@@ -27,7 +27,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `size.hpp` | `alps::size()` for scalars and sequences | current; ALPSCore name |
 | `temporary_filename.hpp` | Private temporary file names | current; ALPSCore name. ALPS keeps its by-value signature |
 | `make_copy.hpp` | `alps::make_copy()` | current; ALPSCore name |
-| `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied from ALPSCore with one local change, MPI builds only |
+| `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied from ALPSCore with local adaptations, MPI builds only |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
 | `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
@@ -49,15 +49,14 @@ while `ALPS_LEGACY_API` is on.
 
 `mpi.hpp` is copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969`
-(`utilities/include/alps/utilities/mpi.hpp`) with one local change, marked by
+(`utilities/include/alps/utilities/mpi.hpp`) with the macro adaptation marked by
 comments: ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
 `ALPS_MPI_EXCEPTION_CATCH` and undefined at the end of the header, so it no
 longer leaks into every file that includes it, directly or through ALEA v2.
 Its notice refers to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
-[`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT)
-and
-[`ACKNOWLEDGE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/ACKNOWLEDGE.TXT).
+[`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT).
+Publication pointers in imported comments have been removed.
 It includes `<mpi.h>`, so only MPI builds install it. In ALPSCore, ALEA, the
 Green's functions, parameters and Monte Carlo code all use it, so it lives here
 rather than with one module.
@@ -70,6 +69,6 @@ it.
 `tests/` holds ALPSCore's tests of the header (`utilities/test/`):
 `mpi_utils_env`, `mpi_utils_comm`, `mpi_utils_bcast`, `mpi_utils_reduce` and the
 two `mpi_utils_env_exceptions`, with `mpi_test_support.{cpp,hpp}` and
-`test_utils.hpp`, all unchanged. They run on 2 and 3 ranks; ALPSCore ran them on
+`test_utils.hpp`, with publication pointers removed from their comments. They run on 2 and 3 ranks; ALPSCore ran them on
 `ALPS_TEST_MPI_NPROC` ranks, 1 by default. `mpi_utils_bcast_optional` is not
 ported, since it tests `mpi_optional.hpp`, which ALPS does not have.

@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 1998-2018 ALPS Collaboration. See COPYRIGHT.TXT
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
  */
 
 // Adapted from ALPSCore 7146b9e1 hdf5/test/hdf5_open_intmode.cpp. Changes:

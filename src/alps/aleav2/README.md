@@ -42,22 +42,18 @@ neither header.
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-Every imported file refers to
-[COPYRIGHT.TXT](COPYRIGHT.TXT), [LICENSE.TXT](LICENSE.TXT) and
-[ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT), which are ALPSCore's top-level files, copied
-unchanged. The SDK installs them under `share/alps/licenses/aleav2/`. Keep the
-notices when modifying these files.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/aleav2/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied unchanged |
+| `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied |
 | `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied with the local changes listed below; `mpi.hpp` is installed only by MPI builds |
-| `alea/src/*.cpp` (13 files) | `src/` | Copied unchanged except for the zero-step correction in `propagation.cpp` |
-| `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied unchanged |
-| `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied unchanged, except that `core.hpp` gains an include (see below) |
+| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` |
+| `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied |
+| `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied, except that `core.hpp` gains an include (see below) |
 | `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp` |
 | `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Adapted to enforce absolute matrix tolerances; shared test support |
-| `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
+| `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 ALPSCore keeps `view.hpp` and the serialization headers in its utilities
 module. In ALPS only ALEA v2 uses them, so they live here, at ALPSCore's include
@@ -102,11 +98,3 @@ The test registration also differs:
 - `mpi_twogauss` keeps its own `main()` and runs on 2 and 3 ranks. ALPSCore ran
   it on `ALPS_TEST_MPI_NPROC` ranks, 1 by default.
 - The tests' `TYPED_TEST_CASE` deprecation warnings are silenced.
-
-## Citing
-
-ALPSCore's [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT) asks publications that use the ALPS
-Core Libraries to cite M. Wallerberger et al., "Updated Core Libraries of the
-ALPS Project", [arXiv:1811.08331](https://arxiv.org/abs/1811.08331) (2018),
-alongside the ALPS paper. The ALPS citation catalog lists it under the `aleav2`
-component.
