@@ -21,9 +21,6 @@ The framework paper applies to every component. A paper serving several roles is
 
 | Component | Algorithm | Implementation | Uses |
 | --- | --- | --- | --- |
-| `aleav2` | N/A | [wallerberger2018alpscore](#wallerberger2018alpscore) | — |
-| `accumulators` | N/A | [wallerberger2018alpscore](#wallerberger2018alpscore) | — |
-| `params` | N/A | [wallerberger2018alpscore](#wallerberger2018alpscore) | — |
 | `scheduler` | N/A | [troyer1998scheduler](#troyer1998scheduler) | — |
 | `sparsediag` | [lanczos1950](#lanczos1950) | [alps30](#alps30) | scheduler |
 | `fulldiag` | N/A | [alps30](#alps30) | scheduler |
@@ -165,10 +162,6 @@ A. Georges, G. Kotliar, "Hubbard model in infinite dimensions." Physical Review 
 ### georges1996
 
 A. Georges et al., "Dynamical Mean-Field Theory of Strongly Correlated Fermion Systems and the Limit of Infinite Dimensions." Reviews of Modern Physics 68, 13–125 (1996). https://doi.org/10.1103/RevModPhys.68.13
-
-### wallerberger2018alpscore
-
-M. Wallerberger et al., "Updated Core Libraries of the ALPS Project." arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331
 
 ## Policy provenance
 
