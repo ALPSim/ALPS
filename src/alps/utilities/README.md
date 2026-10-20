@@ -50,6 +50,9 @@ top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
 `alps/stringvalue.h`, and the type traits ALPSCore lacks. `alps/ngs/boost_mpi.hpp`
 stays where it is: ALPSCore's `alps/utilities/boost_mpi.hpp` is a different API.
 
+[`ALPS::gf`](../gf/README.md) installs four of ALPSCore's `alps/type_traits/`
+headers. Only GF uses them, so by rule 1 they live with it.
+
 Old spellings of the moved headers forward from the [legacy layer](../../../legacy/README.md)
 while `ALPS_LEGACY_API` is on.
 

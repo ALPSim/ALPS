@@ -147,7 +147,11 @@ private:
     const row_type& column = locals[p.ops[r]][in[r]];
     for (std::size_t e = 0; e < column.size(); ++e) {
       out[r] = column[e].first;
-      expand(p, r + 1, value * column[e].second, in, out, acc);
+      // Unit matrix elements need no symbolic expression rebuild.
+      if (column[e].second == T(1))
+        expand(p, r + 1, value, in, out, acc);
+      else
+        expand(p, r + 1, value * column[e].second, in, out, acc);
     }
   }
 
