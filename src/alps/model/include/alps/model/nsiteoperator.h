@@ -147,10 +147,7 @@ private:
     const row_type& column = locals[p.ops[r]][in[r]];
     for (std::size_t e = 0; e < column.size(); ++e) {
       out[r] = column[e].first;
-      // *= rather than *: Expression has no binary operator*
-      T product(value);
-      product *= column[e].second;
-      expand(p, r + 1, product, in, out, acc);
+      expand(p, r + 1, value * column[e].second, in, out, acc);
     }
   }
 

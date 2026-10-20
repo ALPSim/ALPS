@@ -18,7 +18,6 @@
 
 #include <gtest/gtest.h>
 #include <alps/lattice.h>
-#include <alps/expression.h>
 #include <alps/model.h>
 #include <alps/model/hamiltonian_matrix.hpp>
 #include <alps/numeric/matrix.hpp>
@@ -607,7 +606,7 @@ TEST(NSiteHamiltonian, ParametersKeepFullPrecision) {
 
 TEST(NSiteHamiltonian, SymbolicMatrixMatchesNumeric) {
   // Unset parameters stay symbolic, as in the print_symbolic2 tutorial; this
-  // did not compile while the n-site expansion used Expression * Expression.
+  // requires binary multiplication of Expressions in the n-site expansion.
   Files f("<GRAPH name=\"g\" vertices=\"2\"><EDGE source=\"1\" target=\"2\"/>"
           "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
           "<HAMILTONIAN name=\"m\"><BASIS ref=\"fermion\"/>"
