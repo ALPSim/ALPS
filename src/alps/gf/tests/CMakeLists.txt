@@ -1,5 +1,5 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
-# ALPSCore's gf tests, copied unchanged, plus mpi_coexistence. support/ holds
+# ALPSCore's gf tests, copied with publication pointers removed, plus mpi_coexistence. support/ holds
 # ALPSCore's unique_file helper, also unchanged; the helpers other modules share
 # are in the top-level tests/support.
 alps_require_googletest()
