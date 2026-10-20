@@ -174,6 +174,8 @@ endif()
 
 get_property(ALPS_SDK_COMPONENTS GLOBAL PROPERTY ALPS_SDK_COMPONENTS)
 get_property(ALPS_SDK_RUNTIME_TARGETS GLOBAL PROPERTY ALPS_SDK_RUNTIME_TARGETS)
+get_property(ALPS_EIGEN_COMPONENT_NAMES GLOBAL PROPERTY ALPS_EIGEN_COMPONENT_NAMES)
+get_property(ALPS_EIGEN_COMPONENTS GLOBAL PROPERTY ALPS_EIGEN_COMPONENTS)
 configure_package_config_file(
   cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
@@ -192,6 +194,9 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
   COMPONENT build)
 include(cmake/legacy/ALPSLegacyInterfaces.cmake)
+# Deprecated C++ interfaces. Everything in legacy/ is wired in that one file;
+# deleting the legacy/ directory removes it without further edits.
+include(legacy/ALPSLegacy.cmake OPTIONAL)
 install(
   FILES CHANGELOG.md CITATION.md CONTRIBUTING.md LICENSE.txt README.md
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps

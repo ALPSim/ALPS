@@ -171,6 +171,17 @@ endif()
 install(DIRECTORY "${ALPS_DATA_DIR}/xml/" DESTINATION pyalps/xml
   FILES_MATCHING PATTERN "*.xsl" PATTERN "*.xml")
 install(FILES "${ALPS_DATA_DIR}/licenses/xdr/LICENSE" DESTINATION pyalps/licenses/xdr)
+# Preserve the legal notices shipped by the linked SDK's imported components.
+# Older SDKs and optional components may have no corresponding directory.
+foreach(component IN ITEMS aleav2 gf accumulators params mc params/iniparser)
+  foreach(notice IN ITEMS COPYRIGHT.TXT LICENSE.TXT LICENSE AUTHORS)
+    if(EXISTS "${ALPS_DATA_DIR}/licenses/${component}/${notice}")
+      install(FILES "${ALPS_DATA_DIR}/licenses/${component}/${notice}"
+        DESTINATION "pyalps/licenses/${component}")
+    endif()
+  endforeach()
+endforeach()
+
 
 # Only bindings-only builds may fall back to their chosen SDK executables.
 set(_pyalps_sdk_bin "")

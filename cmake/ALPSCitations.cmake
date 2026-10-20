@@ -20,7 +20,7 @@ endforeach()
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_alps_citation_generated}/snapshots.cmake")
 
 configure_file("${_alps_citation_generated}/citations_data.inc"
-               "${PROJECT_BINARY_DIR}/generated/include/alps/utility/citations_data.inc" COPYONLY)
+               "${PROJECT_BINARY_DIR}/generated/include/alps/utilities/citations_data.inc" COPYONLY)
 configure_file("${PROJECT_SOURCE_DIR}/CITATION.md" "${PROJECT_BINARY_DIR}/CITATION.md" COPYONLY)
 
 install(FILES

@@ -21,8 +21,8 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/numeric.hpp>
-#include <alps/ngs/stacktrace.hpp>
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/stacktrace.hpp>
+#include <alps/utilities/short_print.hpp>
 
 #include <boost/mpl/if.hpp>
 #include <boost/utility.hpp>

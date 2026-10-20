@@ -16,7 +16,7 @@
 #include <alps/solvers.hpp>
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #ifdef ALPS_HAVE_MPI
 #include <alps/mcmpiadapter.hpp>
@@ -30,7 +30,7 @@ int global_mpi_rank;
 
 namespace {
 bool stop_requested(boost::posix_time::ptime const & end_time) {
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 void master_final_tasks(const alps::results_type<hybridization>::type &results,

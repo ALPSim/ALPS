@@ -17,7 +17,7 @@
 #include <alps/params_export.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/ngs/config.hpp>
-#include <alps/ngs/detail/remove_cvr.hpp>
+#include <alps/utilities/remove_cvr.hpp>
 #include <alps/ngs/detail/paramvalue_reader.hpp>
 
 #include <boost/variant.hpp>

@@ -47,14 +47,26 @@ else()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
   endif()
+  # ALEA v2 and GF are built only with Eigen; an SDK that installed one must provide it.
+  if(EXISTS "${ALPS_DIR}/ALPSAleav2Targets.cmake")
+    find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
+  endif()
+  if(EXISTS "${ALPS_DIR}/ALPSGfTargets.cmake")
+    find_package(ALPS CONFIG REQUIRED COMPONENTS gf)
+  endif()
   set(sdk_mpi_enabled "${ALPS_MPI_ENABLED}")
   get_filename_component(expected_prefix "${ALPS_DIR}/../.." REALPATH)
   if(NOT EXISTS "${expected_prefix}/include/alps/ngs/detail/export_sim_to_python.hpp"
      OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
     message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
   endif()
-  foreach(private_directory IN ITEMS alps/utilities alps/hdf5/include alps/hdf5/src
-                                     alps/hdf5/tests alps/params alps/common alps/runtime
+  # alps/utilities/ and alps/common/ are public prefixes (ALPSCore's spellings).
+  foreach(private_directory IN ITEMS alps/utilities/include alps/utilities/src
+                                     alps/utilities/tests alps/hdf5/include alps/hdf5/src
+                                     alps/hdf5/tests alps/params alps/common/include
+                                     alps/common/src alps/common/tests alps/runtime
+                                     alps/aleav2/include alps/aleav2/src alps/aleav2/tests
+                                     alps/gf/include alps/gf/src alps/gf/tests
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
       message(FATAL_ERROR "The SDK installs a module's private layout: ${private_directory}")
@@ -122,6 +134,46 @@ function(add_component_contract component source forbidden)
   add_contract(${component} ${source} ALPS::${component})
 endfunction()
 
+# Each installed header copied from ALPSCore compiles on its own, with only its
+# component's usage requirements. The component's header sets list the headers
+# that this SDK installed. ONLY and EXCLUDE are regular expressions on include
+# names; EXCLUDE names headers that are parts of others and need them first.
+function(add_header_contract component)
+  cmake_parse_arguments(PARSE_ARGV 1 ARG "" "ONLY;EXCLUDE" "")
+  get_target_property(header_sets ALPS::${component} INTERFACE_HEADER_SETS)
+  set(sources "")
+  foreach(header_set IN LISTS header_sets)
+    get_target_property(base_dirs ALPS::${component} HEADER_DIRS_${header_set})
+    get_target_property(headers ALPS::${component} HEADER_SET_${header_set})
+    foreach(header IN LISTS headers)
+      set(name "")
+      foreach(base_dir IN LISTS base_dirs)
+        cmake_path(IS_PREFIX base_dir "${header}" NORMALIZE inside)
+        if(inside)
+          cmake_path(RELATIVE_PATH header BASE_DIRECTORY "${base_dir}" OUTPUT_VARIABLE name)
+          break()
+        endif()
+      endforeach()
+      if(NOT name)
+        message(FATAL_ERROR "${header} lies outside the base directories of ALPS::${component}")
+      endif()
+      if((ARG_ONLY AND NOT name MATCHES "${ARG_ONLY}") OR (ARG_EXCLUDE AND name MATCHES "${ARG_EXCLUDE}"))
+        continue()
+      endif()
+      string(MAKE_C_IDENTIFIER "${name}" stem)
+      set(source "${CMAKE_CURRENT_BINARY_DIR}/headers/${component}/${stem}.cpp")
+      file(CONFIGURE OUTPUT "${source}" CONTENT "#include <${name}>\n")
+      list(APPEND sources "${source}")
+    endforeach()
+  endforeach()
+  if(NOT sources)
+    message(FATAL_ERROR "ALPS::${component} installed no header to check")
+  endif()
+  add_library(${component}_header_contract OBJECT ${sources})
+  set_target_properties(${component}_header_contract PROPERTIES CXX_SCAN_FOR_MODULES OFF)
+  target_link_libraries(${component}_header_contract PRIVATE ALPS::${component})
+endfunction()
+
 set(numerical_dependencies "[Bb][Ll][Aa][Ss]|[Ll][Aa][Pp][Aa][Cc][Kk]")
 add_component_contract(utilities utilities.cpp "ALPS::alps|HDF5::|${numerical_dependencies}${serial_dependencies}")
 add_component_contract(hdf5 hdf5.cpp "ALPS::alps|MPI::|${numerical_dependencies}")
@@ -137,6 +189,28 @@ add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
+if(TARGET ALPS::aleav2)
+  add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
+  add_header_contract(aleav2)
+endif()
+add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
+if(sdk_mpi_enabled)
+  add_header_contract(utilities ONLY "^alps/utilities/mpi\\.hpp$")
+endif()
+if(TARGET ALPS::gf)
+  add_component_contract(gf gf.cpp "ALPS::alps|${numerical_dependencies}")
+  # As src/alps/gf/README.md advises; alps/gf/flagcheck.hpp warns otherwise.
+  target_compile_definitions(gf_contract PRIVATE
+    "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+  # As in ALPSCore, the mesh/ headers and mpi_bcast.hpp are parts of others.
+  add_header_contract(gf EXCLUDE "^alps/gf/(mesh/|mpi_bcast\\.hpp$)")
+  target_compile_definitions(gf_header_contract PRIVATE
+    "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+endif()
+# Code written against 3.0.0 builds unchanged while the legacy layer is installed.
+if(ALPS_LEGACY_API)
+  add_contract(legacy_spellings legacy_spellings.cpp "ALPS::utilities;ALPS::cli;ALPS::numerics")
+endif()
 if(EXPECT_SOLVERS)
   get_target_property(maxent_links ALPS::maxent INTERFACE_LINK_LIBRARIES)
   if(maxent_links MATCHES "(^|;)ALPS::alps(;|$)")
@@ -155,4 +229,14 @@ if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
     params_contract osiris_contract xml_contract cli_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  if(ALPS_LEGACY_API)
+    set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
+      "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+  endif()
+  foreach(component IN ITEMS aleav2 gf)
+    if(TARGET ALPS::${component})
+      set_tests_properties(${component}_contract PROPERTIES ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
+    endif()
+  endforeach()
 endif()

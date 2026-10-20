@@ -24,7 +24,7 @@
 #include <alps/lattice/graph_traits.h>
 #include <alps/lattice/coordinate_traits.h>
 #include <alps/lattice/propertymap.h>
-#include <alps/utility/vectorio.hpp>
+#include <alps/utilities/vectorio.hpp>
 #include <alps/lattice/nsite_group.h>
 
 #include <boost/pending/property.hpp>

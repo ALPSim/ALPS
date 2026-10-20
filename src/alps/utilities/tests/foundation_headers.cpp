@@ -4,8 +4,8 @@
 // It exercises array storage and formatting without the numerical umbrella.
 #include <gtest/gtest.h>
 #include <alps/multi_array/multi_array.hpp>
-#include <alps/ngs/short_print.hpp>
-#include <alps/utility/resize.hpp>
+#include <alps/utilities/short_print.hpp>
+#include <alps/utilities/resize.hpp>
 
 #include <iostream>
 #include <sstream>

@@ -12,9 +12,9 @@
 
 /* $Id$ */
 
-#include <alps/utility/cli.hpp>
+#include <alps/cli.hpp>
 #include "fulldiag.h"
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>

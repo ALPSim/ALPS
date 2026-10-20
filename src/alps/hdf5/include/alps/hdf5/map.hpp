@@ -15,7 +15,7 @@
 #define ALPS_NGS_HDF5_STD_MAP
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 
 #include <map>
 
@@ -32,6 +32,9 @@ namespace alps {
         ) {
             if (ar.is_group(path))
                 ar.delete_group(path);
+            // An empty map still writes its group, so it reads back as empty
+            // (from ALPSCore 99e8fa59).
+            ar.create_group(path);
             for(typename std::map<K, T, C, A>::const_iterator it = value.begin(); it != value.end(); ++it)
                 save(ar, ar.complete_path(path) + "/" + ar.encode_segment(cast<std::string>(it->first)), it->second);
         }

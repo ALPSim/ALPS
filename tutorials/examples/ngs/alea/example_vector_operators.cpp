@@ -14,7 +14,7 @@
 #include <alps/ngs/numeric/vector.hpp>
 #include <alps/ngs/numeric/array.hpp>
 #include <alps/multi_array.hpp>
-#include <alps/ngs/short_print.hpp>
+#include <alps/utilities/short_print.hpp>
 //~ #include <alps/ngs.hpp>
 
 #include <boost/integer.hpp>
