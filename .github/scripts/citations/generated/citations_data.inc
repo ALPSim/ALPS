@@ -1,57 +1,5 @@
 // Generated from CITATION.cff and CITATIONS.yaml. Do not edit.
 static const citation_entry citation_entries[] = {
-  {"accumulators",
-   "********************************************************************************\n"
-   "* Recommended citations for ALPS Core Libraries accumulators:                  *\n"
-   "* Framework: [1]; Implementation: [2]                                          *\n"
-   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
-   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
-   "* [2] M. Wallerberger et al., Updated Core Libraries of the ALPS Project,      *\n"
-   "*     arXiv:1811.08331 (2018); preprint.                                       *\n"
-   "* This is a request for scientific credit, separate from the MIT license       *\n"
-   "* terms.                                                                       *\n"
-   "* Full references: --citations                                                 *\n"
-   "********************************************************************************\n"
-   "\n",
-   "Recommended citations for ALPS Core Libraries accumulators:\n"
-   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
-   "implementation, and framework papers below.\n"
-   "  Framework: [1]\n"
-   "  Implementation: [2]\n"
-   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
-   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
-   "      https://doi.org/10.48550/arXiv.2610.03884\n"
-   "  [2] M. Wallerberger et al., \"Updated Core Libraries of the ALPS Project.\"\n"
-   "      arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331\n"
-   "This is a request for scientific credit, separate from the MIT license terms.\n"
-   "\n",
-  },
-  {"aleav2",
-   "********************************************************************************\n"
-   "* Recommended citations for ALPS Core Libraries ALEA statistics:               *\n"
-   "* Framework: [1]; Implementation: [2]                                          *\n"
-   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
-   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
-   "* [2] M. Wallerberger et al., Updated Core Libraries of the ALPS Project,      *\n"
-   "*     arXiv:1811.08331 (2018); preprint.                                       *\n"
-   "* This is a request for scientific credit, separate from the MIT license       *\n"
-   "* terms.                                                                       *\n"
-   "* Full references: --citations                                                 *\n"
-   "********************************************************************************\n"
-   "\n",
-   "Recommended citations for ALPS Core Libraries ALEA statistics:\n"
-   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
-   "implementation, and framework papers below.\n"
-   "  Framework: [1]\n"
-   "  Implementation: [2]\n"
-   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
-   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
-   "      https://doi.org/10.48550/arXiv.2610.03884\n"
-   "  [2] M. Wallerberger et al., \"Updated Core Libraries of the ALPS Project.\"\n"
-   "      arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331\n"
-   "This is a request for scientific credit, separate from the MIT license terms.\n"
-   "\n",
-  },
   {"dirloop_sse",
    "********************************************************************************\n"
    "* Recommended citations for ALPS directed-loop stochastic series expansion:    *\n"
@@ -368,58 +316,6 @@ static const citation_entry citation_entries[] = {
    "  [5] S. Todo, K. Kato, \"Cluster Algorithms for General-S Quantum Spin Systems.\"\n"
    "      Physical Review Letters 87, 047203 (2001).\n"
    "      https://doi.org/10.1103/PhysRevLett.87.047203\n"
-   "This is a request for scientific credit, separate from the MIT license terms.\n"
-   "\n",
-  },
-  {"mc",
-   "********************************************************************************\n"
-   "* Recommended citations for ALPS Core Libraries Monte Carlo simulation base:   *\n"
-   "* Framework: [1]; Implementation: [2]                                          *\n"
-   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
-   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
-   "* [2] M. Wallerberger et al., Updated Core Libraries of the ALPS Project,      *\n"
-   "*     arXiv:1811.08331 (2018); preprint.                                       *\n"
-   "* This is a request for scientific credit, separate from the MIT license       *\n"
-   "* terms.                                                                       *\n"
-   "* Full references: --citations                                                 *\n"
-   "********************************************************************************\n"
-   "\n",
-   "Recommended citations for ALPS Core Libraries Monte Carlo simulation base:\n"
-   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
-   "implementation, and framework papers below.\n"
-   "  Framework: [1]\n"
-   "  Implementation: [2]\n"
-   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
-   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
-   "      https://doi.org/10.48550/arXiv.2610.03884\n"
-   "  [2] M. Wallerberger et al., \"Updated Core Libraries of the ALPS Project.\"\n"
-   "      arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331\n"
-   "This is a request for scientific credit, separate from the MIT license terms.\n"
-   "\n",
-  },
-  {"params",
-   "********************************************************************************\n"
-   "* Recommended citations for ALPS Core Libraries parameters:                    *\n"
-   "* Framework: [1]; Implementation: [2]                                          *\n"
-   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
-   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
-   "* [2] M. Wallerberger et al., Updated Core Libraries of the ALPS Project,      *\n"
-   "*     arXiv:1811.08331 (2018); preprint.                                       *\n"
-   "* This is a request for scientific credit, separate from the MIT license       *\n"
-   "* terms.                                                                       *\n"
-   "* Full references: --citations                                                 *\n"
-   "********************************************************************************\n"
-   "\n",
-   "Recommended citations for ALPS Core Libraries parameters:\n"
-   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
-   "implementation, and framework papers below.\n"
-   "  Framework: [1]\n"
-   "  Implementation: [2]\n"
-   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
-   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
-   "      https://doi.org/10.48550/arXiv.2610.03884\n"
-   "  [2] M. Wallerberger et al., \"Updated Core Libraries of the ALPS Project.\"\n"
-   "      arXiv:1811.08331 (2018). Preprint. https://doi.org/10.48550/arXiv.1811.08331\n"
    "This is a request for scientific credit, separate from the MIT license terms.\n"
    "\n",
   },
