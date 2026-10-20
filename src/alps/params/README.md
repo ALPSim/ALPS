@@ -93,9 +93,7 @@ values, which drops every definition.
 ## Provenance
 
 The ALPSCore files are under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-Each refers to [COPYRIGHT.TXT](COPYRIGHT.TXT), [LICENSE.TXT](LICENSE.TXT) and
-[ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT), which are ALPSCore's top-level files, copied
-unchanged. The SDK installs them under `share/alps/licenses/params/`.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/params/`. Publication pointers have been removed from imported comments.
 
 iniparser is by Nicolas Devillard, under the MIT license in
 [iniparser/LICENSE](iniparser/LICENSE), and was modified for ALPSCore by
@@ -105,12 +103,12 @@ notices when modifying these files.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
-| `params/include/alps/params.hpp`, `params/include/alps/dictionary.hpp` | `include/alps/` | Copied unchanged, except that `params.hpp` gains two members (see below) |
-| `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied unchanged, except that three headers gain includes (see below) |
-| `params/src/*.cpp` (4 files) | `src/` | Copied unchanged, except `params.cpp` (see below) |
-| `params/test/*.cpp` (22 files), `params_test_support.hpp`, `dict_values_test.hpp` | `tests/` | Copied unchanged |
-| `common/deps/iniparser/` | `iniparser/` | Copied unchanged, without its `CMakeLists.txt` |
-| `COPYRIGHT.TXT`, `LICENSE.TXT`, `ACKNOWLEDGE.TXT` | here | Copied unchanged |
+| `params/include/alps/params.hpp`, `params/include/alps/dictionary.hpp` | `include/alps/` | Copied, except that `params.hpp` gains two members (see below) |
+| `params/include/alps/params/*.hpp` (10 files) | `include/alps/params/` | Copied, except that three headers gain includes (see below) |
+| `params/src/*.cpp` (4 files) | `src/` | Copied, except `params.cpp` (see below) |
+| `params/test/*.cpp` (22 files), `params_test_support.hpp`, `dict_values_test.hpp` | `tests/` | Copied |
+| `common/deps/iniparser/` | `iniparser/` | Copied, without its `CMakeLists.txt` |
+| `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
 Not copied: the retired tests in `params/test/old/`, the two scripts that
 generated test code (`params_def_gen_test_helper.sh` and
@@ -190,11 +188,3 @@ write, where ALPSCore's failed writing its attributes.
   `params_bcast_mpi`) keep their own `main()` and run on 2 and 3 ranks.
   ALPSCore ran them on `ALPS_TEST_MPI_NPROC` ranks, 1 by default.
 - The tests' `TYPED_TEST_CASE` deprecation warnings are silenced.
-
-## Citing
-
-ALPSCore's [ACKNOWLEDGE.TXT](ACKNOWLEDGE.TXT) asks publications that use the ALPS
-Core Libraries to cite M. Wallerberger et al., "Updated Core Libraries of the
-ALPS Project", [arXiv:1811.08331](https://arxiv.org/abs/1811.08331) (2018),
-alongside the ALPS paper. The ALPS citation catalog lists it under the `params`
-component.

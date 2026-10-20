@@ -40,7 +40,7 @@ if(ALPS_ENABLE_MPI)
   target_sources(alps_params PUBLIC FILE_SET alpscore_params_headers FILES
     include/alps/params/mpi_variant.hpp)
 endif()
-install(FILES ACKNOWLEDGE.TXT COPYRIGHT.TXT LICENSE.TXT
+install(FILES COPYRIGHT.TXT LICENSE.TXT
   DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/params" COMPONENT libraries)
 install(FILES iniparser/LICENSE iniparser/AUTHORS
   DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/params/iniparser" COMPONENT libraries)

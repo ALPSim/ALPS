@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 1998-2018 ALPS Collaboration. See COPYRIGHT.TXT
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
  */
 
 /** @file dict_value.hpp Defines type(s) used to populate `alps::params_ns::dictionary` container. */

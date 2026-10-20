@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 1998-2019 ALPS Collaboration. See COPYRIGHT.TXT
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
  */
 
 /** @file params_vec_hdf5.cpp

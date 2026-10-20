@@ -29,8 +29,8 @@ means it was moved as it was, and the note says what modernization remains.
 | `make_copy.hpp` | `alps::make_copy()` | current; ALPSCore name |
 | `mpi.hpp` | `alps::mpi`: ALPSCore's MPI communicator, environment, broadcast and reductions | current; copied from ALPSCore with local adaptations, MPI builds only |
 | `boost_mpi.hpp` | `alps::mpi::reduce` for `std::vector`, on ALPSCore's communicator; despite the name, no Boost.MPI | current; copied from ALPSCore, MPI builds only |
-| `mpi_vector.hpp`, `mpi_pair.hpp`, `mpi_map.hpp` | `alps::mpi::broadcast` for `std::vector`, `std::pair` and `std::map` | current; copied unchanged from ALPSCore, MPI builds only |
-| `fs/get_basename.hpp`, `fs/get_dirname.hpp`, `fs/get_extension.hpp`, `fs/remove_extensions.hpp` | File-name operations on strings | current; copied unchanged from ALPSCore with `src/filename_operations.cpp` |
+| `mpi_vector.hpp`, `mpi_pair.hpp`, `mpi_map.hpp` | `alps::mpi::broadcast` for `std::vector`, `std::pair` and `std::map` | current; copied from ALPSCore, MPI builds only |
+| `fs/get_basename.hpp`, `fs/get_dirname.hpp`, `fs/get_extension.hpp`, `fs/remove_extensions.hpp` | File-name operations on strings | current; copied from ALPSCore with `src/filename_operations.cpp` |
 | `deprecated.hpp` | `ALPS_DEPRECATED` | current; copied from ALPSCore, and defines the macro only if ALPS's `<alps/export.h>` has not |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
@@ -43,7 +43,7 @@ means it was moved as it was, and the note says what modernization remains.
 
 `alps/testing/fp_compare.hpp`, ALPSCore's floating-point comparison
 `alps::testing::is_near`, is installed with these headers as in ALPSCore, where
-library code (`ALPS::params`) uses it too. It is copied unchanged.
+library code (`ALPS::params`) uses it too. Its publication pointer has been removed.
 
 Not yet moved: `alps/ngs/{config,hash,mutex,sleep,thread_exceptions}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
@@ -71,7 +71,7 @@ rather than with one module. `boost_mpi.hpp`, from the same commit and copied
 with publication pointers removed, adds its `std::vector` reductions, which ALPSCore's accumulators use.
 
 The container broadcasts `mpi_vector.hpp`, `mpi_pair.hpp` and `mpi_map.hpp`,
-which ALPSCore's parameters use, are copied unchanged from the same commit.
+which ALPSCore's parameters use, are copied from the same commit.
 
 Its names share namespace `alps::mpi` with ALPS's `<alps/ngs/mpi.hpp>`, without
 overlapping; `utilities_mpi_coexistence` uses both in one program. Its

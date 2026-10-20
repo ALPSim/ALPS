@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 1998-2018 ALPS Collaboration. See COPYRIGHT.TXT
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
- * For use in publications, see ACKNOWLEDGE.TXT
  */
 
 #ifndef ALPS_PARAMS_PARAM_TYPES_HPP_2b33f1b375e64b6fa9adcb68d7de2407
