@@ -40,6 +40,7 @@
 #include <alps/lattice.h>
 #include <alps/model.h>
 #include <alps/model/hamiltonian_matrix.hpp>
+#include <alps/model/model_helper.h>
 #include <alps/parameter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
@@ -91,6 +92,13 @@ inline bool apply(const std::vector<std::pair<bool, int> >& ops, det& d, int& si
   return true;
 }
 
+inline std::string not_fixed()
+{
+  return "the model's BASIS does not fix Nup and Ndown from Nup_total and "
+         "Ndown_total (it needs <CONSTRAINT quantumnumber=\"Nup\" "
+         "value=\"Nup_total\"/> and the same for Ndown)";
+}
+
 struct sector {
   std::vector<det> dets;               // ALPS basis state i as a determinant
   std::map<det, std::size_t> index;
@@ -101,14 +109,41 @@ class extractor {
 public:
   explicit extractor(const alps::Parameters& p) : parms_(p), n_(0) {}
 
+  // Refuse, before any basis is enumerated, a BASIS that does not constrain
+  // Nup and Ndown (every state would be built) or that constrains another
+  // quantum number the parameters set (sectors would be incomplete).
+  void check_constraints() const
+  {
+    alps::Parameters p(sector_parameters(0, 0));
+    alps::model_helper<> m(p);
+    alps::model_helper<>::basis_descriptor_type b = m.basis();
+    b.set_parameters(p);
+    bool up = false, down = false;
+    for (std::size_t k = 0; k < b.constraints().size(); ++k) {
+      const std::string& q = b.constraints()[k].first;
+      if (q == "Nup")
+        up = true;
+      else if (q == "Ndown")
+        down = true;
+      else {
+        std::string value;
+        for (std::size_t j = 0; j < b.all_constraints().size(); ++j)
+          if (b.all_constraints()[j].first == q)
+            value = boost::lexical_cast<std::string>(b.all_constraints()[j].second);
+        throw std::runtime_error(
+            "the model's BASIS also constrains " + q + " (<CONSTRAINT quantumnumber=\"" +
+            q + "\" value=\"" + value + "\"/>), which the parameters fix; FCIDUMP "
+            "export needs every (Nup,Ndown) sector, so unset " + value);
+      }
+    }
+    if (!up || !down)
+      throw std::runtime_error(not_fixed());
+  }
+
   // ALPS's Hamiltonian in sector (nup, ndown), basis states as determinants.
   sector build(int nup, int ndown)
   {
-    alps::Parameters p(parms_);
-    p["Nup_total"] = nup;
-    p["Ndown_total"] = ndown;
-    p["CONSERVED_QUANTUMNUMBERS"] = "Nup,Ndown";
-    hamiltonian h(p);
+    hamiltonian h(sector_parameters(nup, ndown));
     const hamiltonian::basis_states_type& states = h.states_vector();
     const alps::basis_states_descriptor<short>& basis = states.basis();
     n_ = basis.size();
@@ -134,12 +169,17 @@ public:
       int nu = 0, nd = 0;
       for (std::size_t k = 0; k < d.size(); ++k) (d[k] % 2 ? nd : nu)++;
       if (nu != nup || nd != ndown)
-        throw std::runtime_error(
-            "the model's BASIS does not fix Nup and Ndown from Nup_total and "
-            "Ndown_total (it needs <CONSTRAINT quantumnumber=\"Nup\" "
-            "value=\"Nup_total\"/> and the same for Ndown)");
+        throw std::runtime_error(not_fixed());
       out.index[d] = out.dets.size();
       out.dets.push_back(d);
+    }
+    double expected = choose(n_, nup) * choose(n_, ndown);
+    if (out.dets.size() != expected) {
+      std::ostringstream o;
+      o << "sector (Nup,Ndown) = (" << nup << "," << ndown << ") has " << out.dets.size()
+        << " states instead of " << expected << "; the model's BASIS restricts it "
+        << "beyond Nup_total and Ndown_total";
+      throw std::runtime_error(o.str());
     }
 
     const sparse_matrix& m = h.matrix();
@@ -154,6 +194,22 @@ public:
   std::size_t sites() const { return n_; }
 
 private:
+  alps::Parameters sector_parameters(int nup, int ndown) const
+  {
+    alps::Parameters p(parms_);
+    p["Nup_total"] = nup;
+    p["Ndown_total"] = ndown;
+    p["CONSERVED_QUANTUMNUMBERS"] = "Nup,Ndown";
+    return p;
+  }
+
+  static double choose(std::size_t n, int k)
+  {
+    double c = 1.;
+    for (int j = 0; j < k; ++j) c = c * (n - j) / (j + 1);
+    return c;
+  }
+
   alps::Parameters parms_;
   std::size_t n_;
 };
@@ -170,11 +226,21 @@ struct integrals {
   std::vector<double> h;   // n*n
   std::vector<double> g;   // n^4, chemists' (pq|rs) at ((p*n+q)*n+r)*n+s
   double& H(std::size_t p, std::size_t q) { return h[p * n + q]; }
+  double H(std::size_t p, std::size_t q) const { return h[p * n + q]; }
   double& G(std::size_t p, std::size_t q, std::size_t r, std::size_t s)
+  { return g[((p * n + q) * n + r) * n + s]; }
+  double G(std::size_t p, std::size_t q, std::size_t r, std::size_t s) const
   { return g[((p * n + q) * n + r) * n + s]; }
 };
 
 inline std::string orbitals(int p, int q) { std::ostringstream o; o << "(" << p + 1 << "," << q + 1 << ")"; return o.str(); }
+
+inline std::string integral(std::size_t p, std::size_t q, std::size_t r, std::size_t s)
+{
+  std::ostringstream o;
+  o << "(" << p + 1 << " " << q + 1 << "|" << r + 1 << " " << s + 1 << ")";
+  return o.str();
+}
 
 inline void require(double a, double b, double tol, const std::string& what)
 {
@@ -187,6 +253,7 @@ inline void require(double a, double b, double tol, const std::string& what)
 
 inline integrals extract(extractor& x, double tol)
 {
+  x.check_constraints();
   integrals I;
   sector s00 = x.build(0, 0);
   I.n = x.sites();
@@ -199,9 +266,9 @@ inline integrals extract(extractor& x, double tol)
   for (std::size_t p = 0; p < n; ++p)
     for (std::size_t q = 0; q < n; ++q) {
       det dp(1, 2 * p), dq(1, 2 * q);
-      double up = element(s10, s10.index[dp], s10.index[dq]) - (p == q ? I.ecore : 0.);
+      double up = element(s10, s10.index.at(dp), s10.index.at(dq)) - (p == q ? I.ecore : 0.);
       dp[0] += 1; dq[0] += 1;
-      double down = element(s01, s01.index[dp], s01.index[dq]) - (p == q ? I.ecore : 0.);
+      double down = element(s01, s01.index.at(dp), s01.index.at(dq)) - (p == q ? I.ecore : 0.);
       require(up, down, tol, "h" + orbitals(p, q) + " differs between up and down "
               "electrons; FCIDUMP (restricted) needs a spin-independent Hamiltonian");
       I.H(p, q) = up;
@@ -223,7 +290,7 @@ inline integrals extract(extractor& x, double tol)
       int sign = 1;
       apply(ops, d, sign);
       sgn[p][r] = sign;
-      idx[p][r] = s11.index[d];
+      idx[p][r] = s11.index.at(d);
     }
   for (std::size_t p = 0; p < n; ++p)
     for (std::size_t q = 0; q < n; ++q)
@@ -241,24 +308,20 @@ inline integrals extract(extractor& x, double tol)
     for (std::size_t q = 0; q < n; ++q)
       for (std::size_t r = 0; r < n; ++r)
         for (std::size_t s = 0; s < n; ++s) {
-          std::string e = "(" + boost::lexical_cast<std::string>(p + 1) + " " +
-                          boost::lexical_cast<std::string>(q + 1) + "|" +
-                          boost::lexical_cast<std::string>(r + 1) + " " +
-                          boost::lexical_cast<std::string>(s + 1) + ")";
           double v = I.G(p, q, r, s);
           if (std::abs(v - I.G(r, s, p, q)) > tol)
-            require(v, I.G(r, s, p, q), tol, e + " changes when up and down are "
-                    "swapped; FCIDUMP needs a spin-independent interaction");
+            require(v, I.G(r, s, p, q), tol, integral(p, q, r, s) + " changes when up and "
+                    "down are swapped; FCIDUMP needs a spin-independent interaction");
           if (std::abs(v - I.G(q, p, r, s)) > tol || std::abs(v - I.G(p, q, s, r)) > tol)
             require(v, I.G(q, p, r, s) != v ? I.G(q, p, r, s) : I.G(p, q, s, r), tol,
-                    e + " lacks the symmetry (pq|rs) = (qp|rs) = (pq|sr) of real "
+                    integral(p, q, r, s) + " lacks the symmetry (pq|rs) = (qp|rs) = (pq|sr) of real "
                     "orbitals that FCIDUMP assumes");
         }
   return I;
 }
 
 // H|d> from the integrals, as {basis index: amplitude} in sector s.
-inline void apply_integrals(integrals& I, const det& d, const sector& s,
+inline void apply_integrals(const integrals& I, const det& d, const sector& s,
                      std::map<std::size_t, double>& out)
 {
   const int n = I.n;
@@ -306,7 +369,7 @@ inline std::string show(const det& d)
 
 // Compare ALPS's H with the integrals' H in every sector with at most
 // max_electrons electrons. Returns the largest difference.
-inline double verify(extractor& x, integrals& I, int max_electrons, double tol)
+inline double verify(extractor& x, const integrals& I, int max_electrons, double tol)
 {
   double worst = 0.;
   const int n = I.n;
@@ -340,9 +403,8 @@ inline double verify(extractor& x, integrals& I, int max_electrons, double tol)
   return worst;
 }
 
-inline void write(const integrals& I0, const std::string& file, int nelec, int ms2, double cutoff)
+inline void write(const integrals& I, const std::string& file, int nelec, int ms2, double cutoff)
 {
-  integrals I = I0;
   std::ofstream out(file.c_str());
   if (!out)
     throw std::runtime_error("cannot write " + file);

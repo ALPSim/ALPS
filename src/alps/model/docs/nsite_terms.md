@@ -99,8 +99,9 @@ without them, half filling is written.
 The same export is a parameter of `fulldiag` and `sparsediag`:
 `FCIDUMP="file"` writes the model to `file` before it is diagonalized, with
 the same checks. A model that FCIDUMP cannot hold stops the run with the
-reason. With `TOTAL_MOMENTUM` or momentum sectors the file is still the
-real-space Hamiltonian.
+reason. Each task of a job needs its own `FCIDUMP`; a task whose `FCIDUMP`
+is another task's file is not run. With `TOTAL_MOMENTUM` or momentum sectors
+the file is still the real-space Hamiltonian.
 
 The integrals are read off the matrix ALPS builds, in the sectors with at most
 one up and one down electron, so they follow ALPS's operator definitions and
