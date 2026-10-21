@@ -36,7 +36,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 {
   if (ndat_<4)
     boost::throw_exception(std::invalid_argument("NDAT too small"));
-  std::string p_f_grid = p["FREQUENCY_GRID"].cast<std::string>();
+  std::string p_f_grid = p["FREQUENCY_GRID"].as<std::string>();
   if (p_f_grid=="Lorentzian") {
     double cut = p["CUT"];
     std::vector<double> temp(nfreq_+1);
@@ -121,9 +121,9 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
 // As with the data, we adopt the convention that for complex data the sequence
 // will be real imag.
 
-  if (!p["DATA"].cast<std::string>().empty()) {
-      std::string fname = p["DATA"].cast<std::string>();
-      if(p["DATA_IN_HDF5"].cast<bool>()) {
+  if (!p["DATA"].as<std::string>().empty()) {
+      std::string fname = p["DATA"].as<std::string>();
+      if(p["DATA_IN_HDF5"].as<bool>()) {
           //attempt to read from h5 archive
           alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
           std::vector<double> tmp(ndat());
@@ -133,7 +133,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
           for(std::size_t i=0; i<ndat(); i++)
              y_(i) = tmp[i]/static_cast<double>(p["NORM"]);
           path.str("");
-          if (p["COVARIANCE_MATRIX"].cast<std::string>().empty()) {
+          if (p["COVARIANCE_MATRIX"].as<std::string>().empty()) {
             path<<"/Error";
             ar>>alps::make_pvp(path.str(),tmp);
             for(std::size_t i=0; i<ndat(); i++)
@@ -168,7 +168,7 @@ y_(ndat_),sigma_(ndat_), x_(ndat_),K_(),t_array_(nfreq_+1)
       for (int i=0; i<ndat(); ++i){
           if(!p.defined("X_"+boost::lexical_cast<std::string>(i))){ throw std::runtime_error("parameter X_i missing!"); }
           y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);          
-          if (p["COVARIANCE_MATRIX"].cast<std::string>().empty()){
+          if (p["COVARIANCE_MATRIX"].as<std::string>().empty()){
               if(!p.defined("SIGMA_"+boost::lexical_cast<std::string>(i))) { throw std::runtime_error(std::string("parameter SIGMA_i missing!")+"SIGMA_"+boost::lexical_cast<std::string>(i)); }
               sigma_(i) = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
           }
@@ -184,8 +184,8 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
 {
   using namespace boost::numeric;
   K_.resize(ndat_, ntab);
-  std::string p_data = p["DATASPACE"].cast<std::string>();
-  std::string p_kernel = p["KERNEL"].cast<std::string>();
+  std::string p_data = p["DATASPACE"].as<std::string>();
+  std::string p_kernel = p["KERNEL"].as<std::string>();
 //  for (int i=0; i<ndat(); ++i)
 //    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
   if(p_data=="time") {
@@ -330,12 +330,12 @@ void ContiParameters::setup_kernel(const alps::params& p, const int ntab, const 
   else
     boost::throw_exception(std::invalid_argument("unknown value for parameter DATASPACE"));
 //  vector_type sigma(ndat());
-  if (!p["COVARIANCE_MATRIX"].cast<std::string>().empty()) {
-    if(!p["DATA_IN_HDF5"].cast<bool>()) {
+  if (!p["COVARIANCE_MATRIX"].as<std::string>().empty()) {
+    if(!p["DATA_IN_HDF5"].as<bool>()) {
       cov_.resize(ndat(),ndat());
       if (alps::is_master())
         std::cerr << "Reading covariance matrix\n";
-      std::string fname = p["COVARIANCE_MATRIX"].cast<std::string>();
+      std::string fname = p["COVARIANCE_MATRIX"].as<std::string>();
       std::ifstream covstream(fname.c_str());
       if (!covstream)
         boost::throw_exception(std::invalid_argument("could not open covariance matrix file: "+fname));

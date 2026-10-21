@@ -2,19 +2,21 @@
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
 //
-// The single Python→alps::params conversion ladder, shared by
-// pyngsparams_c (__setitem__ / dict ctor), pyngsbase_c (mcbase ctor)
-// and the application modules (maxent_c / cthyb / ctint), so every
-// module ingests parameters identically.
+// The single Python→alps::params conversion, shared by pyngsparams_c
+// (__setitem__ / dict ctor), pyngsbase_c (mcbase ctor) and the application
+// modules (maxent_c / cthyb / ctint), so every module ingests parameters
+// identically. Python values are supplied as text, as an INI file or HDF5
+// group would supply them (alps::params::supply), and each program's
+// define<T>() parses the text with its own type; see
+// src/alps/params/README.md.
 #ifndef PYALPS_DICT_TO_PARAMS_HPP
 #define PYALPS_DICT_TO_PARAMS_HPP
 #include "numpy_compat.hpp"
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
+#include <alps/params/text_values.hpp>
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/complex.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
-#include <complex>
 #include <cstring>
 #include <limits>
 #include <string>
@@ -88,43 +90,6 @@ inline scalar_kind classify_scalar(nb::handle value) {
     return scalar_kind::unsupported;
 }
 
-inline int integer_value(nb::handle value, std::string const & key) {
-    PyObject * indexed = PyNumber_Index(value.ptr());
-    if (!indexed)
-        throw nb::python_error();
-    int overflow = 0;
-    long long const converted = PyLong_AsLongLongAndOverflow(indexed, &overflow);
-    Py_DECREF(indexed);
-    if (PyErr_Occurred()) {
-        PyErr_Clear();
-        overflow = 1;
-    }
-    if (overflow
-        || converted < std::numeric_limits<int>::min()
-        || converted > std::numeric_limits<int>::max())
-        throw nb::type_error(("parameter '" + key
-            + "' contains an integer that does not fit params'"
-              " 32-bit integer type").c_str());
-    return static_cast<int>(converted);
-}
-
-inline double real_value(nb::handle value, std::string const & key) {
-    if (classify_scalar(value) == scalar_kind::integer)
-        return static_cast<double>(integer_value(value, key));
-    double const converted = PyFloat_AsDouble(value.ptr());
-    if (PyErr_Occurred())
-        throw nb::python_error();
-    return converted;
-}
-
-inline std::complex<double> complex_value(nb::handle value,
-                                          std::string const & key) {
-    scalar_kind const kind = classify_scalar(value);
-    if (kind == scalar_kind::integer || kind == scalar_kind::real)
-        return std::complex<double>(real_value(value, key), 0.0);
-    return nb::cast<std::complex<double>>(value);
-}
-
 inline std::string string_value(nb::handle value) {
     if (PyUnicode_Check(value.ptr()))
         return nb::cast<std::string>(value);
@@ -144,278 +109,79 @@ inline std::string string_value(nb::handle value) {
     return nb::cast<std::string>(decoded);
 }
 } // namespace detail
-// Materialize a checked native snapshot. paramvalue's only integral
-// alternative is a 32-bit int and libalps static_casts wider integer
-// types down to it, so out-of-range integers are rejected loudly here
-// — for scalars and inside lists alike — rather than truncated or
-// silently widened to double. Sequence elements are classified before
-// conversion so integers round-trip as ints, mixed real numerics widen to
-// double, and complex values can never be coerced through a real-number path.
-inline void set_native_param_value(alps::params & p, std::string const & key, nb::handle value) {
+// The text of a Python value: alps::params_ns::to_text's rules, with exact
+// decimal integers of any size (define<T>() range-checks them) and
+// comma-separated sequences. Values params cannot hold are a TypeError naming
+// the parameter.
+inline std::string param_text(nb::handle value, std::string const & key) {
+    auto unsupported = [&key](std::string const & what) {
+        return nb::type_error(("parameter '" + key + "' " + what).c_str());
+    };
     if (value.is_none())
-        throw nb::type_error(("cannot store None for parameter '" + key
-            + "': params has no null type; delete the key instead").c_str());
-    detail::scalar_kind const scalar_type = detail::classify_scalar(value);
-    if (scalar_type == detail::scalar_kind::boolean) {
-        // PyObject_IsTrue rather than nb::cast<bool>: the caster does
-        // not convert numpy bool scalars
-        int const truth = PyObject_IsTrue(value.ptr());
-        if (truth < 0)
-            throw nb::python_error();
-        p[key] = (truth == 1);
-    } else if (detail::is_numpy_array(value)) {
-        // A native consumer can request scalar/vector values. The original
-        // Python object (including higher-rank metadata) remains owned by
-        // python_paramvalue_source; only this snapshot has the native shape
-        // restrictions.
+        throw unsupported("is None; params has no null type, delete the key instead");
+    if (detail::is_numpy_array(value)) {
         std::size_t const ndim = nb::cast<std::size_t>(value.attr("ndim"));
-        if (ndim == 0) {
-            set_native_param_value(p, key, value.attr("item")());
-            return;
-        }
+        if (ndim == 0)
+            return param_text(value.attr("item")(), key);
         if (ndim != 1)
-            throw nb::type_error(("parameter '" + key
-                + "' is a multidimensional numpy array; params supports only scalars"
-                  " and one-dimensional sequences").c_str());
-        nb::object items = value.attr("tolist")();
-        if (nb::len(items) == 0) {
-            // With no elements the sequence ladder cannot infer a native
-            // alternative. Preserve the ndarray's scalar family explicitly
-            // so an empty bool array does not silently become vector<int>.
-            std::string const kind = nb::cast<std::string>(
-                value.attr("dtype").attr("kind"));
-            if (kind == "b") p[key] = std::vector<bool>();
-            else if (kind == "i" || kind == "u") p[key] = std::vector<int>();
-            else if (kind == "f") p[key] = std::vector<double>();
-            else if (kind == "c") p[key] = std::vector<std::complex<double>>();
-            else if (kind == "S" || kind == "U") p[key] = std::vector<std::string>();
-            else
-                throw nb::type_error(("parameter '" + key
-                    + "' is an empty numpy array with unsupported dtype kind '"
-                    + kind + "'").c_str());
-            return;
-        }
-        set_native_param_value(p, key, items);
-        return;
-    } else if (scalar_type == detail::scalar_kind::integer) {
-        p[key] = detail::integer_value(value, key);
-    } else if (scalar_type == detail::scalar_kind::real) {
-        p[key] = detail::real_value(value, key);
-    } else if (scalar_type == detail::scalar_kind::complex) {
-        p[key] = detail::complex_value(value, key);
-    } else if (scalar_type == detail::scalar_kind::string) {
-        p[key] = detail::string_value(value);
-    } else if (nb::isinstance<nb::list>(value) || nb::isinstance<nb::tuple>(value)) {
-        // Classify before conversion. In particular, NumPy complex scalars
-        // implement a warning-emitting __float__; blindly probing a
-        // vector<double> caster first would discard their imaginary parts.
-        std::size_t const length = nb::len(value);
-        bool has_bool = false;
-        bool has_integer = false;
-        bool has_real = false;
-        bool has_complex = false;
-        bool has_string = false;
-        for (std::size_t i = 0; i < length; ++i) {
-            nb::object item = value[i];
-            switch (detail::classify_scalar(item)) {
-                case detail::scalar_kind::boolean: has_bool = true; break;
-                case detail::scalar_kind::integer:
-                    detail::integer_value(item, key); // range check now
-                    has_integer = true;
-                    break;
-                case detail::scalar_kind::real: has_real = true; break;
-                case detail::scalar_kind::complex: has_complex = true; break;
-                case detail::scalar_kind::string: has_string = true; break;
-                case detail::scalar_kind::unsupported:
-                    throw nb::type_error(("unsupported element in parameter '"
-                        + key + "' sequence").c_str());
-            }
-        }
-
-        bool const has_non_bool = has_integer || has_real || has_complex || has_string;
-        if (has_bool && !has_non_bool) {
-            std::vector<bool> flags;
-            flags.reserve(length);
-            for (std::size_t i = 0; i < length; ++i) {
-                int const truth = PyObject_IsTrue(value[i].ptr());
-                if (truth < 0)
-                    throw nb::python_error();
-                flags.push_back(truth == 1);
-            }
-            p[key] = flags;
-            return;
-        }
-        if (has_bool)
-            throw nb::type_error(("unsupported sequence for parameter '" + key
-                + "' (bools cannot be mixed with other element types)").c_str());
-        if (has_string && (has_integer || has_real || has_complex))
-            throw nb::type_error(("unsupported sequence for parameter '" + key
-                + "' (strings cannot be mixed with numeric element types)").c_str());
-
-        if (has_string) {
-            std::vector<std::string> strings;
-            strings.reserve(length);
-            for (std::size_t i = 0; i < length; ++i)
-                strings.push_back(detail::string_value(value[i]));
-            p[key] = strings;
-        } else if (has_complex) {
-            std::vector<std::complex<double>> numbers;
-            numbers.reserve(length);
-            for (std::size_t i = 0; i < length; ++i)
-                numbers.push_back(detail::complex_value(value[i], key));
-            p[key] = numbers;
-        } else if (has_real) {
-            std::vector<double> numbers;
-            numbers.reserve(length);
-            for (std::size_t i = 0; i < length; ++i)
-                numbers.push_back(detail::real_value(value[i], key));
-            p[key] = numbers;
-        } else {
-            // An empty untyped Python sequence follows the historic native
-            // ladder's first vector alternative (vector<int>).
-            std::vector<int> numbers;
-            numbers.reserve(length);
-            for (std::size_t i = 0; i < length; ++i)
-                numbers.push_back(detail::integer_value(value[i], key));
-            p[key] = numbers;
-        }
-        return;
-    } else {
-        throw nb::type_error(("unsupported type for parameter '" + key
-            + "' (expected bool/int/float/complex/str, a one-dimensional"
-              " numpy array, or a sequence of those scalar types)").c_str());
+            throw unsupported("is a multidimensional numpy array; params holds only scalars"
+                              " and one-dimensional sequences");
+        return param_text(value.attr("tolist")(), key);
     }
-}
-// Keep interpreter ownership in the binding, not in libalps. Copies share the
-// provider (matching the original object-valued parameters), native consumers
-// request a checked snapshot, and Python lookups/saves see all mutations.
-class python_paramvalue_source final : public alps::detail::paramvalue_source {
-public:
-    python_paramvalue_source(nb::handle value, std::string key)
-        : value_(value.inc_ref().ptr()), key_(std::move(key)) {}
-    ~python_paramvalue_source() override {
-        if (Py_IsInitialized()) {
-            nb::gil_scoped_acquire gil;
-            Py_DECREF(value_);
+    switch (detail::classify_scalar(value)) {
+        case detail::scalar_kind::boolean: {
+            // PyObject_IsTrue rather than nb::cast<bool>: the caster does
+            // not convert numpy bool scalars
+            int const truth = PyObject_IsTrue(value.ptr());
+            if (truth < 0)
+                throw nb::python_error();
+            return alps::params_ns::to_text(truth == 1);
         }
-    }
-    bool native_elements(std::vector<alps::detail::paramvalue> & elements) const override {
-        nb::gil_scoped_acquire gil;
-        nb::object items = nb::borrow<nb::object>(value_);
-        if (detail::is_numpy_array(items)) {
-            if (nb::cast<int>(items.attr("ndim")) != 1)
-                return false;
-            items = items.attr("tolist")();
-        }
-        if (!nb::isinstance<nb::list>(items) && !nb::isinstance<nb::tuple>(items))
-            return false;
-        elements.reserve(nb::len(items));
-        for (std::size_t i = 0; i < nb::len(items); ++i)
-            elements.push_back(python_paramvalue_source(items[i], key_).native_value());
-        return true;
-    }
-    bool native_text(std::string & text) const override {
-        nb::gil_scoped_acquire gil;
-        nb::handle items(value_);
-        if (!nb::isinstance<nb::list>(items) && !nb::isinstance<nb::tuple>(items))
-            return false;
-        // The original reader joined Python element strings. Converting a
-        // mixed sequence to one native vector first both rejects valid text
-        // parameters and changes representations such as True and 3.0.
-        text.clear();
-        for (std::size_t i = 0; i < nb::len(items); ++i) {
-            if (i) text += ',';
-            nb::object item = items[i];
-            text += nb::cast<std::string>(nb::str(item));
-        }
-        return true;
-    }
-    alps::detail::paramvalue native_value() const override {
-        nb::gil_scoped_acquire gil;
-        // Defer large integers to ALPS' checked text-to-target conversion.
-        // Narrowing to the native variant's int first would corrupt values.
-        nb::object normalized = nb::borrow<nb::object>(value_);
-        if (detail::is_numpy_array(normalized)
-            && nb::cast<int>(normalized.attr("ndim")) == 0)
-            normalized = normalized.attr("item")();
-        nb::handle value(normalized);
-        if (!detail::is_numpy_array(value)
-            && detail::classify_scalar(value) == detail::scalar_kind::integer) {
+        case detail::scalar_kind::integer: {
             nb::object integer = nb::steal<nb::object>(PyNumber_Index(value.ptr()));
-            if (!integer.is_valid()) throw nb::python_error();
-            int overflow = 0;
-            long long number = PyLong_AsLongLongAndOverflow(integer.ptr(), &overflow);
-            if (PyErr_Occurred()) throw nb::python_error();
-            if (overflow || number < std::numeric_limits<int>::min()
-                         || number > std::numeric_limits<int>::max())
-                return alps::detail::paramvalue(nb::cast<std::string>(nb::str(integer)));
+            if (!integer.is_valid())
+                throw nb::python_error();
+            return nb::cast<std::string>(nb::str(integer));
         }
-        nb::object items = nb::borrow<nb::object>(value);
-        if (detail::is_numpy_array(value) && nb::cast<int>(value.attr("ndim")) == 1)
-            items = value.attr("tolist")();
-        if (nb::isinstance<nb::list>(items) || nb::isinstance<nb::tuple>(items)) {
-            bool integral = nb::len(items) > 0, wide = false;
-            std::vector<std::string> integers;
-            for (std::size_t i = 0; i < nb::len(items); ++i) {
-                nb::object item = items[i];
-                if (detail::classify_scalar(item) != detail::scalar_kind::integer) {
-                    integral = false;
-                    break;
-                }
-                nb::object integer = nb::steal<nb::object>(PyNumber_Index(item.ptr()));
-                if (!integer.is_valid()) throw nb::python_error();
-                int overflow = 0;
-                long long number = PyLong_AsLongLongAndOverflow(integer.ptr(), &overflow);
-                if (PyErr_Occurred()) throw nb::python_error();
-                wide |= overflow || number < std::numeric_limits<int>::min()
-                                 || number > std::numeric_limits<int>::max();
-                integers.push_back(nb::cast<std::string>(nb::str(integer)));
-            }
-            if (integral && wide)
-                return alps::detail::paramvalue(integers);
+        case detail::scalar_kind::real: {
+            double const number = PyFloat_AsDouble(value.ptr());
+            if (PyErr_Occurred())
+                throw nb::python_error();
+            return alps::params_ns::to_text(number);
         }
-        alps::params snapshot;
-        set_native_param_value(snapshot, key_, value);
-        return *snapshot.find(key_);
+        case detail::scalar_kind::complex:
+            throw unsupported("is complex, which params cannot hold");
+        case detail::scalar_kind::string:
+            return detail::string_value(value);
+        case detail::scalar_kind::unsupported:
+            break;
     }
-    void save(alps::hdf5::archive & ar) const override {
-        nb::gil_scoped_acquire gil;
-        nb::module_::import_("pyalps.cxx.pyngshdf5_c");
-        nb::cast(&ar, nb::rv_policy::reference).attr("__setitem__")("", nb::handle(value_));
+    if (nb::isinstance<nb::list>(value) || nb::isinstance<nb::tuple>(value)) {
+        std::string text;
+        for (std::size_t i = 0; i < nb::len(value); ++i) {
+            nb::object item = value[i];
+            if (nb::isinstance<nb::list>(item) || nb::isinstance<nb::tuple>(item)
+                || detail::is_numpy_array(item))
+                throw unsupported("is a nested sequence; params holds only one-dimensional sequences");
+            std::string const element = param_text(item, key);
+            if (element.find(',') != std::string::npos)
+                throw unsupported("is a sequence with an element containing a comma,"
+                                  " which separates the elements");
+            if (i) text += ',';
+            text += element;
+        }
+        return text;
     }
-    void print(std::ostream & stream) const override {
-        nb::gil_scoped_acquire gil;
-        stream << nb::cast<std::string>(nb::str(nb::handle(value_)));
-    }
-    void * object(char const * binding) const override {
-        return std::strcmp(binding, "python") == 0 ? value_ : nullptr;
-    }
-private:
-    PyObject * value_;
-    std::string key_;
-};
-
-inline void set_param_value(alps::params & p, std::string const & key, nb::handle value) {
-    p[key] = alps::detail::paramvalue(std::make_shared<python_paramvalue_source>(value, key));
-}
-
-inline void enable_python_param_reader(alps::params & params) {
-    params.set_value_reader([](alps::hdf5::archive & ar) {
-        nb::gil_scoped_acquire gil;
-        nb::module_::import_("pyalps.cxx.pyngshdf5_c");
-        nb::object value = nb::cast(&ar, nb::rv_policy::reference).attr("__getitem__")("");
-        return alps::detail::paramvalue(
-            std::make_shared<python_paramvalue_source>(value, ar.get_context()));
-    });
+    throw unsupported("has an unsupported type (expected bool/int/float/str, a one-dimensional"
+                      " numpy array, or a sequence of those scalar types)");
 }
 
 inline alps::params params_from_dict(nb::dict const & values) {
     alps::params result;
-    enable_python_param_reader(result);
-    for (auto item : values)
-        set_param_value(result,
-                        nb::cast<std::string>(nb::str(item.first)),
-                        item.second);
+    for (auto item : values) {
+        std::string const key = nb::cast<std::string>(nb::str(item.first));
+        result.supply(key, param_text(item.second, key));
+    }
     return result;
 }
 } // namespace pyalps

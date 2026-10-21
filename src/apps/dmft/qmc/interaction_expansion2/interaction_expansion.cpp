@@ -30,26 +30,57 @@ double *c_or_cdagger::omegan_;
 std::complex<double> *c_or_cdagger::exp_iomegan_tau_;
 
 
+
 namespace {
-//gives a parameter its default value if the input does not set it; the
-//description documents the parameter
-template<typename T> void define(alps::params &p, std::string const &name, T const &value, std::string const &){
-  if(!p.defined(name)) p[name]=value;
+//defines a parameter that has an older or a derived alternative only if the input supplies it
+template<typename T> void define_if_supplied(alps::params &p, std::string const &name, std::string const &description){
+  if(p.supplied(name)) p.define<T>(name, description);
 }
 }
 
 void InteractionExpansion::define_parameters(alps::params &p)
 {
-  define<int>(p, "MAX_ORDER", 2048, "maximum perturbation order");
-  define<int>(p, "SITES", 1, "number of sites");
-  define<int>(p, "N_ORBITALS", 2, "number of orbitals; the number of flavors unless FLAVORS is set");
-  define<int>(p, "N_MEAS", 200, "number of updates between measurements unless MEASUREMENT_PERIOD is set");
-  define<int>(p, "RECALC_PERIOD", 5000, "number of updates between recomputations of the inverse Green's function matrix");
-  define<double>(p, "ALMOSTZERO", 1.e-16, "roundoff threshold");
-  define<bool>(p, "HISTOGRAM_MEASUREMENT", false, "measure the self-energy in imaginary time with histograms instead of on Matsubara frequencies");
-  define<bool>(p, "ATOMIC", false, "start from the atomic limit instead of the bare Green's function in INFILE");
-  define<bool>(p, "DMFT_FRAMEWORK", false, "read INFILE in the layout of the DMFT framework");
-  define<int>(p, "TAU_DISCRETIZATION_FOR_EXP", 0, "number of imaginary-time points at which exp(i omega_n tau) is tabulated; 0 computes it on the fly");
+  alps::mcbase::define_parameters(p); //SEED
+  p.define<long>("SWEEPS", "number of measurement steps");
+  p.define<long>("THERMALIZATION", "number of thermalization steps");
+  p.define<long>("MAX_TIME", "time limit in seconds");
+  p.define<double>("BETA", "inverse temperature");
+  p.define<double>("U", "on-site interaction");
+  p.define<double>("ALPHA", "shift of the auxiliary field");
+  p.define<int>("MAX_ORDER", 2048, "maximum perturbation order");
+  p.define<int>("SITES", 1, "number of sites");
+  p.define<int>("N_ORBITALS", 2, "number of orbitals; the number of flavors unless FLAVORS is set");
+  p.define<int>("N_MEAS", 200, "number of updates between measurements unless MEASUREMENT_PERIOD is set");
+  p.define<int>("RECALC_PERIOD", 5000, "number of updates between recomputations of the inverse Green's function matrix");
+  p.define<double>("ALMOSTZERO", 1.e-16, "roundoff threshold");
+  p.define<bool>("HISTOGRAM_MEASUREMENT", false, "measure the self-energy in imaginary time with histograms instead of on Matsubara frequencies");
+  p.define<bool>("ATOMIC", false, "start from the atomic limit instead of the bare Green's function in INFILE");
+  p.define<bool>("DMFT_FRAMEWORK", false, "read INFILE in the layout of the DMFT framework");
+  p.define<int>("TAU_DISCRETIZATION_FOR_EXP", 0, "number of imaginary-time points at which exp(i omega_n tau) is tabulated; 0 computes it on the fly");
+  if(!p["ATOMIC"].as<bool>()) p.define<std::string>("INFILE", "HDF5 file with the bare Green's function G0");
+  else define_if_supplied<std::string>(p, "INFILE", "HDF5 file with the bare Green's function G0");
+  //sizes with older names (which take precedence) or derived defaults; see ctint_parameters
+  define_if_supplied<int>(p, "FLAVORS", "number of flavors; N_ORBITALS by default");
+  define_if_supplied<int>(p, "NMATSUBARA", "older name of N_MATSUBARA");
+  if(p.supplied("N_MATSUBARA") || !p.supplied("NMATSUBARA")) p.define<int>("N_MATSUBARA", "number of Matsubara frequencies");
+  define_if_supplied<int>(p, "NMATSUBARA_MEASUREMENTS", "number of Matsubara frequencies measured; N_MATSUBARA by default");
+  define_if_supplied<int>(p, "N", "older name of N_TAU");
+  if(p.supplied("N_TAU") || !p.supplied("N")) p.define<int>("N_TAU", "number of imaginary-time slices");
+  define_if_supplied<int>(p, "NSELF", "number of imaginary-time points of the self-energy; 10*N_TAU by default");
+  define_if_supplied<int>(p, "MEASUREMENT_PERIOD", "number of updates between measurements; N_MEAS by default");
+  define_if_supplied<int>(p, "CONVERGENCE_CHECK_PERIOD", "number of updates between convergence checks; RECALC_PERIOD by default");
+  //read by the Fourier transformer and the interaction matrix through alps::Parameters
+  define_if_supplied<double>(p, "MU", "chemical potential");
+  define_if_supplied<double>(p, "H", "magnetic field");
+  define_if_supplied<double>(p, "J", "Hund's coupling");
+  define_if_supplied<double>(p, "U'", "interaction between different orbitals");
+  define_if_supplied<std::string>(p, "U_MATRIX", "interaction matrix");
+  std::vector<std::string> flavor_energies;
+  for(auto const &supplied : p.supplied_text())
+    if(supplied.first.compare(0, 4, "EPS_")==0 || supplied.first.compare(0, 6, "EPSSQ_")==0)
+      flavor_energies.push_back(supplied.first);
+  for(auto const &name : flavor_energies)
+    p.define<double>(name, "EPS_f: energy of flavor f; EPSSQ_f: its second moment");
 }
 
 namespace ctint_parameters {
@@ -119,9 +150,9 @@ pert_hist(max_order)
   measurement_time=0;
   update_time=0;
   thermalized=therm_steps==0?true:false;
-  if(!parms["ATOMIC"].cast<bool>()) {
-    alps::hdf5::archive ar(parms["INFILE"].cast<std::string>(),"r");
-    if(parms["DMFT_FRAMEWORK"].cast<bool>()){
+  if(!parms["ATOMIC"].as<bool>()) {
+    alps::hdf5::archive ar(parms["INFILE"].as<std::string>(),"r");
+    if(parms["DMFT_FRAMEWORK"].as<bool>()){
       //read in as green_function
 //      std::cerr << "Reading G0 ...";
       bare_green_matsubara.read_hdf5(ar,"/G0");

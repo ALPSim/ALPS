@@ -18,7 +18,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <complex>
 #include <utility>
 #include "default_model.hpp"

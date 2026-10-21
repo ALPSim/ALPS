@@ -16,9 +16,20 @@
 #include <cmath>
 #include <sstream>
 
+// Defines the parameters the simulation reads; main() calls it before
+// constructing the simulation and reports missing ones.
+ising_sim::parameters_type & ising_sim::define_parameters(parameters_type & parameters) {
+    return parameters
+        .define<long>("SEED", 42, "seed of the random number generator")
+        .define<int>("L", "number of sites")
+        .define<int>("THERMALIZATION", "number of thermalization sweeps")
+        .define<int>("SWEEPS", "number of measurement sweeps")
+        .define<double>("T", "temperature");
+}
+
 ising_sim::ising_sim(parameters_type const & params)
     : parameters(params)
-    , random(boost::mt19937((parameters["SEED"] | 42)), boost::uniform_real<>())
+    , random(boost::mt19937(static_cast<boost::uint32_t>(parameters["SEED"].as<long>())), boost::uniform_real<>())
     , length(parameters["L"])
     , sweeps(0)
     , thermalization_sweeps(int(parameters["THERMALIZATION"]))

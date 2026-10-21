@@ -19,6 +19,7 @@
 #include <alps/hdf5/ublas/vector.hpp>
 #include <alps/utilities/signal.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
@@ -27,43 +28,70 @@
 
 
 
-namespace {
-//gives a parameter its default value if the input does not set it; the
-//description documents the parameter
-template<typename T> void define(alps::params &p, std::string const &name, T const &value, std::string const &){
-  if(!p.defined(name)) p[name]=value;
-}
-}
-
 void MaxEntSimulation::define_parameters(alps::params &p)
 {
   //data
-  define<std::string>(p, "DATA", "", "file with the data; without it, the data are the parameters X_i and SIGMA_i");
-  define<bool>(p, "DATA_IN_HDF5", false, "read DATA (and COVARIANCE_MATRIX) from an HDF5 file");
-  define<std::string>(p, "COVARIANCE_MATRIX", "", "file with the covariance matrix of the data; replaces SIGMA_i");
-  define<std::string>(p, "DATASPACE", "time", "space of the data: time, frequency or legendre");
-  define<std::string>(p, "KERNEL", "fermionic", "kernel: fermionic, bosonic, anomalous or Boris");
-  define<bool>(p, "PARTICLE_HOLE_SYMMETRY", false, "the data are particle-hole symmetric");
-  define<bool>(p, "ENFORCE_NORMALIZATION", false, "add the normalization as a data point with error SIGMA_NORMALIZATION");
-  if(p.defined("BETA")) define<double>(p, "T", 1./static_cast<double>(p["BETA"]), "temperature; 1/BETA by default");
+  p.define<int>("NDAT", "number of data points");
+  p.define<double>("NORM", "normalization of the spectral function; the data are divided by it");
+  p.define<std::string>("DATA", "", "file with the data; without it, the data are the parameters X_i and SIGMA_i");
+  p.define<bool>("DATA_IN_HDF5", false, "read DATA (and COVARIANCE_MATRIX) from an HDF5 file");
+  p.define<std::string>("COVARIANCE_MATRIX", "", "file with the covariance matrix of the data; replaces SIGMA_i");
+  p.define<std::string>("DATASPACE", "time", "space of the data: time, frequency or legendre");
+  p.define<std::string>("KERNEL", "fermionic", "kernel: fermionic, bosonic, anomalous or Boris");
+  p.define<bool>("PARTICLE_HOLE_SYMMETRY", false, "the data are particle-hole symmetric");
+  p.define<bool>("ENFORCE_NORMALIZATION", false, "add the normalization as a data point with error SIGMA_NORMALIZATION");
+  if(p.exists("ENFORCE_NORMALIZATION") && p["ENFORCE_NORMALIZATION"].as<bool>())
+    p.define<double>("SIGMA_NORMALIZATION", "error of the normalization data point");
+  //data given as parameters, and the imaginary times of the data points
+  if(p.exists("NDAT")) {
+    for(int i=0; i<p["NDAT"].as<int>(); ++i) {
+      std::string const index=boost::lexical_cast<std::string>(i);
+      if(p.supplied("X_"+index)) p.define<double>("X_"+index, "data point i");
+      if(p.supplied("SIGMA_"+index)) p.define<double>("SIGMA_"+index, "error of data point i");
+      if(p.supplied("TAU_"+index)) p.define<double>("TAU_"+index, "imaginary time of data point i");
+    }
+  }
+  //temperature: T, or 1/BETA
+  if(p.supplied("T")) p.define<double>("T", "temperature");
+  else {
+    p.define<double>("BETA", "inverse temperature");
+    if(p.exists("BETA")) p.define<double>("T", 1./p["BETA"].as<double>(), "temperature; 1/BETA by default");
+  }
   //real-frequency grid
-  if(p.defined("OMEGA_MAX")) define<double>(p, "OMEGA_MIN", -static_cast<double>(p["OMEGA_MAX"]), "lower end of the frequency grid; -OMEGA_MAX by default");
-  define<std::string>(p, "FREQUENCY_GRID", "", "frequency grid: Lorentzian, half Lorentzian, quadratic, log, linear or lin_log");
-  define<double>(p, "CUT", 0.01, "cutoff of the Lorentzian grids");
-  define<double>(p, "SPREAD", 4., "spread of the quadratic grid");
-  define<double>(p, "LOG_MIN", 1.0e-4, "smallest frequency of the logarithmic grid");
-  //default model
-  define<std::string>(p, "DEFAULT_MODEL", "flat", "default model: flat, gaussian, twogaussians, shifted gaussian, double gaussian, general double gaussian, linear rise exp decay, quadratic rise exp decay, or a file name");
-  define<double>(p, "BLOW_UP", 1., "factor by which the default model is widened");
-  define<double>(p, "SHIFT1", 0., "position of the first Gaussian of twogaussians");
-  define<double>(p, "NORM1", 0.5, "weight of the first Gaussian of twogaussians");
+  p.define<int>("NFREQ", "number of real frequencies");
+  p.define<double>("OMEGA_MAX", "upper end of the frequency grid");
+  if(p.exists("OMEGA_MAX")) p.define<double>("OMEGA_MIN", -p["OMEGA_MAX"].as<double>(), "lower end of the frequency grid; -OMEGA_MAX by default");
+  p.define<std::string>("FREQUENCY_GRID", "", "frequency grid: Lorentzian, half Lorentzian, quadratic, log, linear or lin_log");
+  p.define<double>("CUT", 0.01, "cutoff of the Lorentzian grids");
+  p.define<double>("SPREAD", 4., "spread of the quadratic grid");
+  p.define<double>("LOG_MIN", 1.0e-4, "smallest frequency of the logarithmic grid");
+  //default model, and the parameters of the chosen one
+  p.define<std::string>("DEFAULT_MODEL", "flat", "default model: flat, gaussian, twogaussians, shifted gaussian, double gaussian, general double gaussian, linear rise exp decay, quadratic rise exp decay, or a file name");
+  p.define<double>("BLOW_UP", 1., "factor by which the default model is widened");
+  p.define<double>("SHIFT1", 0., "position of the first Gaussian of twogaussians");
+  p.define<double>("NORM1", 0.5, "weight of the first Gaussian of twogaussians");
+  std::string const model=p["DEFAULT_MODEL"].as<std::string>();
+  bool const gaussian=(model=="gaussian" || model=="shifted gaussian" || model=="double gaussian" || model=="general double gaussian");
+  if(gaussian) p.define<double>("SIGMA", "width of the Gaussian default model");
+  if(gaussian && model!="gaussian") p.define<double>("SHIFT", "shift of the Gaussian default model");
+  if(model=="general double gaussian") p.define<double>("BOSE_NORM", "bosonic weight of the general double Gaussian default model");
+  if(model=="twogaussians") {
+    p.define<double>("SIGMA1", "width of the first Gaussian of twogaussians");
+    p.define<double>("SIGMA2", "width of the second Gaussian of twogaussians");
+    p.define<double>("SHIFT2", "position of the second Gaussian of twogaussians");
+  }
+  if(model=="linear rise exp decay" || model=="quadratic rise exp decay")
+    p.define<double>("LAMBDA", "decay rate of the default model");
   //iteration and output
-  define<int>(p, "MAX_IT", 1000, "number of iterations of the root finding");
-  define<int>(p, "MAX_TIME", 60, "time limit in seconds");
-  define<int>(p, "SEED", 42, "random seed; accepted for compatibility, MaxEnt draws no random numbers");
-  define<bool>(p, "VERBOSE", false, "print extra information");
-  define<bool>(p, "TEXT_OUTPUT", false, "also write results as text files");
-  define<bool>(p, "SELF", false, "the data are a self-energy");
+  p.define<int>("N_ALPHA", "number of values of alpha");
+  p.define<double>("ALPHA_MIN", "smallest alpha");
+  p.define<double>("ALPHA_MAX", "largest alpha");
+  p.define<int>("MAX_IT", 1000, "number of iterations of the root finding");
+  p.define<int>("MAX_TIME", 60, "time limit in seconds");
+  p.define<int>("SEED", 42, "random seed; accepted for compatibility, MaxEnt draws no random numbers");
+  p.define<bool>("VERBOSE", false, "print extra information");
+  p.define<bool>("TEXT_OUTPUT", false, "also write results as text files");
+  p.define<bool>("SELF", false, "the data are a self-energy");
 }
 
 MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &outfile)
@@ -72,7 +100,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::params &parms,const std::string &
 , norm(parms["NORM"])                                                  //The integral is normalized to NORM (use e.g. for self-energies
 , max_it(parms["MAX_IT"])                                       //The number of iterations done in the root finding procedure
 , name(outfile,0,outfile.size()-6)
-, Kernel_type(parms["KERNEL"].cast<std::string>())
+, Kernel_type(parms["KERNEL"].as<std::string>())
 , finished(false)
 , verbose(parms["VERBOSE"])
 , text_output(parms["TEXT_OUTPUT"])

@@ -3,6 +3,7 @@ add_library(alps_utilities
   src/copyright.cpp
   src/citations.cpp
   src/encode.cpp
+  src/filename_operations.cpp
   src/os.cpp
   src/short_print.cpp
   src/signal.cpp
@@ -47,6 +48,9 @@ if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
 endif()
 alps_configure_component(alps_utilities utilities)
+# ALPSCore's filename helpers (fs/*.hpp) declare no export macro; ALPS::params
+# calls them across the DLL boundary.
+set_target_properties(alps_utilities PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_include_directories(alps_utilities PRIVATE "${PROJECT_BINARY_DIR}/generated/include")
 target_sources(alps_utilities PUBLIC
   FILE_SET utilities_headers TYPE HEADERS
@@ -62,6 +66,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/ngs/sleep.hpp
     include/alps/ngs/thread_exceptions.hpp
     include/alps/stringvalue.h
+    include/alps/testing/fp_compare.hpp
     include/alps/type_traits/average_type.hpp
     include/alps/type_traits/change_value_type.hpp
     include/alps/type_traits/covariance_type.hpp
@@ -81,7 +86,12 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/citations.hpp
     include/alps/utilities/copyright.hpp
     include/alps/utilities/data.hpp
+    include/alps/utilities/deprecated.hpp
     include/alps/utilities/encode.hpp
+    include/alps/utilities/fs/get_basename.hpp
+    include/alps/utilities/fs/get_dirname.hpp
+    include/alps/utilities/fs/get_extension.hpp
+    include/alps/utilities/fs/remove_extensions.hpp
     include/alps/utilities/make_copy.hpp
     include/alps/utilities/os.hpp
     include/alps/utilities/remove_cvr.hpp
@@ -96,13 +106,16 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/vectorio.hpp
     include/alps/utilities/vmusage.hpp)
 if(ALPS_ENABLE_MPI)
-  # ALPSCore's MPI wrapper and its vector reductions, copied unchanged except
-  # for one local change to the wrapper (see README.md). They include <mpi.h>,
-  # so only MPI builds install them; ALPSCore's code reaches them only when
-  # ALPS_HAVE_MPI is set.
+  # ALPSCore's MPI wrapper, its vector reductions and its broadcasts of
+  # containers, with obsolete publication pointers removed and one local change to the wrapper
+  # (see README.md). They include <mpi.h>, so only MPI builds install them;
+  # ALPSCore's code reaches them only when ALPS_HAVE_MPI is set.
   target_sources(alps_utilities PUBLIC FILE_SET utilities_headers FILES
     include/alps/utilities/boost_mpi.hpp
-    include/alps/utilities/mpi.hpp)
+    include/alps/utilities/mpi.hpp
+    include/alps/utilities/mpi_map.hpp
+    include/alps/utilities/mpi_pair.hpp
+    include/alps/utilities/mpi_vector.hpp)
 endif()
 
 if(ALPS_BUILD_TESTING)

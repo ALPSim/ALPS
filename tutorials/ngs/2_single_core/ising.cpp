@@ -35,6 +35,16 @@ ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
     ;
 }
 
+// Defines the parameters the simulation reads; main() calls it before
+// constructing the simulation and reports missing ones.
+ising_sim::parameters_type & ising_sim::define_parameters(parameters_type & parameters) {
+    return alps::mcbase::define_parameters(parameters)
+        .define<int>("L", "number of sites")
+        .define<int>("THERMALIZATION", "number of thermalization sweeps")
+        .define<int>("SWEEPS", "number of measurement sweeps")
+        .define<double>("T", "temperature");
+}
+
 void ising_sim::update() {
     for (int j = 0; j < length; ++j) {
         using std::exp;

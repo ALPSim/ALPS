@@ -14,7 +14,7 @@
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <boost/filesystem.hpp>
 
 #include <algorithm>
@@ -81,11 +81,11 @@ TEST(MaxEnt, LinearGridAndStopCallbacks) {
   p["DEFAULT_MODEL"] = std::string("flat");
   p["FREQUENCY_GRID"] = std::string("linear");
   p["MAX_IT"] = 40;
-  p["PARTICLE_HOLE_SYMMETRY"] = 0;
-  p["TEXT_OUTPUT"] = 0;
-  p["DATA_IN_HDF5"] = 1;
+  p["PARTICLE_HOLE_SYMMETRY"] = false;
+  p["TEXT_OUTPUT"] = false;
+  p["DATA_IN_HDF5"] = true;
   p["MAX_TIME"] = 600;
-  p["VERBOSE"] = 0;
+  p["VERBOSE"] = false;
 
   alps::testing::TemporaryDirectory temporary;
   const std::string base = (temporary.path() / "maxent").string();
@@ -99,6 +99,7 @@ TEST(MaxEnt, LinearGridAndStopCallbacks) {
   }
   std::remove(out_h5.c_str());
   MaxEntSimulation::define_parameters(p);
+  ASSERT_TRUE(p.ok()) << "MaxEnt reported missing parameters";
 
   {
     MaxEntSimulation sim(p, out_h5);

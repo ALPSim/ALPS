@@ -15,7 +15,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
-#include <alps/ngs/params.hpp>
+#include <alps/params.hpp>
 #include <alps/solvers.hpp>
 
 #include <chrono>
@@ -63,20 +63,20 @@ void check_run(std::filesystem::path const & dir, int thermalization) {
   }
 
   alps::params p;
-  p["INFILE"] = g0;
-  p["BETA"] = beta;
-  p["U"] = 4.;
-  p["MU"] = 1.;
-  p["ALPHA"] = 0.3;
-  p["N_ORBITALS"] = 2;
-  p["N_MATSUBARA"] = n_matsubara;
-  p["N_TAU"] = 64;
-  p["HISTOGRAM_MEASUREMENT"] = 1;
-  p["SWEEPS"] = sweeps;
-  p["THERMALIZATION"] = thermalization;
-  p["N_MEAS"] = n_meas;
-  p["MAX_TIME"] = max_time;
-  p["SEED"] = 3;
+  p.supply("INFILE", g0);
+  p.supply("BETA", std::to_string(beta));
+  p.supply("U", "4");
+  p.supply("MU", "1");
+  p.supply("ALPHA", "0.3");
+  p.supply("N_ORBITALS", "2");
+  p.supply("N_MATSUBARA", std::to_string(n_matsubara));
+  p.supply("N_TAU", "64");
+  p.supply("HISTOGRAM_MEASUREMENT", "1");
+  p.supply("SWEEPS", std::to_string(sweeps));
+  p.supply("THERMALIZATION", std::to_string(thermalization));
+  p.supply("N_MEAS", std::to_string(n_meas));
+  p.supply("MAX_TIME", std::to_string(max_time));
+  p.supply("SEED", "3");
 
   const std::string output = (dir / ("out" + std::to_string(thermalization) + ".h5")).string();
   const auto start = std::chrono::steady_clock::now();

@@ -936,6 +936,27 @@
     "boost/numeric/bindings/views.hpp"
   ],
   "retired": {
-    "alps/utility/factory.hpp": "did not compile in 3.0.0 (a syntax error in factory::register_type), so no consumer could use it"
+    "alps/utility/factory.hpp": "did not compile in 3.0.0 (a syntax error in factory::register_type), so no consumer could use it",
+    "alps/ngs/detail/paramiterator.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramproxy.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/params_impl_base.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramvalue.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/detail/paramvalue_reader.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/params.hpp": "the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
+    "alps/ngs/parapack/clone.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/clone_info.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/clone_info_p.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/clone_proxy.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/job.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/job_p.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/params_p.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/parapack.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/simulation_p.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/parapack/worker_factory.h": "NGS bridge from parapack to the NGS parameters, which ALPSCore's parameters replace; nothing used it",
+    "alps/ngs/scheduler/proto/controlthreadsim.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/scheduler/proto/mcbase.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/scheduler/proto/mpisim.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/scheduler/proto/mpisim_ulfm.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/scheduler/proto/tcpserver.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it"
   }
 }

@@ -13,6 +13,8 @@ public:
     explicit ising_sim(parameters_type const & parameters,
                        std::size_t seed_offset = 0);
 
+    static parameters_type & define_parameters(parameters_type & parameters);
+
     void update() override;
     void measure() override;
     double fraction_completed() const override;

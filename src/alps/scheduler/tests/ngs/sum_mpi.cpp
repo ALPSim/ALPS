@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <boost/mpi/collectives.hpp>
 #include <functional>
+#include <string>
 
 // Make completion checks deterministic instead of depending on wall time.
 struct every_step {
@@ -28,11 +29,13 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
     boost::mpi::communicator world;
     ASSERT_GE(world.size(), 2);
     alps::params parameters;
-    if (world.rank() == 0) {
-        parameters["COUNT"] = 128 * world.size();
-        parameters["SEED"] = 42;
-    }
+    if (world.rank() == 0)
+        parameters.supply("COUNT", std::to_string(128 * world.size())).supply("SEED", "42");
+    // The supplied text reaches every rank, and each defines the parameters.
     alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    EXPECT_EQ(parameters["BINNUMBER"].as<int>(), 128);
     alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
     EXPECT_TRUE(simulation.run([] { return false; }));
     EXPECT_EQ(simulation.count, 128);
@@ -69,11 +72,11 @@ TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
     boost::mpi::communicator world;
     ASSERT_GE(world.size(), 2);
     alps::params parameters;
-    if (world.rank() == 0) {
-        parameters["COUNT"] = 128;
-        parameters["SEED"] = 42;
-    }
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
     alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
     alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
     if (world.rank() == 0) {
         simulation.update();
@@ -85,11 +88,11 @@ TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
 TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
     boost::mpi::communicator world;
     alps::params parameters;
-    if (world.rank() == 0) {
-        parameters["COUNT"] = 128;
-        parameters["SEED"] = 42;
-    }
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
     alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
     alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
     const auto results = alps::collect_results(simulation);
     // With ALPS_NGS_USE_NEW_ALEA only rank 0 receives the results, and count()

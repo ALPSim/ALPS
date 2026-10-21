@@ -19,54 +19,62 @@
 #include <iomanip>
 #include"hyb.hpp"
 
-namespace {
-//gives a parameter its default value if the input does not set it; the
-//description documents the parameter
-template<typename T> void define(alps::params &parms, std::string const &name, T const &value, std::string const &){
-  if(!parms.defined(name)) parms[name]=value;
-}
-}
-
 void hybridization::define_parameters(alps::params &parms){
+  alps::mcbase::define_parameters(parms); //SEED
   //simulation
-  define<int>(parms, "OUTPUT_PERIOD", 100000, "number of sweeps between progress reports");
-  define<int>(parms, "N_HISTOGRAM_ORDERS", 50, "number of orders measured for the order histogram");
-  define<bool>(parms, "TIMESERIES", false, "use fixed binning instead of detailed binning");
-  define<int>(parms, "NUM_BINS", 0, "number of bins for the measurements");
-  define<bool>(parms, "VERBOSE", false, "print extra information");
+  parms.define<long>("SWEEPS", "number of sweeps after thermalization");
+  parms.define<long>("THERMALIZATION", "number of thermalization sweeps");
+  parms.define<long>("MAX_TIME", "time limit in seconds");
+  parms.define<int>("N_MEAS", "number of updates between measurements");
+  parms.define<int>("OUTPUT_PERIOD", 100000, "number of sweeps between progress reports");
+  parms.define<int>("N_HISTOGRAM_ORDERS", 50, "number of orders measured for the order histogram");
+  parms.define<bool>("TIMESERIES", false, "use fixed binning instead of detailed binning");
+  parms.define<int>("NUM_BINS", 0, "number of bins for the measurements");
+  parms.define<bool>("VERBOSE", false, "print extra information");
   //updates
-  define<bool>(parms, "SPINFLIP", false, "perform local spin-flip updates");
-  define<bool>(parms, "GLOBALFLIP", false, "perform global spin-flip updates");
+  parms.define<bool>("SPINFLIP", false, "perform local spin-flip updates");
+  parms.define<bool>("GLOBALFLIP", false, "perform global spin-flip updates");
   //measurements
-  define<bool>(parms, "MEASURE_time", true, "measure the Green's function in imaginary time");
-  define<bool>(parms, "MEASURE_freq", false, "measure the Green's function on Matsubara frequencies");
-  define<bool>(parms, "MEASURE_legendre", false, "measure the Green's function in Legendre polynomials");
-  define<bool>(parms, "MEASURE_nn", false, "measure equal-time density-density correlations");
-  define<bool>(parms, "MEASURE_nnt", false, "measure the density-density correlation function in imaginary time");
-  define<bool>(parms, "MEASURE_nnw", false, "measure the density-density correlation function on Matsubara frequencies");
-  define<bool>(parms, "MEASURE_g2w", false, "measure the two-particle Green's function");
-  define<bool>(parms, "MEASURE_h2w", false, "measure the higher-order two-particle correlator");
-  define<bool>(parms, "MEASURE_sector_statistics", false, "measure sector statistics");
-  define<bool>(parms, "COMPUTE_VERTEX", false, "compute the vertex function");
-  define<bool>(parms, "ACCURATE_COVARIANCE", true, "compute the covariance of the imaginary-time Green's function accurately");
-  define<int>(parms, "N_MATSUBARA", 0, "number of Matsubara frequencies; required with MEASURE_freq or MEASURE_legendre");
-  define<int>(parms, "N_LEGENDRE", 0, "number of Legendre coefficients; required with MEASURE_legendre");
-  define<int>(parms, "N_nn", 0, "number of imaginary-time points for the density-density correlator; required with MEASURE_nnt");
-  define<int>(parms, "N_W", 0, "number of bosonic Matsubara frequencies; required with MEASURE_nnw, MEASURE_g2w or MEASURE_h2w");
-  define<int>(parms, "N_w2", 0, "number of fermionic Matsubara frequencies for two-particle functions; required with MEASURE_g2w or MEASURE_h2w");
+  parms.define<bool>("MEASURE_time", true, "measure the Green's function in imaginary time");
+  parms.define<bool>("MEASURE_freq", false, "measure the Green's function on Matsubara frequencies");
+  parms.define<bool>("MEASURE_legendre", false, "measure the Green's function in Legendre polynomials");
+  parms.define<bool>("MEASURE_nn", false, "measure equal-time density-density correlations");
+  parms.define<bool>("MEASURE_nnt", false, "measure the density-density correlation function in imaginary time");
+  parms.define<bool>("MEASURE_nnw", false, "measure the density-density correlation function on Matsubara frequencies");
+  parms.define<bool>("MEASURE_g2w", false, "measure the two-particle Green's function");
+  parms.define<bool>("MEASURE_h2w", false, "measure the higher-order two-particle correlator");
+  parms.define<bool>("MEASURE_sector_statistics", false, "measure sector statistics");
+  parms.define<bool>("COMPUTE_VERTEX", false, "compute the vertex function");
+  parms.define<bool>("ACCURATE_COVARIANCE", true, "compute the covariance of the imaginary-time Green's function accurately");
+  parms.define<int>("N_MATSUBARA", 0, "number of Matsubara frequencies; required with MEASURE_freq or MEASURE_legendre");
+  parms.define<int>("N_LEGENDRE", 0, "number of Legendre coefficients; required with MEASURE_legendre");
+  parms.define<int>("N_nn", 0, "number of imaginary-time points for the density-density correlator; required with MEASURE_nnt");
+  parms.define<int>("N_W", 0, "number of bosonic Matsubara frequencies; required with MEASURE_nnw, MEASURE_g2w or MEASURE_h2w");
+  parms.define<int>("N_w2", 0, "number of fermionic Matsubara frequencies for two-particle functions; required with MEASURE_g2w or MEASURE_h2w");
   //input and output
-  define<std::string>(parms, "BASEPATH", "", "path in the output file under which results are stored");
-  define<bool>(parms, "TEXT_OUTPUT", false, "also write results as text files");
-  define<bool>(parms, "DELTA_IN_HDF5", false, "read the hybridization function DELTA from an HDF5 file");
-  define<bool>(parms, "DMFT_FRAMEWORK", false, "read HDF5 input in the layout of the DMFT framework");
-  define<std::string>(parms, "U_MATRIX", "", "file with the interaction matrix; replaces U, U' and J");
-  define<bool>(parms, "UMATRIX_IN_HDF5", false, "read U_MATRIX from an HDF5 file");
-  define<std::string>(parms, "MU_VECTOR", "", "file with the orbital chemical potentials; replaces MU");
-  define<bool>(parms, "MU_IN_HDF5", false, "read MU_VECTOR from an HDF5 file");
-  define<std::string>(parms, "RET_INT_K", "", "file with the retarded interaction K(tau); enables the retarded interaction");
-  define<bool>(parms, "K_IN_HDF5", false, "read RET_INT_K from an HDF5 file");
-  //interaction
-  define<double>(parms, "J", 0., "Hund's coupling");
+  parms.define<std::string>("BASEPATH", "", "path in the output file under which results are stored");
+  parms.define<bool>("TEXT_OUTPUT", false, "also write results as text files");
+  parms.define<bool>("DELTA_IN_HDF5", false, "read the hybridization function DELTA from an HDF5 file");
+  parms.define<bool>("DMFT_FRAMEWORK", false, "read HDF5 input in the layout of the DMFT framework");
+  parms.define<std::string>("U_MATRIX", "", "file with the interaction matrix; replaces U, U' and J");
+  parms.define<bool>("UMATRIX_IN_HDF5", false, "read U_MATRIX from an HDF5 file");
+  parms.define<std::string>("MU_VECTOR", "", "file with the orbital chemical potentials; replaces MU");
+  parms.define<bool>("MU_IN_HDF5", false, "read MU_VECTOR from an HDF5 file");
+  parms.define<std::string>("RET_INT_K", "", "file with the retarded interaction K(tau); enables the retarded interaction");
+  parms.define<bool>("K_IN_HDF5", false, "read RET_INT_K from an HDF5 file");
+  //physics
+  parms.define<double>("BETA", "inverse temperature");
+  parms.define<int>("N_TAU", "number of imaginary-time slices of the hybridization function");
+  parms.define<int>("N_ORBITALS", "number of orbitals");
+  parms.define<std::string>("DELTA", "file with the hybridization function");
+  parms.define<double>("MU", 0., "chemical potential; MU_VECTOR replaces it");
+  //interaction: U, U' and J, or a matrix from the file U_MATRIX
+  parms.define<double>("J", 0., "Hund's coupling");
+  if(parms["U_MATRIX"].as<std::string>().empty()) {
+    parms.define<double>("U", "interaction");
+    if(parms.exists("U"))
+      parms.define<double>("U'", parms["U"].as<double>()-2*parms["J"].as<double>(), "interaction between different orbitals; U-2J by default");
+  }
 }
 
 hybridization::hybridization(const alps::params &parms, int crank_)
@@ -207,9 +215,9 @@ void hybridization::show_info(const alps::params &parms, int crank){
     if(static_cast<bool>(parms["MEASURE_nnw"])) std::cout << "measuring nnw" << std::endl;
     if(static_cast<bool>(parms["MEASURE_sector_statistics"])) std::cout << "measuring sector statistics" << std::endl;
     if(static_cast<bool>(parms["COMPUTE_VERTEX"])) std::cout << "vertex will be computed" << std::endl;
-    if(!parms["RET_INT_K"].cast<std::string>().empty()) std::cout << "using retarded interaction" << std::endl;
-    if(!parms["U_MATRIX"].cast<std::string>().empty()) std::cout << "reading U matrix from file " << parms["U_MATRIX"] << std::endl;
-    if(!parms["MU_VECTOR"].cast<std::string>().empty()) std::cout << "reading MU vector from file " << parms["MU_VECTOR"] << std::endl;
+    if(!parms["RET_INT_K"].as<std::string>().empty()) std::cout << "using retarded interaction" << std::endl;
+    if(!parms["U_MATRIX"].as<std::string>().empty()) std::cout << "reading U matrix from file " << parms["U_MATRIX"] << std::endl;
+    if(!parms["MU_VECTOR"].as<std::string>().empty()) std::cout << "reading MU vector from file " << parms["MU_VECTOR"] << std::endl;
     std::cout << "Simulation scheduled to run " << parms["MAX_TIME"] << " seconds" << std::endl << std::endl;
   }
   return;

@@ -60,11 +60,13 @@ else()
      OR NOT EXISTS "${expected_prefix}/include/alps/python/save_observable_to_hdf5.hpp")
     message(FATAL_ERROR "The SDK must retain public Python compatibility includes")
   endif()
-  # alps/utilities/ and alps/common/ are public prefixes (ALPSCore's spellings).
+  # alps/utilities/, alps/common/ and alps/params/ are public prefixes (ALPSCore's spellings).
   foreach(private_directory IN ITEMS alps/utilities/include alps/utilities/src
                                      alps/utilities/tests alps/hdf5/include alps/hdf5/src
-                                     alps/hdf5/tests alps/params alps/common/include
-                                     alps/common/src alps/common/tests alps/runtime
+                                     alps/hdf5/tests alps/params/include alps/params/src
+                                     alps/params/tests alps/params/adapters alps/params/iniparser
+                                     alps/common/include alps/common/src alps/common/tests
+                                     alps/runtime
                                      alps/aleav2/include alps/aleav2/src alps/aleav2/tests
                                      alps/gf/include alps/gf/src alps/gf/tests
                                      alps/accumulators/include alps/accumulators/src
@@ -200,10 +202,15 @@ endif()
 add_header_contract(accumulators)
 add_header_contract(configuration ONLY "^alps/config\\.hpp$")
 add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
+add_header_contract(params ONLY "^alps/(params|dictionary|params/[a-z_]+)\\.hpp$"
+  EXCLUDE "^alps/params/(dict_value|params)_impl\\.hpp$")
 add_header_contract(numerics
   ONLY "^alps/numeric/(boost_array_functions|check_size|inf|rectangularize|scalar|vector_functions)\\.hpp$")
 if(sdk_mpi_enabled)
-  add_header_contract(utilities ONLY "^alps/utilities/(boost_)?mpi\\.hpp$")
+  add_header_contract(utilities
+    ONLY "^alps/(utilities/((boost_)?mpi|mpi_(map|pair|vector)|deprecated|fs/[a-z_]+)|testing/fp_compare)\\.hpp$")
+else()
+  add_header_contract(utilities ONLY "^alps/(utilities/(deprecated|fs/[a-z_]+)|testing/fp_compare)\\.hpp$")
 endif()
 if(TARGET ALPS::gf)
   add_component_contract(gf gf.cpp "ALPS::alps|${numerical_dependencies}")

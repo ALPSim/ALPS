@@ -30,6 +30,8 @@ class ising_sim : public alps::mcbase {
         
         ising_sim(parameters_type const & parms, std::size_t seed_offset = 0);
 
+        static parameters_type & define_parameters(parameters_type & parameters);
+
         virtual void update();
         virtual void measure();
         virtual double fraction_completed() const;

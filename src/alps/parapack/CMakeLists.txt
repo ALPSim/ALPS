@@ -1,10 +1,5 @@
 # Parapack source ownership.
 target_sources(alps PRIVATE
-  src/ngs/clone.cpp
-  src/ngs/clone_info.cpp
-  src/ngs/job.cpp
-  src/ngs/parapack.cpp
-  src/ngs/worker_factory.cpp
   src/parapack/clone.C
   src/parapack/clone_info.C
   src/parapack/filelock.C
@@ -27,16 +22,6 @@ target_sources(alps_headers INTERFACE
   FILE_SET parapack_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
-    include/alps/ngs/parapack/clone.h
-    include/alps/ngs/parapack/clone_info.h
-    include/alps/ngs/parapack/clone_info_p.h
-    include/alps/ngs/parapack/clone_proxy.h
-    include/alps/ngs/parapack/job.h
-    include/alps/ngs/parapack/job_p.h
-    include/alps/ngs/parapack/params_p.h
-    include/alps/ngs/parapack/parapack.h
-    include/alps/ngs/parapack/simulation_p.h
-    include/alps/ngs/parapack/worker_factory.h
     include/alps/parapack/clone.h
     include/alps/parapack/clone_info.h
     include/alps/parapack/clone_info_p.h
