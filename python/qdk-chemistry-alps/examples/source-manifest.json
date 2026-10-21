@@ -1,0 +1,27 @@
+{
+  "source_repository": "skilledwolf/alpsx (private)",
+  "base_commit": "1adba871e",
+  "includes_local_edits": true,
+  "sha256": {
+    "examples/molecule.py": "fcfcf356d4bf3ae8c24abb7a791b36c2ce8c019bc582280e12a5580faf5edc5b",
+    "examples/hubbard_reference.py": "2fb41daf147809f23ed802194868acead995044e240a7ee7471cc4abfc05318f",
+    "examples/spin_one_anisotropy.py": "e073a448df4bb98694489930a9364f5dc74da64b98b66eba02bffe6445906cec",
+    "examples/spin_one_quench.py": "4d00f034c76644883a29a0dac559b00fc8df0f7f60f48be9f864788fed01c0dc",
+    "examples/large_active_space.py": "1fe88978ad459480ed34dab9a7ac9738bdb8a387b8c80a2c0f85538b8de9b5d0",
+    "examples/rdm_observables.py": "483100f45061e1af3d36233dd5461b5d87553790fbceb23e24fe6440ada1c4cc",
+    "examples/interop.py": "6e87111e5a2cc939436f2e2d9d61cc8e840e82dff8b180b9890e5d538161e469",
+    "examples/hardware_export.py": "0410474084abc9cff25961fbe43e2124f170056bf446e346c5658fe0989834fc",
+    "examples/converging_dmrg.py": "72319cd57176802de1ff4b5c63c400be5b8bbf1cf1c47b4aa799db0905b28567",
+    "examples/custom_spin_export.py": "4221ed3609eed3aaf261390a93c95b3825e4034b02ccc85555ac3cd54f5813b0",
+    "examples/fermion_pairing.py": "06becfd2b740ce60ae0024a2d0cd7ff1267b0a85b4493efe448afa3cfe036355",
+    "examples/spin_quench.py": "582d9c90ebbfc705e721eb26800f43ef5eef93157e6d9d79050d1a706afd891b",
+    "examples/observables.py": "0aabef328cd77b312b0948f266ec8211c75aba8a9340873cd605e7c955ff7429",
+    "examples/quickstart.py": "c557f150d0ad9e8f753c6326122883bb8c401ebca22f0f8b64a7a0cb5465885e",
+    "examples/demo_support/__init__.py": "c6ef62796dade877a42425bb64f231e45d64d31c52c9ed2ebb1f58e2d3dc5cdb",
+    "examples/demo_support/spin_one.py": "68749a20564fffa0525291c860ab3011d6185c220982fdddb3e8b2246a54da8d",
+    "examples/nitrogen/run.py": "6ad6294b1c7b2f186df96abe15f7cff40d0f900aeed81235ed83e338b489c197",
+    "examples/nitrogen/capacity.py": "7f0d7e0fd25f254b4ef0864581d0dc287b0f06ea2315c65fd8c07e2c01909641",
+    "examples/scaling/run.py": "2e18f89ce3f7c39b0dd62fb4380fbf297dce7fb3fe77817259512cb5345d6e51",
+    "examples/scaling/guard.py": "bab8396d12e81b48abf6b276a9457775d712e0a1818555a61a1f8627270e9372"
+  }
+}

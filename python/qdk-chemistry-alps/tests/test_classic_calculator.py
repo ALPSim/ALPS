@@ -265,7 +265,7 @@ def test_container_choice_is_made_before_the_solve(hubbard_qdk):
         calculator.run(h, 2, 2)
     assert calculator.last_result is None
     with pytest.raises(ValueError, match="wavefunction_container"):
-        _classic(wavefunction_container="mps").run(h, 2, 2)
+        _classic(wavefunction_container="invalid").run(h, 2, 2)
 
 
 @pytest.mark.local_qdk

@@ -16,11 +16,11 @@
 # dmrg_calculator.py. Changes: the container is chosen before the solve,
 # because the CI vector is requested from solve_molecular, which contracts it
 # from the engine's stored rotations (alpsx contracted a retained MPS
-# afterwards); there is no "mps" mode; the memory estimate is per
+# afterwards); the optional MPS mode exports the final state; the memory estimate is per
 # determinant; the measurements are derived from the run's RDMs (alpsx
 # contracted its MPS), and other operators are measured in the final sweep
 # through the observables attribute; the run's spin-resolved RDMs are
-# attached to both containers.
+# attached to every untrimmed container.
 """QDK molecular calculator using the classic ALPS block DMRG engine."""
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ __all__ = ["AlpsClassicDmrgCalculator"]
 
 # Spin-half string characters by alpha + 2 * beta occupation.
 _STATE_CHAR = np.array(["0", "u", "d", "2"])
-_MODES = ("auto", "statevector", "rdm")
+_MODES = ("auto", "statevector", "rdm", "mps")
 # Peak memory of a CI vector, per determinant: about 460 bytes measured for
 # the QDK Configuration objects and container, plus the engine's
 # reconstruction and result arrays and their NumPy copies, rounded up.
@@ -57,14 +57,16 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
     pyalps's ``classic_dmrg.solve_molecular`` builds the molecular
     Hamiltonian, runs the sweeps and measures, in the final sweep, the 1-/2-RDMs
     by spin block and, on request, the CI vector of the final state,
-    contracted from the engine's stored rotations. The engine keeps no
-    state afterwards. The container depends on ``wavefunction_container``:
+    contracted from the engine's stored rotations. The engine exports the final
+    MPS on request. The container depends on ``wavefunction_container``:
 
     * ``"auto"`` (default): a ``StateVectorContainer`` while the sector's CI
       vector fits in ``ci_memory_limit_gb``, otherwise an ``RdmContainer``.
     * ``"statevector"``: always the CI vector; ``MemoryError`` beyond the
       limit.
     * ``"rdm"``: an ``RdmContainer`` without a CI vector.
+    * ``"mps"``: a QDK ``MPSContainer`` with final-state RDMs, without CI
+      reconstruction. Requires the optional QDK MPS container capability.
 
     ``RdmContainer`` needs a qdk-chemistry build that provides it (released
     2.2.1 does not); the state-vector path works with released builds. The
@@ -101,6 +103,11 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
 
     def name(self) -> str:
         return "alps_classic_dmrg"
+
+    @property
+    def last_state(self):
+        """Native final MPS when wavefunction_container="mps", otherwise None."""
+        return self.last_result.mps[0] if self.last_result is not None and self.last_result.mps else None
 
     def _last(self):
         if self.last_result is None:
@@ -165,7 +172,11 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
         two = two[0] if isinstance(two, (tuple, list)) else two
         n = one.shape[0]
         statevector = self._wants_statevector(n, n_alpha, n_beta)
-        if not statevector:
+        mps_mode = str(self._settings.get("wavefunction_container")) == "mps"
+        if mps_mode:
+            from .mps import require_mps_container
+            require_mps_container()
+        elif not statevector:
             _rdm_container_class()  # fail before the solve, not after it
         truncation = float(self._settings.get("truncation_tol"))
         # Zero selects the classic fixed-state schedule. Positive values opt
@@ -181,6 +192,7 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
             integral_cutoff=float(self._settings.get("integral_cutoff")),
             observables=dict(self.observables),
             ci_vector=statevector,
+            keep_mps=mps_mode,
             sweeps=classic_dmrg.fixed_sweeps(int(self._settings.get("sweeps")), max_states),
             warmup_states=int(self._settings.get("warmup_states")),
             lanczos_tolerance=float(self._settings.get("convergence_tol")),
@@ -189,7 +201,11 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
         )
         self.last_result = result
         self.last_energies = np.asarray([result.energy])
-        if statevector:
+        if mps_mode:
+            from .mps import mps_container
+            container = mps_container(result.mps[0], hamiltonian.get_orbitals(),
+                                      n_alpha, n_beta, **self._rdm_data(result))
+        elif statevector:
             container = self._statevector_container(hamiltonian, result)
         else:
             container = self._rdm_container(hamiltonian, result, n_alpha, n_beta, max_states)
@@ -203,9 +219,9 @@ class AlpsClassicDmrgCalculator(MultiConfigurationCalculator):
         mode = str(self._settings.get("wavefunction_container"))
         if mode not in _MODES:
             raise ValueError(
-                f"wavefunction_container={mode!r}; expected 'auto', 'statevector' or 'rdm'"
+                f"wavefunction_container={mode!r}; expected 'auto', 'statevector', 'rdm' or 'mps'"
             )
-        if mode == "rdm":
+        if mode in ("rdm", "mps"):
             return False
         workspace_gb = self._ci_workspace_gb(n, n_alpha, n_beta)
         limit = float(self._settings.get("ci_memory_limit_gb"))

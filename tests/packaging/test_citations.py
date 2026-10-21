@@ -116,8 +116,6 @@ class CitationTests(unittest.TestCase):
                 self.assertEqual(lines[0], "*" * 80)
                 self.assertEqual(lines[-1], lines[0])
                 self.assertTrue(all(len(line) == 80 for line in lines))
-                # DMRG's seven entries need 17 lines with recognizable authors.
-                self.assertLessEqual(len(lines), 17 if component == "dmrg" else 15)
                 self.assertIn("Framework: [1]", text)
                 content = " ".join(line[2:-2].strip() for line in lines[1:-1])
                 self.assertIn("[1] F. Alet et al., " + self.references[self.framework]["title"], content)

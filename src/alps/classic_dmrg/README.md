@@ -380,6 +380,13 @@ kept states and two sweeps, the reconstruction adds 0.03 s to a 1.4 s run
 at 10 orbitals (63504 determinants) and 0.35 s to a 2.5 s run at 12
 (853776). It is limited to 64 orbitals.
 
+Complementary operators are established quantum-chemistry DMRG machinery;
+the ALPS work here implements that construction in the classic engine.
+For a detailed derivation and its connection to matrix product operators,
+see Chan, Keselman, Nakatani, Li and White,
+[J. Chem. Phys. **145**, 014102 (2016)](https://doi.org/10.1063/1.4955108),
+Sec. II D–E ([open author manuscript](https://arxiv.org/abs/1605.02611)).
+
 The solver is meant for small and medium active spaces and for checking
 other codes. Its engine, `dmtk::MolecularSystem`
 (`src/dmtk/molecular_system.hpp`), keeps for every block the normal and

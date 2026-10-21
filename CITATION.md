@@ -30,7 +30,7 @@ The framework paper applies to every component. A paper serving several roles is
 | `worm` | [prokofev1998](#prokofev1998), [Prokofev1998JETP](#prokofev1998jetp) | [alps30](#alps30) | scheduler |
 | `qwl` | [wang2001prl](#wang2001prl), [wang2001pre](#wang2001pre), [troyer2003qwl](#troyer2003qwl) | [alps30](#alps30) | scheduler |
 | `dmrg` | [white1992](#white1992), [white1993](#white1993), [schollwock2005](#schollwock2005), [hallberg2006](#hallberg2006) | [feiguin2013](#feiguin2013) | scheduler |
-| `classic_dmrg` | [white1992](#white1992), [white1993](#white1993), [schollwock2005](#schollwock2005), [hallberg2006](#hallberg2006) | [feiguin2013](#feiguin2013) | — |
+| `classic_dmrg` | [white1992](#white1992), [white1993](#white1993), [schollwock2005](#schollwock2005), [hallberg2006](#hallberg2006), [whiteMartin1999](#whitemartin1999), [chanHeadGordon2002](#chanheadgordon2002), [chan2016](#chan2016) | [feiguin2013](#feiguin2013) | — |
 | `classic_dmrg_evolution` | [white1992](#white1992), [white1993](#white1993), [white2004](#white2004), [feiguin2005](#feiguin2005) | [feiguin2013](#feiguin2013) | — |
 | `dmft` | [metzner1989](#metzner1989), [georges1992](#georges1992), [georges1996](#georges1996) | [gull2011cpc](#gull2011cpc) | — |
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
@@ -116,6 +116,18 @@ S. R. White, "Density Matrix Formulation for Quantum Renormalization Groups." Ph
 ### white1993
 
 S. R. White, "Density-Matrix Algorithms for Quantum Renormalization Groups." Physical Review B 48, 10345–10356 (1993). https://doi.org/10.1103/PhysRevB.48.10345
+
+### whiteMartin1999
+
+S. R. White, R. L. Martin, "Ab initio quantum chemistry using the density matrix renormalization group." The Journal of Chemical Physics 110, 4127–4130 (1999). https://doi.org/10.1063/1.478295
+
+### chanHeadGordon2002
+
+G. K.-L. Chan, M. Head-Gordon, "Highly correlated calculations with a polynomial cost algorithm: A study of the density matrix renormalization group." The Journal of Chemical Physics 116, 4462–4476 (2002). https://doi.org/10.1063/1.1449459
+
+### chan2016
+
+G. K.-L. Chan et al., "Matrix product operators, matrix product states, and ab initio density matrix renormalization group algorithms." The Journal of Chemical Physics 145, 014102 (2016). https://doi.org/10.1063/1.4955108
 
 ### white2004
 

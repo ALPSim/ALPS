@@ -1,0 +1,2673 @@
+{
+  "date": "2026-10-21",
+  "implementation_branch": "claude/classic-dmrg-product-state",
+  "base_commit": "aee5fc28af4dba5702336a38f216152696d9cf01",
+  "source_snapshot": {
+    "source_repository": "skilledwolf/alpsx (private)",
+    "base_commit": "1adba871e",
+    "includes_local_edits": true,
+    "sha256": {
+      "examples/molecule.py": "fcfcf356d4bf3ae8c24abb7a791b36c2ce8c019bc582280e12a5580faf5edc5b",
+      "examples/hubbard_reference.py": "2fb41daf147809f23ed802194868acead995044e240a7ee7471cc4abfc05318f",
+      "examples/spin_one_anisotropy.py": "e073a448df4bb98694489930a9364f5dc74da64b98b66eba02bffe6445906cec",
+      "examples/spin_one_quench.py": "4d00f034c76644883a29a0dac559b00fc8df0f7f60f48be9f864788fed01c0dc",
+      "examples/large_active_space.py": "1fe88978ad459480ed34dab9a7ac9738bdb8a387b8c80a2c0f85538b8de9b5d0",
+      "examples/rdm_observables.py": "483100f45061e1af3d36233dd5461b5d87553790fbceb23e24fe6440ada1c4cc",
+      "examples/interop.py": "6e87111e5a2cc939436f2e2d9d61cc8e840e82dff8b180b9890e5d538161e469",
+      "examples/hardware_export.py": "0410474084abc9cff25961fbe43e2124f170056bf446e346c5658fe0989834fc",
+      "examples/converging_dmrg.py": "72319cd57176802de1ff4b5c63c400be5b8bbf1cf1c47b4aa799db0905b28567",
+      "examples/custom_spin_export.py": "4221ed3609eed3aaf261390a93c95b3825e4034b02ccc85555ac3cd54f5813b0",
+      "examples/fermion_pairing.py": "06becfd2b740ce60ae0024a2d0cd7ff1267b0a85b4493efe448afa3cfe036355",
+      "examples/spin_quench.py": "582d9c90ebbfc705e721eb26800f43ef5eef93157e6d9d79050d1a706afd891b",
+      "examples/observables.py": "0aabef328cd77b312b0948f266ec8211c75aba8a9340873cd605e7c955ff7429",
+      "examples/quickstart.py": "c557f150d0ad9e8f753c6326122883bb8c401ebca22f0f8b64a7a0cb5465885e",
+      "examples/demo_support/__init__.py": "c6ef62796dade877a42425bb64f231e45d64d31c52c9ed2ebb1f58e2d3dc5cdb",
+      "examples/demo_support/spin_one.py": "68749a20564fffa0525291c860ab3011d6185c220982fdddb3e8b2246a54da8d",
+      "examples/nitrogen/run.py": "6ad6294b1c7b2f186df96abe15f7cff40d0f900aeed81235ed83e338b489c197",
+      "examples/nitrogen/capacity.py": "7f0d7e0fd25f254b4ef0864581d0dc287b0f06ea2315c65fd8c07e2c01909641",
+      "examples/scaling/run.py": "2e18f89ce3f7c39b0dd62fb4380fbf297dce7fb3fe77817259512cb5345d6e51",
+      "examples/scaling/guard.py": "bab8396d12e81b48abf6b276a9457775d712e0a1818555a61a1f8627270e9372"
+    }
+  },
+  "runtime": {
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+    "classic_binding": "/Users/wolft/.cache/uv/archive-v0/4ERrxggPAgN2SIpe/pyalps/_ext/classic_dmrg_c.abi3.so",
+    "classic_binding_sha256": "2b9628994befd53becf8c3935ca21fb7ef335f4a200c0cd2fb45b2f5f12ad7c5",
+    "versions": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "qdk-chemistry": "2.1.0+local",
+      "qdk": "1.32.3",
+      "pyscf": "2.14.0",
+      "psutil": "7.2.2",
+      "matplotlib": "3.11.2"
+    }
+  },
+  "qdk_mps_container_commit": "079029fad1b706a0d59aa3f1ae603aa26e2ba913",
+  "qdk_state_preparation_commit": "fb286eb2d9dde51d960f6953cb726cb45d52c12b",
+  "tests": {
+    "mps_build": {
+      "passed": 95,
+      "skipped": 6
+    },
+    "rdm_build": {
+      "passed": 94,
+      "skipped": 7
+    }
+  },
+  "top_level_examples_passed": [
+    "converging_dmrg",
+    "custom_spin_export",
+    "fermion_pairing",
+    "hardware_export",
+    "hubbard_reference",
+    "interop",
+    "large_active_space",
+    "molecule",
+    "observables",
+    "quickstart",
+    "rdm_observables",
+    "spin_one_anisotropy",
+    "spin_one_quench",
+    "spin_quench"
+  ],
+  "measurement_note": "Single local runs, no repeated timing benchmark or peak-scratch measurement. RSS is cumulative process peak, including imports and any preceding reference solves. Larger cases are capacity checks, not converged singlet energies. Dense CI memory estimates are analytical lower bounds. CPU activity elsewhere was not controlled.",
+  "nitrogen": [
+    {
+      "preparation": {
+        "distance_angstrom": 1.1,
+        "molecule": "N2",
+        "basis": "cc-pVDZ",
+        "electrons": 14,
+        "basis_orbitals": 28,
+        "active_electrons": 6,
+        "active_orbitals": 6,
+        "inactive_electrons": 8,
+        "qubits": 12,
+        "orbital_selection": "AVAS N 2p, ncore=4, threshold=0.2; singlet CASSCF(6,6)",
+        "casscf_newton_fallback": true,
+        "active_orbital_permutation": [
+          0,
+          5,
+          1,
+          3,
+          2,
+          4
+        ],
+        "rhf_energy": -108.95379624089067,
+        "casscf_energy": -109.09022707209407,
+        "fci_energy": -109.09022707209407,
+        "core_energy": -95.51828550515101,
+        "rhf_ground_state_probability": 0.933219643838022,
+        "active_reference_determinant_probability": 0.9348897309270436,
+        "natural_occupations": [
+          1.9821093039658395,
+          1.9413500142741913,
+          1.941350014274189,
+          0.058562758300462696,
+          0.05856275830046247,
+          0.0180651508848575
+        ],
+        "spin_squared": 6.116753503373861e-30,
+        "integrals_sha256": "fae1a0564fedd32411459ba14e3ad49db88647650b77ff1422a2f0cf9f62e937",
+        "total_seconds": 8.634128165998845,
+        "process_peak_rss_bytes": 193380352,
+        "script_sha256": "5cc544be06814ed1454ba54ac3e5eddee2aac52ad449206593cc1f0bf0b981ba",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "versions": {
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0",
+          "qdk": "1.32.3"
+        }
+      },
+      "casci_energy": -109.09022707209407,
+      "dmrg": [
+        {
+          "bond_requested": 8,
+          "bond_actual": 16,
+          "energy": -109.08829662197742,
+          "error_vs_exact_mEh": 1.9304501166459431,
+          "seconds": 0.18709195801056921,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 0.0015005684750097892,
+          "fidelity_vs_exact": 0.9990937222263356,
+          "spin_squared": 1.8776466821205886e-31,
+          "natural_occupations": [
+            1.9830155341783244,
+            1.9428505827491986,
+            1.9416044444385054,
+            0.058308612695272634,
+            0.05719698315489812,
+            0.01702384278379907
+          ],
+          "last_iteration_delta_Eh": 0.0028939514696872948,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.382070756875466e-15,
+          "hdf5_bytes": 75458,
+          "mps_tensor_bytes": 9472,
+          "serialization_hash": "59a185e460a2c3ed",
+          "process_peak_rss_bytes": 197509120
+        },
+        {
+          "bond_requested": 16,
+          "bond_actual": 16,
+          "energy": -109.09013064297315,
+          "error_vs_exact_mEh": 0.09642912091578637,
+          "seconds": 0.25866208400111645,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 0.00016143935299495205,
+          "fidelity_vs_exact": 0.9999721490298815,
+          "spin_squared": 1.4472805543852029e-05,
+          "natural_occupations": [
+            1.9821918629517974,
+            1.9415114536271854,
+            1.941423224902728,
+            0.05848899538404884,
+            0.05840062701318636,
+            0.017983836121077255
+          ],
+          "last_iteration_delta_Eh": 3.274778084261243e-07,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.4545008488651174e-15,
+          "hdf5_bytes": 86308,
+          "mps_tensor_bytes": 20736,
+          "serialization_hash": "31d7235543aadfc0",
+          "process_peak_rss_bytes": 202604544
+        },
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -109.09022707209407,
+          "error_vs_exact_mEh": 0.0,
+          "seconds": 0.2365027089836076,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 5.28798085275938e-14,
+          "fidelity_vs_exact": 1.0,
+          "spin_squared": 1.026004603534171e-29,
+          "natural_occupations": [
+            1.9821093039658408,
+            1.9413500142741917,
+            1.9413500142741877,
+            0.05856275830046293,
+            0.05856275830046288,
+            0.01806515088485779
+          ],
+          "last_iteration_delta_Eh": 8.881784197001252e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 2.0329000391261085e-15,
+          "hdf5_bytes": 102692,
+          "mps_tensor_bytes": 37120,
+          "serialization_hash": "e666f0ad6dac4a2d",
+          "process_peak_rss_bytes": 211304448
+        },
+        {
+          "bond_requested": 64,
+          "bond_actual": 64,
+          "energy": -109.09022707209407,
+          "error_vs_exact_mEh": 0.0,
+          "seconds": 0.26558212499367073,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 5.2639114058449916e-14,
+          "fidelity_vs_exact": 1.0,
+          "spin_squared": 5.46040560902878e-29,
+          "natural_occupations": [
+            1.98210930396584,
+            1.9413500142741906,
+            1.9413500142741895,
+            0.05856275830046251,
+            0.05856275830046251,
+            0.018065150884857457
+          ],
+          "last_iteration_delta_Eh": 7.105427357601002e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 3.7598262723085865e-15,
+          "hdf5_bytes": 135460,
+          "mps_tensor_bytes": 69888,
+          "serialization_hash": "a5dbe31470fd3a60",
+          "process_peak_rss_bytes": 231161856
+        }
+      ]
+    },
+    {
+      "preparation": {
+        "distance_angstrom": 1.5,
+        "molecule": "N2",
+        "basis": "cc-pVDZ",
+        "electrons": 14,
+        "basis_orbitals": 28,
+        "active_electrons": 6,
+        "active_orbitals": 6,
+        "inactive_electrons": 8,
+        "qubits": 12,
+        "orbital_selection": "AVAS N 2p, ncore=4, threshold=0.2; singlet CASSCF(6,6)",
+        "casscf_newton_fallback": false,
+        "active_orbital_permutation": [
+          0,
+          5,
+          1,
+          3,
+          2,
+          4
+        ],
+        "rhf_energy": -108.67751384146652,
+        "casscf_energy": -108.92870048274341,
+        "fci_energy": -108.9287004827444,
+        "core_energy": -97.97098170513169,
+        "rhf_ground_state_probability": 0.7877231476966831,
+        "active_reference_determinant_probability": 0.7923031080972037,
+        "natural_occupations": [
+          1.9316731259660358,
+          1.8024420285644673,
+          1.8024420285644638,
+          0.19743043982323094,
+          0.19743043982322808,
+          0.06858193725857475
+        ],
+        "spin_squared": 1.2270484861679957e-29,
+        "integrals_sha256": "c5765f09d242feeb1d18e72df1ffdfc7ff46047c3f22564e99ca7f3abd89555a",
+        "total_seconds": 1.2678089160035597,
+        "process_peak_rss_bytes": 163921920,
+        "script_sha256": "5cc544be06814ed1454ba54ac3e5eddee2aac52ad449206593cc1f0bf0b981ba",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "versions": {
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0",
+          "qdk": "1.32.3"
+        }
+      },
+      "casci_energy": -108.92870048274439,
+      "dmrg": [
+        {
+          "bond_requested": 8,
+          "bond_actual": 16,
+          "energy": -108.92334424519105,
+          "error_vs_exact_mEh": 5.356237553343135,
+          "seconds": 0.19423933298094198,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 0.010974935384230111,
+          "fidelity_vs_exact": 0.9934639230756365,
+          "spin_squared": 5.807105948229903e-26,
+          "natural_occupations": [
+            1.940865171250651,
+            1.8134169639486943,
+            1.8098539589019638,
+            0.18985902305322014,
+            0.18665357995376547,
+            0.05935130289169163
+          ],
+          "last_iteration_delta_Eh": 0.017578096488561457,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.0231645340128248e-15,
+          "hdf5_bytes": 75458,
+          "mps_tensor_bytes": 9472,
+          "serialization_hash": "94ee3c9ac3cd6598",
+          "process_peak_rss_bytes": 195067904
+        },
+        {
+          "bond_requested": 16,
+          "bond_actual": 16,
+          "energy": -108.9280847376521,
+          "error_vs_exact_mEh": 0.6157450922898988,
+          "seconds": 0.3051026670145802,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 0.0014308883465870004,
+          "fidelity_vs_exact": 0.9994419335719115,
+          "spin_squared": 0.0010587687804845254,
+          "natural_occupations": [
+            1.9329968763382732,
+            1.8038729169110561,
+            1.8023560034323791,
+            0.19745978370166647,
+            0.19588522443917025,
+            0.06742919517747038
+          ],
+          "last_iteration_delta_Eh": 1.5511589408490067e-05,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.6822131193570945e-15,
+          "hdf5_bytes": 86308,
+          "mps_tensor_bytes": 20736,
+          "serialization_hash": "5c7dfed720583d5c",
+          "process_peak_rss_bytes": 202162176
+        },
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -108.9287004827444,
+          "error_vs_exact_mEh": -1.4210854715202004e-11,
+          "seconds": 0.2605841250042431,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 3.775874128961427e-13,
+          "fidelity_vs_exact": 1.0000000000000027,
+          "spin_squared": 7.935768941910796e-24,
+          "natural_occupations": [
+            1.9316731259660354,
+            1.8024420285644653,
+            1.8024420285644636,
+            0.1974304398232319,
+            0.1974304398232306,
+            0.06858193725857453
+          ],
+          "last_iteration_delta_Eh": 3.552713678800501e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 2.1414336236867465e-15,
+          "hdf5_bytes": 102692,
+          "mps_tensor_bytes": 37120,
+          "serialization_hash": "38f324a524bf71d9",
+          "process_peak_rss_bytes": 209944576
+        },
+        {
+          "bond_requested": 64,
+          "bond_actual": 64,
+          "energy": -108.9287004827444,
+          "error_vs_exact_mEh": -1.4210854715202004e-11,
+          "seconds": 0.3164094999956433,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 3.672610487424625e-13,
+          "fidelity_vs_exact": 0.9999999999999998,
+          "spin_squared": 7.336119740987146e-28,
+          "natural_occupations": [
+            1.9316731259660362,
+            1.8024420285644676,
+            1.8024420285644658,
+            0.19743043982323003,
+            0.1974304398232292,
+            0.06858193725857453
+          ],
+          "last_iteration_delta_Eh": 1.7763568394002505e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 4.715943166131609e-15,
+          "hdf5_bytes": 135460,
+          "mps_tensor_bytes": 69888,
+          "serialization_hash": "1fd84e906d0e70b3",
+          "process_peak_rss_bytes": 226590720
+        }
+      ]
+    },
+    {
+      "preparation": {
+        "distance_angstrom": 2.0,
+        "molecule": "N2",
+        "basis": "cc-pVDZ",
+        "electrons": 14,
+        "basis_orbitals": 28,
+        "active_electrons": 6,
+        "active_orbitals": 6,
+        "inactive_electrons": 8,
+        "qubits": 12,
+        "orbital_selection": "AVAS N 2p, ncore=4, threshold=0.2; singlet CASSCF(6,6)",
+        "casscf_newton_fallback": false,
+        "active_orbital_permutation": [
+          0,
+          5,
+          1,
+          4,
+          2,
+          3
+        ],
+        "rhf_energy": -108.33058275365984,
+        "casscf_energy": -108.78966140961106,
+        "fci_energy": -108.78966140961255,
+        "core_energy": -99.31791237171328,
+        "rhf_ground_state_probability": 0.30603286430396637,
+        "active_reference_determinant_probability": 0.31252610341786796,
+        "natural_occupations": [
+          1.641659667429245,
+          1.2897679927359733,
+          1.2897679927359638,
+          0.7102307164619902,
+          0.7102307164619821,
+          0.3583429141748484
+        ],
+        "spin_squared": 1.0103336043618109e-27,
+        "integrals_sha256": "2f3a23dd5a17345fc307420b3101a68b0201d8bea10e781375b5106407bab771",
+        "total_seconds": 1.0587561660067877,
+        "process_peak_rss_bytes": 164429824,
+        "script_sha256": "5cc544be06814ed1454ba54ac3e5eddee2aac52ad449206593cc1f0bf0b981ba",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "versions": {
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0",
+          "qdk": "1.32.3"
+        }
+      },
+      "casci_energy": -108.78966140961258,
+      "dmrg": [
+        {
+          "bond_requested": 8,
+          "bond_actual": 16,
+          "energy": -108.77899708113004,
+          "error_vs_exact_mEh": 10.664328482533847,
+          "seconds": 0.2877018750004936,
+          "rdm_energy_error": 1.7053025658242404e-13,
+          "one_rdm_max_error": 0.09646606689176318,
+          "fidelity_vs_exact": 0.5484402837740536,
+          "spin_squared": 1.035587526724684,
+          "natural_occupations": [
+            1.6335345823943292,
+            1.2570667759760399,
+            1.1933019258442097,
+            0.8066991153639128,
+            0.7429200472945469,
+            0.36647755312710323
+          ],
+          "last_iteration_delta_Eh": 0.008660520665793925,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 9.779576677635216e-16,
+          "hdf5_bytes": 75458,
+          "mps_tensor_bytes": 9472,
+          "serialization_hash": "5ba4322ecc7efa19",
+          "process_peak_rss_bytes": 195919872
+        },
+        {
+          "bond_requested": 16,
+          "bond_actual": 16,
+          "energy": -108.78951725027643,
+          "error_vs_exact_mEh": 0.14415933614486676,
+          "seconds": 0.3828924580011517,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 0.0038823124928937247,
+          "fidelity_vs_exact": 0.9996037879133458,
+          "spin_squared": 2.0648804866120625e-28,
+          "natural_occupations": [
+            1.6413878988430688,
+            1.289239701029068,
+            1.2858856802430785,
+            0.7141219419292648,
+            0.7107577125352402,
+            0.3586070654202835
+          ],
+          "last_iteration_delta_Eh": 2.467550324070089e-07,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.5816639394957576e-15,
+          "hdf5_bytes": 86308,
+          "mps_tensor_bytes": 20736,
+          "serialization_hash": "cce64042b593e0b0",
+          "process_peak_rss_bytes": 203423744
+        },
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -108.78966140961255,
+          "error_vs_exact_mEh": 2.8421709430404007e-11,
+          "seconds": 0.33458666599472053,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 3.177873325851577e-10,
+          "fidelity_vs_exact": 1.0000000000000013,
+          "spin_squared": 1.846475297117571e-17,
+          "natural_occupations": [
+            1.6416596674292467,
+            1.2897679927380428,
+            1.2897679927339005,
+            0.7102307164634309,
+            0.710230716460538,
+            0.3583429141748474
+          ],
+          "last_iteration_delta_Eh": 1.0658141036401503e-14,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 2.317487785027156e-15,
+          "hdf5_bytes": 102692,
+          "mps_tensor_bytes": 37120,
+          "serialization_hash": "51407cff93de9d70",
+          "process_peak_rss_bytes": 211288064
+        },
+        {
+          "bond_requested": 64,
+          "bond_actual": 64,
+          "energy": -108.78966140961255,
+          "error_vs_exact_mEh": 2.8421709430404007e-11,
+          "seconds": 0.3611962089780718,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 2.2659040834482135e-12,
+          "fidelity_vs_exact": 1.0000000000000018,
+          "spin_squared": 1.3173135116692652e-20,
+          "natural_occupations": [
+            1.641659667429216,
+            1.2897679927359145,
+            1.2897679927358785,
+            0.7102307164620765,
+            0.7102307164620408,
+            0.3583429141748781
+          ],
+          "last_iteration_delta_Eh": 1.7763568394002505e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 4.13729079858927e-15,
+          "hdf5_bytes": 135460,
+          "mps_tensor_bytes": 69888,
+          "serialization_hash": "f34507796b72f30b",
+          "process_peak_rss_bytes": 228573184
+        }
+      ]
+    },
+    {
+      "preparation": {
+        "distance_angstrom": 2.5,
+        "molecule": "N2",
+        "basis": "cc-pVDZ",
+        "electrons": 14,
+        "basis_orbitals": 28,
+        "active_electrons": 6,
+        "active_orbitals": 6,
+        "inactive_electrons": 8,
+        "qubits": 12,
+        "orbital_selection": "AVAS N 2p, ncore=4, threshold=0.2; singlet CASSCF(6,6)",
+        "casscf_newton_fallback": false,
+        "active_orbital_permutation": [
+          0,
+          5,
+          1,
+          3,
+          2,
+          4
+        ],
+        "rhf_energy": -108.11975338758734,
+        "casscf_energy": -108.77756606440244,
+        "fci_energy": -108.77756606442757,
+        "core_energy": -99.89459673281958,
+        "rhf_ground_state_probability": 0.11415597564798376,
+        "active_reference_determinant_probability": 0.11830902121120052,
+        "natural_occupations": [
+          1.2762733162831779,
+          1.0714549374234685,
+          1.0714549374234612,
+          0.92854126661763,
+          0.9285412666176237,
+          0.723734275634642
+        ],
+        "spin_squared": 1.0302523422186414e-27,
+        "integrals_sha256": "5479011990ddf1e5ef86e06e29c0292c0c89fe8061e9191339f48839a04c4b45",
+        "total_seconds": 0.9516245839913609,
+        "process_peak_rss_bytes": 165380096,
+        "script_sha256": "5cc544be06814ed1454ba54ac3e5eddee2aac52ad449206593cc1f0bf0b981ba",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "versions": {
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0",
+          "qdk": "1.32.3"
+        }
+      },
+      "casci_energy": -108.77756606442759,
+      "dmrg": [
+        {
+          "bond_requested": 8,
+          "bond_actual": 16,
+          "energy": -108.77522236592036,
+          "error_vs_exact_mEh": 2.3436985072322614,
+          "seconds": 0.3043388749938458,
+          "rdm_energy_error": 8.526512829121202e-14,
+          "one_rdm_max_error": 0.037456828329363256,
+          "fidelity_vs_exact": 0.2999357220438294,
+          "spin_squared": 2.2013449718304696,
+          "natural_occupations": [
+            1.2388164879538026,
+            1.055752606593092,
+            1.0519445006646229,
+            0.9480555025143586,
+            0.9442448793749798,
+            0.7611860228991126
+          ],
+          "last_iteration_delta_Eh": 0.004175544485425675,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.4992623320748562e-15,
+          "hdf5_bytes": 75458,
+          "mps_tensor_bytes": 9472,
+          "serialization_hash": "7327f0f93cc8ef06",
+          "process_peak_rss_bytes": 195493888
+        },
+        {
+          "bond_requested": 16,
+          "bond_actual": 16,
+          "energy": -108.77756159049422,
+          "error_vs_exact_mEh": 0.004473933373105865,
+          "seconds": 0.3754687080217991,
+          "rdm_energy_error": 1.4210854715202004e-14,
+          "one_rdm_max_error": 0.00039289660208474686,
+          "fidelity_vs_exact": 0.9999834555050637,
+          "spin_squared": 7.245007226122258e-19,
+          "natural_occupations": [
+            1.2761963102971536,
+            1.0714472605147973,
+            1.0710620408213831,
+            0.9289379495866261,
+            0.9285489516766234,
+            0.7238074871034247
+          ],
+          "last_iteration_delta_Eh": 3.1322322513460676e-10,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 1.4689397456232477e-15,
+          "hdf5_bytes": 86308,
+          "mps_tensor_bytes": 20736,
+          "serialization_hash": "56b0ce397722d461",
+          "process_peak_rss_bytes": 205864960
+        },
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -108.77756606442757,
+          "error_vs_exact_mEh": 1.4210854715202004e-11,
+          "seconds": 0.344257333985297,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 3.3334724164410274e-10,
+          "fidelity_vs_exact": 1.0000000000000018,
+          "spin_squared": 4.583404185960465e-18,
+          "natural_occupations": [
+            1.276273316283182,
+            1.0714549374234683,
+            1.0714549374234636,
+            0.9285412666176283,
+            0.9285412666176232,
+            0.7237342756346382
+          ],
+          "last_iteration_delta_Eh": 3.552713678800501e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 2.3132069359912094e-15,
+          "hdf5_bytes": 102692,
+          "mps_tensor_bytes": 37120,
+          "serialization_hash": "3d58c00028dcddbf",
+          "process_peak_rss_bytes": 214614016
+        },
+        {
+          "bond_requested": 64,
+          "bond_actual": 64,
+          "energy": -108.77756606442757,
+          "error_vs_exact_mEh": 1.4210854715202004e-11,
+          "seconds": 0.374001958000008,
+          "rdm_energy_error": 0.0,
+          "one_rdm_max_error": 1.0967209108733848e-12,
+          "fidelity_vs_exact": 1.0000000000000018,
+          "spin_squared": 1.4660740908627696e-22,
+          "natural_occupations": [
+            1.2762733162832551,
+            1.0714549374235893,
+            1.0714549374235145,
+            0.9285412666175762,
+            0.9285412666175021,
+            0.7237342756345639
+          ],
+          "last_iteration_delta_Eh": 3.552713678800501e-15,
+          "convergence_note": "adjacent iterations can have different center positions; not a sweep convergence test",
+          "right_isometry_error": 4.0201744357880776e-15,
+          "hdf5_bytes": 135460,
+          "mps_tensor_bytes": 69888,
+          "serialization_hash": "f58fa15689b4ec87",
+          "process_peak_rss_bytes": 235536384
+        }
+      ]
+    }
+  ],
+  "scaling": {
+    "hydrogen8": {
+      "problem": {
+        "name": "H8 / STO-3G",
+        "spacing_angstrom": 1.8,
+        "basis": "STO-3G",
+        "orbital_order": "symmetric Lowdin AOs, chain order",
+        "rhf_energy": -3.3463924224467965,
+        "nuclear_energy": 4.0402260071828575,
+        "rhf_newton_fallback": false,
+        "integral_symmetry_roundoff_removed": 3.885780586188048e-16,
+        "energy_unit": "Eh",
+        "geometry_angstrom": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.8
+          ],
+          [
+            0.0,
+            0.0,
+            3.6
+          ],
+          [
+            0.0,
+            0.0,
+            5.4
+          ],
+          [
+            0.0,
+            0.0,
+            7.2
+          ],
+          [
+            0.0,
+            0.0,
+            9.0
+          ],
+          [
+            0.0,
+            0.0,
+            10.8
+          ],
+          [
+            0.0,
+            0.0,
+            12.6
+          ]
+        ],
+        "orbitals": 8,
+        "electrons": 8,
+        "n_alpha": 4,
+        "n_beta": 4,
+        "determinants": 4900,
+        "ci_float64_vector_bytes": 39200
+      },
+      "controls": {
+        "sweeps": 12,
+        "eigensolver_tol": 1e-10,
+        "truncation_tol": 0.0,
+        "integral_cutoff": 1e-12
+      },
+      "screening_energy_bound": 3.3231163891301576e-11,
+      "preparation_seconds": 0.04648504199576564,
+      "provenance": {
+        "generated_utc": "2026-10-21T16:09:36.858995+00:00",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "executable": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/bin/python",
+        "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+        "versions": {
+          "pyalps": "3.0.0",
+          "qdk-chemistry": "2.1.0+local",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0"
+        },
+        "alps_module": "/Users/wolft/.cache/uv/archive-v0/4ERrxggPAgN2SIpe/pyalps/__init__.py",
+        "qdk_module": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/mps-pr540/qdk_chemistry/__init__.py",
+        "adapter_module": "/private/tmp/qdk-classic-examples-20261021/package/src/qdk_chemistry_alps/classic_dmrg_calculator.py",
+        "alps_repository_revision": "",
+        "script_sha256": "273fa58a886caff5fe88c7e65e59cac10b977a47d2905ae2823fbf1ed1848935",
+        "adapter_sha256": "fe466355db51712e0df005f705c136170d2b961626422ddc42966d6c5cfdb696",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        },
+        "memory_note": "process cumulative peak RSS, not per-solver memory; includes imports and integrals"
+      },
+      "dmrg": [
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -3.850875662703907,
+          "seconds_including_rdms": 1.7879537909757346,
+          "energy_full_integrals_from_rdms": -3.850875662704068,
+          "process_peak_rss_bytes": 274169856,
+          "dense_mps_export_bytes": 102656,
+          "dense_mps_parameters": 12832,
+          "returned_container": "mps",
+          "rdm_energy_error": 2.6645352591003757e-15,
+          "rdm_trace_error": 3.019806626980426e-14,
+          "natural_occupations": [
+            1.6739341164564001,
+            1.6162699737482829,
+            1.5056968115622829,
+            1.324766383714407,
+            0.6819007272919745,
+            0.4968276661552796,
+            0.3808956887766912,
+            0.3197086322947128
+          ],
+          "double_occupancies": [
+            0.039296512602087066,
+            0.057576847848799774,
+            0.055554221166587404,
+            0.05680322992774413,
+            0.05680317665188384,
+            0.05555416004607425,
+            0.0575766583717285,
+            0.03929612762893544
+          ],
+          "last_iteration_energy_change": 1.3792256225997335e-10,
+          "maximum_iteration_discarded_weight": 4.59160529046182e-06,
+          "endpoint_discarded_weight": -1.5103169196783572e-16,
+          "convergence_note": "adjacent iteration energies are not a completed-sweep convergence criterion",
+          "error_vs_casci": 6.70171973915501e-07,
+          "one_rdm_max_error_vs_fci": 0.0001711445065691584
+        }
+      ],
+      "casci": {
+        "status": "measured",
+        "energy": -3.850876332875881,
+        "seconds_including_rdms": 0.2369543750246521
+      },
+      "pyscf_fci": {
+        "energy": -3.8508763328726534
+      }
+    },
+    "hydrogen20": {
+      "problem": {
+        "name": "H20 / STO-3G",
+        "spacing_angstrom": 1.8,
+        "basis": "STO-3G",
+        "orbital_order": "symmetric Lowdin AOs, chain order",
+        "rhf_energy": -8.38711291040231,
+        "nuclear_energy": 15.274051405150823,
+        "rhf_newton_fallback": false,
+        "integral_symmetry_roundoff_removed": 1.6653345369377348e-16,
+        "energy_unit": "Eh",
+        "geometry_angstrom": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.8
+          ],
+          [
+            0.0,
+            0.0,
+            3.6
+          ],
+          [
+            0.0,
+            0.0,
+            5.4
+          ],
+          [
+            0.0,
+            0.0,
+            7.2
+          ],
+          [
+            0.0,
+            0.0,
+            9.0
+          ],
+          [
+            0.0,
+            0.0,
+            10.8
+          ],
+          [
+            0.0,
+            0.0,
+            12.6
+          ],
+          [
+            0.0,
+            0.0,
+            14.4
+          ],
+          [
+            0.0,
+            0.0,
+            16.2
+          ],
+          [
+            0.0,
+            0.0,
+            18.0
+          ],
+          [
+            0.0,
+            0.0,
+            19.8
+          ],
+          [
+            0.0,
+            0.0,
+            21.6
+          ],
+          [
+            0.0,
+            0.0,
+            23.400000000000002
+          ],
+          [
+            0.0,
+            0.0,
+            25.2
+          ],
+          [
+            0.0,
+            0.0,
+            27.0
+          ],
+          [
+            0.0,
+            0.0,
+            28.8
+          ],
+          [
+            0.0,
+            0.0,
+            30.6
+          ],
+          [
+            0.0,
+            0.0,
+            32.4
+          ],
+          [
+            0.0,
+            0.0,
+            34.2
+          ]
+        ],
+        "orbitals": 20,
+        "electrons": 20,
+        "n_alpha": 10,
+        "n_beta": 10,
+        "determinants": 34134779536,
+        "ci_float64_vector_bytes": 273078236288
+      },
+      "controls": {
+        "sweeps": 4,
+        "eigensolver_tol": 1e-10,
+        "truncation_tol": 0.0,
+        "integral_cutoff": 1e-12
+      },
+      "screening_energy_bound": 9.082451707882601e-09,
+      "preparation_seconds": 0.05060383302043192,
+      "provenance": {
+        "generated_utc": "2026-10-21T16:09:41.652152+00:00",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "executable": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/bin/python",
+        "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+        "versions": {
+          "pyalps": "3.0.0",
+          "qdk-chemistry": "2.1.0+local",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0"
+        },
+        "alps_module": "/Users/wolft/.cache/uv/archive-v0/4ERrxggPAgN2SIpe/pyalps/__init__.py",
+        "qdk_module": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/mps-pr540/qdk_chemistry/__init__.py",
+        "adapter_module": "/private/tmp/qdk-classic-examples-20261021/package/src/qdk_chemistry_alps/classic_dmrg_calculator.py",
+        "alps_repository_revision": "",
+        "script_sha256": "273fa58a886caff5fe88c7e65e59cac10b977a47d2905ae2823fbf1ed1848935",
+        "adapter_sha256": "fe466355db51712e0df005f705c136170d2b961626422ddc42966d6c5cfdb696",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        },
+        "memory_note": "process cumulative peak RSS, not per-solver memory; includes imports and integrals"
+      },
+      "dmrg": [
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -9.63154487108355,
+          "seconds_including_rdms": 18.680775874992833,
+          "energy_full_integrals_from_rdms": -9.631544871084705,
+          "process_peak_rss_bytes": 445169664,
+          "dense_mps_export_bytes": 495872,
+          "dense_mps_parameters": 61984,
+          "returned_container": "mps",
+          "rdm_energy_error": 3.197442310920451e-14,
+          "rdm_trace_error": 4.618527782440651e-14,
+          "natural_occupations": [
+            1.6879665105863488,
+            1.6774049687783399,
+            1.6594323912717905,
+            1.6328309986057177,
+            1.5958639986538743,
+            1.546413491300523,
+            1.4819891495198028,
+            1.400382396748074,
+            1.301051970644372,
+            1.1880476575158878,
+            0.8201341259560291,
+            0.7060572220723186,
+            0.604974772619909,
+            0.5211089587003932,
+            0.45421827960461536,
+            0.4024016794600332,
+            0.3634089517052381,
+            0.3352228246820057,
+            0.3161311431101087,
+            0.304958508464659
+          ],
+          "double_occupancies": [
+            0.038931311908213986,
+            0.05772972209163146,
+            0.055051783123244734,
+            0.05718099128551712,
+            0.0559054776871021,
+            0.05674276504534757,
+            0.05616090719780161,
+            0.05653781402190112,
+            0.056298766524513016,
+            0.05641111530061682,
+            0.056409359732921036,
+            0.05629961990088714,
+            0.056533419621287,
+            0.056157759543322916,
+            0.05674079043907096,
+            0.055904322570214764,
+            0.05717942689044443,
+            0.05505126280405391,
+            0.057729235174829814,
+            0.03893232595263325
+          ],
+          "last_iteration_energy_change": 1.312692177179997e-10,
+          "maximum_iteration_discarded_weight": 1.6072998702624727e-05,
+          "endpoint_discarded_weight": -2.581110560608826e-16,
+          "convergence_note": "adjacent iteration energies are not a completed-sweep convergence criterion"
+        }
+      ],
+      "casci": {
+        "status": "not_run",
+        "reason": "determinant count exceeds the 50,000 reference guard; vector memory is an analytical lower bound, not a measured failure"
+      }
+    },
+    "hubbard32": {
+      "problem": {
+        "name": "Hubbard 32",
+        "boundary": "open",
+        "t": 1.0,
+        "U": 8.0,
+        "energy_unit": "t",
+        "orbitals": 32,
+        "electrons": 32,
+        "n_alpha": 16,
+        "n_beta": 16,
+        "determinants": 361297635242552100,
+        "ci_float64_vector_bytes": 2890381081940416800
+      },
+      "controls": {
+        "sweeps": 4,
+        "eigensolver_tol": 1e-10,
+        "truncation_tol": 0.0,
+        "integral_cutoff": 1e-12
+      },
+      "screening_energy_bound": 0.0,
+      "preparation_seconds": 0.004857708001509309,
+      "provenance": {
+        "generated_utc": "2026-10-21T16:10:02.809068+00:00",
+        "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+        "executable": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/bin/python",
+        "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+        "versions": {
+          "pyalps": "3.0.0",
+          "qdk-chemistry": "2.1.0+local",
+          "numpy": "2.5.3",
+          "scipy": "1.18.1",
+          "pyscf": "2.14.0"
+        },
+        "alps_module": "/Users/wolft/.cache/uv/archive-v0/4ERrxggPAgN2SIpe/pyalps/__init__.py",
+        "qdk_module": "/Users/wolft/Dev/alps_ecosystem/qdk-chemistry-alps/.venv/mps-pr540/qdk_chemistry/__init__.py",
+        "adapter_module": "/private/tmp/qdk-classic-examples-20261021/package/src/qdk_chemistry_alps/classic_dmrg_calculator.py",
+        "alps_repository_revision": "",
+        "script_sha256": "273fa58a886caff5fe88c7e65e59cac10b977a47d2905ae2823fbf1ed1848935",
+        "adapter_sha256": "fe466355db51712e0df005f705c136170d2b961626422ddc42966d6c5cfdb696",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1"
+        },
+        "memory_note": "process cumulative peak RSS, not per-solver memory; includes imports and integrals"
+      },
+      "dmrg": [
+        {
+          "bond_requested": 32,
+          "bond_actual": 32,
+          "energy": -10.27437093822784,
+          "seconds_including_rdms": 22.852150583988987,
+          "energy_full_integrals_from_rdms": -10.274370938227841,
+          "process_peak_rss_bytes": 1023574016,
+          "dense_mps_export_bytes": 889088,
+          "dense_mps_parameters": 111136,
+          "returned_container": "mps",
+          "rdm_energy_error": 1.7763568394002505e-15,
+          "rdm_trace_error": 1.9895196601282805e-13,
+          "natural_occupations": [
+            1.5771994712449289,
+            1.5728164669791447,
+            1.5656949370994815,
+            1.5556710308707566,
+            1.5424384890431486,
+            1.5256627024787321,
+            1.5050108852564437,
+            1.4801497312292478,
+            1.4506965244273615,
+            1.4161533244216413,
+            1.3760606092642158,
+            1.3302663028164243,
+            1.2789237917913123,
+            1.2224692606756127,
+            1.1621744357136796,
+            1.1011286042170818,
+            0.8988726170750677,
+            0.8378270178266549,
+            0.7775317342407223,
+            0.7210768926909122,
+            0.6697339081779949,
+            0.6239395362626821,
+            0.5838469051571563,
+            0.5493031994391375,
+            0.5198497883124491,
+            0.4949888233345766,
+            0.4743366223594213,
+            0.45756069964219476,
+            0.44432873174456056,
+            0.4343046238284408,
+            0.42718242823349684,
+            0.4227999041455125
+          ],
+          "double_occupancies": [
+            0.024508841653235254,
+            0.03754099222362947,
+            0.03586780898421924,
+            0.03708932637337966,
+            0.03636009192771572,
+            0.03685826015426813,
+            0.036484826148750135,
+            0.0367585340546882,
+            0.036537494513623245,
+            0.036699615592427896,
+            0.03656833005373287,
+            0.03666664663168488,
+            0.0365887973021,
+            0.036644036538532765,
+            0.036606841843056744,
+            0.036625937515329055,
+            0.03662365889734417,
+            0.036609059796001146,
+            0.03664177662700645,
+            0.03659093597376961,
+            0.036663798539514916,
+            0.03656804161880177,
+            0.03669780415231733,
+            0.03653608501341805,
+            0.03675625795536844,
+            0.03648267554792302,
+            0.03685828045358172,
+            0.03636038072382601,
+            0.037089199371216845,
+            0.03586836716060616,
+            0.03754081506316854,
+            0.02451017867766621
+          ],
+          "last_iteration_energy_change": 1.2732215282085235e-10,
+          "maximum_iteration_discarded_weight": 1.862662982519362e-05,
+          "endpoint_discarded_weight": 2.890595223711866e-17,
+          "convergence_note": "adjacent iteration energies are not a completed-sweep convergence criterion"
+        }
+      ],
+      "casci": {
+        "status": "not_run",
+        "reason": "determinant count exceeds the 50,000 reference guard; vector memory is an analytical lower bound, not a measured failure"
+      }
+    }
+  },
+  "guard_stops": [
+    {
+      "stage": "dense MPS circuit, 10 rotation bits",
+      "limit_seconds": 180,
+      "exit": 124
+    },
+    {
+      "stage": "dense MPS circuit, 10 rotation bits",
+      "limit_seconds": 420,
+      "exit": 124
+    },
+    {
+      "stage": "QPE, 14 phase bits, 32 subdivisions",
+      "cap_gb": 12,
+      "observed_rss_gb": 7.17,
+      "observed_footprint_gb": 12.25,
+      "exit": 75
+    },
+    {
+      "stage": "QPE, 14 phase bits, 32 subdivisions",
+      "cap_gb": 16,
+      "observed_rss_gb": 3.61,
+      "observed_footprint_gb": 16.28,
+      "exit": 75
+    }
+  ],
+  "nitrogen_capacity": {
+    "energy": -108.85695639899869,
+    "bond_requested": 32,
+    "bond_actual": 32,
+    "seconds_including_rdms_and_export": 37.8242644170241,
+    "rdm_energy_error": 0.0,
+    "spin_squared": 1.6121515103456425,
+    "natural_occupations": [
+      1.9881767228533334,
+      1.982889488670964,
+      1.6835355671312184,
+      1.225813959499187,
+      1.188415177848326,
+      0.8047363486532113,
+      0.7689745413141336,
+      0.31558099116885363,
+      0.007595984719512311,
+      0.005298367250039524,
+      0.004434365334313052,
+      0.004343121364197361,
+      0.003345088089166987,
+      0.00303042631192864,
+      0.002768600584603952,
+      0.0026396005861650438,
+      0.0021468946460117765,
+      0.0017771421043578741,
+      0.0016521125521343227,
+      0.0007134673437927177,
+      0.0004936151750713284,
+      0.00046832384013280125,
+      0.0003594540204789423,
+      0.00031141744087108685,
+      0.00028240140423471807,
+      0.00021682009375861966
+    ],
+    "mps_file_bytes": 15386420,
+    "wavefunction_hash": "46ff5e7a49743bd0",
+    "note": "Independent fixed-state solve; no MPO compilation, MPS restart or one-site polishing API",
+    "seconds": 40.289015957998345,
+    "process_peak_rss_bytes": 656441344,
+    "script_sha256": "9c57217b85738fdf62b46644d3c0eac0cb16b55f4de4054a885dde66ae79be7b",
+    "integrals_sha256": "67e7686cad96e11e22f7a24fb62f21e3eace31997350aafed8ae6250282ad792",
+    "controls": {
+      "bond": 32,
+      "sweeps": 4,
+      "distance_angstrom": 2.0,
+      "active_electrons": 10,
+      "active_orbitals": 26
+    }
+  },
+  "fresh_preparation": {
+    "small_cas": "passed at 1.1 angstrom",
+    "large_cas": "passed at 2.0 angstrom; integral file hash exactly matches the reused source inputs"
+  },
+  "block2_small_reference": {
+    "energy": -108.77756606442634,
+    "error_vs_exact_mEh": 1.2363443602225743e-09,
+    "seconds_including_one_rdm": 0.21056337500340305,
+    "symmetry": "Sz",
+    "bond": 64,
+    "one_rdm_max_error": 4.339584259563281e-07,
+    "stack_bytes": 500000000,
+    "total_seconds": 0.37826875000610016,
+    "process_peak_rss_bytes": 165199872,
+    "script_sha256": "bc26a9d4dbfe9fe7dc555a969b9426f5acccdaa522705488e2e881d7c0a38de7",
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "versions": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pyscf": "2.14.0",
+      "qdk": "1.32.3"
+    }
+  },
+  "circuit_8bit": {
+    "bond": 16,
+    "method": "dense",
+    "rotation_bits": 8,
+    "state_qubits": 12,
+    "build_seconds": 0.00516141697880812,
+    "simulate_seconds": 104.84788504100288,
+    "logical_counts": {
+      "numQubits": 49,
+      "tCount": 42,
+      "rotationCount": 126,
+      "rotationDepth": 46,
+      "cczCount": 8242,
+      "ccixCount": 0,
+      "measurementCount": 8592
+    },
+    "fidelity_vs_mps": 0.9973177143556722,
+    "fidelity_vs_exact": 0.9973015508162105,
+    "zero_bond_probability": 0.9999802472840649,
+    "postselected_fidelity_vs_exact": 0.9973211997499992,
+    "energy": -108.77617663777363,
+    "energy_error_mEh": 1.389426653943815,
+    "correct_particle_sector_probability": 0.9979414401463834,
+    "pauli_terms": 1475,
+    "wavefunction_hash": "56b0ce397722d461",
+    "execution": "Q# sparse simulator, MPSSequential/MPSSparse; all bond outcomes included, no postselection or hardware",
+    "export_limit": "PR #540 circuit/QIR factory resets output; saved callable parameters used instead",
+    "total_seconds": 108.46079137499328,
+    "process_peak_rss_bytes": 715964416,
+    "script_sha256": "bc26a9d4dbfe9fe7dc555a969b9426f5acccdaa522705488e2e881d7c0a38de7",
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "versions": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pyscf": "2.14.0",
+      "qdk": "1.32.3"
+    }
+  },
+  "qpe_resources": {
+    "bond": 16,
+    "rotation_bits": 8,
+    "phase_bits": 8,
+    "evolution_time": 0.5,
+    "trotter_order": 2,
+    "trotter_divisions": 4,
+    "energy_shift_electronic_Eh": -8.882964857674637,
+    "core_energy_Eh": -99.89459673281958,
+    "energy_bin_width_Eh": 0.04908738521234052,
+    "logical_counts": {
+      "numQubits": 57,
+      "tCount": 63,
+      "rotationCount": 6014109,
+      "rotationDepth": 5593749,
+      "cczCount": 8242,
+      "ccixCount": 0,
+      "measurementCount": 8600
+    },
+    "wavefunction_hash": "56b0ce397722d461",
+    "status": "Composed and resource-counted in QDK; QPE not executed",
+    "limitation": "Phase bin width is not total error. Trotter and gate-synthesis errors are not certified; no physical-qubit or runtime claim.",
+    "total_seconds": 4.27166841700091,
+    "process_peak_rss_bytes": 813940736,
+    "script_sha256": "268aa31e2ef42eb4bf8b665c324314227e74885c09f84860ef23a66e2d7b9b34",
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "versions": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "pyscf": "2.14.0",
+      "qdk": "1.32.3"
+    }
+  },
+  "lattice": {
+    "spin_one_anisotropy": {
+      "anisotropy": [
+        -1.0,
+        0.0,
+        1.0,
+        2.0,
+        4.0
+      ],
+      "reference_energy": [
+        -6.443660028811393,
+        -2.986086349501625,
+        -0.8475881269990635,
+        0.1810658111972228,
+        0.8555992459053586
+      ],
+      "dmrg_energy": [
+        -6.443660028811392,
+        -2.9860863495016283,
+        -0.8475881269990645,
+        0.18106581119721896,
+        0.8555992459053572
+      ],
+      "binary_energy": [
+        -6.443660028811388,
+        -2.9860863495016257,
+        -0.8475881269990629,
+        0.18106581119721987,
+        0.855599245905367
+      ],
+      "gray_energy": [
+        -6.443660028811394,
+        -2.9860863495016274,
+        -0.8475881269990668,
+        0.18106581119721946,
+        0.8555992459053859
+      ],
+      "mean_sz_squared": [
+        0.9338809823392733,
+        0.7379123761274227,
+        0.3703002803898139,
+        0.1646327459094509,
+        0.04105829251452689
+      ],
+      "bond_sz_correlation": [
+        -0.9283409345550211,
+        -0.678223527188104,
+        -0.2324813745453867,
+        -0.09724250874993175,
+        -0.02527456737850586
+      ],
+      "encoding_diagnostics": {
+        "binary": {
+          "layout": {
+            "scheme": "binary",
+            "site_dimensions": [
+              3,
+              3,
+              3,
+              3
+            ],
+            "site_offsets": [
+              0,
+              2,
+              4,
+              6
+            ]
+          },
+          "qubits": 8,
+          "pauli_terms": 160,
+          "local_decompositions": 12,
+          "local_cache_hits": 72,
+          "discarded_l1": 0.0
+        },
+        "gray": {
+          "layout": {
+            "scheme": "gray",
+            "site_dimensions": [
+              3,
+              3,
+              3,
+              3
+            ],
+            "site_offsets": [
+              0,
+              2,
+              4,
+              6
+            ]
+          },
+          "qubits": 8,
+          "pauli_terms": 160,
+          "local_decompositions": 12,
+          "local_cache_hits": 72,
+          "discarded_l1": 0.0
+        }
+      },
+      "maximum_operator_error": 7.993605777301127e-15,
+      "model": {
+        "sites": 4,
+        "spin": 1,
+        "boundary": "open",
+        "J": [
+          1.0,
+          0.8,
+          1.2
+        ],
+        "K": 0.18,
+        "h": [
+          0.07,
+          -0.11,
+          0.16,
+          -0.03
+        ],
+        "constant": 0.37,
+        "units": "hbar=1, J0=1"
+      },
+      "dmrg_controls": {
+        "sector": {
+          "Sz": 0
+        },
+        "max_bond_dim": 32,
+        "sweeps": 6,
+        "lanczos_tolerance": 1e-10
+      }
+    },
+    "rdm_observables": {
+      "model": {
+        "sites": 14,
+        "t": 1.0,
+        "U": 4.0,
+        "sector": {
+          "N": 14,
+          "Sz": 0
+        },
+        "boundary": "open"
+      },
+      "controls": {
+        "bond": 64,
+        "sweeps": 8,
+        "truncation": 0.0,
+        "eigensolver_tol": 1e-10
+      },
+      "workflow": "ALPS-native observables; not a QDK RdmContainer",
+      "energy": -7.6723438312744845,
+      "energy_from_rdms": -7.6723438312744925,
+      "natural_occupations": [
+        1.826403421357222,
+        1.8140928130145253,
+        1.7917134905252685,
+        1.7546362076523059,
+        1.6937230711499696,
+        1.591048671553061,
+        1.413290059346792,
+        0.5867096757818403,
+        0.40895135079253137,
+        0.3062772394832354,
+        0.2453639020248687,
+        0.2082864293355394,
+        0.18590709143066272,
+        0.17359657655220304
+      ],
+      "double_occupancy": [
+        0.0712549927671383,
+        0.0992276413199164,
+        0.09735995001645567,
+        0.10070286307586879,
+        0.09957325076728704,
+        0.10051631080704465,
+        0.10018570054196231,
+        0.1001856532484578,
+        0.10051632439057848,
+        0.0995732201109892,
+        0.10070280275533959,
+        0.09735992415176357,
+        0.09922756713766982,
+        0.07125502369438416
+      ],
+      "one_rdm": [
+        [
+          0.9999999935241303,
+          0.637172288380087,
+          -7.800357516157819e-09,
+          -0.1528423582178174,
+          1.079892943461544e-07,
+          0.060728896509177926,
+          -2.3951883683492187e-06,
+          -0.028322292338926337,
+          -5.5521454825763206e-06,
+          0.014342560540892592,
+          7.04733471302817e-06,
+          -0.007603965342547441,
+          -4.432422320336431e-06,
+          0.004072814157013216
+        ],
+        [
+          0.637172288380087,
+          0.9999999833712705,
+          0.3758433351666711,
+          3.674098067972531e-08,
+          -0.04988544294007252,
+          1.592675685540201e-07,
+          0.01310718477533123,
+          7.823144151359451e-06,
+          -0.004093693459001109,
+          1.719799399206527e-06,
+          0.001276112258656869,
+          -5.037757157698253e-06,
+          -0.0003352349309692607,
+          4.3850605725263965e-06
+        ],
+        [
+          -7.800357495341137e-09,
+          0.3758433351666711,
+          0.9999999761362499,
+          0.577610816045852,
+          5.490344989755869e-08,
+          -0.13907492747430833,
+          -1.9623673444147532e-06,
+          0.0569544502717763,
+          -7.551629706718799e-06,
+          -0.027407413527844263,
+          -3.5498219688177065e-06,
+          0.014267870579537191,
+          5.129452137689686e-06,
+          -0.007600688794182144
+        ],
+        [
+          -0.1528423582178174,
+          3.674098068319476e-08,
+          0.577610816045852,
+          0.9999999557280823,
+          0.40739409048700514,
+          1.8572120478923398e-07,
+          -0.05947824308271511,
+          1.7716912958432897e-06,
+          0.016176015124199153,
+          9.648431404839382e-06,
+          -0.004902906330428293,
+          3.366361404919644e-06,
+          0.0012742226883618694,
+          -6.930190847287118e-06
+        ],
+        [
+          1.0798929434441967e-07,
+          -0.04988544294007253,
+          5.4903449876742005e-08,
+          0.4073940904870051,
+          0.9999999534052959,
+          0.5620742362364637,
+          -2.0364996970029248e-08,
+          -0.13457838695216784,
+          -2.6440555509991276e-06,
+          0.05583809372406612,
+          -9.044850989745837e-06,
+          -0.027405958091904097,
+          -2.066489089490916e-06,
+          0.01433662433228874
+        ],
+        [
+          0.06072889650917794,
+          1.592675685604169e-07,
+          -0.1390749274743083,
+          1.8572120479704024e-07,
+          0.5620742362364637,
+          0.9999999566016542,
+          0.41656924741726803,
+          1.800713225925954e-07,
+          -0.061716010829037084,
+          2.345601027617817e-06,
+          0.016172048800211728,
+          7.3681168805225686e-06,
+          -0.004087490477005209,
+          5.641715271886854e-06
+        ],
+        [
+          -2.395188368346183e-06,
+          0.01310718477533123,
+          -1.9623673444104164e-06,
+          -0.05947824308271511,
+          -2.0364997018601505e-08,
+          0.416569247417268,
+          0.9999999666416765,
+          0.5581277601991916,
+          -1.5234828513663312e-07,
+          -0.1345777513865551,
+          -1.7703145080896071e-06,
+          0.05695714348321825,
+          -6.891290872736676e-06,
+          -0.02831931585747008
+        ],
+        [
+          -0.028322292338926344,
+          7.823144151356253e-06,
+          0.0569544502717763,
+          1.7716912958439402e-06,
+          -0.13457838695216784,
+          1.8007132259172803e-07,
+          0.5581277601991916,
+          0.9999999946819906,
+          0.4165685753527513,
+          6.873403013158558e-08,
+          -0.05947767419193388,
+          1.5824822726805306e-06,
+          0.013098255507339188,
+          1.6633638756056052e-06
+        ],
+        [
+          -5.5521454825778385e-06,
+          -0.004093693459001109,
+          -7.551629706714462e-06,
+          0.016176015124199153,
+          -2.6440555509921887e-06,
+          -0.06171601082903708,
+          -1.5234828512275533e-07,
+          0.4165685753527513,
+          1.000000027343869,
+          0.5620744149046987,
+          -2.1191386653102162e-07,
+          -0.1390737569825311,
+          1.0906187692706626e-07,
+          0.0607332444583462
+        ],
+        [
+          0.014342560540892594,
+          1.7197993992082076e-06,
+          -0.027407413527844263,
+          9.64843140483754e-06,
+          0.05583809372406612,
+          2.345601027618034e-06,
+          -0.13457775138655512,
+          6.873403011770779e-08,
+          0.5620744149046987,
+          1.0000000320764268,
+          0.40739282981127944,
+          -4.655063439405749e-08,
+          -0.04988532040202226,
+          -6.161768593829827e-08
+        ],
+        [
+          7.047334713028712e-06,
+          0.001276112258656869,
+          -3.5498219688205254e-06,
+          -0.004902906330428293,
+          -9.044850989749307e-06,
+          0.016172048800211728,
+          -1.7703145080878724e-06,
+          -0.05947767419193387,
+          -2.1191386653449107e-07,
+          0.40739282981127944,
+          1.0000000627747436,
+          0.5776113413452874,
+          -9.766082801829223e-08,
+          -0.15284285597811686
+        ],
+        [
+          -0.0076039653425474425,
+          -5.037757157699219e-06,
+          0.014267870579537191,
+          3.366361404920335e-06,
+          -0.027405958091904103,
+          7.368116880522514e-06,
+          0.05695714348321826,
+          1.5824822726857347e-06,
+          -0.1390737569825311,
+          -4.6550634416608894e-08,
+          0.5776113413452874,
+          1.0000000295201597,
+          0.3758424920263627,
+          -6.31962537162023e-09
+        ],
+        [
+          -4.432422320336323e-06,
+          -0.0003352349309692607,
+          5.129452137690228e-06,
+          0.0012742226883618697,
+          -2.066489089490482e-06,
+          -0.004087490477005209,
+          -6.891290872735375e-06,
+          0.01309825550733919,
+          1.0906187692966834e-07,
+          -0.04988532040202226,
+          -9.766082801829223e-08,
+          0.3758424920263627,
+          1.0000000445576496,
+          0.6371729378340395
+        ],
+        [
+          0.004072814157013218,
+          4.3850605725269336e-06,
+          -0.007600688794182143,
+          -6.930190847287528e-06,
+          0.014336624332288743,
+          5.64171527188681e-06,
+          -0.02831931585747008,
+          1.6633638756020545e-06,
+          0.0607332444583462,
+          -6.161768593385304e-08,
+          -0.15284285597811686,
+          -6.31962537162023e-09,
+          0.6371729378340395,
+          1.0000000236368263
+        ]
+      ],
+      "determinants": 11778624
+    },
+    "spin_quench": {
+      "times": [
+        0.0,
+        0.2,
+        0.4,
+        0.6000000000000001,
+        0.8,
+        1.0,
+        1.2000000000000002
+      ],
+      "errors": {
+        "qdk_dt_0.1": 0.0022369625220237666,
+        "qdk_dt_0.05": 0.000556804715975523,
+        "mps_dt_0.04_bond_8": 9.629563285173948e-05,
+        "mps_dt_0.02_bond_8": 2.4067413863959608e-05,
+        "mps_dt_0.02_bond_2": 0.00019340792587124733
+      },
+      "controls": {
+        "mps_dt": [
+          0.04,
+          0.02
+        ],
+        "mps_bonds": [
+          2,
+          8
+        ],
+        "mps_order": 2,
+        "truncation": null,
+        "qdk_dt": [
+          0.1,
+          0.05
+        ],
+        "qdk_order": 2,
+        "shots": 128,
+        "seeds": [
+          423,
+          425,
+          427
+        ]
+      },
+      "state_fidelity": [
+        0.9999999999999976,
+        0.9999998030504448,
+        0.9999991053271502,
+        0.9999981154377736,
+        0.9999974772581103,
+        0.9999973913640453,
+        0.9999975147141044
+      ]
+    },
+    "hubbard_reference": {
+      "model": {
+        "sites": 6,
+        "t": 1.0,
+        "U": 4.0,
+        "n_alpha": 3,
+        "n_beta": 3,
+        "boundary": "open"
+      },
+      "controls": {
+        "max_bond_dim": 128,
+        "sweeps": 12,
+        "truncation": 0.0
+      },
+      "energy_ed": -3.0925653195053764,
+      "energy_dmrg": -3.0925653195053937,
+      "energy_reference": -3.0925653195054004,
+      "occupations": [
+        1.0,
+        1.0000000000000002,
+        0.9999999999999992,
+        1.0000000000000004,
+        1.0000000000000002,
+        1.0000000000000004
+      ],
+      "reference_occupations": [
+        1.0000000000000013,
+        1.000000000000001,
+        1.0000000000000009,
+        1.000000000000001,
+        1.0000000000000009,
+        1.0000000000000016
+      ],
+      "spin_correlations": [
+        [
+          0.6418536970440016,
+          -0.5370684326854747,
+          0.11895939363998986,
+          -0.17327640936128463,
+          0.05993324588596169,
+          -0.11040149452319364
+        ],
+        [
+          -0.5370684326854747,
+          0.6019952675998329,
+          -0.1832755421334,
+          0.09698017405215636,
+          -0.03856471271907612,
+          0.05993324588596156
+        ],
+        [
+          0.11895939363998986,
+          -0.1832755421334,
+          0.6028068371811143,
+          -0.46219445337857623,
+          0.09698017405215639,
+          -0.17327640936128424
+        ],
+        [
+          -0.17327640936128463,
+          0.09698017405215636,
+          -0.46219445337857623,
+          0.6028068371811146,
+          -0.18327554213339997,
+          0.11895939363999003
+        ],
+        [
+          0.05993324588596169,
+          -0.03856471271907612,
+          0.09698017405215639,
+          -0.18327554213339997,
+          0.6019952675998328,
+          -0.5370684326854748
+        ],
+        [
+          -0.11040149452319364,
+          0.05993324588596156,
+          -0.17327640936128424,
+          0.11895939363999003,
+          -0.5370684326854748,
+          0.6418536970440012
+        ]
+      ],
+      "reference_spin_correlations": [
+        [
+          0.6418536970440021,
+          -0.5370684326854752,
+          0.11895939363999022,
+          -0.1732764093612848,
+          0.05993324588596185,
+          -0.11040149452319423
+        ],
+        [
+          -0.5370684326854752,
+          0.6019952675998328,
+          -0.18327554213339967,
+          0.09698017405215663,
+          -0.03856471271907651,
+          0.05993324588596184
+        ],
+        [
+          0.11895939363999022,
+          -0.18327554213339967,
+          0.6028068371811136,
+          -0.4621944533785761,
+          0.09698017405215656,
+          -0.17327640936128472
+        ],
+        [
+          -0.1732764093612848,
+          0.09698017405215663,
+          -0.4621944533785761,
+          0.6028068371811136,
+          -0.18327554213339958,
+          0.11895939363999014
+        ],
+        [
+          0.05993324588596185,
+          -0.03856471271907651,
+          0.09698017405215656,
+          -0.18327554213339958,
+          0.6019952675998328,
+          -0.5370684326854753
+        ],
+        [
+          -0.11040149452319423,
+          0.05993324588596184,
+          -0.17327640936128472,
+          0.11895939363999014,
+          -0.5370684326854753,
+          0.6418536970440021
+        ]
+      ]
+    },
+    "fermion_pairing": {
+      "model": {
+        "sites": 6,
+        "t": 1.0,
+        "pairing_real": 0.3,
+        "pairing_imag": 0.12,
+        "mu": [
+          0.7,
+          0.75,
+          0.7999999999999999,
+          0.85,
+          0.8999999999999999,
+          0.95
+        ],
+        "V": 0.15,
+        "boundary": "open"
+      },
+      "layout": {
+        "site_qubits": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "fermion_mode_qubits": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "discarded_l1": 0.0,
+      "pauli_operator": {
+        "container_type": "pauli_decomposition",
+        "pauli_strings": [
+          "IIIIII",
+          "IIIIIZ",
+          "IIIIXX",
+          "IIIIXY",
+          "IIIIYX",
+          "IIIIYY",
+          "IIIIZI",
+          "IIIIZZ",
+          "IIIXXI",
+          "IIIXYI",
+          "IIIYXI",
+          "IIIYYI",
+          "IIIZII",
+          "IIIZZI",
+          "IIXXII",
+          "IIXYII",
+          "IIYXII",
+          "IIYYII",
+          "IIZIII",
+          "IIZZII",
+          "IXXIII",
+          "IXYIII",
+          "IYXIII",
+          "IYYIII",
+          "IZIIII",
+          "IZZIII",
+          "XXIIII",
+          "XYIIII",
+          "YXIIII",
+          "YYIIII",
+          "ZIIIII",
+          "ZZIIII"
+        ],
+        "coefficients": {
+          "real": [
+            0.18749999999999967,
+            0.3125,
+            -0.6499999999999999,
+            0.06,
+            0.06,
+            -0.35,
+            0.3,
+            0.0375,
+            -0.6499999999999999,
+            0.06,
+            0.06,
+            -0.35,
+            0.32499999999999996,
+            0.0375,
+            -0.6499999999999999,
+            0.06,
+            0.06,
+            -0.35,
+            0.35,
+            0.0375,
+            -0.6499999999999999,
+            0.06,
+            0.06,
+            -0.35,
+            0.37499999999999994,
+            0.0375,
+            -0.6499999999999999,
+            0.06,
+            0.06,
+            -0.35,
+            0.4375,
+            0.0375
+          ],
+          "imag": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            32
+          ],
+          "dtype": "complex128"
+        },
+        "version": "0.1.0"
+      },
+      "energy": -3.819262187123941,
+      "occupations": [
+        0.7203204707464984,
+        0.5339187828422749,
+        0.6484105419203063,
+        0.6277232154625467,
+        0.5658354585268528,
+        0.786411212555295
+      ],
+      "particle_number_variance": 0.33337243668586325,
+      "pair_expectation": {
+        "real": -0.08537250807716576,
+        "imag": 0.03414900323086631
+      },
+      "even_spectrum": [
+        -3.8192621871239374,
+        -2.853842766279435,
+        -2.481992396022554,
+        -2.360739106948746,
+        -1.7231927480401241,
+        -1.6675265494980864,
+        -1.6227405534115777,
+        -1.3084689055193799,
+        -1.137290764918644,
+        -0.9693652755228697,
+        -0.6272477092560683,
+        -0.46448101632129435,
+        -0.43046330944510586,
+        -0.3339428385120862,
+        -0.13118137192851895,
+        0.06513518657239731,
+        0.33178293177651924,
+        0.4829562992305507,
+        0.7603206574480227,
+        0.798605118946571,
+        0.8222151450724113,
+        1.0119169471676017,
+        1.2954590441701486,
+        1.5347743159557168,
+        1.6878285034650933,
+        1.9776366891289787,
+        2.0130052349375394,
+        2.257426445899344,
+        2.6711715651261643,
+        2.9476599951788955,
+        3.172001906926018,
+        4.101841511746446
+      ],
+      "odd_spectrum": [
+        -3.692428471294485,
+        -2.9546543149235367,
+        -2.607505753164865,
+        -2.4805977933116474,
+        -1.8029135768730373,
+        -1.6238321824455682,
+        -1.5267519940102392,
+        -1.2761482361209586,
+        -1.1870722890836474,
+        -0.8595324574366151,
+        -0.5009173794526479,
+        -0.4313533881070848,
+        -0.338755788256241,
+        -0.3121151212766506,
+        -0.0021951154088156186,
+        0.19802296778491243,
+        0.23094896551464653,
+        0.37571463406423583,
+        0.676208942485306,
+        0.7174997006269245,
+        0.8996036986166458,
+        0.9012616890194542,
+        1.1694389080080605,
+        1.5738173900354917,
+        1.6361505658086797,
+        1.8476694216073337,
+        2.1156707080858883,
+        2.1278581470502,
+        2.7756913904077996,
+        3.0542564167602713,
+        3.295429809181715,
+        4.0015305061084705
+      ]
+    },
+    "custom_spin_export": {
+      "model": {
+        "sites": 6,
+        "J": 1.0,
+        "h": 0.37,
+        "longitudinal_fields": [
+          -0.19,
+          -0.098,
+          -0.006000000000000005,
+          0.08600000000000002,
+          0.178,
+          0.27
+        ],
+        "y_field_site": 1,
+        "y_field": 0.11,
+        "constant": 0.13,
+        "boundary": "open"
+      },
+      "pauli_operator": {
+        "container_type": "pauli_decomposition",
+        "pauli_strings": [
+          "IIIIII",
+          "IIIZXZ",
+          "IIZXZI",
+          "IZXZII",
+          "ZXZIII",
+          "IIIIIX",
+          "IIIIIZ",
+          "IIIIXI",
+          "IIIIZI",
+          "IIIXII",
+          "IIIZII",
+          "IIXIII",
+          "IIZIII",
+          "IXIIII",
+          "IZIIII",
+          "XIIIII",
+          "ZIIIII",
+          "IIIIYI"
+        ],
+        "coefficients": {
+          "real": [
+            0.13,
+            -1.0,
+            -1.0,
+            -1.0,
+            -1.0,
+            -0.37,
+            -0.19,
+            -0.37,
+            -0.098,
+            -0.37,
+            -0.006000000000000005,
+            -0.37,
+            0.08600000000000002,
+            -0.37,
+            0.178,
+            -0.37,
+            0.27,
+            0.11
+          ],
+          "imag": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "shape": [
+            18
+          ],
+          "dtype": "float64"
+        },
+        "version": "0.1.0"
+      },
+      "matrix_error": 0.0,
+      "reference_spectrum": [
+        -4.673387069537875,
+        -4.366841384019899,
+        -4.141754488460858,
+        -3.7746484158077074,
+        -2.933478626099504,
+        -2.777309284901218,
+        -2.5069267482275377,
+        -2.391858562353439,
+        -2.3738133235819983,
+        -2.2900990662954195,
+        -2.2260981986447055,
+        -2.156207388897315,
+        -2.0079232739855977,
+        -1.8776753664766572,
+        -1.8117702967241542,
+        -1.7352511075469297,
+        -1.6875683539395427,
+        -1.5947587760561035,
+        -1.3222704462131105,
+        -1.2182237133215394,
+        -0.9406414776206682,
+        -0.6047656378702762,
+        -0.46700150622573555,
+        -0.3794571897587108,
+        -0.3138660430223076,
+        -0.2524573657841675,
+        -0.15126428014561955,
+        -0.11662918708816096,
+        -0.009883767241837456,
+        0.025413264100243367,
+        0.07740128990314524,
+        0.09133253026667983,
+        0.16866746973332,
+        0.18259871009685394,
+        0.23458673589975612,
+        0.2698837672418373,
+        0.3766291870881606,
+        0.4112642801456197,
+        0.5124573657841676,
+        0.5738660430223073,
+        0.6394571897587112,
+        0.7270015062257359,
+        0.864765637870276,
+        1.2006414776206693,
+        1.4782237133215388,
+        1.582270446213111,
+        1.8547587760561035,
+        1.947568353939542,
+        1.9952511075469301,
+        2.071770296724154,
+        2.1376753664766572,
+        2.2679232739855957,
+        2.4162073888973126,
+        2.486098198644705,
+        2.5500990662954237,
+        2.6338133235819963,
+        2.6518585623534348,
+        2.7669267482275415,
+        3.0373092849012187,
+        3.19347862609951,
+        4.034648415807711,
+        4.401754488460847,
+        4.626841384019897,
+        4.933387069537876
+      ],
+      "exported_spectrum": [
+        -4.673387069537891,
+        -4.366841384019899,
+        -4.14175448846086,
+        -3.774648415807712,
+        -2.9334786260995127,
+        -2.777309284901215,
+        -2.5069267482275417,
+        -2.391858562353435,
+        -2.3738133235819974,
+        -2.2900990662954217,
+        -2.2260981986447037,
+        -2.156207388897314,
+        -2.007923273985597,
+        -1.8776753664766546,
+        -1.8117702967241571,
+        -1.7352511075469326,
+        -1.6875683539395407,
+        -1.5947587760561046,
+        -1.3222704462131118,
+        -1.2182237133215401,
+        -0.9406414776206675,
+        -0.6047656378702757,
+        -0.46700150622573666,
+        -0.3794571897587117,
+        -0.3138660430223074,
+        -0.25245736578416755,
+        -0.151264280145619,
+        -0.11662918708816078,
+        -0.009883767241837567,
+        0.025413264100243253,
+        0.07740128990314556,
+        0.09133253026668016,
+        0.16866746973331986,
+        0.1825987100968546,
+        0.23458673589975676,
+        0.2698837672418369,
+        0.37662918708816057,
+        0.4112642801456195,
+        0.5124573657841681,
+        0.5738660430223083,
+        0.6394571897587115,
+        0.7270015062257352,
+        0.8647656378702759,
+        1.2006414776206678,
+        1.4782237133215401,
+        1.5822704462131139,
+        1.8547587760561022,
+        1.947568353939542,
+        1.9952511075469306,
+        2.0717702967241554,
+        2.1376753664766546,
+        2.2679232739855952,
+        2.4162073888973103,
+        2.486098198644703,
+        2.5500990662954206,
+        2.633813323581996,
+        2.6518585623534356,
+        2.7669267482275473,
+        3.0373092849012147,
+        3.1934786260995134,
+        4.034648415807714,
+        4.401754488460851,
+        4.6268413840199045,
+        4.933387069537893
+      ],
+      "reference_expectations": [
+        0.9427546655283462,
+        0.21164086011508135
+      ],
+      "qubit_expectations": [
+        0.9427546655283465,
+        0.2116408601150814
+      ],
+      "basis_map": "site 0 most significant in ALPS; qubit 0 least significant in QDK Pauli matrix"
+    },
+    "spin_one_quench": {
+      "times": [
+        0.0,
+        0.2,
+        0.4,
+        0.6000000000000001,
+        0.8
+      ],
+      "mps_errors": {
+        "dt_0.025_bond_9": 3.9711410821402504e-05,
+        "dt_0.0125_bond_9": 9.928158111349727e-06
+      },
+      "controls": {
+        "qdk_steps": [
+          0.1,
+          0.05,
+          0.025
+        ],
+        "qdk_order": 2,
+        "mps_steps": [
+          0.025,
+          0.0125
+        ],
+        "mps_bonds": [
+          9
+        ],
+        "mps_order": 2,
+        "truncation": null,
+        "bond_note": "Four sites remain explicit in the classic superblock; this example tests time-step error, not bond truncation",
+        "shots": 64,
+        "postselection": false,
+        "global_phase_omitted": true
+      },
+      "encodings": {
+        "binary": {
+          "runs": [
+            {
+              "dt": 0.1,
+              "leakage": [
+                0.0,
+                2.1930577673679564e-09,
+                2.0068411052592246e-08,
+                8.360601776416974e-08,
+                2.2057856256295907e-07
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.9999996901679298,
+                0.9999989786419646,
+                0.9999981626492989,
+                0.999997109208635
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000002478,
+                1.0000000000004936,
+                1.0000000000007412,
+                1.0000000000009894
+              ],
+              "maximum_observable_error": 0.0008217773963233588,
+              "steps_to_final_time": 8,
+              "cnot_ladder_estimate": 8768
+            },
+            {
+              "dt": 0.05,
+              "leakage": [
+                0.0,
+                1.3713317863693976e-10,
+                1.256118249652795e-09,
+                5.233776723469815e-09,
+                1.3808359686432518e-08
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.999999980714822,
+                0.9999999363865287,
+                0.9999998854044401,
+                0.999999819449716
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000004663,
+                1.0000000000009295,
+                1.000000000001402,
+                1.0000000000018676
+              ],
+              "maximum_observable_error": 0.00020494326001038732,
+              "steps_to_final_time": 16,
+              "cnot_ladder_estimate": 17536
+            },
+            {
+              "dt": 0.025,
+              "leakage": [
+                0.0,
+                8.572308173976002e-12,
+                7.853774287049425e-11,
+                3.2724502582551296e-10,
+                8.633725022208101e-10
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.9999999987968353,
+                0.9999999960294474,
+                0.9999999928442602,
+                0.9999999887212476
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000009706,
+                1.0000000000019427,
+                1.0000000000029092,
+                1.0000000000038773
+              ],
+              "maximum_observable_error": 5.1204524847803246e-05,
+              "steps_to_final_time": 32,
+              "cnot_ladder_estimate": 35072
+            }
+          ]
+        },
+        "gray": {
+          "runs": [
+            {
+              "dt": 0.1,
+              "leakage": [
+                0.0,
+                2.782977134292782e-07,
+                1.0348823716617677e-06,
+                2.0919844731139043e-06,
+                3.277826357011585e-06
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.999998946355042,
+                0.9999957905490896,
+                0.9999906295100057,
+                0.9999840126971481
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000001608,
+                1.0000000000003195,
+                1.000000000000478,
+                1.0000000000006373
+              ],
+              "maximum_observable_error": 0.0028138218529847187,
+              "steps_to_final_time": 8,
+              "cnot_ladder_estimate": 6784
+            },
+            {
+              "dt": 0.05,
+              "leakage": [
+                0.0,
+                1.7417391191768893e-08,
+                6.475560494647534e-08,
+                1.3087027052777287e-07,
+                2.0501483464803364e-07
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.9999999341877075,
+                0.9999997370078064,
+                0.9999994144145419,
+                0.9999990006829608
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000002918,
+                1.000000000000581,
+                1.0000000000008675,
+                1.0000000000011526
+              ],
+              "maximum_observable_error": 0.0007014840633841612,
+              "steps_to_final_time": 16,
+              "cnot_ladder_estimate": 13568
+            },
+            {
+              "dt": 0.025,
+              "leakage": [
+                0.0,
+                1.0889560117253564e-09,
+                4.048393823820363e-09,
+                8.18126315201715e-09,
+                1.2815742893729173e-08
+              ],
+              "fidelity": [
+                0.9999999999999987,
+                0.9999999958879615,
+                0.9999999835657348,
+                0.9999999634038587,
+                0.9999999375434848
+              ],
+              "norm_squared": [
+                1.0,
+                1.0000000000006177,
+                1.0000000000012306,
+                1.0000000000018452,
+                1.0000000000024618
+              ],
+              "maximum_observable_error": 0.0001752470562975117,
+              "steps_to_final_time": 32,
+              "cnot_ladder_estimate": 27136
+            }
+          ]
+        }
+      }
+    }
+  },
+  "final_file_hashes": {
+    "tests/test_pauli_interop.py": "61a938766ae76d1e59c493a48e4790ec0afba0a7b49754b74350ce9681e2617b",
+    "tests/conftest.py": "9ea4ac191acded48e9fef37dd7c92870a6c9616b15efa464b8bb44a38a27462c",
+    "tests/test_plugin.py": "48ca1ff79c8ecf07a29fcbf2a6bcea3954f0ba4fa3bef56f3a3e1b508fed042b",
+    "tests/test_mps_container.py": "794b2e5ecad2b952b3b3d8ff340f36cdc432c544965028f74d62d7b788d78c9f",
+    "tests/test_calculators.py": "439fd645628c433d0c98debb0516b55d15c177472f417463b5e7caaea3364817",
+    "tests/test_classic_calculator.py": "30f61bb3f38c4e1cdbcdd9dd21781b51f8c1782e392cd6af859fe591e60db7e0",
+    "tests/test_interop.py": "ec34ca555ffb9e22b329b3951cc88bf90a89d2c7c0adea6b86a7380f353dc0f3",
+    "tests/environment_test.py": "72c64e8fc361f328506019fe7f4835c9471431f4ce77d5c91761fc84e63224cd",
+    "tests/test_qubit_export.py": "69723ee66ff328fa0a9d2f37c9fd8c963081315e1db4fc050be9357f3273bf64",
+    "tests/test_abinitio.py": "aa6863d312abe1fd15604e7047dd5735eb908d2612b29bc8c7e542d6cabe358a",
+    "examples/molecule.py": "e54ded8cb834ecc1eb4efabee2c6fdffebd6f36598bf7ce7dded2add6fd4b12c",
+    "examples/render.py": "7a4d498eeb202e0ed0e5c3212c4654633a335e1997eb48065bd7da37427221c1",
+    "examples/hubbard_reference.py": "82a0d66b2ab8995e21ef65db617adb34d3ce7df404aa8ff4b20cece5b250563e",
+    "examples/spin_one_anisotropy.py": "7027b0c43cd86c9d6c67dd9dca27a9025c793be52d653fd866d0d5c03e678492",
+    "examples/spin_one_quench.py": "0491b4310c47fdbb6b0274576c70ddccba456318715a2bdce018dea7e16bac49",
+    "examples/large_active_space.py": "9f087f737f39854eecb8b0c9f5779fc3be109f3f9b592a90c7b1c393b0bf9e78",
+    "examples/rdm_observables.py": "cdce7a337dac7dc4d05f2ff1d14a080f85e8ea8863d1777a4257dd0812b3417c",
+    "examples/interop.py": "67b74b6ff394392df7e4e9cd360a9d55cefdcdbecc6d3daf53368a0bb982d2b1",
+    "examples/hardware_export.py": "3e933e46f40cbaca65ef121ddcd7e5525f7b566319b5f1d816fe997f721d84ee",
+    "examples/converging_dmrg.py": "51f21cb10d461e04ee69290996b29487de43b25660ca26cdbeb679add47ffdb4",
+    "examples/custom_spin_export.py": "49987a9f76a4ef4d7654db462b55a070893d3f234d08d36ca9872386fe325ad6",
+    "examples/fermion_pairing.py": "142ca66e03835550c40b0274b62af85378c07f85c93354b8ed2bba29bff79d58",
+    "examples/spin_quench.py": "0921f8a8d585bb79aca1cc21e2cbbfc6ecabba731827d506fd4ec5d5f5147b03",
+    "examples/observables.py": "ff53ad310040103637602549f228121412655e0dff132f857c25d05e4acc6e8f",
+    "examples/quickstart.py": "88651af70b2203bd491e2be77869de8483151c3d69363b939375643835c4a8b4",
+    "src/qdk_chemistry_alps/classic_dmrg_calculator.py": "fe466355db51712e0df005f705c136170d2b961626422ddc42966d6c5cfdb696",
+    "src/qdk_chemistry_alps/mps.py": "98167e2a415c3f866d5ee1abcaeba967237c10e1a40bca9d1db51e353cdab2c7",
+    "src/qdk_chemistry_alps/__init__.py": "5b38c49f97cdedb123b700fc9d9f3fb1f382d67b919de6e0b9e7bfa610e29590",
+    "src/qdk_chemistry_alps/ed_calculator.py": "5a2a9e41e7a7789db03a31547ea98fa54fcb832c5312ab433a51a7b071ae10c9",
+    "src/qdk_chemistry_alps/interop.py": "efe782556c247b10133815458db672a7d2a7186c5585ebb64043ebe60efb3020",
+    "src/qdk_chemistry_alps/plugin.py": "494057ca453cd01bb5f9d0af5227bf67d55f874903b78b4df6a30c1bf100936f",
+    "src/qdk_chemistry_alps/abinitio.py": "d505dd7bd3e47efd273926ae43ca57eff5e60b45bfa6311e54b43c5ed2983bf6",
+    "examples/nitrogen/run.py": "268aa31e2ef42eb4bf8b665c324314227e74885c09f84860ef23a66e2d7b9b34",
+    "examples/nitrogen/capacity.py": "54f8d6821a712669f96a32a718cea0f5463191ab00710363e6fddca01d99a8f1",
+    "examples/scaling/run.py": "273fa58a886caff5fe88c7e65e59cac10b977a47d2905ae2823fbf1ed1848935",
+    "examples/scaling/guard.py": "2a0d4ea13299c4c3353bbccaabe38081f997764f8e07506983fd8d77795b903b",
+    "examples/demo_support/__init__.py": "bae5cfa38fb1b3a3ea3b455ea58c650b540348e28ad4a45dee13fcceae712542",
+    "examples/demo_support/spin_one.py": "10d680bd464d609d5342bae5bc796cf721afe36c5f8930a103585af5d6b79bcb"
+  }
+}

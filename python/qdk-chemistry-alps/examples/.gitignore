@@ -1,0 +1,4 @@
+results/
+figures/
+__pycache__/
+*.wavefunction.h5

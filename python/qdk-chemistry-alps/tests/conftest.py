@@ -4,8 +4,8 @@
 # Adapted from skilledwolf/alpsx (private repository), branch
 # agent/v3-execution-and-api-audit at d37e51227,
 # python/qdk-chemistry-alps/tests/conftest.py. Changes: the stack is pyalps
-# (models, ed) and qdk-chemistry; the native_dmrg, mps_qdk and qsharp gates
-# are replaced by classic_dmrg; the fock_matrix fixture stands in for alpsx's
+# (models, ed) and qdk-chemistry; classic_dmrg gates the solver and mps_qdk
+# gates optional QDK MPS export; the fock_matrix fixture stands in for alpsx's
 # Hamiltonian.to_sparse_matrix().
 """Shared fixtures and capability gating.
 
@@ -16,6 +16,7 @@ resolved below:
 
 ``pyscf``         needs the pyscf package for a reference value
 ``classic_dmrg``  needs pyalps built with the classic_dmrg bindings
+``mps_qdk``       needs QDK MPSContainer and MPSSite
 ``local_qdk``     needs a qdk-chemistry providing RdmContainer
 
 There is deliberately no speed tier: every model here is small enough that
@@ -91,7 +92,13 @@ def _pyscf() -> bool:
     return True
 
 
+def _mps_container():
+    from qdk_chemistry.data import MPSContainer, MPSSite  # noqa: F401
+    return True
+
+
 _CAPABILITIES = {
+    "mps_qdk": (_mps_container, "needs QDK MPSContainer and MPSSite (PR #751)"),
     "classic_dmrg": (
         _classic_dmrg,
         "needs pyalps built with the classic_dmrg bindings",

@@ -62,7 +62,7 @@ components:
     uses: [scheduler]
   classic_dmrg:
     name: ALPS classic DMRG
-    algorithm: [white1992, white1993, schollwock2005, hallberg2006]
+    algorithm: [white1992, white1993, schollwock2005, hallberg2006, whiteMartin1999, chanHeadGordon2002, chan2016]
     implementation: [feiguin2013]
   classic_dmrg_evolution:
     name: ALPS classic DMRG time evolution

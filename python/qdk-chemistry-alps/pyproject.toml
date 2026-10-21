@@ -1,8 +1,8 @@
 # Adapted from skilledwolf/alpsx (private repository), branch
 # agent/v3-execution-and-api-audit at d37e51227,
 # python/qdk-chemistry-alps/pyproject.toml: the backends run on pyalps, the
-# MPS DMRG backend and its markers are gone, and the documentation, example
-# and proof-of-concept extras are not carried over.
+# separate MPS DMRG backend is not carried over. Optional MPS export and
+# advanced examples use the classic solver and public pyalps APIs.
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -48,6 +48,7 @@ Issues = "https://github.com/ALPSim/ALPS/issues"
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
+examples = ["pyscf>=2.8", "matplotlib>=3.8", "psutil>=5.9", "qdk>=1.26"]
 dev = ["pytest>=7", "ruff>=0.6"]
 
 [project.entry-points."qdk_chemistry.plugins"]
@@ -59,6 +60,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
+    "mps_qdk: needs a QDK build providing MPSContainer and MPSSite",
     "pyscf: needs the pyscf package for a reference value",
     "local_qdk: needs a qdk-chemistry build providing RdmContainer (unreleased as of 2.2.1)",
     "classic_dmrg: needs pyalps built with the classic_dmrg bindings",

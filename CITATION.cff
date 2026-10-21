@@ -385,6 +385,65 @@ references:
     value: white1993
     description: ALPS reference key
 - type: article
+  title: Ab initio quantum chemistry using the density matrix renormalization group
+  authors:
+  - family-names: White
+    given-names: S. R.
+  - family-names: Martin
+    given-names: R. L.
+  year: 1999
+  journal: The Journal of Chemical Physics
+  volume: '110'
+  issue: '9'
+  doi: 10.1063/1.478295
+  start: '4127'
+  end: '4130'
+  identifiers:
+  - type: other
+    value: whiteMartin1999
+    description: ALPS reference key
+- type: article
+  title: 'Highly correlated calculations with a polynomial cost algorithm: A study of the density matrix renormalization group'
+  authors:
+  - family-names: Chan
+    given-names: G. K.-L.
+  - family-names: Head-Gordon
+    given-names: M.
+  year: 2002
+  journal: The Journal of Chemical Physics
+  volume: '116'
+  issue: '11'
+  doi: 10.1063/1.1449459
+  start: '4462'
+  end: '4476'
+  identifiers:
+  - type: other
+    value: chanHeadGordon2002
+    description: ALPS reference key
+- type: article
+  title: Matrix product operators, matrix product states, and ab initio density matrix renormalization group algorithms
+  authors:
+  - family-names: Chan
+    given-names: G. K.-L.
+  - family-names: Keselman
+    given-names: A.
+  - family-names: Nakatani
+    given-names: N.
+  - family-names: Li
+    given-names: Z.
+  - family-names: White
+    given-names: S. R.
+  year: 2016
+  journal: The Journal of Chemical Physics
+  volume: '145'
+  issue: '1'
+  doi: 10.1063/1.4955108
+  start: '014102'
+  identifiers:
+  - type: other
+    value: chan2016
+    description: ALPS reference key
+- type: article
   title: Real-Time Evolution Using the Density Matrix Renormalization Group
   authors:
   - family-names: White
