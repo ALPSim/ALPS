@@ -144,6 +144,10 @@ tests them:
 - `params::supplied_text()` returns the supplied text of every supplied
   parameter, by name, including parameters the program never defines.
 
+When an integer parameter rejects whole-number text such as `24.0` or `1e6`,
+the error in `params_impl.hpp` says how to write it: `write 1000000`. A
+comment marked `ALPS:` marks the addition.
+
 `params::load()` also reads HDF5 groups without ALPSCore's attributes, as
 pyalps, `alps::Parameters::save` and the NGS parameters wrote `/parameters`. It
 supplies each value as text, as an INI file would, so `define<T>()` parses it
