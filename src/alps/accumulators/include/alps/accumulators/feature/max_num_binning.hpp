@@ -396,7 +396,7 @@ namespace alps {
               private:
                 void analyze() const;
 
-#define NUMERIC_FUNCTION_OPERATOR(OP_NAME, OPEQ_NAME, OP, OP_TOKEN, OP_STD, ERROR_OP, ERROR_FACTOR) \
+#define NUMERIC_FUNCTION_OPERATOR(OP_NAME, OPEQ_NAME, OP, OP_TOKEN, OP_STD) \
                 template<typename U> void aug ## OP_TOKEN (U const & arg, typename std::enable_if<!std::is_scalar<U>::value, int>::type = 0) { \
                     typedef typename value_type<B>::type self_value_type; \
                     typedef typename value_type<U>::type arg_value_type; \
@@ -406,34 +406,22 @@ namespace alps {
                 template<typename U> void aug ## OP_TOKEN (U const & arg, typename std::enable_if<std::is_scalar<U>::value, int>::type = 0) { \
                     using alps::numeric:: OP_NAME ;                     \
                     typedef typename mean_type<B>::type mean_type;      \
-                    typedef typename alps::numeric::scalar<mean_type>::type scalar_type; \
-                    /* ALPS: shift or scale an analyzed mean and error, so that */ \
-                    /* r + 1, -r and 2 * r keep the error of r; a jackknife over */ \
-                    /* the bins would replace it with another estimate */ \
-                    bool const was_analyzed = m_mn_data_is_analyzed;    \
                     generate_jackknife();                               \
                     m_mn_data_is_analyzed = false;                      \
                     m_mn_cannot_rebin = true;                           \
                     typename std::vector<mean_type>::iterator it;       \
                     for (it = m_mn_bins.begin(); it != m_mn_bins.end(); ++it) \
-                        *it = *it OP static_cast<scalar_type>(arg);     \
+                        *it = *it OP static_cast<typename alps::numeric::scalar<mean_type>::type>(arg); \
                     for (it = m_mn_jackknife_bins.begin(); it != m_mn_jackknife_bins.end(); ++it) \
-                        *it = *it OP static_cast<scalar_type>(arg);     \
-                    if (was_analyzed) {                                 \
-                        m_mn_mean = m_mn_mean OP static_cast<scalar_type>(arg); \
-                        using alps::numeric::operator ERROR_OP ;        \
-                        using std::abs;                                 \
-                        m_mn_error = m_mn_error ERROR_OP (ERROR_FACTOR); \
-                        m_mn_data_is_analyzed = true;                   \
-                    } else                                              \
-                        analyze();                                      \
+                        *it = *it OP static_cast<typename alps::numeric::scalar<mean_type>::type>(arg); \
+                    analyze();                                          \
                     B:: OPEQ_NAME (arg);                                \
                 }                                                       \
 
-                NUMERIC_FUNCTION_OPERATOR(operator+, operator+=, +, add, alps::numeric::plus, *, scalar_type(1))
-                NUMERIC_FUNCTION_OPERATOR(operator-, operator-=, -, sub, alps::numeric::minus, *, scalar_type(1))
-                NUMERIC_FUNCTION_OPERATOR(operator*, operator*=, *, mul, alps::numeric::multiplies, *, abs(static_cast<scalar_type>(arg)))
-                NUMERIC_FUNCTION_OPERATOR(operator/, operator/=, /, div, alps::numeric::divides, /, abs(static_cast<scalar_type>(arg)))
+                NUMERIC_FUNCTION_OPERATOR(operator+, operator+=, +, add, alps::numeric::plus)
+                NUMERIC_FUNCTION_OPERATOR(operator-, operator-=, -, sub, alps::numeric::minus)
+                NUMERIC_FUNCTION_OPERATOR(operator*, operator*=, *, mul, alps::numeric::multiplies)
+                NUMERIC_FUNCTION_OPERATOR(operator/, operator/=, /, div, alps::numeric::divides)
 
 #undef NUMERIC_FUNCTION_OPERATOR
             };
