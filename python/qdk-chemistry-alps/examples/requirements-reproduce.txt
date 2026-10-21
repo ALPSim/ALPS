@@ -1,0 +1,10 @@
+# Scientific Python versions verified with QDK commit fb286eb2d9dde51d960f6953cb726cb45d52c12b.
+# Use with pip -c; install QDK Chemistry itself from the pinned public source.
+numpy==2.3.5
+scipy==1.18.1
+pyscf==2.14.0
+qdk==1.32.3
+h5py==3.16.0
+matplotlib==3.11.2
+psutil==7.2.2
+pytest==9.1.1

@@ -1,0 +1,412 @@
+{
+  "checked_at_utc": "2026-10-21T19:01:31.666042+00:00",
+  "alps_commit": "56ff2faaebdcf57cbee77b078d9119d05a715d4b",
+  "qdk_commit": "fb286eb2d9dde51d960f6953cb726cb45d52c12b",
+  "platform": "macOS-27.0.1-arm64-arm-64bit-Mach-O",
+  "scope": "Fresh public source checkouts, isolated Python environment, newly built ALPS and QDK native code; preinstalled third-party native dependencies reused.",
+  "commands": [
+    {
+      "name": "pip-check",
+      "args": [
+        "-m",
+        "pip",
+        "check"
+      ],
+      "exit_code": 0,
+      "seconds": 0.178
+    },
+    {
+      "name": "adapter-tests",
+      "args": [
+        "-m",
+        "pytest",
+        "python/qdk-chemistry-alps",
+        "--require-solver-stack",
+        "-q"
+      ],
+      "exit_code": 0,
+      "seconds": 12.708
+    },
+    {
+      "name": "quickstart",
+      "args": [
+        "quickstart.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.461
+    },
+    {
+      "name": "molecule",
+      "args": [
+        "molecule.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.455
+    },
+    {
+      "name": "interop",
+      "args": [
+        "interop.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.177
+    },
+    {
+      "name": "hardware_export",
+      "args": [
+        "hardware_export.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.232
+    },
+    {
+      "name": "custom_spin_export",
+      "args": [
+        "custom_spin_export.py",
+        "--output",
+        "results/clean-custom_spin_export"
+      ],
+      "exit_code": 0,
+      "seconds": 14.273
+    },
+    {
+      "name": "fermion_pairing",
+      "args": [
+        "fermion_pairing.py",
+        "--output",
+        "results/clean-fermion_pairing"
+      ],
+      "exit_code": 0,
+      "seconds": 2.688
+    },
+    {
+      "name": "hubbard_reference",
+      "args": [
+        "hubbard_reference.py",
+        "--output",
+        "results/clean-hubbard_reference"
+      ],
+      "exit_code": 0,
+      "seconds": 2.764
+    },
+    {
+      "name": "observables",
+      "args": [
+        "observables.py"
+      ],
+      "exit_code": 0,
+      "seconds": 2.308
+    },
+    {
+      "name": "rdm_observables",
+      "args": [
+        "rdm_observables.py",
+        "--output",
+        "results/clean-rdm_observables"
+      ],
+      "exit_code": 0,
+      "seconds": 6.816
+    },
+    {
+      "name": "large_active_space",
+      "args": [
+        "large_active_space.py"
+      ],
+      "exit_code": 0,
+      "seconds": 6.135
+    },
+    {
+      "name": "converging_dmrg",
+      "args": [
+        "converging_dmrg.py"
+      ],
+      "exit_code": 0,
+      "seconds": 13.217
+    },
+    {
+      "name": "spin_one_anisotropy",
+      "args": [
+        "spin_one_anisotropy.py",
+        "--output",
+        "results/clean-spin_one_anisotropy"
+      ],
+      "exit_code": 0,
+      "seconds": 2.837
+    },
+    {
+      "name": "spin_quench",
+      "args": [
+        "spin_quench.py",
+        "--output",
+        "results/clean-spin_quench"
+      ],
+      "exit_code": 0,
+      "seconds": 4.127
+    },
+    {
+      "name": "spin_one_quench",
+      "args": [
+        "spin_one_quench.py",
+        "--output",
+        "results/clean-spin_one_quench"
+      ],
+      "exit_code": 0,
+      "seconds": 29.872
+    },
+    {
+      "name": "nitrogen-prepare",
+      "args": [
+        "nitrogen/run.py",
+        "prepare",
+        "--distance",
+        "2.5",
+        "--folder",
+        "results/clean-n2"
+      ],
+      "exit_code": 0,
+      "seconds": 0.996
+    },
+    {
+      "name": "nitrogen-solve",
+      "args": [
+        "nitrogen/run.py",
+        "solve",
+        "--folder",
+        "results/clean-n2",
+        "--bonds",
+        "8",
+        "16",
+        "32"
+      ],
+      "exit_code": 0,
+      "seconds": 3.208
+    },
+    {
+      "name": "nitrogen-render",
+      "args": [
+        "render.py",
+        "results/clean-n2/solve.json"
+      ],
+      "exit_code": 0,
+      "seconds": 0.294
+    },
+    {
+      "name": "nitrogen-circuit",
+      "args": [
+        "scaling/guard.py",
+        "--max-seconds",
+        "300",
+        "--",
+        "python",
+        "nitrogen/run.py",
+        "circuit",
+        "--folder",
+        "results/clean-n2",
+        "--bond",
+        "16",
+        "--bits",
+        "8"
+      ],
+      "exit_code": 0,
+      "seconds": 113.229
+    },
+    {
+      "name": "nitrogen-resources",
+      "args": [
+        "scaling/guard.py",
+        "--max-seconds",
+        "300",
+        "--",
+        "python",
+        "nitrogen/run.py",
+        "qpe_resources",
+        "--folder",
+        "results/clean-n2",
+        "--bond",
+        "16",
+        "--bits",
+        "8"
+      ],
+      "exit_code": 0,
+      "seconds": 3.96
+    }
+  ],
+  "setup_attempts": [
+    {
+      "name": "nitrogen-circuit",
+      "args": [
+        "scaling/guard.py",
+        "--max-seconds",
+        "300",
+        "--",
+        "python",
+        "nitrogen/run.py",
+        "circuit",
+        "--folder",
+        "results/clean-n2",
+        "--bond",
+        "16",
+        "--bits",
+        "8"
+      ],
+      "exit_code": 1,
+      "seconds": 0.041,
+      "reason": "macOS sandbox denied psutil process inspection; rerun outside sandbox"
+    }
+  ],
+  "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+  "versions": {
+    "numpy": "2.3.5",
+    "scipy": "1.18.1",
+    "pyscf": "2.14.0",
+    "qdk": "1.32.3",
+    "qdk-chemistry": "2.2.1+local",
+    "h5py": "3.16.0",
+    "matplotlib": "3.11.2",
+    "psutil": "7.2.2",
+    "pytest": "9.1.1",
+    "pyalps": "3.0.0",
+    "qdk-chemistry-alps": "0.2.0.dev0"
+  },
+  "adapter_tests": {
+    "passed": 95,
+    "skipped": 6,
+    "failed": 0,
+    "skip_reason": "Six RdmContainer tests; that optional capability is absent from the pinned public QDK commit."
+  },
+  "upstream_qdk_mps_container_tests": {
+    "passed": 8,
+    "failed": 0,
+    "seconds": 0.03,
+    "log": "clean-mps-tests.log"
+  },
+  "citation_tests": {
+    "passed": 16,
+    "failed": 0
+  },
+  "qdk_capabilities": {
+    "MPSContainer": true,
+    "MPSSite": true,
+    "RdmContainer": false
+  },
+  "module_and_resource_paths_within_fresh_environment": true,
+  "pythonpath_and_qdk_resource_overlays_used": false,
+  "native_build": {
+    "alps_sdk": "fresh SDK preset, Release, two jobs, Homebrew Boost/HDF5/Eigen/BLAS dependencies",
+    "pyalps": "fresh source wheel, models/ED/classic DMRG enabled; unrelated solver bindings/applications omitted",
+    "qdk": "fresh C++ core and bindings, Release, two jobs, OpenMP/IPO off; existing QDK library explicitly excluded",
+    "third_party_dependencies_reused": true,
+    "qdk_dependency_versions": {
+      "Libint": "2.9.0",
+      "Libecpint": "1.0.7",
+      "GauXC": "1.0.0 with cube support",
+      "spdlog": "1.15.3"
+    },
+    "blank_machine_dependency_provisioning_retested": false,
+    "qdk_extension_sha256": "1a7703cb02499f88a468d4a3535fddb4a91d54bfa5b21f08893c28f1f9b88a64",
+    "classic_dmrg_extension_sha256": "6995c7287d1353a68345dda31f99c81580197291983c10c04d3fe7423486215f"
+  },
+  "nitrogen_solve": [
+    {
+      "bond_requested": 8,
+      "energy": -108.77522236592016,
+      "error_vs_exact_mEh": 2.3436985074312133,
+      "fidelity_vs_exact": 0.2999357220643577,
+      "rdm_energy_error": 5.684341886080802e-14,
+      "spin_squared": 2.201344971893165
+    },
+    {
+      "bond_requested": 16,
+      "energy": -108.77756159049419,
+      "error_vs_exact_mEh": 0.0044739334015275745,
+      "fidelity_vs_exact": 0.999983455505066,
+      "rdm_energy_error": 1.4210854715202004e-14,
+      "spin_squared": 5.0351021330555835e-18
+    },
+    {
+      "bond_requested": 32,
+      "energy": -108.77756606442757,
+      "error_vs_exact_mEh": 1.4210854715202004e-11,
+      "fidelity_vs_exact": 1.0000000000000009,
+      "rdm_energy_error": 0.0,
+      "spin_squared": 1.0642908376020411e-17
+    }
+  ],
+  "nitrogen_preparation": {
+    "bond": 16,
+    "method": "dense",
+    "rotation_bits": 8,
+    "state_qubits": 12,
+    "build_seconds": 0.0036222499911673367,
+    "simulate_seconds": 109.92191841598833,
+    "logical_counts": {
+      "numQubits": 49,
+      "tCount": 42,
+      "rotationCount": 126,
+      "rotationDepth": 46,
+      "cczCount": 8276,
+      "ccixCount": 0,
+      "measurementCount": 8571
+    },
+    "fidelity_vs_mps": 0.9969751400701378,
+    "fidelity_vs_exact": 0.9969614477900773,
+    "zero_bond_probability": 0.9999703893509126,
+    "postselected_fidelity_vs_exact": 0.9969907672123275,
+    "energy": -108.77598913780778,
+    "energy_error_mEh": 1.5769266197906973,
+    "correct_particle_sector_probability": 0.9982356412175338,
+    "pauli_terms": 1475,
+    "wavefunction_hash": "f86412294db20cf4",
+    "execution": "Q# sparse simulator, MPSSequential/MPSSparse; all bond outcomes included, no postselection or hardware",
+    "export_limit": "PR #540 circuit/QIR factory resets output; saved callable parameters used instead",
+    "total_seconds": 112.93757870799163,
+    "process_peak_rss_bytes": 805109760,
+    "script_sha256": "268aa31e2ef42eb4bf8b665c324314227e74885c09f84860ef23a66e2d7b9b34",
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "versions": {
+      "numpy": "2.3.5",
+      "scipy": "1.18.1",
+      "pyscf": "2.14.0",
+      "qdk": "1.32.3"
+    }
+  },
+  "nitrogen_qpe_resources": {
+    "bond": 16,
+    "rotation_bits": 8,
+    "phase_bits": 8,
+    "evolution_time": 0.5,
+    "trotter_order": 2,
+    "trotter_divisions": 4,
+    "energy_shift_electronic_Eh": -8.882964857674608,
+    "core_energy_Eh": -99.89459673281958,
+    "energy_bin_width_Eh": 0.04908738521234052,
+    "logical_counts": {
+      "numQubits": 57,
+      "tCount": 63,
+      "rotationCount": 6014109,
+      "rotationDepth": 5593749,
+      "cczCount": 8276,
+      "ccixCount": 0,
+      "measurementCount": 8579
+    },
+    "wavefunction_hash": "f86412294db20cf4",
+    "status": "Composed and resource-counted in QDK; QPE not executed",
+    "limitation": "Phase bin width is not total error. Trotter and gate-synthesis errors are not certified; no physical-qubit or runtime claim.",
+    "total_seconds": 3.573304040997755,
+    "process_peak_rss_bytes": 799997952,
+    "script_sha256": "268aa31e2ef42eb4bf8b665c324314227e74885c09f84860ef23a66e2d7b9b34",
+    "python": "3.13.9 | packaged by Anaconda, Inc. | (main, Oct 21 2025, 19:11:29) [Clang 20.1.8 ]",
+    "versions": {
+      "numpy": "2.3.5",
+      "scipy": "1.18.1",
+      "pyscf": "2.14.0",
+      "qdk": "1.32.3"
+    }
+  },
+  "comparison_with_original_figures": {
+    "dmrg_m16_ground_state_probability_original": 0.9999834555050637,
+    "qsharp_preparation_probability_original": 0.9973015508162105,
+    "qsharp_preparation_probability_clean": 0.9969614477900773,
+    "note": "The earlier mixed runtime used NumPy 2.5.3 and an assembled QDK environment. The clean public source build uses the pinned QDK NumPy<2.4 requirement. DMRG overlaps agree to numerical precision; finite-precision circuit preparation is not bitwise identical. The presentation preparation figure now uses the clean-run result."
+  }
+}

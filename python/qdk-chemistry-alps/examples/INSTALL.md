@@ -38,6 +38,7 @@ cmake --build --preset sdk --target install --parallel 2
 export ALPS_DIR="$PWD/_build/sdk/install/share/alps"
 PYALPS_BUNDLE_APPLICATIONS=OFF CMAKE_BUILD_PARALLEL_LEVEL=2 \
   python -m pip install ./python/pyalps \
+    -c python/qdk-chemistry-alps/examples/requirements-reproduce.txt \
     -C cmake.define.PYALPS_BUILD_SOLVERS=OFF \
     -C build-dir="$PWD/_build/python"
 ```
@@ -71,13 +72,13 @@ If native dependencies are not installed, the pinned repository provides its
 own manifest-driven CI helper:
 
 ```bash
-brew install nlohmann-json
+brew install nlohmann-json wget
 export QDK_DEPS="$PWD/../qdk-deps"
 INSTALL_PREFIX="$QDK_DEPS" BUILD_DIR="$PWD/../qdk-deps-build" \
   MARCH=armv8-a JOBS=2 \
   bash .pipelines/install-scripts/install-cpp-deps.sh \
-    cpp/manifest/qdk-chemistry/cgmanifest.json \
-    external/macis/manifest/cgmanifest.json auto
+    "$PWD/cpp/manifest/qdk-chemistry/cgmanifest.json" \
+    "$PWD/external/macis/manifest/cgmanifest.json" auto
 ```
 
 That optional helper builds substantial dependencies, including Libint, and
@@ -92,6 +93,7 @@ Compile and install the pinned QDK core and Python bindings:
 CMAKE_PREFIX_PATH="$QDK_DEPS:$(brew --prefix)" \
 CMAKE_BUILD_PARALLEL_LEVEL=2 QDK_ENABLE_OPENMP=OFF QDK_UARCH=armv8-a \
   python -m pip install ./python \
+    -c ../ALPS/python/qdk-chemistry-alps/examples/requirements-reproduce.txt \
     -C build-dir=build/python \
     -C cmake.define.CMAKE_DISABLE_FIND_PACKAGE_qdk=TRUE \
     -C cmake.define.QDK_ALLOW_DEPENDENCY_FETCH=OFF \
@@ -105,13 +107,15 @@ cd ../ALPS
 
 The include flag keeps headers consistent with the prefix's spdlog library.
 The pinned Python metadata selects QDK runtime `1.32.3` and NumPy `>=2,<2.4`.
-Respect those constraints. `RdmContainer` is a separate optional QDK capability;
+The checked-in constraints file pins the scientific Python versions used in
+the clean verification. Respect the QDK constraints. `RdmContainer` is a separate optional QDK capability;
 the MPS examples require `MPSContainer` and `MPSSite` instead.
 
 ## 4. Install the adapter and run the examples
 
 ```bash
-python -m pip install './python/qdk-chemistry-alps[examples,test]'
+python -m pip install './python/qdk-chemistry-alps[examples,test]' \
+  -c python/qdk-chemistry-alps/examples/requirements-reproduce.txt
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
 export QSHARP_PYTHON_TELEMETRY=false
 python -m pytest python/qdk-chemistry-alps --require-solver-stack -q
