@@ -23,7 +23,7 @@ if __name__ == '__main__':
             limit = float(args['-T'])
         except KeyError:
             limit = 0
-        resume = True if 'c' in args else False
+        resume = '-c' in args
         outfile = positional[0]
     except (IndexError, getopt.GetoptError):
         print('usage: [-T timelimit] [-c] outputfile')
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         try:
             with hdf5.archive(outfile[0:outfile.rfind('.h5')] + '.clone0.h5', 'r') as ar:
                 sim.load(ar)
-        except ArchiveNotFound: pass
+        except hdf5.ArchiveNotFound: pass
 
     if limit == 0:
         sim.run(lambda: False)
