@@ -93,15 +93,16 @@ alps2fcidump parm FCIDUMP
 ```
 
 `parm` is an ordinary ALPS parameter file (`LATTICE`/`GRAPH`, `MODEL`,
-couplings, libraries). `Nup_total` and `Ndown_total` give `NELEC` and `MS2`;
-without them, half filling is written.
+couplings, libraries). `Nup_total` and `Ndown_total` give `NELEC` and `MS2`,
+or `N_total` and `Sz_total` with a basis such as `"alternative fermion"`;
+without them, half filling is written. With `TOTAL_MOMENTUM` the file is still
+the real-space Hamiltonian.
 
 The same export is a parameter of `fulldiag` and `sparsediag`:
 `FCIDUMP="file"` writes the model to `file` before it is diagonalized, with
 the same checks. A model that FCIDUMP cannot hold stops the run with the
-reason. Each task of a job needs its own `FCIDUMP`; a task whose `FCIDUMP`
-is another task's file is not run. With `TOTAL_MOMENTUM` or momentum sectors
-the file is still the real-space Hamiltonian.
+reason. Each task of a job needs its own `FCIDUMP`; a job in which two tasks
+name the same file fails before any task runs.
 
 The integrals are read off the matrix ALPS builds, in the sectors with at most
 one up and one down electron, so they follow ALPS's operator definitions and
@@ -116,6 +117,11 @@ says why. Refused, for example: spin models, a Zeeman field, terms such as the
 walkthrough's `K` term that act on up and down electrons differently,
 three-body terms, and singlet pair hopping between bonds, which is
 spin-independent but has (pq|rs) != (qp|rs).
+
+The check builds ALPS's matrix in the sectors with four electrons, about
+n^4/4 states for n orbitals, which dominates the export beyond about 30
+orbitals. `--check 3` still catches three-body terms; `--check 2` checks only
+the sectors the integrals are read from.
 
 A worked example (one 2x2 plaquette followed through the local table and the
 matrix fill), the benchmarks against QDK CASCI and exact results, and the

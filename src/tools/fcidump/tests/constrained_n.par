@@ -2,4 +2,5 @@ LATTICE="chain lattice"
 L=4
 MODEL="alternative fermion Hubbard"
 U=4
+CONSERVED_QUANTUMNUMBERS="N,Sz"
 N_total=4

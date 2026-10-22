@@ -33,7 +33,8 @@ void usage(std::ostream& os)
         "orbital per site; site, bond and n-site terms) as an FCIDUMP file.\n"
         "PARAMETER_FILE is an ALPS parameter file (LATTICE, MODEL, couplings, and\n"
         "LATTICE_LIBRARY / MODEL_LIBRARY if needed); the first parameter set is\n"
-        "used. NELEC and MS2 come from Nup_total and Ndown_total, if set.\n"
+        "used. NELEC and MS2 come from Nup_total and Ndown_total, or N_total\n"
+        "and Sz_total, if set; otherwise half filling is written.\n"
         "FCIDUMP defaults to 'FCIDUMP'.\n\n"
         "Options:\n"
         "  --check N    compare ALPS's matrix with the integrals in every sector\n"
@@ -78,9 +79,6 @@ int main(int argc, char** argv)
       if (list.size() > 1)
         std::cerr << "Note: " << list.size() << " parameter sets; using the first.\n";
     }
-    if (p.defined("TOTAL_MOMENTUM"))
-      throw std::runtime_error("TOTAL_MOMENTUM is set; alps2fcidump needs the real-space basis");
-
     alps::fcidump::summary s = alps::fcidump::export_fcidump(p, target, check, tol, cutoff);
     std::cout << "Wrote " << target << ": " << s.orbitals << " orbitals, NELEC=" << s.nelec
               << ", MS2=" << s.ms2 << ", E_core=" << std::setprecision(12) << s.ecore

@@ -108,8 +108,10 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
         static_cast<std::string>(this->alps::scheduler::Task::parms["FCIDUMP"])).lexically_normal().string();
     std::map<std::string, std::pair<const void*, std::string> >::const_iterator
         it = fcidump_claims().find(file);
+    // not a runtime_error: MasterScheduler takes that for a missing task
+    // file, skips the task and still succeeds
     if (it != fcidump_claims().end() && it->second.first != this)
-      boost::throw_exception(std::runtime_error(
+      boost::throw_exception(std::invalid_argument(
           "FCIDUMP: " + file + " is also the FCIDUMP of " + it->second.second +
           "; give each task its own FCIDUMP"));
     fcidump_claims()[file] = std::make_pair(static_cast<const void*>(this),
@@ -134,9 +136,7 @@ void DiagMatrix<T,M>::dostep()
     return;
   // FCIDUMP="file": also write the Hamiltonian as FCIDUMP integrals
   if (this->alps::scheduler::Task::parms.defined("FCIDUMP")) {
-    alps::Parameters p(this->alps::scheduler::Task::parms);
-    if (p.defined("TOTAL_MOMENTUM"))
-      p.erase("TOTAL_MOMENTUM");
+    const alps::Parameters& p = this->alps::scheduler::Task::parms;
     std::string file = p["FCIDUMP"];
     try {
       alps::fcidump::summary s = alps::fcidump::export_fcidump(p, file);

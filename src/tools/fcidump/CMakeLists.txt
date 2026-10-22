@@ -26,14 +26,31 @@ if(ALPS_BUILD_TESTING)
   set_tests_properties(alps2fcidump_hubbard PROPERTIES
     ENVIRONMENT_MODIFICATION "${fcidump_xml}" LABELS "cli" TIMEOUT 60)
 
-  # Models an FCIDUMP cannot hold are refused with a message, without a file.
-  # They run in the source directory for the test model library; the refused
-  # FCIDUMP would go to the build tree.
+  # Sector parameters: N_total and Sz_total of "alternative fermion" give NELEC
+  # and MS2, and TOTAL_MOMENTUM is ignored.
   foreach(case IN ITEMS
-      "constrained_sz|BASIS also constrains Sz"
-      "constrained_n|BASIS also constrains N "
+      "constrained_n|NELEC=4, MS2=0"
+      "constrained_sz|NELEC=4, MS2=0"
+      "momentum|NELEC=4, MS2=0")
+    string(REPLACE "|" ";" case "${case}")
+    list(GET case 0 name)
+    list(GET case 1 expected)
+    add_test(NAME alps2fcidump_${name}
+      COMMAND alps2fcidump ${name}.par "${fcidump_work}/${name}.fcidump"
+      WORKING_DIRECTORY "${fcidump_tests}")
+    set_tests_properties(alps2fcidump_${name} PROPERTIES
+      ENVIRONMENT_MODIFICATION "${fcidump_xml}" PASS_REGULAR_EXPRESSION "Wrote [^\n]*${expected}"
+      LABELS "cli" TIMEOUT 60)
+  endforeach()
+
+  # Models an FCIDUMP cannot hold, and electron counts that do not fit, are
+  # refused with a message, without a file. They run in the source directory
+  # for the test model library; the refused FCIDUMP would go to the build tree.
+  foreach(case IN ITEMS
+      "fixed_n|BASIS also constrains N "
       "unconstrained|does not fix Nup and Ndown"
-      "momentum|TOTAL_MOMENTUM is set")
+      "lone_nup|Nup_total is set without Ndown_total"
+      "overfilled|6 up and 0 down electrons do not fit in 4 orbitals")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 name)
     list(GET case 1 expected)
