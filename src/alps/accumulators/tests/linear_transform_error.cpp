@@ -11,6 +11,7 @@
 #include "gtest/gtest.h"
 
 #include <random>
+#include <utility>
 #include <vector>
 
 namespace acc = alps::accumulators;
@@ -66,6 +67,24 @@ TEST(LinearTransformError, VectorKeepsTheError) {
     for (std::size_t i = 0; i < 2; ++i) {
         EXPECT_DOUBLE_EQ(error[i], negated[i]);
         EXPECT_DOUBLE_EQ(3 * error[i], scaled[i]);
+    }
+}
+
+// The count and mean keep the samples of the last, incomplete bin.
+TEST(LinearTransformError, IncompleteBinIsKept) {
+    acc::accumulator_set measurements;
+    measurements << acc::FullBinningAccumulator<double>("x");
+    for (int i = 0; i < 129; ++i)
+        measurements["x"] << double(i);
+    acc::result_set results(measurements);
+    acc::result_wrapper const& r = results["x"];
+    ASSERT_EQ(129u, r.count());
+    ASSERT_DOUBLE_EQ(64.0, r.mean<double>());
+    std::vector<std::pair<acc::result_wrapper, double> > const transformed = {
+        {-r, -64.0}, {r + 1.0, 65.0}, {r * 2.0, 128.0}, {1.0 - r, -63.0}};
+    for (auto const& t : transformed) {
+        EXPECT_EQ(129u, t.first.count());
+        EXPECT_DOUBLE_EQ(t.second, t.first.mean<double>());
     }
 }
 
