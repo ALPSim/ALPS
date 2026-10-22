@@ -24,6 +24,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/smart_ptr.hpp>
+#include <algorithm>
 #include <fstream>
 
 namespace alps {
@@ -80,6 +81,8 @@ void MasterScheduler::set_new_jobfile(const boost::filesystem::path& jobfilename
 #ifndef BOOST_NO_EXCEPTIONS
     try {
 #endif
+      if (!boost::filesystem::exists(taskfiles[i].in))
+        boost::throw_exception(std::runtime_error("file does not exist"));
       tasks[i]=make_task(taskfiles[i].in);
       if (tasks[i] && 
           taskstatus[i]!= TaskFinished && tasks[i]->finished_notime())  {
@@ -90,13 +93,9 @@ void MasterScheduler::set_new_jobfile(const boost::filesystem::path& jobfilename
 
 #ifndef BOOST_NO_EXCEPTIONS
     }
-    catch (const std::runtime_error& err) // file does not exist
+    catch (const std::exception& err)
     {
-      std::cout << err.what() << "\n";
-      std::cout  << "Cannot open simulation file " << taskfiles[i].in.string() 
-                 << ".\n";
-      tasks[i]=0;
-      taskstatus[i] = TaskNotExisting;
+      task_failed(i,err);
     }
 #endif
   }
@@ -168,14 +167,46 @@ void MasterScheduler::parse_job_file(const boost::filesystem::path& filename)
     boost::throw_exception(std::runtime_error("missing </JOB> tag in jobfile"));
 }
 
-// reload a simulation, this time to perform actual work
+// report a task that cannot be created; the other tasks still run and
+// exit_status() reports the failure at the end
+void MasterScheduler::task_failed(int i, const std::exception& err)
+{
+  std::cerr << "Error: cannot create task " << i+1 << " from "
+            << taskfiles[i].in.string() << ": " << err.what() << "\n";
+  tasks[i]=0;
+  taskstatus[i] = TaskNotExisting;
+}
+
+// reload a simulation, this time to perform actual work; if that fails
+// the task is reported and left null
 void  MasterScheduler::remake_task(ProcessList& where, const int i)
 {
   if(tasks[i]==0)
     boost::throw_exception(std::logic_error(
                "cannot remake a simulation that does not exist"));
   delete tasks[i];
-  tasks[i]=make_task(where,taskfiles[i].in);
+  tasks[i]=0;
+#ifndef BOOST_NO_EXCEPTIONS
+  try {
+#endif
+    tasks[i]=make_task(where,taskfiles[i].in);
+#ifndef BOOST_NO_EXCEPTIONS
+  }
+  catch (const std::exception& err) {
+    task_failed(i,err);
+  }
+#endif
+}
+
+int MasterScheduler::exit_status() const
+{
+  std::size_t failed=std::count(taskstatus.begin(),taskstatus.end(),
+                                int(TaskNotExisting));
+  if (failed==0)
+    return 0;
+  std::cerr << "Error: " << failed << " of " << taskstatus.size()
+            << " tasks could not be created.\n";
+  return 2;
 }
 
 MasterScheduler::~MasterScheduler()
@@ -225,11 +256,14 @@ void MasterScheduler::checkpoint()
         tasks[i]=0;
       }
       else if(taskstatus[i]==TaskNotExisting) {
-        out << start_tag("TASK") << attribute("status","finished")
+        // "new", so that a restart from this job file tries the task again
+        out << start_tag("TASK") << attribute("status","new")
             << start_tag("INPUT") << attribute("file",taskfiles[i].in.string())
+            << end_tag()
+            << start_tag("OUTPUT") << attribute("file",taskfiles[i].out.string())
             << end_tag() << end_tag();
-        std::cout  << "Task# " << i+1 << " does not exist\n";
-      } 
+        std::cout  << "Task# " << i+1 << " could not be created\n";
+      }
       else {
         out << start_tag("TASK") 
             << attribute("status",((taskstatus[i]==TaskNotStarted) ? "new" : "running"))
