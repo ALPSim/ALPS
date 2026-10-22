@@ -1,0 +1,19 @@
+Whenever scientific publications result from a program based on ALPS or Maxent we kindly ask for an acknowledgment of ALPS in the acknowledgment section of the paper, for a citation to the ALPS Maxent paper, and for a citation to the most current ALPS paper:
+
+1) The most current Maxent Paper:
+
+R. Levy, J.P.F. LeBlanc, E. Gull, Comput. Phys. Commun. 215 (2017).
+http://www.sciencedirect.com/science/article/pii/S0010465517300309
+http://dx.doi.org/10.1016/j.cpc.2017.01.018
+
+2) The most current ALPS Core Libraries paper:
+
+A. Gaenko et al., Comp. Phys. Comm. (2017) v.213, p.235-251
+http://www.sciencedirect.com/science/article/pii/S0010465516303885
+http://dx.doi.org/10.1016/j.cpc.2016.12.009
+
+3) The most current ALPS paper:
+
+B. Bauer et al., J. Stat. Mech. (2011) P05001.
+http://iopscience.iop.org/1742-5468/2011/05/P05001/
+http://dx.doi.org/10.1088/1742-5468/2011/05/P05001

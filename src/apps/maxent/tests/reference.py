@@ -27,21 +27,36 @@ def working_directory(directory):
 
 
 def kernel(case, beta, points, omega):
+    if case["dataspace"] == "time" and case["kernel"] == "bosonic":
+        # Even in omega; evaluated at |omega| so that no exponential overflows.
+        tau, frequency = points[:, None], np.abs(omega)[None, :]
+        with np.errstate(divide="ignore", invalid="ignore"):
+            values = 0.5 * frequency * (np.exp(-frequency * tau) + np.exp(-frequency * (beta - tau)))
+            values /= -np.expm1(-frequency * beta)
+        return np.where(frequency == 0, 1 / beta, values)
     if case["dataspace"] == "time":
         return -np.exp(-np.outer(points, omega)) / (1 + np.exp(-beta * omega))
-    frequency = (2 * points + (case["kernel"] == "fermionic")) * np.pi / beta
+    frequency = (2 * points + (case["kernel"] != "bosonic")) * np.pi / beta
+    if case.get("particle_hole_symmetry") is False:
+        complex_kernel = 1 / (1j * frequency[:, None] - omega[None, :])
+        if case["kernel"] != "fermionic":
+            complex_kernel *= omega[None, :] * (1 if case["kernel"] == "bosonic" else -1)
+        paired = np.empty((2 * len(points), len(omega)))
+        paired[0::2], paired[1::2] = complex_kernel.real, complex_kernel.imag
+        return paired
     denominator = frequency[:, None] ** 2 + omega[None, :] ** 2
     if case["kernel"] == "fermionic":
         return -frequency[:, None] / denominator
-    return -omega[None, :] ** 2 / denominator
+    return (1 if case["kernel"] == "anomalous" else -1) * omega[None, :] ** 2 / denominator
 
 
 def prepare(defaults, case, directory):
     count = defaults["ndat"]
-    points = np.arange(count, dtype=float)
+    complex_frequency = case.get("particle_hole_symmetry") is False
+    points = np.arange(count // 2 if complex_frequency else count, dtype=float)
     if case["dataspace"] == "time":
         points *= defaults["beta"] / (count - 1)
-    errors = defaults["sigma"] * (1 + np.arange(count) / count)
+    errors = case.get("sigma", defaults["sigma"]) * (1 + np.arange(count) / count)
     poles = np.asarray(case["poles"], dtype=float)
     values = kernel(case, defaults["beta"], points, poles[:, 0]) @ poles[:, 1]
     if case.get("omit_last", False):
@@ -54,22 +69,41 @@ def prepare(defaults, case, directory):
         "OMEGA_MIN": defaults["omega_min"], "OMEGA_MAX": defaults["omega_max"],
         "NORM": norm, "KERNEL": case["kernel"], "DATASPACE": case["dataspace"],
         "FREQUENCY_GRID": case["grid"], "DEFAULT_MODEL": "flat",
-        "PARTICLE_HOLE_SYMMETRY": int(case["dataspace"] == "frequency"),
+        "PARTICLE_HOLE_SYMMETRY": int(case.get("particle_hole_symmetry",
+                                               case["dataspace"] == "frequency")),
         "TEXT_OUTPUT": 0, "VERBOSE": 0, "MAX_TIME": 60, "CUT": 0.01,
         "DATA_IN_HDF5": 1, "DATA": str(directory / "input.h5"),
         "BASENAME": str(directory / "result"),
     }
-    if case["dataspace"] == "time":
+    # Without TAU_i, ALPS assumes a uniform tau grid for every input path.
+    # Upstream CQMP/Maxent leaves the HDF5 path's grid unset; Marcus Rosales
+    # found its wrong sum rule (commit 0070b980a on marcusr2ML/ALPS).
+    if case["dataspace"] == "time" and case.get("explicit_tau", True):
         parameters.update({f"TAU_{index}": float(point) for index, point in enumerate(points)})
-    with h5py.File(parameters["DATA"], "w") as archive:
-        archive["/Data"] = values * norm
-        archive["/Error"] = errors * norm
+    source = case.get("data_source", "hdf5")
+    if source == "inline":
+        del parameters["DATA"], parameters["DATA_IN_HDF5"]
+        for index, (value, error) in enumerate(zip(values, errors)):
+            parameters[f"X_{index}"] = float(value * norm)
+            parameters[f"SIGMA_{index}"] = float(error * norm)
+    elif source == "indexed_text":
+        parameters["DATA"] = str(directory / "input.dat")
+        parameters["DATA_IN_HDF5"] = 0
+        # ALPS text files address values by index, including paired real/imag
+        # frequency rows. Reorder them to catch accidental sequential reading.
+        rows = np.column_stack((np.arange(len(values)), values * norm, errors * norm))
+        np.savetxt(parameters["DATA"], rows[::-1], fmt=["%d", "%.17g", "%.17g"])
+    with h5py.File(directory / "input.h5", "w") as archive:
+        if source == "hdf5":
+            archive["/Data"] = values * norm
+            if not case.get("omit_errors", False):
+                archive["/Error"] = errors * norm
         if case.get("covariance", False):
             diagonal = (errors * norm) ** 2
             if case.get("singular_last", False):
                 diagonal[-1] = 0
             archive["/Covariance"] = np.diag(diagonal).ravel()
-            parameters["COVARIANCE_MATRIX"] = "HDF5"
+            parameters["COVARIANCE_MATRIX"] = case.get("covariance_marker", "HDF5")
         # Native params store integers as C++ int, not h5py's default int64.
         for name, value in parameters.items():
             archive["/parameters/" + name] = np.int32(value) if isinstance(value, int) else value
@@ -80,9 +114,9 @@ def read_result(filename, case):
     paths = {key: "/spectrum/" + key for key in
              ("omega", "average", "maximum", "chi", "variance")}
     paths.update(alpha="/alpha/values", probability="/alpha/probability")
-    if case["kernel"] == "bosonic":
-        paths.update(bosonic_average="/spectrum/bosonic/average",
-                     bosonic_maximum="/spectrum/bosonic/maximum")
+    if case["kernel"] in ("bosonic", "anomalous"):
+        paths.update({case["kernel"] + "_" + name: "/spectrum/" + case["kernel"] + "/" + name
+                      for name in ("average", "maximum")})
     with h5py.File(filename, "r") as archive:
         result = {key: np.asarray(archive[path]) for key, path in paths.items()}
     # Preserve the native test's check of the actual quadrature diagnostic.
@@ -126,11 +160,12 @@ def validate(defaults, case, result, points, values, errors):
                                                 defaults["n_alpha"]), rtol=1e-12)
     integral = np.sum((probability[:-1] + probability[1:]) * -np.diff(alpha) / 2)
     assert abs(integral - 1) < 1e-12
-    if case["kernel"] == "bosonic":
+    if case["kernel"] in ("bosonic", "anomalous"):
         for name in ("average", "maximum"):
-            assert result["bosonic_" + name].shape == result["omega"].shape
-            np.testing.assert_allclose(result["bosonic_" + name],
-                                       np.pi * result["omega"] * result[name], rtol=1e-12)
+            assert result[case["kernel"] + "_" + name].shape == result["omega"].shape
+            np.testing.assert_allclose(result[case["kernel"] + "_" + name],
+                                       np.pi * result["omega"] * result[name],
+                                       rtol=1e-12, atol=np.finfo(float).tiny)
 
 
 def run_cases(root, solve):
@@ -139,23 +174,29 @@ def run_cases(root, solve):
     for case in definitions["cases"]:
         directory = root / case["name"]
         directory.mkdir()
-        parameters, points, values, errors = prepare(definitions["defaults"], case, directory)
+        # A case may override the shared temperature and frequency grid.
+        settings = {**definitions["defaults"], **case.get("settings", {})}
+        parameters, points, values, errors = prepare(settings, case, directory)
         with working_directory(directory):
             solve(parameters)
         result = read_result(directory / "result.out.h5", case)
-        validate(definitions["defaults"], case, result, points, values, errors)
+        validate(settings, case, result, points, values, errors)
         runs[case["name"]] = result
     compare_results(runs["time_covariance"], runs["time_linear"])
     compare_results(runs["time_covariance_singular"], runs["time_omitted"])
     scaled = next(case for case in definitions["cases"] if case["name"] == "time_scaled")
     compare_results(runs["time_scaled"], runs["time_linear"], scaled["norm"])
+    for case in definitions["cases"]:
+        if "compare_with" in case:
+            compare_results(runs[case["name"]], runs[case["compare_with"]])
     return runs
 
 
 def compare_results(actual, expected, scale=1., relative=2e-5, absolute=1e-8):
     for name in expected:
         factor = (scale ** 2 if name == "variance" else scale
-                  if name in ("average", "maximum", "chi", "bosonic_average", "bosonic_maximum")
+                  if name in ("average", "maximum", "chi", "bosonic_average", "bosonic_maximum",
+                              "anomalous_average", "anomalous_maximum")
                   else 1.)
         normalized = actual[name] / factor
         assert normalized.shape == expected[name].shape
@@ -169,7 +210,8 @@ def compare_results(actual, expected, scale=1., relative=2e-5, absolute=1e-8):
 
 
 def run_cli(executable, parameters):
-    process = subprocess.run([str(executable), parameters["DATA"]],
+    input_file = Path(parameters["BASENAME"]).parent / "input.h5"
+    process = subprocess.run([str(executable), str(input_file)],
                              text=True, capture_output=True, timeout=60)
     assert process.returncode == 0, process.stdout + process.stderr
 

@@ -41,7 +41,7 @@ foreach(app dmrg qwl dirloop_sse worm spinmc fulldiag sparsediag hirschfye loop
   string(REPLACE "_evaluate" "" component "${app}")
   if(app STREQUAL "loop")
     set(component looper)
-  elseif(app MATCHES "^(checksign|simplemc|pevaluate|maxent)$")
+  elseif(app MATCHES "^(checksign|simplemc|pevaluate)$")
     set(component framework)
   endif()
   add_test(NAME citation_cli_${app} COMMAND "${ALPS_CITATION_PYTHON}"
