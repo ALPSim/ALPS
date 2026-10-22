@@ -930,6 +930,16 @@ def test_samples_that_do_not_fit_are_value_errors():
     assert "\n" not in str(raised.value)
 
 
+def test_results_refuse_a_result_without_measurements():
+    from pyalps import ngs
+
+    results = ngs.results()
+    for empty in (ngs.result(), ngs.observable2result(ngs.createRealObservable("x"))):
+        with pytest.raises(ValueError, match="no measurements"):
+            results["x"] = empty
+    assert "x" not in results
+
+
 def test_observables_item_deletion():
     from pyalps import ngs
 
