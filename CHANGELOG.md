@@ -30,8 +30,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
-- Replace the MaxEnt implementation with CQMP/Maxent while retaining the ALPS CLI, Python binding, solver API and scientific output conventions. Application builds now require Eigen >= 3.3. The solver adds fermionic Legendre input, additional default models and a `SEED` parameter (default 42) for reproducible `GENERATE_ERR` bootstrap errors. Its imaginary-time bosonic kernel stays finite at zero frequency and for large `BETA` times frequency. Its provenance is recorded in `src/apps/maxent/README.md`.
-
+- Replace the MaxEnt implementation with CQMP/Maxent while retaining the ALPS CLI, Python binding, solver API and scientific output conventions. Application builds now require Eigen >= 3.3. The solver adds fermionic Legendre input, additional default models and a `SEED` parameter (default 42) for reproducible `GENERATE_ERR` bootstrap errors. Its imaginary-time bosonic kernel stays finite at zero frequency and for large `BETA` times frequency. Its provenance is recorded in `src/apps/maxent/README.md`. The solver, rather than the CLI, prints its citations after input validation, so Python and direct C++ calls show them too; `ALPS_NO_CITATIONS=1` suppresses them but not the license notice.
 - Consolidate native runtime tests under GoogleTest with individual CTest cases, historical numerical and serialization references, isolated temporary files, and explicit MPI/sanitizer registration. GoogleTest is a test-only dependency; builds with tests disabled do not acquire or install it.
 - Keep Python tests and fixtures alongside pyalps and run standalone numerical tutorial tests independently. Retire the optional Boost.Python differential build audit after retaining application checks and focused regressions; see [the coverage assessment](tests/python-migration.md) for historical compatibility limits.
 

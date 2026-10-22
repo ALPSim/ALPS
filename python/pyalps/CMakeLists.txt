@@ -186,7 +186,6 @@ if((PYALPS_BUILD_SOLVERS OR PYALPS_BUNDLE_APPLICATIONS)
     AND IS_DIRECTORY "${ALPS_DATA_DIR}/licenses/maxent")
   # SDKs predating the CQMP reintegration do not contain these notices.
   install(FILES "${ALPS_DATA_DIR}/licenses/maxent/LICENSE.TXT"
-                "${ALPS_DATA_DIR}/licenses/maxent/ACKNOWLEDGE.TXT"
     DESTINATION pyalps/licenses/maxent)
 endif()
 

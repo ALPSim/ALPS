@@ -1,7 +1,6 @@
 /*
  * Copyright (C) 1998-2018 ALPS Collaboration.
  * All rights reserved. Use is subject to license terms. See ../LICENSE.TXT
- * For use in publications, see ../ACKNOWLEDGE.TXT
  */
 
 // Grid checks adapted from CQMP/Maxent test/gridTest.cpp at

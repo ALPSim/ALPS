@@ -13,6 +13,8 @@
 
 #include "maxent.hpp"
 #include <alps/utilities/signal.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/cli.hpp>
 #include <alps/solvers.hpp>
 #include <boost/bind/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -33,8 +35,12 @@ void alps::solvers::maxent(alps::params const& input, std::string const& output_
   std::ostringstream missing;
   if (parms.has_missing(missing))
     throw std::invalid_argument("maxent: " + missing.str());
-  parms.has_unused(std::cerr);
   MaxEntSimulation simulation(parms, output_file);
+  if (alps::cli_is_master()) {
+    alps::print_copyright(std::cout, "maxent");
+    std::cout << std::flush;
+    parms.has_unused(std::cerr);
+  }
   simulation.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time()
       + boost::posix_time::seconds(static_cast<int>(parms["MAX_TIME"]))));
 }

@@ -16,11 +16,11 @@ set_target_properties(alps_maxent PROPERTIES EXPORT_NAME maxent
   CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 target_link_libraries(alps_maxent PUBLIC ALPS::solver_headers ALPS::params ALPS::hdf5 ALPS::utilities ALPS::osiris
   Boost::filesystem Boost::date_time
-  PRIVATE $<BUILD_INTERFACE:Eigen3::Eigen> ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
+  PRIVATE ALPS::cli $<BUILD_INTERFACE:Eigen3::Eigen> ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
 target_compile_definitions(alps_maxent PRIVATE HAVE_LAPACK)
 install(TARGETS alps_maxent EXPORT ALPSTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
-install(FILES LICENSE.TXT ACKNOWLEDGE.TXT
+install(FILES LICENSE.TXT
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/maxent COMPONENT libraries)
 
 add_executable(maxent cli/maxent.cpp)

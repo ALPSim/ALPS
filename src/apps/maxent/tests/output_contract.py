@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+import os
 import subprocess
 import tempfile
 
@@ -12,7 +13,7 @@ import numpy as np
 BETA, COUNT, FREQUENCIES, ALPHAS, NORM = 4.0, 16, 48, 6, 2.5
 
 
-def solve(executable, directory, **overrides):
+def solve(executable, directory, returncode=0, **overrides):
     beta, count, frequencies, alphas, norm = BETA, COUNT, FREQUENCIES, ALPHAS, NORM
     tau = np.linspace(0.0, beta, count)
     poles = np.array([-1.0, 1.0])
@@ -36,9 +37,22 @@ def solve(executable, directory, **overrides):
         archive["Error"] = np.full(count, norm * 0.001)
         for name, value in parameters.items():
             archive["parameters/" + name] = np.int32(value) if isinstance(value, int) else value
-    completed = subprocess.run([str(executable), str(source)], cwd=directory,
+    environment = {k: v for k, v in os.environ.items() if k != "ALPS_NO_CITATIONS"}
+    completed = subprocess.run([str(executable), str(source)], cwd=directory, env=environment,
                                capture_output=True, text=True, timeout=60)
-    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert completed.returncode == returncode, completed.stdout + completed.stderr
+    return completed
+
+
+def check_citations(executable, directory):
+    """The solver prints its citations once per run, and not for rejected input."""
+    completed = solve(executable, directory)
+    assert completed.stdout.count("Recommended citations for ALPS maximum entropy") == 1, completed.stdout
+    for path in directory.glob("result*"):
+        path.unlink()
+    rejected = solve(executable, directory, returncode=1, NDAT=0)
+    assert "Recommended citations for" not in rejected.stdout, rejected.stdout
+    assert not list(directory.glob("result*")), "Rejected input must not write output"
 
 
 def check(executable, directory):
@@ -105,4 +119,6 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="alps-maxent-output-") as temporary:
         check(executable, Path(temporary))
         check_bootstrap_seed(executable, Path(temporary))
+    with tempfile.TemporaryDirectory(prefix="alps-maxent-citations-") as temporary:
+        check_citations(executable, Path(temporary))
     print("MaxEnt text and self-energy output checks passed")
