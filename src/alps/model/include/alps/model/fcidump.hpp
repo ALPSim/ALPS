@@ -546,10 +546,11 @@ inline summary export_fcidump(const alps::Parameters& parms, const std::string& 
   if (p.defined("TOTAL_MOMENTUM"))
     p.erase("TOTAL_MOMENTUM");
   check = std::max(check, 2);
-  if (p.defined("Nup_total") != p.defined("Ndown_total"))
-    throw std::runtime_error(p.defined("Nup_total")
-        ? "Nup_total is set without Ndown_total; set both, or neither for half filling"
-        : "Ndown_total is set without Nup_total; set both, or neither for half filling");
+  // A diag task may fix one of them and scan the other's sectors.
+  const bool up = p.defined("Nup_total"), down = p.defined("Ndown_total");
+  if (up != down)
+    std::cerr << "Note: only " << (up ? "Nup_total" : "Ndown_total")
+              << " is set; NELEC and MS2 do not use it.\n";
 
   extractor x(p);
   integrals I = extract(x, tol);
@@ -557,9 +558,17 @@ inline summary export_fcidump(const alps::Parameters& parms, const std::string& 
 
   int nup, ndown;
   const std::map<std::string, double>& totals = x.totals();
-  if (p.defined("Nup_total")) {
+  if (up && down) {
     nup = as_int(p, "Nup_total");
     ndown = as_int(p, "Ndown_total");
+    if ((totals.count("N") && totals.at("N") != nup + ndown) ||
+        (totals.count("Sz") && 2 * totals.at("Sz") != nup - ndown)) {
+      std::ostringstream o;
+      o << "Nup_total = " << nup << " and Ndown_total = " << ndown << " disagree with ";
+      if (totals.count("N")) o << "N_total = " << totals.at("N") << (totals.count("Sz") ? " and " : "");
+      if (totals.count("Sz")) o << "Sz_total = " << totals.at("Sz");
+      throw std::runtime_error(o.str());
+    }
   } else if (!totals.empty()) {
     double ne = totals.count("N") ? totals.at("N") : n;
     double ms2 = totals.count("Sz") ? 2 * totals.at("Sz") : std::fmod(ne, 2.);
@@ -577,8 +586,9 @@ inline summary export_fcidump(const alps::Parameters& parms, const std::string& 
   } else {
     nup = (n + 1) / 2;
     ndown = n / 2;
-    std::cerr << "Note: Nup_total/Ndown_total not set; writing half filling, NELEC="
-              << n << ", MS2=" << nup - ndown << ".\n";
+    if (!up && !down)
+      std::cerr << "Note: Nup_total/Ndown_total not set; writing half filling, NELEC="
+                << n << ", MS2=" << nup - ndown << ".\n";
   }
   if (nup < 0 || ndown < 0 || nup > n || ndown > n) {
     std::ostringstream o;

@@ -1,6 +1,7 @@
 # FCIDUMP="file" with several tasks: tasks with their own FCIDUMP each write
 # theirs; a second task naming the same FCIDUMP fails the run before any task
 # runs, instead of overwriting the first one's file.
+# A task that fixes only Nup_total and scans the Ndown sectors still runs.
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")
 set(ENV{ALPS_XML_PATH} "${xml_dir}")
@@ -51,3 +52,19 @@ list(LENGTH writes writes)
 if(NOT writes EQUAL 0 OR EXISTS "${test_dir}/shared.fcidump")
   message(FATAL_ERROR "a task ran although the FCIDUMP was shared:\n${output}")
 endif()
+
+file(WRITE "${test_dir}/lone" [=[
+LATTICE="chain lattice"
+L=2
+MODEL="fermion Hubbard"
+CONSERVED_QUANTUMNUMBERS="Nup,Ndown"
+Nup_total=1
+FCIDUMP="lone.fcidump"
+{ U=2 }
+]=])
+run_fulldiag(lone)
+if(NOT status EQUAL 0 OR NOT EXISTS "${test_dir}/lone.fcidump"
+   OR NOT output MATCHES "only Nup_total is set")
+  message(FATAL_ERROR "fulldiag with only Nup_total set did not run and write its FCIDUMP:\n${output}")
+endif()
+require_u(lone.fcidump 2)

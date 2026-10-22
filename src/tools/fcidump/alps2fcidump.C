@@ -79,6 +79,10 @@ int main(int argc, char** argv)
       if (list.size() > 1)
         std::cerr << "Note: " << list.size() << " parameter sets; using the first.\n";
     }
+    if (p.defined("Nup_total") != p.defined("Ndown_total"))
+      throw std::runtime_error(p.defined("Nup_total")
+          ? "Nup_total is set without Ndown_total; set both, or neither for half filling"
+          : "Ndown_total is set without Nup_total; set both, or neither for half filling");
     alps::fcidump::summary s = alps::fcidump::export_fcidump(p, target, check, tol, cutoff);
     std::cout << "Wrote " << target << ": " << s.orbitals << " orbitals, NELEC=" << s.nelec
               << ", MS2=" << s.ms2 << ", E_core=" << std::setprecision(12) << s.ecore

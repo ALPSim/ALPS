@@ -50,6 +50,7 @@ if(ALPS_BUILD_TESTING)
       "fixed_n|BASIS also constrains N "
       "unconstrained|does not fix Nup and Ndown"
       "lone_nup|Nup_total is set without Ndown_total"
+      "conflicting_n|Nup_total = 2 and Ndown_total = 2 disagree with N_total = 3"
       "overfilled|6 up and 0 down electrons do not fit in 4 orbitals")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 name)

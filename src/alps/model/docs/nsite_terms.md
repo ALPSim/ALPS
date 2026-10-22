@@ -96,13 +96,19 @@ alps2fcidump parm FCIDUMP
 couplings, libraries). `Nup_total` and `Ndown_total` give `NELEC` and `MS2`,
 or `N_total` and `Sz_total` with a basis such as `"alternative fermion"`;
 without them, half filling is written. With `TOTAL_MOMENTUM` the file is still
-the real-space Hamiltonian.
+the real-space Hamiltonian. The export sets `Nup_total`, `Ndown_total`,
+`N_total` and `Sz_total` for each sector it builds, so couplings must not
+refer to them: `mu="(Nup_total+Ndown_total)/4"` would be exported as
+-N^2/4, which equals the model only at that filling.
 
 The same export is a parameter of `fulldiag` and `sparsediag`:
 `FCIDUMP="file"` writes the model to `file` before it is diagonalized, with
 the same checks. A model that FCIDUMP cannot hold stops the run with the
 reason. Each task of a job needs its own `FCIDUMP`; a job in which two tasks
-name the same file fails before any task runs.
+name the same file fails before any task runs. A task that sets only one of
+`Nup_total` and `Ndown_total`, to scan the other's sectors, gets a note and
+the `NELEC` and `MS2` of the other parameters or of half filling; `alps2fcidump`
+refuses it.
 
 The integrals are read off the matrix ALPS builds, in the sectors with at most
 one up and one down electron, so they follow ALPS's operator definitions and
