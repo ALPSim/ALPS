@@ -216,6 +216,9 @@ void ContiParameters::decompose_covariance_matrix(const alps::params& p){
       if (var[new_ndat_]>cutoff) break; 
     // This is the number of good data
     ndat_ = old_ndat_ - new_ndat_;
+    // ALPS: no good data directions would leave an empty kernel.
+    if (ndat_ == 0)
+      throw std::invalid_argument("all covariance eigenvalues are at or below CM_EIGENVALUE_CUTOFF");
     if (new_ndat_ ==0)
       std::cout << " Ignoring no singular eigenvalues of covariance" << std::endl;
     else

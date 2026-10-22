@@ -64,6 +64,11 @@ void MaxEntHelper::checkDefaultModel(const vector_type &D) const{
         if(Di==0 || std::isnan(Di))
           throw std::logic_error("Error: Default model point = 0 at omega="
                                 +to_string_exact(omega_coord(i)));
+        // ALPS: the entropy takes log(A/D), so D must also be positive,
+        // e.g. where a tabulated model is extrapolated past its last row.
+        if(Di<0)
+          throw std::logic_error("Error: Default model point < 0 at omega="
+                                +to_string_exact(omega_coord(i)));
     }
 }
 

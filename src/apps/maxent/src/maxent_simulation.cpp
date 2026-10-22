@@ -89,6 +89,9 @@ alps::params& MaxEntSimulation::define_parameters(alps::params &p){
   p.define<bool>("SELF",false,"input is a self energy");
   p.define<int>("MAX_IT",1000,"Maximum Iterations for the fitting routine");
   p.define<int>("N_ALPHA",60,"Number of alpha samples");
+  // ALPS: the alpha grid and its probability need at least two points.
+  if (p.exists("N_ALPHA") && p["N_ALPHA"].as<int>() < 2)
+    throw std::invalid_argument("N_ALPHA must be at least 2");
   p.define<double>("ALPHA_MIN",0.01,"Minimum alpha");
   p.define<double>("ALPHA_MAX",20,"Maximum alpha");
   p.define<double>("NORM",1.0,"NORM");

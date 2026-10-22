@@ -13,7 +13,7 @@ import numpy as np
 BETA, COUNT, FREQUENCIES, ALPHAS, NORM = 4.0, 16, 48, 6, 2.5
 
 
-def solve(executable, directory, returncode=0, **overrides):
+def solve(executable, directory, returncode=0, covariance=None, **overrides):
     beta, count, frequencies, alphas, norm = BETA, COUNT, FREQUENCIES, ALPHAS, NORM
     tau = np.linspace(0.0, beta, count)
     poles = np.array([-1.0, 1.0])
@@ -35,6 +35,8 @@ def solve(executable, directory, returncode=0, **overrides):
     with h5py.File(source, "w") as archive:
         archive["Data"] = norm * data
         archive["Error"] = np.full(count, norm * 0.001)
+        if covariance is not None:
+            archive["Covariance"] = covariance
         for name, value in parameters.items():
             archive["parameters/" + name] = np.int32(value) if isinstance(value, int) else value
     environment = {k: v for k, v in os.environ.items() if k != "ALPS_NO_CITATIONS"}
@@ -53,6 +55,26 @@ def check_citations(executable, directory):
     rejected = solve(executable, directory, returncode=1, NDAT=0)
     assert "Recommended citations for" not in rejected.stdout, rejected.stdout
     assert not list(directory.glob("result*")), "Rejected input must not write output"
+
+
+def check_rejected_input(executable, directory):
+    """Input the solver cannot use is an error naming the cause, before any output."""
+    model = directory / "narrow_model.dat"
+    # Linear extrapolation of this table is negative beyond |omega| = 3.
+    np.savetxt(model, [[-2.0, 0.1], [0.0, 0.4], [2.0, 0.1]])
+    cases = {
+        "all covariance eigenvalues": dict(
+            covariance=np.eye(COUNT).ravel() * 1e-12, COVARIANCE_MATRIX="HDF5", CM_EIGENVALUE_CUTOFF=1e-10),
+        "Default model point < 0": dict(DEFAULT_MODEL=str(model)),
+        "N_ALPHA must be at least 2": dict(N_ALPHA=1),
+    }
+    for diagnostic, overrides in cases.items():
+        run = directory / ("rejected-" + diagnostic.split()[0])
+        run.mkdir()
+        rejected = solve(executable, run, returncode=1, **overrides)
+        assert diagnostic in rejected.stderr, rejected.stdout + rejected.stderr
+        assert not list(run.glob("result*")), diagnostic
+        assert not (run / "deltaOmega.dat").exists(), diagnostic
 
 
 def check(executable, directory):
@@ -119,6 +141,7 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="alps-maxent-output-") as temporary:
         check(executable, Path(temporary))
         check_bootstrap_seed(executable, Path(temporary))
+        check_rejected_input(executable, Path(temporary))
     with tempfile.TemporaryDirectory(prefix="alps-maxent-citations-") as temporary:
         check_citations(executable, Path(temporary))
     print("MaxEnt text and self-energy output checks passed")
