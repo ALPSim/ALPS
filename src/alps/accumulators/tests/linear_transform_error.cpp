@@ -46,6 +46,8 @@ TEST(LinearTransformError, ScalarKeepsTheError) {
     EXPECT_DOUBLE_EQ(2 * error, (r * -2.0).error<double>());
     EXPECT_DOUBLE_EQ(error / 2, (r / 2.0).error<double>());
     EXPECT_DOUBLE_EQ(error, (r * 2.0 / 2.0).error<double>());
+    EXPECT_DOUBLE_EQ(error, (1.0 - r).error<double>());
+    EXPECT_DOUBLE_EQ(2 * error, (2.0 * r).error<double>());
 
     EXPECT_DOUBLE_EQ(-mean, (-r).mean<double>());
     EXPECT_DOUBLE_EQ(mean + 1, (r + 1.0).mean<double>());
