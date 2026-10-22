@@ -913,6 +913,23 @@ def test_standalone_observables_accept_samples():
     observables["Energy"] << 1.5
 
 
+def test_samples_that_do_not_fit_are_value_errors():
+    import numpy as np
+
+    from pyalps import ngs
+
+    vector = ngs.createRealVectorObservable("Correlations")
+    vector << np.array([1.0, 2.0])
+    with pytest.raises(ValueError, match="same size") as raised:
+        vector << np.array([1.0, 2.0, 3.0])
+    assert "\n" not in str(raised.value)
+
+    scalar = ngs.createRealObservable("Energy")
+    with pytest.raises(ValueError, match="cannot convert") as raised:
+        scalar << np.array([1.0, 2.0])
+    assert "\n" not in str(raised.value)
+
+
 def test_observables_item_deletion():
     from pyalps import ngs
 

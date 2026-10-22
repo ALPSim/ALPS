@@ -39,22 +39,36 @@
 #include <nanobind/stl/string.h>
 namespace nb = nanobind;
 #include <cstdint>
+#include <exception>
 #include <memory>
 #include <string>
 #include <vector>
 namespace acc = alps::accumulators;
 namespace {
+// Appends a sample. One that does not fit the observable, such as a vector of
+// another size, is a ValueError, without the C++ stack trace that ALPSCore's
+// messages end with.
+template <typename T> void append_sample(acc::accumulator_wrapper & self, T const & sample) {
+    try {
+        self << sample;
+    } catch (std::exception const & error) {
+        std::string message = error.what();
+        throw nb::value_error(message.substr(0, message.find("\nIn ")).c_str());
+    }
+}
 void observable_append(acc::accumulator_wrapper & self, nb::object const & data) {
     if (nb::isinstance<nb::int_>(data) || nb::isinstance<nb::float_>(data)) {
-        self << nb::cast<double>(data);
+        append_sample(self, nb::cast<double>(data));
         return;
     }
+    std::vector<double> values;
     try {
-        auto values = nb::cast<nb::ndarray<double const, nb::c_contig>>(data);
-        self << std::vector<double>(values.data(), values.data() + values.size());
+        auto array = nb::cast<nb::ndarray<double const, nb::c_contig>>(data);
+        values.assign(array.data(), array.data() + array.size());
     } catch (nb::cast_error const &) {
         throw nb::type_error("observable samples must be numeric scalars or contiguous float64 arrays");
     }
+    append_sample(self, values);
 }
 void observable_load(acc::accumulator_wrapper & self, alps::hdf5::archive & ar, std::string const & path) {
     std::string current = ar.get_context();
