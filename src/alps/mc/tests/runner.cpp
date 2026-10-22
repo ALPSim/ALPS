@@ -62,6 +62,34 @@ TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
     EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
 }
 
+TEST(MonteCarloRunner, RejectsACheckpointOfTheNgsMcbase) {
+    alps::params parameters;
+    parameters["COUNT"] = 256;
+    parameters["SEED"] = 42;
+    sum_simulation simulation(parameters);
+    simulation.run([&] { return simulation.count == 32; });
+
+    alps::testing::TemporaryDirectory directory;
+    const auto filename = (directory.path() / "checkpoint.h5").string();
+    simulation.save(filename);
+    {
+        // The NGS mcbase stored the generator's state at checkpoint/engine/engine.
+        alps::hdf5::archive archive(filename, "w");
+        const std::string engine = "/simulation/realizations/0/clones/0/checkpoint/engine";
+        std::string state;
+        archive[engine] >> state;
+        archive.delete_data(engine);
+        archive[engine + "/engine"] << state;
+    }
+    sum_simulation resumed(parameters);
+    try {
+        resumed.load(filename);
+        FAIL() << "a checkpoint of the NGS mcbase was loaded";
+    } catch (std::runtime_error const& error) {
+        EXPECT_NE(std::string(error.what()).find("NGS mcbase"), std::string::npos) << error.what();
+    }
+}
+
 TEST(MonteCarloRunner, StopCallbackPreventsFurtherMeasurements) {
     alps::params parameters;
     parameters["COUNT"] = 256;

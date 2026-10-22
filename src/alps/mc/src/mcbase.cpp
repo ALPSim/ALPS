@@ -6,6 +6,8 @@
 #include <alps/utilities/signal.hpp>
 #include <alps/mc/mcbase.hpp>
 
+#include <stdexcept>
+
 namespace alps {
 
     mcbase::mcbase(parameters_type const & parms, std::size_t seed_offset)
@@ -69,6 +71,11 @@ namespace alps {
     }
 
     void mcbase::load(alps::hdf5::archive & ar) {
+        // ALPS addition: ALPS's NGS mcbase stored the generator's state in a
+        // group, at checkpoint/engine/engine.
+        if (ar.is_group("checkpoint/engine"))
+            throw std::runtime_error("the checkpoint was written by the NGS mcbase of an earlier ALPS"
+                                     " and cannot be resumed; start a new run");
         ar["/parameters"] >> parameters;
         ar["measurements"] >> measurements;
         ar["checkpoint"] >> random;

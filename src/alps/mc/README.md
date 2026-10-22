@@ -34,7 +34,7 @@ The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYR
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
 | `mc/include/alps/mc/*.hpp` (6 files) | `include/alps/mc/` | Copied, except that `mcbase.hpp` gains a virtual destructor (see below) |
-| `mc/src/*.cpp` (3 files) | `src/` | Copied |
+| `mc/src/*.cpp` (3 files) | `src/` | Copied, except that `mcbase.cpp` rejects NGS checkpoints (see below) |
 | `mc/test/*.cpp` (9 files) | `tests/` | Copied |
 | `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
@@ -53,3 +53,9 @@ destructor. `mcbase.hpp` declares one, marked with a comment, so a simulation
 can be destroyed through a pointer to `mcbase`. pyalps relies on this: a
 Python simulation is a nanobind trampoline derived from `mcbase`, and nanobind
 destroys it as an `mcbase`.
+
+`mcbase::load` first checks for the layout of a checkpoint written by ALPS's
+NGS `mcbase`, which stored the generator's state in a group at
+`checkpoint/engine/engine`. Such a checkpoint cannot be resumed, and the check
+says so instead of failing on a missing path. The code is marked with a
+comment, and `tests/runner.cpp` tests it.
