@@ -64,7 +64,7 @@ BasicVertexReference::BasicVertexReference(XMLTag tag)
   vertex_=(tag.attributes["vertex"]=="" ? 0 : boost::lexical_cast<int>(tag.attributes["vertex"]));
   if (tag.attributes["cell"]!="")
     read_vector_resize(tag.attributes["cell"],cell_);
-  else
+  else if (tag.name!="VERTEX")
     boost::throw_exception(std::runtime_error("cell attribute missing in <" + tag.name + "> element"));
   if (tag.attributes["offset"]!="")
     read_vector_resize(tag.attributes["offset"],offset_);

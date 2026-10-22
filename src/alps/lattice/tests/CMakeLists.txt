@@ -30,13 +30,14 @@ foreach(
   example9
   example10
   example11
-  label)
+  label
+  disorder)
   add_executable(lattice_${name} ${name}.C)
 
   target_link_libraries(lattice_${name} PRIVATE ALPS::alps)
   alps_add_gtest(lattice_${name} COMPONENT lattice LABELS compatibility)
 endforeach()
-foreach(name coloring disorder parity)
+foreach(name coloring parity)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)

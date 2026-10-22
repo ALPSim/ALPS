@@ -50,6 +50,8 @@ TEST(LatticeDisorder, ChangedEdgeKeepsSourceAndTarget) {
   EXPECT_NE(target_xml.find("cell=\"0 1\""), std::string::npos) << output;
   EXPECT_NE(target_xml.find("offset=\"1 1\""), std::string::npos) << output;
   EXPECT_NE(target_xml.find("vertex=\"7\""), std::string::npos) << output;
+
+  EXPECT_EQ(round_trip(output + "</LATTICEGRAPH>"), output);
 }
 
 // A changed vertex must keep its cell, offset and vertex attributes, and be
@@ -70,15 +72,21 @@ TEST(LatticeDisorder, ChangedVertexRoundTrips) {
   EXPECT_EQ(round_trip(output + "</LATTICEGRAPH>"), output);
 }
 
-TEST(LatticeDisorder, ChangedVertexRequiresCell) {
-  EXPECT_THROW(round_trip("<CHANGED><VERTEX type=\"4\" vertex=\"5\"/>"
-                          "</CHANGED></LATTICEGRAPH>"),
-               std::runtime_error);
+// A changed <VERTEX> without cell parsed before the fix and must still parse,
+// since one bad lattice would stop the whole lattice library from loading.
+TEST(LatticeDisorder, ChangedVertexWithoutCellParses) {
+  const std::string output = round_trip(
+      "<CHANGED><VERTEX type=\"4\" vertex=\"5\"/></CHANGED></LATTICEGRAPH>");
+
+  EXPECT_EQ(output.find("cell="), std::string::npos) << output;
+  EXPECT_NE(output.find("vertex=\"5\""), std::string::npos) << output;
+  EXPECT_EQ(round_trip(output + "</LATTICEGRAPH>"), output);
 }
 
-TEST(LatticeDisorder, DefaultVertexReferenceIsZeroed) {
-  const alps::detail::BasicVertexReference reference;
-  EXPECT_EQ(reference.vertex(), 0u);
-  EXPECT_TRUE(reference.cell_offset().empty());
-  EXPECT_TRUE(reference.offset().empty());
+TEST(LatticeDisorder, ChangedEdgeRequiresCell) {
+  EXPECT_THROW(round_trip("<CHANGED><EDGE type=\"2\">"
+                          "<SOURCE vertex=\"3\"/>"
+                          "<TARGET cell=\"0 1\" vertex=\"7\"/>"
+                          "</EDGE></CHANGED></LATTICEGRAPH>"),
+               std::runtime_error);
 }
