@@ -102,8 +102,14 @@ def prepare(defaults, case, directory):
             diagonal = (errors * norm) ** 2
             if case.get("singular_last", False):
                 diagonal[-1] = 0
-            archive["/Covariance"] = np.diag(diagonal).ravel()
-            parameters["COVARIANCE_MATRIX"] = case.get("covariance_marker", "HDF5")
+            if source == "hdf5":
+                archive["/Covariance"] = np.diag(diagonal).ravel()
+                parameters["COVARIANCE_MATRIX"] = case.get("covariance_marker", "HDF5")
+            else:
+                # Text data takes a separate "i j value" covariance file.
+                parameters["COVARIANCE_MATRIX"] = str(directory / "covariance.dat")
+                rows = [(i, i, value) for i, value in enumerate(diagonal)][::-1]
+                np.savetxt(parameters["COVARIANCE_MATRIX"], rows, fmt=["%d", "%d", "%.17g"])
         # Native params store integers as C++ int, not h5py's default int64.
         for name, value in parameters.items():
             archive["/parameters/" + name] = np.int32(value) if isinstance(value, int) else value
