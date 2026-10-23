@@ -331,6 +331,9 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
 
         return
 
+    if len( testdata ) != len( refdata ):
+        raise Exception( "Comparison Error: test and reference data differ in number of tasks" )
+
     # File level
     compare_list = []
     for testtask, reftask in zip(testdata, refdata):
@@ -498,7 +501,10 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
 
     # call comparison functions
     test_success = True
-    if compMethod == 'auto':
+    if len(outputs) != len(refFileList):
+        print("Number of output files (%d) differs from number of reference files (%d)" % (len(outputs), len(refFileList)))
+        test_success = False
+    elif compMethod == 'auto':
         missmatch = [(tf,rf) for (tf,rf) in zip(outputs,refFileList) if not checkProperties(tf,rf)]
         if missmatch:
             for ft in missmatch:
@@ -592,7 +598,7 @@ def runTest(testinputfile, outputs='auto', compMethod='auto', pyexec='auto'):
     
     os.chdir( tmpdir )
     cmdline = [pyexec, os.path.basename(script)]
-    pyalps.executeCommand(cmdline)
+    status = pyalps.executeCommand(cmdline)
     if inputs is not None:
         for f in inputs: os.remove(f)
 
@@ -610,7 +616,11 @@ def runTest(testinputfile, outputs='auto', compMethod='auto', pyexec='auto'):
         outputs = pyalps.getResultFiles( pattern=os.path.basename(outputs), \
             dirname=os.path.dirname(outputs) )
 
-    if not outputs:
+    if status != 0:
+        print("\n%s exited with status %d\n" % (script, status))
+        test_success = False
+
+    elif not outputs:
         print("\nList of output files of %s is empty\n" % script)
         test_success = False
 
@@ -719,10 +729,12 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
     pardir = os.getcwd()
     os.chdir(refdir)
     cmdline = [ sys.executable, os.path.join(pardir, script) ]
-    pyalps.executeCommand(cmdline)
+    status = pyalps.executeCommand(cmdline)
     if inputs is not None:
         for f in inputs: os.remove(f)
     os.chdir(pardir)
+    if status != 0:
+        raise Exception( "Reference generation failed: %s exited with status %d" % (script, status) )
 
     if prefix is None:
         reffiles = [ os.path.join(refdir, os.path.basename(f)) for f in outputs ]
