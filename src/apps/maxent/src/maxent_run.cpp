@@ -2,9 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
-*                       Thomas Pruschke <pruschke@comp-phys.org>
-*                       Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 1998-2026 ALPS Collaboration
 *
 * ALPS Project: https://alps.comp-phys.org/
 * SPDX-License-Identifier: MIT
