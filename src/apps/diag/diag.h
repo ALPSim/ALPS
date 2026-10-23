@@ -13,13 +13,29 @@
 /* $Id$ */
 
 #include <alps/model/hamiltonian_matrix.hpp>
+#include <alps/model/fcidump.hpp>
 #include <alps/lattice.h>
 #include <alps/scheduler/diag.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/tokenizer.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <cmath>
 #include <cstddef>
+#include <map>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+// The FCIDUMP files claimed by the tasks of this job, with the claiming task
+// and its file. The master constructs every task before running any, so two
+// tasks that would write the same FCIDUMP meet here.
+inline std::map<std::string, std::pair<const void*, std::string> >& fcidump_claims()
+{
+  static std::map<std::string, std::pair<const void*, std::string> > claims;
+  return claims;
+}
 
 
 template <class T, class M>
@@ -37,6 +53,7 @@ public:
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
 
   DiagMatrix (const alps::ProcessList& , const boost::filesystem::path&,bool delay_construct=false);
+  ~DiagMatrix();
 
   void dostep();
 
@@ -75,6 +92,7 @@ private:
 
   std::vector<unsigned int> multiplicities_;    
   QNRangeType ranges_;
+  std::string fcidump_;   // FCIDUMP file this task claimed, as an absolute path
 };
 
 
@@ -85,6 +103,30 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
 { 
   if (this->calc_averages())
     multiplicities_ = this->distance_multiplicities();
+  if (this->alps::scheduler::Task::parms.defined("FCIDUMP")) {
+    std::string file = boost::filesystem::absolute(
+        static_cast<std::string>(this->alps::scheduler::Task::parms["FCIDUMP"])).lexically_normal().string();
+    std::map<std::string, std::pair<const void*, std::string> >::const_iterator
+        it = fcidump_claims().find(file);
+    // not a runtime_error: MasterScheduler takes that for a missing task
+    // file, skips the task and still succeeds
+    if (it != fcidump_claims().end() && it->second.first != this)
+      boost::throw_exception(std::invalid_argument(
+          "FCIDUMP: " + file + " is also the FCIDUMP of " + it->second.second +
+          "; give each task its own FCIDUMP"));
+    fcidump_claims()[file] = std::make_pair(static_cast<const void*>(this),
+                                            this->infilename.string());
+    fcidump_ = file;
+  }
+}
+
+template <class T, class M>
+DiagMatrix<T,M>::~DiagMatrix()
+{
+  std::map<std::string, std::pair<const void*, std::string> >::iterator
+      it = fcidump_claims().find(fcidump_);
+  if (it != fcidump_claims().end() && it->second.first == this)
+    fcidump_claims().erase(it);
 }
 
 template <class T, class M>
@@ -92,6 +134,19 @@ void DiagMatrix<T,M>::dostep()
 {
   if (this->finished()) 
     return;
+  // FCIDUMP="file": also write the Hamiltonian as FCIDUMP integrals
+  if (this->alps::scheduler::Task::parms.defined("FCIDUMP")) {
+    const alps::Parameters& p = this->alps::scheduler::Task::parms;
+    std::string file = p["FCIDUMP"];
+    try {
+      alps::fcidump::summary s = alps::fcidump::export_fcidump(p, file);
+      std::cerr << "Wrote FCIDUMP " << file << ": " << s.orbitals << " orbitals, NELEC="
+                << s.nelec << ", MS2=" << s.ms2 << "; checked up to " << s.checked
+                << " electrons, max |difference| " << s.worst << "\n";
+    } catch (std::exception& e) {
+      boost::throw_exception(std::runtime_error("FCIDUMP: " + std::string(e.what())));
+    }
+  }
   build_subspaces(this->alps::scheduler::Task::parms["CONSERVED_QUANTUMNUMBERS"]);
   std::vector<total_type> indices(ranges_.size());
   std::vector<std::string> momenta;

@@ -7,6 +7,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 ### Added
 
 - n-site Hamiltonian terms for exact diagonalization (`fulldiag`, `sparsediag`). An `<NSITE>` in a `<UNITCELL>` or `<GRAPH>` lists an ordered group of sites; an `<NSITETERM sites="i j k l">` in a `<HAMILTONIAN>` is applied to every n-site group of its type, with arbitrary operator strings, any number of sites, and fermion signs handled. Terms that leave the `CONSERVED_QUANTUMNUMBERS` sector are refused. A term that changes a quantum number capped by a cutoff parameter, such as a boson `N <= Nmax`, prints a warning that the results depend on the cutoff. Other applications refuse models that combine n-site terms with n-site groups instead of ignoring them. See [the syntax](src/alps/model/docs/nsite_terms.md).
+- `alps2fcidump` and the `fulldiag`/`sparsediag` parameter `FCIDUMP="file"` write a spin-1/2 fermion model, including its n-site terms, as FCIDUMP integrals (h_pq, (pq|rs), E_core) for quantum chemistry codes. The integrals are read off ALPS's Hamiltonian matrix and checked against it; models FCIDUMP cannot hold are refused with the reason. See [the export section](src/alps/model/docs/nsite_terms.md#export-to-fcidump).
 
 ### Fixed
 
