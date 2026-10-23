@@ -30,6 +30,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Changed
 
+- Applications on the legacy scheduler (`sparsediag`, `fulldiag`, `dmrg`, `spinmc`, `qwl`, `worm`, `dirloop_sse`) now report a task that cannot be created, for example because of an unknown `LATTICE` or `MODEL`, an invalid parameter, or a missing task file. The error, naming the task and its input file, goes to stderr; the job's other tasks still run, and the program then exits with status 2. ALPS 3.0.0 either printed the error on stdout, called the task "does not exist", and exited 0 without results for it (diagonalization and DMRG), or aborted the whole job with status 255 (Monte Carlo applications, whose workers fail when the task starts). A restart from the job's `.out.xml` now tries such tasks again instead of recording them as finished. Time-limit (1) and signal exits are unchanged.
 - Consolidate native runtime tests under GoogleTest with individual CTest cases, historical numerical and serialization references, isolated temporary files, and explicit MPI/sanitizer registration. GoogleTest is a test-only dependency; builds with tests disabled do not acquire or install it.
 - Keep Python tests and fixtures alongside pyalps and run standalone numerical tutorial tests independently. Retire the optional Boost.Python differential build audit after retaining application checks and focused regressions; see [the coverage assessment](tests/python-migration.md) for historical compatibility limits.
 
