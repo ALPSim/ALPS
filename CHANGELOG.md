@@ -17,7 +17,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Initialize Monte Carlo completion scheduling before first use.
 - Read integer checkpoint parameters at their stored width and reject out-of-range conversion without changing existing values.
 - Preserve `txt2archive`, `xml2archive`, and the optional SQLite `archive` program; correct malformed-input handling.
-- `archive -c plot` accepts a paired `<CONSTRAINT>...</CONSTRAINT>` element, takes the plot or XML file as a positional argument as documented, and prints its version for `--version`. `alps_inspect` (`-DALPS_BUILD_DEVELOPER_TOOLS=ON`) compiles again.
+- `archive -c plot` accepts a paired `<CONSTRAINT>...</CONSTRAINT>` element, takes the plot or XML file as a positional argument as documented (giving it both ways, or to a command that reads no file, is an error), and prints its version for `--version`. A plot file that only partly matches the plot DTD is rejected instead of being used as far as it parsed.
 - Report MaxEnt CLI help and input errors with normal exit codes instead of continuing into an empty input or aborting on an exception. Valid scientific runs are unchanged.
 - Reject unsupported native C++ parameter checkpoint datatypes with the dataset path in the diagnostic, instead of silently substituting zero. Existing supported types and custom readers retain their decoding behavior; a failed parameter reload preserves the previous values.
 - Generate XML plotting scripts compatible with Python 3 through the `alps-xml` CLI.

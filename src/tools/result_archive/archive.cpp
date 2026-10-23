@@ -92,10 +92,29 @@ int main(int ac, char* av[]) {
                         throw std::runtime_error("no db-file specified!");
 
                 else {
+                        std::string const cmd = vm["command"].as<std::string>();
+
+                        // A positional file stands in for -p (plot) or -x (append, rebuild).
+                        // Resolve it once, so a file given both ways or to a command that
+                        // reads none is an error instead of being silently ignored.
+                        std::string positional;
+                        if (vm.count("positional-arg")) {
+                                positional = vm["positional-arg"].as<std::string>();
+                                if (vm.count("plot-file") || vm.count("xml-file"))
+                                        throw std::runtime_error("give the input file either as a positional argument or with -p/-x, not both");
+                                if (cmd != "plot" && cmd != "p" && cmd != "append" && cmd != "a" && cmd != "rebuild" && cmd != "r")
+                                        throw std::runtime_error(std::string("command '") + cmd + "' takes no input file");
+                        }
+                        auto inputFile = [&](char const* option, char const* what) {
+                                if (positional.empty() && !vm.count(option))
+                                        throw std::runtime_error(std::string("no ") + what + " specified");
+                                return absolute(fs::path(positional.empty() ? vm[option].as<std::string>() : positional));
+                        };
+
                         db.setVerbose(vm.count("verbose"));
                         db.open(absolute(fs::path(vm["db-file"].as<std::string>())));
 
-                        if (vm["command"].as<std::string>() == "install" || vm["command"].as<std::string>() == "i") {
+                        if (cmd == "install" || cmd == "i") {
                                 #ifdef USEPATTERN
                                         if (!vm.count("pattern-file"))
                                                 throw std::runtime_error("no index-file specified!");
@@ -104,27 +123,24 @@ int main(int ac, char* av[]) {
                                         Index(db, vm.count("verbose")).install();
                                 #endif
 
-                        } else if (vm["command"].as<std::string>() == "list" || vm["command"].as<std::string>() == "l") {
+                        } else if (cmd == "list" || cmd == "l") {
                                 Index(db, vm.count("verbose")).list(vm.count("full-list"));
 
-                        } else if (vm["command"].as<std::string>() == "plot" || vm["command"].as<std::string>() == "p") {
-                                if (!vm.count("plot-file") && !vm.count("positional-arg"))
-                                        throw std::runtime_error("no plot-file specified");
-                                else if (!vm.count("output-path"))
+                        } else if (cmd == "plot" || cmd == "p") {
+                                fs::path plotPath = inputFile("plot-file", "plot-file");
+                                if (!vm.count("output-path"))
                                         throw std::runtime_error("no output-path specified");
-                                fs::path plotPath = absolute(fs::path(vm[vm.count("positional-arg") ? "positional-arg" : "plot-file"].as<std::string>()));
                                 fs::path outputPath = absolute(fs::path(vm["output-path"].as<std::string>()));
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.filename().string());
 
                         } else {
-                                if (!vm.count("xml-file") && !vm.count("positional-arg"))
-                                        throw std::runtime_error("No xml-file specified!");
-                                else if (vm["command"].as<std::string>() == "rebuild" || vm["command"].as<std::string>() == "r") {
+                                fs::path xmlPath = inputFile("xml-file", "xml-file");
+                                if (cmd == "rebuild" || cmd == "r") {
                                         if(db.clear() == false)
                                                 throw std::runtime_error("Could not clear tables!");
-                                } else if (vm["command"].as<std::string>() != "append" && vm["command"].as<std::string>() != "a")
-                                        throw std::runtime_error(std::string("Unknown command '") + vm["command"].as<std::string>() + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(absolute(fs::path(vm[vm.count("positional-arg") ? "positional-arg" : "xml-file"].as<std::string>())));
+                                } else if (cmd != "append" && cmd != "a")
+                                        throw std::runtime_error(std::string("Unknown command '") + cmd + std::string("'"));
+                                Index(db, vm.count("verbose")).exec(xmlPath);
                         }
                 }
         } catch(std::exception& e) {

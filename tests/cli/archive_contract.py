@@ -65,21 +65,35 @@ def main():
             run(command, "--command", "append", "--db-file", database, "--xml-file", simulation)
             with sqlite3.connect(database) as db:
                 assert db.execute("SELECT count(*) FROM measurement").fetchone() == (1,)
-            # The input file may also be given positionally.
-            run(command, "--command", "append", "--db-file", database, simulation)
+            # The input file may also be given positionally, but not both ways,
+            # and not to a command that reads none.
+            second = root / "second.xml"
+            second.write_text(simulation.read_text().replace("1.25", "2.5").replace("<MEAN>-2</MEAN>", "<MEAN>-4</MEAN>"))
+            run(command, "--command", "append", "--db-file", database, second)
             with sqlite3.connect(database) as db:
-                assert db.execute("SELECT count(*) FROM measurement").fetchone() == (1,)
+                assert db.execute("SELECT count(*) FROM measurement").fetchone() == (2,)
+                assert db.execute("SELECT value FROM parameter WHERE name='T' ORDER BY value").fetchall() == [('1.25',), ('2.5',)]
+            run(command, "--command", "append", "--db-file", database, "--xml-file", simulation, second, success=False)
+            run(command, "--command", "list", "--db-file", database, second, success=False)
             assert run(command, "--version").startswith("ALPS Plot Generator")
 
-            # A paired <constraint></constraint> is as valid as a self-closing one.
+            # A paired <constraint></constraint> is as valid as a self-closing one,
+            # and it selects the plotted points.
             plot = root / "energy.plot.xml"
-            plot.write_text('''<plot name="energy"><xaxis name="T" type="parameter"/>
+            plot.write_text('''<plot name="energy" output="text"><xaxis name="T" type="parameter"/>
 <yaxis name="Energy" type="mean"/>
-<constraint name="T" type="parameter" operator="greaterthan" value="0"></constraint>
+<constraint name="T" type="parameter" operator="greaterthan" value="2"></constraint>
 </plot>''')
             output = root / "plots"
             output.mkdir()
             run(command, "--command", "plot", "--db-file", database, "--output-path", output, plot)
+            written = output / "energy.plot.xml.text"
+            assert written.is_file(), sorted(output.iterdir())
+            rows = [line.split() for line in written.read_text().splitlines() if line and not line.startswith("#")]
+            assert rows == [["2.5", "-4"]], written.read_text()
+            # A plot file that only partly matches the DTD is rejected.
+            plot.write_text(plot.read_text() + "<stray/>\n")
+            run(command, "--command", "plot", "--db-file", database, "--output-path", output, plot, success=False)
 
 
 if __name__ == "__main__":

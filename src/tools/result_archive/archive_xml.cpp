@@ -335,7 +335,9 @@ Node XML::operator()(fs::path inFileName, bool usePlotDTD)
   if (usePlotDTD) {
     sp::parse_info<> plotInfo =
       sp::parse(fileContent.c_str(), PlotDTD(), sp::space_p);
-    if (!plotInfo.hit)
+    // the whole file has to match: a plot file with trailing content
+    // would otherwise be used as far as it parsed
+    if (!plotInfo.full)
       boost::throw_exception(std::runtime_error(std::string(
         "The Plotfile does not match the DTD! Fails parsing at: ") +
         plotInfo.stop));
@@ -343,6 +345,9 @@ Node XML::operator()(fs::path inFileName, bool usePlotDTD)
 
   sp::parse_info<> info =
     sp::parse(fileContent.c_str(), XMLEbnf(), sp::space_p);
+  if (usePlotDTD && !info.full)
+    boost::throw_exception(std::runtime_error(std::string(
+      "Fails parsing file ") + inFileName.string() + " at " + info.stop));
   if (mVerbose) {
     if (info.full) {
       std::cout << "File parsed: " << inFileName.string() << " ("

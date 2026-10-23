@@ -42,6 +42,10 @@ namespace boost
       //  called for each file and directory, so only the leaf need be tested
       string const filename( full_path.filename().string() );
 
+      // allow Mac .DS_Store files
+      if (filename == ".DS_Store")
+         return;
+
       //  includes only allowable characters
       if ( (pos = filename.find_first_not_of( allowable )) != string::npos )
       {
@@ -80,9 +84,6 @@ namespace boost
       //        + " file name with more than one dot character ('.')" );
       //  }
       //}
-      // allow Mac .DS_Store files
-      if (filename == ".DS_Store")
-         return;
 
       //  the path, including a presumed root, does not exceed the maximum size
       path const relative_path( relative_to( full_path, filesystem::initial_path() ) );
