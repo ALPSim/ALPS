@@ -47,7 +47,8 @@ NB_MODULE(pyngsresults_c, m) {
         .def("__setitem__",  [](acc::result_set & self, std::string const & k, pyalps::result const & v) {
                                  // The set and the assigned name share the result;
                                  // a result without measurements is refused.
-                                 v.get();
+                                 if (v.empty())
+                                     throw nb::value_error("result has no measurements");
                                  pyalps::assign(self, k, v.value);
                              })
         .def("__delitem__",  &pyalps::erase<acc::result_set>)

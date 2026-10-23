@@ -12,7 +12,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <algorithm>
+#include <cmath> // ALPS: for the integer hint in define_
+#include <iomanip> // ALPS: for the integer hint in define_
 #include <locale> // FIXME: needed only for boolean conversions
+#include <sstream> // ALPS: for the integer hint in define_
+#include <type_traits> // ALPS: for the integer hint in define_
 
 namespace alps {
     namespace params_ns {
@@ -110,7 +114,20 @@ namespace alps {
                 return false; // caller needs to decide whether the default is available
             }
             if (!assign_to_name_<T>(name, it->second)) {
-                err_status_.push_back("Cannot parse parameter '"+name+"' as the requested type");
+                std::string message="Cannot parse parameter '"+name+"' as the requested type";
+                // ALPS: say how to write a whole number such as "24.0" or "1e6"
+                // that an integer parameter rejects
+                if constexpr (std::is_integral<T>::value && !std::is_same<T, bool>::value) {
+                    double number;
+                    if (boost::conversion::try_lexical_convert(it->second, number)
+                        && std::isfinite(number) && number == std::trunc(number)
+                        && std::fabs(number) <= 9007199254740992.0) { // 2^53
+                        std::ostringstream hint;
+                        hint << std::fixed << std::setprecision(0) << number;
+                        message+=": '"+it->second+"' is not an integer literal; write "+hint.str();
+                    }
+                }
+                err_status_.push_back(message);
                 (*this)[name].clear();
             }
             return true;

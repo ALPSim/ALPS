@@ -60,6 +60,23 @@ TEST(ParamsSupply, NonIntegralTextForAnIntegerIsAnError) {
     }
 }
 
+// The error for whole-number text says how to write the integer.
+TEST(ParamsSupply, WholeNumberTextForAnIntegerSaysHowToWriteIt) {
+    std::map<std::string, std::string> const texts = {
+        {"4.0", "write 4"}, {"1e6", "write 1000000"}, {"-3.", "write -3"}};
+    for (auto const& text : texts) {
+        alps::params p;
+        p.supply("SWEEPS", text.first);
+        p.define<long>("SWEEPS", "sweeps");
+        EXPECT_TRUE(p.has_missing()) << "'" << text.first << "'";
+        EXPECT_NE(std::string::npos, missing_message(p).find(text.second)) << missing_message(p);
+    }
+    alps::params p;
+    p.supply("N_TAU", "2.7");
+    p.define<int>("N_TAU", "time slices");
+    EXPECT_EQ(std::string::npos, missing_message(p).find("write")) << missing_message(p);
+}
+
 TEST(ParamsSupply, ExponentTextIsADouble) {
     alps::params p;
     p.supply("SWEEPS", "1e6");

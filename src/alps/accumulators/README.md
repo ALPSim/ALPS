@@ -78,6 +78,17 @@ One source change, for MPI builds:
   `alps::hdf5` traits derive from `boost::true_type` and `boost::false_type`,
   ALPSCore's from the `std::` types the helpers take.
 
+One change to `FullBinningAccumulator` results, marked `ALPS:` in
+`feature/max_num_binning.hpp` and `src/feature/max_num_binning.cpp`:
+
+- Adding, subtracting, multiplying or dividing by a constant, or negating,
+  shifts or scales the result's mean and error. `-r`, `r + 1` and `r / 2` have
+  the error of `r`, and `2 * r` twice it. ALPSCore replaced the
+  binning-analysis error with a jackknife over the bins, which for correlated
+  data differs from it: by 7.5% for an AR(1) process with coefficient 0.8.
+  Operations on two results and nonlinear functions still use the jackknife.
+  `tests/linear_transform_error.cpp`, ALPS's own, tests this.
+
 One test change:
 
 - `tests/save_load.cpp` and `tests/mean_err_count.cpp` include

@@ -465,7 +465,18 @@ namespace alps {
                 using alps::numeric::negate;
 
                 typedef typename value_type<B>::type value_type;
+                // ALPS: keep the count and error of an analyzed result, as the
+                // scalar operators in the header do; -r has the error of r
+                bool const was_analyzed = m_mn_data_is_analyzed;
+                typename B::count_type const count = m_mn_count;
+                typename mean_type<B>::type const mean = m_mn_mean;
+                typename error_type<B>::type const error = m_mn_error;
                 transform(negate<value_type>());
+                if (was_analyzed) {
+                    m_mn_count = count;
+                    m_mn_mean = negate<typename mean_type<B>::type>()(mean);
+                    m_mn_error = error;
+                }
                 B::negate();
             }
 
