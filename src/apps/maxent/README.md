@@ -80,7 +80,7 @@ references.
 
 ## License and scientific credit
 
-The imported code is under the MIT license in [LICENSE.TXT](LICENSE.TXT), distributed with the SDK and Python package. Its copyright notices are preserved. Run `maxent --citations` for guidance from the shared ALPS citation catalog.
+The imported code is under the MIT license of ALPS, as is CQMP/Maxent; each source states it with an `SPDX-License-Identifier` line. Run `maxent --citations` for guidance from the shared ALPS citation catalog.
 
 ## Validation
 

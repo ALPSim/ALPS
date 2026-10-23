@@ -1,7 +1,14 @@
-/*
- * Copyright (C) 1998-2018 ALPS Collaboration.
- * All rights reserved. Use is subject to license terms. See ../LICENSE.TXT
- */
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1998-2018 ALPS Collaboration
+*
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+*
+*****************************************************************************/
+
 
 // Grid checks adapted from CQMP/Maxent test/gridTest.cpp at
 // a3992534228b0de732e033ae23154969724814be: combine the odd/even cases,

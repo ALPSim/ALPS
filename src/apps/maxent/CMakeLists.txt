@@ -20,8 +20,6 @@ target_link_libraries(alps_maxent PUBLIC ALPS::solver_headers ALPS::params ALPS:
 target_compile_definitions(alps_maxent PRIVATE HAVE_LAPACK)
 install(TARGETS alps_maxent EXPORT ALPSTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
-install(FILES LICENSE.TXT
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/licenses/maxent COMPONENT libraries)
 
 add_executable(maxent cli/maxent.cpp)
 target_link_libraries(maxent PRIVATE ALPS::maxent ALPS::cli)
