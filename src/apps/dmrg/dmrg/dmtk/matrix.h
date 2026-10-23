@@ -179,10 +179,10 @@ class Matrix:public std::vector<T>
     Matrix<T> ct() const;
     Matrix<T>& randomize(int seed = -1)
     {
-      static long idum = seed == -1 ? abs((long)this)/0xffff : seed;
+      if(seed != -1) seed_random(seed);
       for(int i = 0; i < cols(); i++)
         for(int j = 0; j < rows(); j++)
-          operator()(i,j) = quickran(idum);
+          operator()(i,j) = quickran(random_state());
       return *this;
     }
 
