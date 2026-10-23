@@ -26,8 +26,7 @@
 
 // Adapted from CQMP/Maxent src/maxent_kernel.cpp, revision
 // e727650a1f0a427e95efebc409d907b4c84011ec, on 2026-10-14.
-// Uses ALPS's HDF5 archive and retains ALPS input/output conventions;
-// see ../README.md for provenance and licensing.
+// Uses ALPS's HDF5 archive and retains ALPS input/output conventions.
 #include "maxent_kernel.hpp"
 #include <cmath>
 #include "maxent_string.hpp"

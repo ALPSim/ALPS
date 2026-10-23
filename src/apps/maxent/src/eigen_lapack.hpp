@@ -10,7 +10,7 @@
 *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/eigen_lapack.hpp at
-// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec.
 // Updated 2026-10-14 to size thin factors and report LAPACK errors.
 #pragma once
 

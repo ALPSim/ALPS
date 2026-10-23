@@ -10,7 +10,7 @@
 *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_matrix_def.hpp at
-// e727650a1f0a427e95efebc409d907b4c84011ec; see ../README.md.
+// e727650a1f0a427e95efebc409d907b4c84011ec.
 
 #pragma once
 
