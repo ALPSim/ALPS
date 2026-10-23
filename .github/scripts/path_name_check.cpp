@@ -42,17 +42,21 @@ namespace boost
       //  called for each file and directory, so only the leaf need be tested
       string const filename( full_path.filename().string() );
 
+      // allow Mac .DS_Store files
+      if (filename == ".DS_Store")
+         return;
+
       //  includes only allowable characters
-      if ( (pos = leaf.find_first_not_of( allowable )) != string::npos )
+      if ( (pos = filename.find_first_not_of( allowable )) != string::npos )
       {
         ++m_name_errors;
         error( library_name, full_path, string(name())
             + " file or directory name contains unacceptable character '"
-            + leaf[pos] + "'" );
+            + filename[pos] + "'" );
       }
 
       //  allowable initial character
-      if ( std::strchr( initial_char, leaf[0] ) == 0 )
+      if ( std::strchr( initial_char, filename[0] ) == 0 )
       {
         ++m_name_errors;
         error( library_name, full_path, string(name())
@@ -62,7 +66,7 @@ namespace boost
       //  rules for dot characters differ slightly for directories and files
       if ( filesystem::is_directory( full_path ) )
       {
-        if ( std::strchr( leaf.c_str(), '.' ) )
+        if ( std::strchr( filename.c_str(), '.' ) )
         {
           ++m_name_errors;
           error( library_name, full_path, string(name())
@@ -72,7 +76,7 @@ namespace boost
       //else // not a directory
       //{
       //  //  includes at most one dot character
-      //  const char * first_dot = std::strchr( leaf.c_str(), '.' );
+      //  const char * first_dot = std::strchr( filename.c_str(), '.' );
       //  if ( first_dot && std::strchr( first_dot+1, '.' ) )
       //  {
       //    ++m_name_errors;
@@ -80,9 +84,6 @@ namespace boost
       //        + " file name with more than one dot character ('.')" );
       //  }
       //}
-      // allow Mac .DS_Store files
-      if (leaf == ".DS_Store")
-         return;
 
       //  the path, including a presumed root, does not exceed the maximum size
       path const relative_path( relative_to( full_path, filesystem::initial_path() ) );
