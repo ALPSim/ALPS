@@ -3,15 +3,16 @@
 //               2026       by the ALPS collaboration
 // Part of the ALPS Project — see LICENSE.txt for full license text.
 // SPDX-License-Identifier: MIT
+//
+// pyalps.ngs.result: a result of ALPSCore's accumulators, held through
+// pyalps::result (see accumulator_handles.hpp).
 #include <nanobind/nanobind.h>
+#include "accumulator_handles.hpp"
 #include "archive_savable.hpp"
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
 #include <alps/hdf5/archive.hpp>
-#include <alps/utilities/cast.hpp>
-#include <alps/ngs/mcresult.hpp>
-#include <alps/ngs/mcobservable.hpp>
-#include <alps/utilities/stacktrace.hpp>
+#include <boost/function.hpp>
 #include <cmath>
 #include <cstddef>
 #include <cstring>
@@ -20,6 +21,8 @@
 #include <string>
 #include <vector>
 namespace nb = nanobind;
+namespace acc = alps::accumulators;
+using pyalps::result;
 namespace {
 // Allocate a heap-owned 1-D numpy array of T and copy `n` elements from `src`.
 template <typename T>
@@ -32,158 +35,147 @@ nb::ndarray<nb::numpy, T> make_1d(T const * src, std::size_t n) {
     std::size_t shape[1] = { n };
     return nb::ndarray<nb::numpy, T>(buf, 1, shape, owner);
 }
-} // namespace
-namespace alps {
-    namespace detail {
-        template <typename T> std::string short_print_python(T const & value) {
-            return cast<std::string>(value);
-        }
-        template <typename T> std::string short_print_python(std::vector<T> const & value) {
-            switch (value.size()) {
-                case 0:
-                    return "[]";
-                case 1:
-                    return "[" + short_print_python(value.front()) + "]";
-                case 2:
-                    return "[" + short_print_python(value.front()) + "," + short_print_python(value.back()) + "]";
-                default:
-                    return "[" + short_print_python(value.front()) + ",.." + short_print_python(value.size()) + "..," + short_print_python(value.back()) + "]";
-            }
-        }
-        inline nb::object vec_to_numpy(std::vector<double> const & v) {
-            return nb::cast(make_1d<double>(v.data(), v.size()));
-        }
-        std::string mcresult_print(alps::mcresult const & self) {
-            if (self.count() == 0)
-                return "No Measurements";
-            else if (self.is_type<double>())
-                return short_print_python(self.mean<double>()) + "(" + short_print_python(self.count()) + ") "
-                    + "+/-" + short_print_python(self.error<double>()) + " "
-                    + short_print_python(self.bins<double>()) + "#" + short_print_python(self.bin_size());
-            else if (self.is_type<std::vector<double> >())
-                return short_print_python(self.mean<std::vector<double> >()) + "(" + short_print_python(self.count()) + ") "
-                    + "+/-" + short_print_python(self.error<std::vector<double> >()) + " "
-                    + short_print_python(self.bins<std::vector<double> >()) + "#" + short_print_python(self.bin_size());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        nb::object mcresult_mean(alps::mcresult const & self) {
-            if (self.is_type<double>())
-                return nb::float_(self.mean<double>());
-            else if (self.is_type<std::vector<double> >())
-                return vec_to_numpy(self.mean<std::vector<double> >());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        nb::object mcresult_error(alps::mcresult const & self) {
-            if (self.is_type<double>())
-                return nb::float_(self.error<double>());
-            else if (self.is_type<std::vector<double> >())
-                return vec_to_numpy(self.error<std::vector<double> >());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        nb::object mcresult_tau(alps::mcresult const & self) {
-            if (self.is_type<double>())
-                return nb::float_(self.tau<double>());
-            else if (self.is_type<std::vector<double> >())
-                return vec_to_numpy(self.tau<std::vector<double> >());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        nb::object mcresult_variance(alps::mcresult const & self) {
-            if (self.is_type<double>())
-                return nb::float_(self.variance<double>());
-            else if (self.is_type<std::vector<double> >())
-                return vec_to_numpy(self.variance<std::vector<double> >());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        nb::object mcresult_bins(alps::mcresult const & self) {
-            if (self.is_type<double>())
-                return vec_to_numpy(self.bins<double>());
-            else
-                throw std::runtime_error("Unsupported type." + ALPS_STACKTRACE);
-        }
-        alps::mcresult observable2result_export(alps::mcobservable const & obs) {
-            return alps::mcresult(obs);
-        }
-    }
+nb::object vec_to_numpy(std::vector<double> const & v) {
+    return nb::cast(make_1d<double>(v.data(), v.size()));
 }
+// Scalar results read back as floats, vector results as numpy arrays.
+template <typename Scalar, typename Vector>
+nb::object by_type(result const & self, Scalar scalar, Vector vector) {
+    acc::result_wrapper & r = self.get();
+    if (pyalps::holds<double>(r))
+        return nb::float_(scalar(r));
+    if (pyalps::holds<std::vector<double>>(r))
+        return vec_to_numpy(vector(r));
+    throw std::runtime_error("pyalps handles results of double or vector of double values");
+}
+result wrap(acc::result_wrapper && value) {
+    return result{std::make_shared<acc::result_wrapper>(std::move(value))};
+}
+std::string print(result const & self) {
+    if (self.empty())
+        return "No Measurements";
+    std::ostringstream out;
+    self.value->print(out, true);
+    return out.str();
+}
+// ALPSCore's results have no exp() or pow(); apply them as transformations,
+// which propagate errors through the jackknife where the result has bins.
+result apply(result const & self, double (*op)(double)) {
+    acc::result_wrapper & r = self.get();
+    if (pyalps::holds<double>(r))
+        return wrap(r.transform<double>(boost::function<double(double)>(op)));
+    return wrap(r.transform<std::vector<double>>(boost::function<std::vector<double>(std::vector<double>)>(
+        [op](std::vector<double> values) {
+            for (double & value : values) value = op(value);
+            return values;
+        })));
+}
+result power(result const & self, double exponent) {
+    acc::result_wrapper & r = self.get();
+    if (pyalps::holds<double>(r))
+        return wrap(r.transform<double>(boost::function<double(double)>(
+            [exponent](double value) { return std::pow(value, exponent); })));
+    return wrap(r.transform<std::vector<double>>(boost::function<std::vector<double>(std::vector<double>)>(
+        [exponent](std::vector<double> values) {
+            for (double & value : values) value = std::pow(value, exponent);
+            return values;
+        })));
+}
+double exponential(double value) { return std::exp(value); }
+} // namespace
 NB_MODULE(pyngsresult_c, m) {
-    using namespace alps;
-    using R = alps::mcresult;
-    m.def("observable2result", &alps::detail::observable2result_export);
+    nb::module_::import_("pyalps.cxx.pyngsobservable_c");
+    m.def("observable2result", [](acc::accumulator_wrapper const & observable) {
+        return result{observable.result()};
+    });
+    using R = result;
+#define PYALPS_RESULT_FUNCTION(NAME) \
+    .def(#NAME, [](R const & self) { return wrap(acc::NAME(self.get())); })
     nb::class_<R>(m, "result")
         .def(nb::init<>())
-        .def(nb::init<R const &>())
-        .def("__repr__", &alps::detail::mcresult_print)
-        .def("__deepcopy__",
-             [](R const & self, nb::handle /*memo*/) {
-                 return self.count() ? self + 0.0 : R();
-             })
-        .def("__abs__", static_cast<R(*)(R)>(&abs))
-        .def("__pow__", static_cast<R(*)(R, double)>(&pow))
-        .def_prop_ro("mean",     &alps::detail::mcresult_mean)
-        .def_prop_ro("error",    &alps::detail::mcresult_error)
-        .def_prop_ro("tau",      &alps::detail::mcresult_tau)
-        .def_prop_ro("variance", &alps::detail::mcresult_variance)
-        .def_prop_ro("bins",     &alps::detail::mcresult_bins)
-        .def_prop_ro("count",    &R::count)
-        // mcresult's unary +/- operate on non-const self and return a
-        // reference (not a new value). Wrap them in lambdas that
-        // return a fresh copy, which is what Python's +obj/-obj expect.
-        .def("__pos__", [](R const & self) {
-            if (!self.count()) throw nb::value_error("result has no measurements");
-            return self + 0.0;
+        // An independent copy, as copy.deepcopy() gives.
+        .def("__init__", [](R * self, R const & other) {
+            new (self) R{other.value ? std::make_shared<acc::result_wrapper>(*other.value) : nullptr};
         })
-        .def("__neg__", [](R const & self) {
-            if (!self.count()) throw nb::value_error("result has no measurements");
-            return self * -1.0;
+        .def("__repr__", &print)
+        .def("__deepcopy__", [](R const & self, nb::handle /*memo*/) {
+            return R{self.value ? std::make_shared<acc::result_wrapper>(*self.value) : nullptr};
         })
-        // In-place operators — return self by reference so the original
-        // object is modified in place (Python's __i*__ semantics).
-        .def("__iadd__", [](R & self, R const & o) -> R & { return self += o; }, nb::is_operator())
-        .def("__iadd__", [](R & self, double o)    -> R & { return self += o; }, nb::is_operator())
-        .def("__isub__", [](R & self, R const & o) -> R & { return self -= o; }, nb::is_operator())
-        .def("__isub__", [](R & self, double o)    -> R & { return self -= o; }, nb::is_operator())
-        .def("__imul__", [](R & self, R const & o) -> R & { return self *= o; }, nb::is_operator())
-        .def("__imul__", [](R & self, double o)    -> R & { return self *= o; }, nb::is_operator())
-        .def("__itruediv__", [](R & self, R const & o) -> R & { return self /= o; }, nb::is_operator())
-        .def("__itruediv__", [](R & self, double o)    -> R & { return self /= o; }, nb::is_operator())
+        .def_prop_ro("mean", [](R const & self) {
+            return by_type(self, [](acc::result_wrapper & r) { return r.mean<double>(); },
+                           [](acc::result_wrapper & r) { return r.mean<std::vector<double>>(); });
+        })
+        .def_prop_ro("error", [](R const & self) {
+            return by_type(self, [](acc::result_wrapper & r) { return r.error<double>(); },
+                           [](acc::result_wrapper & r) { return r.error<std::vector<double>>(); });
+        })
+        // The integrated autocorrelation time, for results with binning.
+        .def_prop_ro("tau", [](R const & self) {
+            return by_type(self, [](acc::result_wrapper & r) { return r.autocorrelation<double>(); },
+                           [](acc::result_wrapper & r) { return r.autocorrelation<std::vector<double>>(); });
+        })
+        // The bin means of a scalar result with full binning.
+        .def_prop_ro("bins", [](R const & self) {
+            acc::result_wrapper & r = self.get();
+            if (!pyalps::holds<double>(r))
+                throw std::runtime_error("bins are available for scalar results");
+            return vec_to_numpy(
+                r.extract<acc::FullBinningAccumulator<double>::result_type>().max_num_binning().bins());
+        })
+        .def_prop_ro("count", [](R const & self) -> std::size_t {
+            return self.value ? self.value->count() : 0;
+        })
+        .def("__pos__", [](R const & self) { return wrap(+self.get()); })
+        .def("__neg__", [](R const & self) { return wrap(-self.get()); })
+        .def("__abs__", [](R const & self) { return wrap(acc::abs(self.get())); })
+        .def("__pow__", &power)
+        // In-place operators modify the result, which every reference to it
+        // sees, and return the same Python object (Python's __i*__
+        // semantics). rv_policy::none finds the existing wrapper of self.
+        .def("__iadd__", [](R & self, R const & o) -> R & { self.get() += o.get(); return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__iadd__", [](R & self, double o)    -> R & { self.get() += o; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__isub__", [](R & self, R const & o) -> R & { self.get() -= o.get(); return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__isub__", [](R & self, double o)    -> R & { self.get() -= o; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__imul__", [](R & self, R const & o) -> R & { self.get() *= o.get(); return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__imul__", [](R & self, double o)    -> R & { self.get() *= o; return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__itruediv__", [](R & self, R const & o) -> R & { self.get() /= o.get(); return self; }, nb::rv_policy::none, nb::is_operator())
+        .def("__itruediv__", [](R & self, double o)    -> R & { self.get() /= o; return self; }, nb::rv_policy::none, nb::is_operator())
         // Binary operators — left and right forms. nb::is_operator()
         // marks them as Python operator overloads so mixed-type
         // failures return NotImplemented rather than raising TypeError
         // (giving Python's reflected operator machinery a chance).
-        .def("__add__",  [](R const & a, R const & b) { return a + b; }, nb::is_operator())
-        .def("__radd__", [](R const & a, R const & b) { return b + a; }, nb::is_operator())
-        .def("__add__",  [](R const & a, double b)    { return a + b; }, nb::is_operator())
-        .def("__radd__", [](R const & a, double b)    { return b + a; }, nb::is_operator())
-        .def("__sub__",  [](R const & a, R const & b) { return a - b; }, nb::is_operator())
-        .def("__rsub__", [](R const & a, R const & b) { return b - a; }, nb::is_operator())
-        .def("__sub__",  [](R const & a, double b)    { return a - b; }, nb::is_operator())
-        .def("__rsub__", [](R const & a, double b)    { return b - a; }, nb::is_operator())
-        .def("__mul__",  [](R const & a, R const & b) { return a * b; }, nb::is_operator())
-        .def("__rmul__", [](R const & a, R const & b) { return b * a; }, nb::is_operator())
-        .def("__mul__",  [](R const & a, double b)    { return a * b; }, nb::is_operator())
-        .def("__rmul__", [](R const & a, double b)    { return b * a; }, nb::is_operator())
-        .def("__truediv__",  [](R const & a, R const & b) { return a / b; }, nb::is_operator())
-        .def("__rtruediv__", [](R const & a, R const & b) { return b / a; }, nb::is_operator())
-        .def("__truediv__",  [](R const & a, double b)    { return a / b; }, nb::is_operator())
-        .def("__rtruediv__", [](R const & a, double b)    { return b / a; }, nb::is_operator())
-        .def("sq",   static_cast<R(*)(R)>(&sq))
-        .def("cb",   static_cast<R(*)(R)>(&cb))
-        .def("sqrt", static_cast<R(*)(R)>(&sqrt))
-        .def("cbrt", static_cast<R(*)(R)>(&cbrt))
-        .def("exp",  static_cast<R(*)(R)>(&exp))
-        .def("log",  static_cast<R(*)(R)>(&log))
-        .def("sin",  static_cast<R(*)(R)>(&sin))
-        .def("cos",  static_cast<R(*)(R)>(&cos))
-        .def("tan",  static_cast<R(*)(R)>(&tan))
-        .def("sinh", static_cast<R(*)(R)>(&sinh))
-        .def("cosh", static_cast<R(*)(R)>(&cosh))
-        .def("tanh", static_cast<R(*)(R)>(&tanh))
-        .def("save", &R::save)
-        .def("load", &R::load);
+        .def("__add__",  [](R const & a, R const & b) { return wrap(a.get() + b.get()); }, nb::is_operator())
+        .def("__radd__", [](R const & a, R const & b) { return wrap(b.get() + a.get()); }, nb::is_operator())
+        .def("__add__",  [](R const & a, double b)    { return wrap(a.get() + b); }, nb::is_operator())
+        .def("__radd__", [](R const & a, double b)    { return wrap(b + a.get()); }, nb::is_operator())
+        .def("__sub__",  [](R const & a, R const & b) { return wrap(a.get() - b.get()); }, nb::is_operator())
+        .def("__rsub__", [](R const & a, R const & b) { return wrap(b.get() - a.get()); }, nb::is_operator())
+        .def("__sub__",  [](R const & a, double b)    { return wrap(a.get() - b); }, nb::is_operator())
+        .def("__rsub__", [](R const & a, double b)    { return wrap(b - a.get()); }, nb::is_operator())
+        .def("__mul__",  [](R const & a, R const & b) { return wrap(a.get() * b.get()); }, nb::is_operator())
+        .def("__rmul__", [](R const & a, R const & b) { return wrap(b.get() * a.get()); }, nb::is_operator())
+        .def("__mul__",  [](R const & a, double b)    { return wrap(a.get() * b); }, nb::is_operator())
+        .def("__rmul__", [](R const & a, double b)    { return wrap(b * a.get()); }, nb::is_operator())
+        .def("__truediv__",  [](R const & a, R const & b) { return wrap(a.get() / b.get()); }, nb::is_operator())
+        .def("__rtruediv__", [](R const & a, R const & b) { return wrap(b.get() / a.get()); }, nb::is_operator())
+        .def("__truediv__",  [](R const & a, double b)    { return wrap(a.get() / b); }, nb::is_operator())
+        .def("__rtruediv__", [](R const & a, double b)    { return wrap(b / a.get()); }, nb::is_operator())
+        PYALPS_RESULT_FUNCTION(sq)
+        PYALPS_RESULT_FUNCTION(cb)
+        PYALPS_RESULT_FUNCTION(sqrt)
+        PYALPS_RESULT_FUNCTION(cbrt)
+        PYALPS_RESULT_FUNCTION(log)
+        PYALPS_RESULT_FUNCTION(sin)
+        PYALPS_RESULT_FUNCTION(cos)
+        PYALPS_RESULT_FUNCTION(tan)
+        PYALPS_RESULT_FUNCTION(sinh)
+        PYALPS_RESULT_FUNCTION(cosh)
+        PYALPS_RESULT_FUNCTION(tanh)
+        .def("exp", [](R const & self) { return apply(self, &exponential); })
+        .def("save", [](R const & self, alps::hdf5::archive & ar) { self.get().save(ar); })
+        // Loads the result at the archive's context. A failed load leaves
+        // the result as it was; other references keep the old value.
+        .def("load", [](R & self, alps::hdf5::archive & ar) { self.value = pyalps::load_result(ar); });
+#undef PYALPS_RESULT_FUNCTION
     pyalps::mark_archive_savable(m.attr("result"));
 }

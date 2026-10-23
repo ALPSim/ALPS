@@ -11,11 +11,11 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "sum_simulation.hpp"
-#include <alps/mcmpiadapter.hpp>
+#include "runner_simulation.hpp"
+#include <alps/mc/mpiadapter.hpp>
+#include <alps/utilities/mpi.hpp>
 #include <alps/testing/temporary_directory.hpp>
 #include <gtest/gtest.h>
-#include <boost/mpi/collectives.hpp>
 #include <functional>
 #include <string>
 
@@ -26,7 +26,7 @@ struct every_step {
 };
 
 TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
-    boost::mpi::communicator world;
+    alps::mpi::communicator world;
     ASSERT_GE(world.size(), 2);
     alps::params parameters;
     if (world.rank() == 0)
@@ -35,12 +35,11 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
     alps::broadcast(world, parameters);
     alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
     ASSERT_TRUE(parameters.ok());
-    EXPECT_EQ(parameters["BINNUMBER"].as<int>(), 128);
-    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
     EXPECT_TRUE(simulation.run([] { return false; }));
     EXPECT_EQ(simulation.count, 128);
     EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 1.);
-    const double sum = boost::mpi::all_reduce(world, simulation.sum, std::plus<double>());
+    const double sum = alps::mpi::all_reduce(world, simulation.sum, std::plus<double>());
     const auto results = alps::collect_results(simulation);
     // Every rank must finish the collectives before rank-specific assertions.
     if (world.rank() == 0) {
@@ -57,7 +56,7 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
         const auto filename = (directory.path() / "results.h5").string();
         alps::save_results(results, parameters, filename, "/simulation/results");
         alps::hdf5::archive archive(filename);
-        alps::mcresults restored;
+        alps::accumulators::result_set restored;
         archive["/simulation/results"] >> restored;
         EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
         EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
@@ -69,7 +68,7 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
 // the run stopped, every rank must throw instead of some entering the
 // reduction and hanging.
 TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
-    boost::mpi::communicator world;
+    alps::mpi::communicator world;
     ASSERT_GE(world.size(), 2);
     alps::params parameters;
     if (world.rank() == 0)
@@ -77,7 +76,7 @@ TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
     alps::broadcast(world, parameters);
     alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
     ASSERT_TRUE(parameters.ok());
-    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
     if (world.rank() == 0) {
         simulation.update();
         simulation.measure();
@@ -86,21 +85,14 @@ TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
 }
 
 TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
-    boost::mpi::communicator world;
+    alps::mpi::communicator world;
     alps::params parameters;
     if (world.rank() == 0)
         parameters.supply("COUNT", "128").supply("SEED", "42");
     alps::broadcast(world, parameters);
     alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
     ASSERT_TRUE(parameters.ok());
-    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world);
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
     const auto results = alps::collect_results(simulation);
-    // With ALPS_NGS_USE_NEW_ALEA only rank 0 receives the results, and count()
-    // of an empty result throws instead of returning 0.
-    if (world.rank() == 0) {
-        EXPECT_TRUE(results.has("SValue"));
-#ifndef ALPS_NGS_USE_NEW_ALEA
-        EXPECT_EQ(results["SValue"].count(), 0u);
-#endif
-    }
+    EXPECT_FALSE(results.has("SValue"));
 }

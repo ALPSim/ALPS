@@ -14,9 +14,13 @@
  *****************************************************************************/
 
 #include <alps/solvers.hpp>
-#include <alps/ngs.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/ngs/mcoptions.hpp>
+#include <alps/params.hpp>
+#include <iostream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <boost/mpi/environment.hpp>
+#include <alps/utilities/mpi.hpp>
 #endif
 
 int main(int argc, char** argv) {
@@ -24,7 +28,7 @@ int main(int argc, char** argv) {
     alps::mcoptions options(argc, argv, "hybridization");
     if (!options.valid) return 0;
 #ifdef ALPS_HAVE_MPI
-    boost::mpi::environment env(argc, argv);
+    alps::mpi::environment env(argc, argv);
 #endif
     alps::params parms;
     {

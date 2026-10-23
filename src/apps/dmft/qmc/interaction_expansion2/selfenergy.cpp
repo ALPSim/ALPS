@@ -123,8 +123,8 @@ void InteractionExpansion::measure_Wk(std::vector<std::vector<std::valarray<std:
         Wk_real[w] = Wk[flavor][k][w].real();
         Wk_imag[w] = Wk[flavor][k][w].imag();
       }
-      measurements[Wk_real_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_real*sign);
-      measurements[Wk_imag_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_imag*sign);
+      measurements[Wk_real_name.str().c_str()]<< alps::numeric::valarray2vector(std::valarray<double>(Wk_real*sign));
+      measurements[Wk_imag_name.str().c_str()]<< alps::numeric::valarray2vector(std::valarray<double>(Wk_imag*sign));
     }
   }
 }
@@ -162,11 +162,11 @@ void InteractionExpansion::measure_densities()
       densities[z] += dens[z][i];
       densmeas[i] = 1+dens[z][i];
     }
-    measurements["densities_"+boost::lexical_cast<std::string>(z)] << static_cast<std::valarray<double> > (densmeas*sign);
+    measurements["densities_"+boost::lexical_cast<std::string>(z)] << alps::numeric::valarray2vector(std::valarray<double>(densmeas*sign));
     densities[z] /= n_site;
     densities[z] = 1 + densities[z];
   }
-  measurements["densities"] << static_cast<std::valarray<double> > (densities*sign);
+  measurements["densities"] << alps::numeric::valarray2vector(std::valarray<double>(densities*sign));
   double density_correlation = 0.;
   for (unsigned int i=0; i<n_site; ++i) {
     density_correlation += (1+dens[0][i])*(1+dens[1][i]);
@@ -182,7 +182,7 @@ void InteractionExpansion::measure_densities()
       ninj[i*n_site+j+3] = (1+dens[1][i])*(1+dens[1][j]);
     }
   }
-  measurements["n_i n_j"] << static_cast<std::valarray<double> > (ninj*sign);
+  measurements["n_i n_j"] << alps::numeric::valarray2vector(std::valarray<double>(ninj*sign));
 }
 
 
@@ -248,7 +248,7 @@ void InteractionExpansion::compute_W_itime()
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream W_name;
           W_name  <<"W_"  <<flavor<<"_"<<i<<"_"<<j;
-          measurements[W_name  .str().c_str()] << static_cast<std::valarray<double> > (W_z_i_j[flavor][i][j]*(sign/ntaupoints));
+          measurements[W_name  .str().c_str()] << alps::numeric::valarray2vector(std::valarray<double>(W_z_i_j[flavor][i][j]*(sign/ntaupoints)));
         }
         std::stringstream density_name;
         density_name<<"density_"<<flavor;

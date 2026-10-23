@@ -16,7 +16,9 @@
 #define HYB_INT_HPP
 #include <vector>
 #include <fstream>
-#include <alps/ngs.hpp>
+#include <alps/params.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
 #include "../green_function.h"
 
 //the interaction matrix keeps track of the impurity density-density interactions (other interactions are not possible in this code). Two general methods: either specify U (and optionally J and U'), or define a matrix and write it into a file, from where it is read in.

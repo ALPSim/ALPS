@@ -13,10 +13,10 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/mc/api.hpp>
 #include <alps/parseargs.hpp>
-#include <alps/stop_callback.hpp>
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/stop_callback.hpp>
+#include <alps/mc/mpiadapter.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
@@ -31,8 +31,8 @@
 int main(int argc, char *argv[]) {
 
     try {
-        boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator comm;
+        alps::mpi::environment env(argc, argv);
+        alps::mpi::communicator comm;
 
         alps::parseargs options(argc, argv);
         std::string checkpoint_file = options.input_file.substr(0, options.input_file.find_last_of('.')) 

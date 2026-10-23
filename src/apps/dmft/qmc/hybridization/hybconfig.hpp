@@ -14,7 +14,7 @@
 #ifndef HYB_CONFIG_HPP
 #define HYB_CONFIG_HPP
 
-#include<alps/ngs.hpp>
+#include <alps/params.hpp>
 #include"hybfun.hpp"
 #include"hybsegment.hpp"
 #include"hybmatrix.hpp"

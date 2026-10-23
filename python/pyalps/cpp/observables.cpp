@@ -27,39 +27,37 @@
  * DEALINGS IN THE SOFTWARE.                                                       *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// pyngsobservables_c — nanobind port.
-//
-// Unlike mcresults, alps::mcobservables doesn't override erase() so we
-// can stand on a straight nb::class_<> with hand-written map methods
-// that match the map_indexing_suite surface area. We keep it explicit
-// (rather than nb::bind_map) because the class also carries non-map
-// methods (reset/save/load/__lshift__/create*) that need to live on
-// the same binding, and mixing bind_map with extra defs is noisy.
+// pyngsobservables_c: pyalps.ngs.observables, ALPSCore's accumulator_set,
+// as a mapping from names to pyalps.ngs.observable (see
+// accumulator_handles.hpp).
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsobservables_PyArrayHandle
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/mcobservable.hpp>
-#include <alps/ngs/mcobservables.hpp>
+#include "accumulator_handles.hpp"
 #include "archive_savable.hpp"
-#include "mapping_lifetime.hpp"
-#include <alps/ngs/observablewrappers.hpp>
 #include <nanobind/nanobind.h>
+#include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 namespace nb = nanobind;
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <vector>
+namespace acc = alps::accumulators;
 namespace {
-void mcobservables_load(alps::mcobservables & self, alps::hdf5::archive & ar, std::string const & path) {
+// Loads the accumulators at `path` into a new set first, so a failed load
+// leaves the set and the archive's context as they were.
+void observables_load(acc::accumulator_set & self, alps::hdf5::archive & ar, std::string const & path) {
     alps::hdf5::archive reader(ar);
     reader.set_context(ar.complete_path(path));
-    self.load(reader);
+    acc::accumulator_set loaded;
+    loaded.load(reader);
+    pyalps::replace(self, loaded);
 }
-void createRealObservable(alps::mcobservables & self, std::string const & name, std::uint32_t binnum) {
-    self << alps::ngs::RealObservable(name, binnum);
+template <typename T>
+void create(acc::accumulator_set & self, std::string const & name, std::uint32_t binnum) {
+    self.insert(name, pyalps::full_binning<T>(name, binnum));
 }
-void createRealVectorObservable(alps::mcobservables & self, std::string const & name, std::uint32_t binnum) {
-    self << alps::ngs::RealVectorObservable(name, binnum);
-}
-void addObservable(alps::mcobservables & self, nb::object const & obj) {
+void addObservable(acc::accumulator_set & self, nb::object const & obj) {
     // Mirror boost::python::call_method<void>(obj, "addToObservables", ref(self)):
     // bounce the call back into Python, passing `self` by reference.
     // nanobind's instance registry returns the already-registered
@@ -70,27 +68,22 @@ void addObservable(alps::mcobservables & self, nb::object const & obj) {
 }
 }  // namespace
 NB_MODULE(pyngsobservables_c, m) {
-    nb::class_<alps::mcobservables>(m, "observables")
+    nb::module_::import_("pyalps.cxx.pyngsobservable_c");
+    nb::class_<acc::accumulator_set>(m, "observables")
         .def(nb::init<>())
-        .def("__len__",      [](alps::mcobservables const & self) { return self.size(); })
-        .def("__contains__", [](alps::mcobservables const & self, std::string const & k) {
+        .def("__len__",      [](acc::accumulator_set const & self) { return self.size(); })
+        .def("__contains__", [](acc::accumulator_set const & self, std::string const & k) {
                                  return self.has(k);
                              })
-        .def("__getitem__",  [](alps::mcobservables & self, std::string const & k) -> alps::mcobservable & {
-                                 if (!self.has(k))
-                                     throw nb::key_error(k.c_str());
-                                 return self[k];
-                             },
-                             nb::rv_policy::reference_internal)
-        .def("__setitem__",  [](alps::mcobservables & self, std::string const & k, alps::mcobservable const & v) {
-                                 if (self.has(k)) self[k] = v;
-                                 else self.insert(k, v);
+        .def("__getitem__",  [](acc::accumulator_set & self, std::string const & k) {
+                                 return pyalps::item(self, k);
                              })
-        // mcobservables derives publicly from std::map; item deletion
-        // restores what the legacy map_indexing_suite provided (and
-        // what the MutableMapping mixins pop/popitem/clear need).
-        .def("__delitem__", &pyalps::erase_map_item<alps::mcobservables>)
-        .def("__iter__",     [](alps::mcobservables & self) {
+        .def("__setitem__",  [](acc::accumulator_set & self, std::string const & k,
+                                std::shared_ptr<acc::accumulator_wrapper> v) {
+                                 pyalps::assign(self, k, std::move(v));
+                             })
+        .def("__delitem__",  &pyalps::erase<acc::accumulator_set>)
+        .def("__iter__",     [](acc::accumulator_set & self) {
                                  nb::list keys;
                                  for (auto const & entry : self)
                                      keys.append(nb::cast(entry.first));
@@ -102,13 +95,16 @@ NB_MODULE(pyngsobservables_c, m) {
         // natively as nanobind iterators would narrow that surface (no len(), no
         // set operators, exhausted after one pass) and pyalps/ngs.py cannot
         // recover it -- its guard skips any name the C++ class already provides.
-        .def("reset", &alps::mcobservables::reset, nb::arg("equilibrated") = false)
-        .def("save",  &alps::mcobservables::save)
-        .def("load",  &mcobservables_load)
+        // ALPSCore's accumulators have no equilibration flag; the argument
+        // is accepted for legacy callers and ignored.
+        .def("reset", [](acc::accumulator_set & self, bool /*equilibrated*/) { self.reset(); },
+             nb::arg("equilibrated") = false)
+        .def("save",  [](acc::accumulator_set const & self, alps::hdf5::archive & ar) { self.save(ar); })
+        .def("load",  &observables_load)
         .def("__lshift__", &addObservable)
-        .def("createRealObservable",       &createRealObservable,
+        .def("createRealObservable",       &create<double>,
              nb::arg("name"), nb::arg("binnum") = 0)
-        .def("createRealVectorObservable", &createRealVectorObservable,
+        .def("createRealVectorObservable", &create<std::vector<double>>,
              nb::arg("name"), nb::arg("binnum") = 0);
     pyalps::mark_archive_savable(m.attr("observables"));
 }

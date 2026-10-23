@@ -12,16 +12,17 @@
 
 #include <alps/solvers.hpp>
 #include "interaction_expansion.hpp"
+#include "sz_results.hpp"
 #include "fouriertransform.h"
 #include <alps/utilities/copyright.hpp>
+#include <alps/utilities/signal.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/mpiadapter.hpp>
 #include <functional>
-#include <stdexcept>
 using sim_type = alps::mcmpiadapter<HubbardInteractionExpansion>;
 #else
 using sim_type = HubbardInteractionExpansion;
@@ -50,7 +51,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   rank=0;
   sim_type s(parms,rank);
 #else
-  boost::mpi::communicator c;
+  alps::mpi::communicator c;
   c.barrier();
   rank=c.rank();
   sim_type s(parms, c);
@@ -66,13 +67,15 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   //a rank that is still thermalizing has no measurements. collect_results
   //throws if only some ranks have them, but if none has, only rank 0 fails
   //below while the others wait in the barrier, so check on all ranks here
-  if (boost::mpi::all_reduce(c, s.is_thermalized() ? 1 : 0, std::plus<int>()) < c.size())
+  if (alps::mpi::all_reduce(c, s.is_thermalized() ? 1 : 0, std::plus<int>()) < c.size())
     throw std::runtime_error("interaction: the run ended before every MPI rank finished THERMALIZATION; increase SWEEPS or MAX_TIME");
 #endif
 
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
+    unsigned int n_site(parms["SITES"]);
+    divide_sz_results_by_sign(results, n_site);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);
