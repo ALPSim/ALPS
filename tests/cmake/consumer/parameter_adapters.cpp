@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include <alps/params.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
+#include <alps/ngs/make_parameters_from_deprecated.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -33,6 +34,11 @@ int main() {
     require(std::string(legacy["LATTICE"]) == "chain lattice" && std::string(legacy["T"]) == "2.25");
     parameters.define<int>("SITES", 1, "sites");
     require(!alps::make_deprecated_parameters(parameters).defined("SITES"));
+    // The reverse bridge supplies the text for the program to define.
+    auto typed = alps::make_parameters_from_deprecated(legacy);
+    require(typed.supplied_text() == supplied);
+    typed.define<double>("T", "temperature");
+    require(typed.ok() && typed["T"].as<double>() == 2.25);
     {
         std::ofstream output(text.string());
         output << "L=10; garbage @\n";
