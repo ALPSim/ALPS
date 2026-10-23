@@ -14,8 +14,9 @@
 #ifndef ALPS_TUTORIAL_ISING_HPP
 #define ALPS_TUTORIAL_ISING_HPP
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/mc/mcbase.hpp>
 
 #include <boost/function.hpp>
 #include <boost/filesystem/path.hpp>

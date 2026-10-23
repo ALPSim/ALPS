@@ -20,6 +20,70 @@
 #include "hybevaluate.hpp"
 #include <alps/config.h>
 #include <boost/cstdint.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <stdexcept>
+#include <vector>
+
+namespace {
+
+// The covariance matrix of a vector observable's mean, estimated from its
+// jackknife bins. Adapted from ALEA's alps::alea::mcdata<T>::covariance
+// and accurate_covariance (src/alps/alea/include/alps/alea/mcdata.hpp),
+// which cthyb called through the NGS results. ALPSCore's results do not
+// provide a covariance (it is commented out in max_num_binning.hpp), so the
+// same formulas are applied here to the bins of ALPSCore's max-num binning.
+// Like ALEA's, these bins hold bin means.
+boost::numeric::ublas::matrix<double> covariance(alps::accumulators::result_wrapper const &result, bool accurate)
+{
+  typedef alps::accumulators::FullBinningAccumulator<std::vector<double> >::result_type result_type;
+  std::vector<std::vector<double> > const &bins = result.extract<result_type>().max_num_binning().bins();
+  std::size_t const N = bins.size();
+  if (N == 0) throw std::runtime_error("no binning information available for calculation of covariances");
+  std::size_t const n = bins[0].size();
+
+  // jack[i] is the mean of all bins but bin i
+  std::vector<double> sum(n, 0.);
+  for (std::size_t i = 0; i < N; ++i)
+    for (std::size_t k = 0; k < n; ++k) sum[k] += bins[i][k];
+  std::vector<std::vector<double> > jack(N, std::vector<double>(n));
+  for (std::size_t i = 0; i < N; ++i)
+    for (std::size_t k = 0; k < n; ++k) jack[i][k] = (sum[k] - bins[i][k]) / double(N - 1);
+  std::vector<double> unbiased_mean(n, 0.);
+  for (std::size_t i = 0; i < N; ++i)
+    for (std::size_t k = 0; k < n; ++k) unbiased_mean[k] += jack[i][k] / double(N);
+
+  boost::numeric::ublas::matrix<double> cov(n, n);
+  for (std::size_t k = 0; k < n; ++k)
+    for (std::size_t l = 0; l < n; ++l) cov(k, l) = 0.;
+  if (!accurate) {
+    for (std::size_t i = 0; i < N; ++i)
+      for (std::size_t k = 0; k < n; ++k)
+        for (std::size_t l = 0; l < n; ++l) cov(k, l) += jack[i][k] * jack[i][l];
+    for (std::size_t k = 0; k < n; ++k)
+      for (std::size_t l = 0; l < n; ++l)
+        cov(k, l) = (cov(k, l) / double(N) - unbiased_mean[k] * unbiased_mean[l]) * double(N - 1);
+  } else {
+    // two-pass algorithm on the residuals, see
+    // http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Covariance
+    std::vector<double> xbar(n, 0.), ybar(n, 0.), x(n), dx(n), dy(n);
+    for (std::size_t i = 0; i < N; ++i) {
+      for (std::size_t k = 0; k < n; ++k) {
+        x[k] = jack[i][k] - unbiased_mean[k];
+        dx[k] = x[k] - xbar[k];
+        dy[k] = x[k] - ybar[k];
+        xbar[k] += dx[k] / double(i + 1);
+      }
+      for (std::size_t k = 0; k < n; ++k)
+        for (std::size_t l = 0; l < n; ++l) cov(k, l) += (x[k] - xbar[k]) * dy[l];
+      for (std::size_t k = 0; k < n; ++k) ybar[k] += dy[k] / double(i + 1);
+    }
+    for (std::size_t k = 0; k < n; ++k)
+      for (std::size_t l = 0; l < n; ++l) cov(k, l) = cov(k, l) / double(N) * double(N - 1);
+  }
+  return cov;
+}
+
+}
 
 void evaluate_basics(const alps::results_type<hybridization>::type &results,
                      const alps::parameters_type<hybridization>::type &parms,
@@ -163,10 +227,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
     boost::numeric::ublas::matrix<double> cov(N_t+1, N_t+1);
     std::stringstream g_name; g_name<<"g_"<<i;
 
-    if (accurate)
-      cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
-    else
-      cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);
+    cov=covariance(results[g_name.str()], accurate);
 
     std::vector<double> data((N_t+1)*(N_t+1));
     for(std::size_t t1=0; t1<=N_t; t1++)
@@ -179,10 +240,7 @@ void evaluate_time(const alps::results_type<hybridization>::type &results,
     solver_output<<alps::make_pvp(data_path.str(), data);
     g_name.str(""); g_name<<"f_"<<i;
 
-    if (accurate)
-      cov=results[g_name.str()].accurate_covariance<std::vector<double> >(results[g_name.str()]);
-    else
-      cov=results[g_name.str()].covariance<std::vector<double> >(results[g_name.str()]);      
+    cov=covariance(results[g_name.str()], accurate);
 
     for(std::size_t t1=0; t1<=N_t; t1++)
       for(std::size_t t2=0; t2<=N_t; t2++)

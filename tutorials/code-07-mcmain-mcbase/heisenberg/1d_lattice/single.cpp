@@ -14,7 +14,8 @@
 #include "heisenberg.hpp"
 
 #include <alps/parseargs.hpp>
-#include <alps/stop_callback.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/stop_callback.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 

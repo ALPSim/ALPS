@@ -45,7 +45,8 @@ This program reads parameters from a text input file with the structure <code>pa
 
 <span class="cp">#include &quot;my_mc_sim.hpp&quot;</span>
 <span class="cp">#include &lt;alps/parseargs.hpp&gt;</span>
-<span class="cp">#include &lt;alps/stop_callback.hpp&gt;</span>
+<span class="cp">#include &lt;alps/mc/api.hpp&gt;</span>
+<span class="cp">#include &lt;alps/mc/stop_callback.hpp&gt;</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;alps/ngs/make_parameters_from_file.hpp&gt;</span>
 
 <span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
@@ -88,7 +89,7 @@ With just a few lines of code it can be made to take input files of different fo
 Take a look at an empty definition of a simulation class which you might use as a template if you want to develop a simulation from scratch.</p>
 <div class="codehilite"><pre><span class="cm">/* my_mc_sim.hpp */</span>
 
-<span class="cp">#include &lt;alps/mcbase.hpp&gt;</span>
+<span class="cp">#include &lt;alps/mc/mcbase.hpp&gt;</span>
 <span class="cp">#include &lt;alps/hdf5/archive.hpp&gt;</span>
 
 <span class="k">class</span> <span class="nc">ALPS_DECL</span> <span class="nl">my_mc_sim</span> <span class="p">:</span> <span class="k">public</span> <span class="n">alps</span><span class="o">::</span><span class="n">mcbase</span> <span class="p">{</span>
@@ -213,11 +214,11 @@ An exception to this is the <code>lattice</code> which needs a different type of
 It keeps a map of <code>Observables</code> to which we can just add all the quantities we want to measure.
 In this case we are going for Magnetic susceptibility and Correlations, so we need a timed average of the magnetization as well as it's square.</p>
 <div class="codehilite"><pre>    <span class="n">measurements</span>
-        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Energy&quot;</span><span class="p">)</span>
-        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealVectorObservable</span><span class="p">(</span><span class="s">&quot;Magnetization&quot;</span><span class="p">)</span>
-        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Magnetization^2&quot;</span><span class="p">)</span>
-        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealObservable</span><span class="p">(</span><span class="s">&quot;Magnetization^4&quot;</span><span class="p">)</span>
-        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulator</span><span class="o">::</span><span class="n">RealVectorObservable</span><span class="p">(</span><span class="s">&quot;Correlations&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulators</span><span class="o">::</span><span class="n">FullBinningAccumulator</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;Energy&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulators</span><span class="o">::</span><span class="n">FullBinningAccumulator</span><span class="o">&lt;</span><span class="kt">std::vector&lt;double&gt;</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;Magnetization&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulators</span><span class="o">::</span><span class="n">FullBinningAccumulator</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;Magnetization^2&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulators</span><span class="o">::</span><span class="n">FullBinningAccumulator</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;Magnetization^4&quot;</span><span class="p">)</span>
+        <span class="o">&lt;&lt;</span> <span class="n">alps</span><span class="o">::</span><span class="n">accumulators</span><span class="o">::</span><span class="n">FullBinningAccumulator</span><span class="o">&lt;</span><span class="kt">std::vector&lt;double&gt;</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;Correlations&quot;</span><span class="p">)</span>
     <span class="p">;</span>
 <span class="p">}</span>
 </pre></div>
@@ -470,7 +471,7 @@ SWEEPS=100000
 <h2>API headers for reference</h2>
 <p>The following ALPS Headers were used:</p>
 <ul>
-<li><code>alps/mcbase.hpp</code></li>
+<li><code>alps/mc/mcbase.hpp</code></li>
 <li><code>alps/ngs/numeric.hpp</code></li>
 <li><code>alps/ngs/make_deprecated_parameters.hpp</code></li>
 <li><code>alps/random/uniform_on_sphere_n.hpp</code></li>

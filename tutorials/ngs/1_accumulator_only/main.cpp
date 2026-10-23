@@ -13,7 +13,8 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/utilities/signal.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 
 #include <boost/chrono.hpp>

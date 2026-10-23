@@ -7,7 +7,7 @@
 
 #include "tinyvector/tinyvector.hpp"
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 #include <alps/ngs/numeric.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/random/uniform_on_sphere_n.h>
@@ -90,12 +90,12 @@ ndim_spin_sim<N>::ndim_spin_sim(parameters_type const & parms, std::size_t seed_
     }
 
     measurements
-        << alps::accumulator::RealObservable("Energy")
-        << alps::accumulator::RealVectorObservable("Magnetization")
-        << alps::accumulator::RealObservable("Magnetization^2")
-        << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealVectorObservable("Correlations")
-        << alps::accumulator::RealVectorObservable("Distances")
+        << alps::accumulators::FullBinningAccumulator<double>("Energy")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Magnetization")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Correlations")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Distances")
     ;
 
     using alps::ngs::numeric::operator-;

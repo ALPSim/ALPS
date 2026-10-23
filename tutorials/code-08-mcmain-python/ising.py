@@ -71,14 +71,6 @@ class sim:
     def fraction_completed(self):
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
 
-    def save(self, filename):
-        with hdf5.archive(filename, 'w') as ar:
-            ar['/simulation/realizations/0/clones/0'] = self
-
-    def load(self, filename):
-        with hdf5.archive(filename, 'r') as ar:
-            self = ar['/simulation/realizations/0/clones/0']
-
     def run(self, stopCallback):
         stopped = False
         while True:
@@ -120,18 +112,23 @@ class sim:
 
         try:
         
-            self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+            self.parameters.load(ar, "/parameters")
+            for name, observable in self.measurements.items():
+                observable.load(ar, "measurements/" + name)
 
-            ar["measurements"] = self.measurements
+            self.length = int(self.parameters["L"])
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"])
+            self.total_sweeps = int(self.parameters["SWEEPS"])
+            self.beta = 1. / float(self.parameters["T"])
 
-            self.length = int(self.parameters["L"]);
-            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
-            self.total_sweeps = int(self.parameters["SWEEPS"]);
-            self.beta = 1. / double(self.parameters["T"]);
-
-            self.sweeps = ar["checkpoint/sweeps"]
+            self.sweeps = int(ar["checkpoint/sweeps"])
             self.spins = ar["checkpoint/spins"]
-            self.random.load(ar["checkpoint/engine"])
+            context = ar.context
+            ar.set_context("checkpoint/engine")
+            try:
+                self.random.load(ar)
+            finally:
+                ar.set_context(context)
 
         except:
             traceback.print_exc(file=sys.stderr)

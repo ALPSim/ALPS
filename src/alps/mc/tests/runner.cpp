@@ -11,10 +11,11 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "sum_simulation.hpp"
+#include "runner_simulation.hpp"
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
-#include <alps/check_schedule.hpp>
+#include <alps/mc/check_schedule.hpp>
+#include <memory>
 #include <new>
 
 TEST(MonteCarloSchedule, ChecksImmediatelyAfterConstructionInReusedStorage) {
@@ -22,13 +23,11 @@ TEST(MonteCarloSchedule, ChecksImmediatelyAfterConstructionInReusedStorage) {
     alignas(alps::check_schedule) unsigned char storage[sizeof(alps::check_schedule)];
     volatile unsigned char* bytes = storage;
     for (std::size_t i = 0; i < sizeof(storage); ++i) bytes[i] = 0xff;
-    auto* schedule = new (storage) alps::check_schedule;
-    EXPECT_DOUBLE_EQ(schedule->check_interval(), 0.);
+    auto* schedule = new (storage) alps::check_schedule(60., 900.);
     EXPECT_TRUE(schedule->pending());
     schedule->update(0.25);
-    EXPECT_DOUBLE_EQ(schedule->check_interval(), 60.);
     EXPECT_FALSE(schedule->pending());
-    schedule->~check_schedule();
+    std::destroy_at(schedule);
 }
 
 TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
@@ -56,11 +55,39 @@ TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
     const auto filename = (directory.path() / "results.h5").string();
     alps::save_results(results, parameters, filename, "/simulation/results");
     alps::hdf5::archive archive(filename);
-    alps::mcresults restored;
+    alps::accumulators::result_set restored;
     archive["/simulation/results"] >> restored;
     EXPECT_EQ(restored["SValue"].count(), results["SValue"].count());
     EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
     EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
+}
+
+TEST(MonteCarloRunner, RejectsACheckpointOfTheNgsMcbase) {
+    alps::params parameters;
+    parameters["COUNT"] = 256;
+    parameters["SEED"] = 42;
+    sum_simulation simulation(parameters);
+    simulation.run([&] { return simulation.count == 32; });
+
+    alps::testing::TemporaryDirectory directory;
+    const auto filename = (directory.path() / "checkpoint.h5").string();
+    simulation.save(filename);
+    {
+        // The NGS mcbase stored the generator's state at checkpoint/engine/engine.
+        alps::hdf5::archive archive(filename, "w");
+        const std::string engine = "/simulation/realizations/0/clones/0/checkpoint/engine";
+        std::string state;
+        archive[engine] >> state;
+        archive.delete_data(engine);
+        archive[engine + "/engine"] << state;
+    }
+    sum_simulation resumed(parameters);
+    try {
+        resumed.load(filename);
+        FAIL() << "a checkpoint of the NGS mcbase was loaded";
+    } catch (std::runtime_error const& error) {
+        EXPECT_NE(std::string(error.what()).find("NGS mcbase"), std::string::npos) << error.what();
+    }
 }
 
 TEST(MonteCarloRunner, StopCallbackPreventsFurtherMeasurements) {

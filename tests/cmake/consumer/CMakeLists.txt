@@ -34,7 +34,7 @@ else()
     return()
   endif()
   if(EXPECT_APPLICATIONS)
-    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli accumulators)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli accumulators mc)
     set(application_paths "")
     foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
       string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
@@ -42,7 +42,7 @@ else()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
   else()
-    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli accumulators numerics numeric_io numeric_xml)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli accumulators mc numerics numeric_io numeric_xml)
   endif()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
@@ -71,6 +71,7 @@ else()
                                      alps/gf/include alps/gf/src alps/gf/tests
                                      alps/accumulators/include alps/accumulators/src
                                      alps/accumulators/tests
+                                     alps/mc/include alps/mc/src alps/mc/tests
                                      alps/fortran/include alps/fortran/src alps/fortran/tests)
     if(EXISTS "${expected_prefix}/include/${private_directory}")
       message(FATAL_ERROR "The SDK installs a module's private layout: ${private_directory}")
@@ -190,6 +191,7 @@ foreach(component IN ITEMS xml cli)
 endforeach()
 add_component_contract(accumulators accumulators.cpp
   "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
+add_component_contract(mc mc.cpp "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
 add_contract(sdk main.cpp ALPS::alps)
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
@@ -200,6 +202,8 @@ if(TARGET ALPS::aleav2)
   add_header_contract(aleav2)
 endif()
 add_header_contract(accumulators)
+# The Python compatibility headers of ALPS::mc need pyalps.
+add_header_contract(mc ONLY "^alps/(mc/[a-z0-9_]+|progress_callback)\\.hpp$")
 add_header_contract(configuration ONLY "^alps/config\\.hpp$")
 add_header_contract(hdf5 ONLY "^alps/hdf5/boost_optional\\.hpp$")
 add_header_contract(params ONLY "^alps/(params|dictionary|params/[a-z_]+)\\.hpp$"
@@ -242,7 +246,7 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract accumulators_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract accumulators_contract mc_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   if(ALPS_LEGACY_API)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION

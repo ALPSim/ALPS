@@ -56,7 +56,7 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "xml_contract", "cli_contract", "accumulators_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
+        "xml_contract", "cli_contract", "accumulators_contract", "mc_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
         "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
