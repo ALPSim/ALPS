@@ -257,7 +257,7 @@ namespace alps {
                     std::swap(mean_, rhs.mean_);
                     std::swap(error_, rhs.error_);
                     std::swap(binsize_, rhs.binsize_);
-                    std::swap(rhs.max_bin_number_, rhs.max_bin_number_);
+                    std::swap(max_bin_number_, rhs.max_bin_number_);
                     std::swap(data_is_analyzed_, rhs.data_is_analyzed_);
                     std::swap(jacknife_bins_valid_, rhs.jacknife_bins_valid_);
                     std::swap(cannot_rebin_, rhs.cannot_rebin_);
