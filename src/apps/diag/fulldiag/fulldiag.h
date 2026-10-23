@@ -66,8 +66,6 @@ public:
   typedef typename super_type::operator_matrix_type operator_matrix_type;
   
   FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
-  /// Defines the parameters fulldiag reads, with their defaults
-  static void define_parameters(alps::params& parameters);
   void evaluate(const alps::Parameters&, const std::string&) const;
   void print_eigenvectors(std::ostream& os) const;
   void append_eigenvectors(std::vector<value_type>& v) const;
@@ -97,7 +95,7 @@ private:
 
 template <class T>
 FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p) 
- : super_type(where,p,true,&FullDiagMatrix::define_parameters)
+ : super_type(where,p,true)
  , field(0.)
  , field0(0.) 
  , have_Conserved(false) 
@@ -105,24 +103,6 @@ FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost:
   this->construct(); 
 }
 
-template <class T>
-void FullDiagMatrix<T>::define_parameters(alps::params& parameters)
-{
-  super_type::define_parameters(parameters);
-  // with T or beta, the XML output has the thermodynamics at that temperature
-  // and the field H or h. Each is read only where it is used: h can be a
-  // model expression.
-  if (parameters.supplied("T"))
-    parameters.define<double>("T", "temperature of the averages in the XML output");
-  else if (parameters.supplied("beta"))
-    parameters.define<double>("beta", "inverse temperature of the averages in the XML output");
-  else
-    return;
-  if (parameters.supplied("H"))
-    parameters.define<double>("H", "magnetic field of the averages in the XML output");
-  else if (parameters.supplied("h"))
-    parameters.define<double>("h", "magnetic field of the averages in the XML output");
-}
     
     
 template <class T>
@@ -481,12 +461,13 @@ typename FullDiagMatrix<T>::magnitude_type FullDiagMatrix<T>::calculate_averages
 template <class T>
 void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {
-    const alps::params& pa = this->settings();
-    if (writeallxml && (pa.exists("T") || pa.exists("beta"))) {
-  
-        beta = (pa.exists("T") ? 1./pa["T"].as<double>()
-                           : pa["beta"].as<double>());
-        field0 = field = (pa.exists("H") ? pa["H"].as<double>() : pa.exists("h") ? pa["h"].as<double>() : 0.);
+    const alps::Parameters& pa = this->get_parameters();
+    if (writeallxml && (pa.defined("T") || pa.defined("beta"))) {
+        // T, beta, H and h can be expressions in the model parameters, such as h = J/2
+        beta = (pa.defined("T") ? 1./alps::evaluate<double>(pa["T"], pa)
+                           : alps::evaluate<double>(pa["beta"], pa));
+        field0 = field = (pa.defined("H") ? alps::evaluate<double>(pa["H"], pa)
+                          : pa.defined("h") ? alps::evaluate<double>(pa["h"], pa) : 0.);
     conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();
