@@ -123,6 +123,9 @@ alps::params DiagTask<T,G>::read_parameters(const Parameters& parms, void (*defi
   std::ostringstream errors;
   if (parameters.has_missing(errors))
     boost::throw_exception(std::invalid_argument(errors.str()));
+  // define<unsigned> would accept -1
+  if (parameters.exists("NUMBER_EIGENVALUES") && parameters["NUMBER_EIGENVALUES"].template as<int>() < 0)
+    boost::throw_exception(std::invalid_argument("parameter 'NUMBER_EIGENVALUES' must not be negative"));
   return parameters;
 }
 

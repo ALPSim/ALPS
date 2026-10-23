@@ -62,6 +62,15 @@ TEST(SparsediagParameters, NonIntegerNamesParameter) {
     }
 }
 
+TEST(SparsediagParameters, RejectsNegativeNumberOfEigenvalues) {
+    try {
+        read("NUMBER_EIGENVALUES = -1");
+        ADD_FAILURE() << "NUMBER_EIGENVALUES = -1 was accepted";
+    } catch (std::invalid_argument const & e) {
+        EXPECT_NE(std::string(e.what()).find("parameter 'NUMBER_EIGENVALUES'"), std::string::npos) << e.what();
+    }
+}
+
 TEST(SparsediagParameters, ComplexUnlessGraphOrNoMomenta) {
     EXPECT_TRUE(matrix_type::use_complex(read("L = 4"), false));
     EXPECT_FALSE(matrix_type::use_complex(read("L = 4"), true));
