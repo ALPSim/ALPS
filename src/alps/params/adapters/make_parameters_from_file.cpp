@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <alps/ngs/make_parameters_from_file.hpp>
+#include <alps/ngs/make_parameters_from_deprecated.hpp>
 #include <alps/parameter.h>
 
 #include <boost/filesystem/fstream.hpp>
@@ -20,11 +21,7 @@ namespace alps {
 
     params make_parameters_from_file(boost::filesystem::path const & path) {
         boost::filesystem::ifstream ifs(path);
-        Parameters par(ifs);
-        params res;
-        for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it)
-            res.supply(it->key(), it->value());
-        return res;
+        return make_parameters_from_deprecated(Parameters(ifs));
     }
 
 }

@@ -39,6 +39,8 @@ public:
   typedef typename super_type::operator_matrix_type operator_matrix_type;
   
   SparseDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
+  /// Defines the parameters sparsediag reads, with their defaults
+  static void define_parameters(alps::params& parameters);
   void do_subspace();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&, bool) const;
   void print_eigenvectors(std::ostream& os) const;
@@ -51,9 +53,18 @@ private:
 
 template <class T>
 SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p) 
- : super_type(where,p,true) 
+ : super_type(where,p,true,&SparseDiagMatrix::define_parameters) 
 { 
   this->construct();
+}
+
+template <class T>
+void SparseDiagMatrix<T>::define_parameters(alps::params& parameters)
+{
+  super_type::define_parameters(parameters);
+  // without it, at most 10 per basis state and 1000
+  if (parameters.supplied("MAX_ITERATIONS"))
+    parameters.define<int>("MAX_ITERATIONS", "maximum number of Lanczos iterations");
 }
 
 
@@ -107,8 +118,9 @@ void SparseDiagMatrix<T>::do_subspace()
   int n;
   
   if (this->dimension()>1) {
-    int max_iter = this->get_parameters().value_or_default("MAX_ITERATIONS",std::min(int(10*this->dimension()),1000));  
-    int num_eigenvalues = this->get_parameters().value_or_default("NUMBER_EIGENVALUES",1);
+    int max_iter = this->settings().exists("MAX_ITERATIONS") ? this->settings()["MAX_ITERATIONS"].template as<int>()
+                                                              : std::min(int(10*this->dimension()),1000);
+    int num_eigenvalues = this->settings().exists("NUMBER_EIGENVALUES") ? this->settings()["NUMBER_EIGENVALUES"].template as<int>() : 1;
     ietl::lanczos_iteration_nlowest<double> iter(max_iter,num_eigenvalues);
     std::cerr << "Starting Lanczos \n";
     lanczos.calculate_eigenvalues(iter,generator);
