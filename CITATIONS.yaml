@@ -77,3 +77,7 @@ components:
     name: ALPS Hirsch-Fye impurity solver
     algorithm: [hirschfye1986]
     implementation: [gull2011cpc]
+  maxent:
+    name: ALPS maximum entropy analytic continuation (CQMP/Maxent)
+    algorithm: [bryan1990, jarrell1996]
+    implementation: [levy2017maxent]
