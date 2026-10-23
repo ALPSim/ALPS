@@ -19,3 +19,7 @@
 
 add_subdirectory(sparsediag)
 add_subdirectory(fulldiag)
+
+if(ALPS_BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
