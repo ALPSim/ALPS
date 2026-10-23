@@ -65,6 +65,21 @@ def main():
             run(command, "--command", "append", "--db-file", database, "--xml-file", simulation)
             with sqlite3.connect(database) as db:
                 assert db.execute("SELECT count(*) FROM measurement").fetchone() == (1,)
+            # The input file may also be given positionally.
+            run(command, "--command", "append", "--db-file", database, simulation)
+            with sqlite3.connect(database) as db:
+                assert db.execute("SELECT count(*) FROM measurement").fetchone() == (1,)
+            assert run(command, "--version").startswith("ALPS Plot Generator")
+
+            # A paired <constraint></constraint> is as valid as a self-closing one.
+            plot = root / "energy.plot.xml"
+            plot.write_text('''<plot name="energy"><xaxis name="T" type="parameter"/>
+<yaxis name="Energy" type="mean"/>
+<constraint name="T" type="parameter" operator="greaterthan" value="0"></constraint>
+</plot>''')
+            output = root / "plots"
+            output.mkdir()
+            run(command, "--command", "plot", "--db-file", database, "--output-path", output, plot)
 
 
 if __name__ == "__main__":

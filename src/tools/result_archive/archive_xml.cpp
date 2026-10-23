@@ -227,7 +227,7 @@ struct PlotDTD : public sp::grammar<PlotDTD>
           >> ( "/>"
              | ( '>'
                  >> *Comment
-                 >> sp::as_lower_d[sp::str_p("</yaxis")]
+                 >> sp::as_lower_d[sp::str_p("</constraint")]
                  >> '>'
                )
              );

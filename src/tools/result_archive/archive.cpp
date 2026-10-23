@@ -62,7 +62,7 @@ int main(int ac, char* av[]) {
                         ("positional-arg", po::value<std::string>(), "positional argument");
 
                 po::options_description cmdline_options;
-                cmdline_options.add(generic).add(config).add(command);
+                cmdline_options.add(generic).add(config).add(command).add(hidden);
 
                 po::options_description config_file_options;
                 config_file_options.add(config);
@@ -80,12 +80,12 @@ int main(int ac, char* av[]) {
                 po::store(po::parse_config_file(ifs, config_file_options), vm);
                 po::notify(vm);
 
-                if (vm.count("help") || !vm.count("command") || vm["command"].as<std::string>() == "help" || vm["command"].as<std::string>() == "h") {
-                        std::cout << visible << std::endl;
+                if (vm.count("version")) {
+                        std::cout << "ALPS Plot Generator, version 1.0" << std::endl;
                         exit(0);
 
-                } else if (vm.count("version")) {
-                        std::cout << "ALPS Plot Generator, version 1.0" << std::endl;
+                } else if (vm.count("help") || !vm.count("command") || vm["command"].as<std::string>() == "help" || vm["command"].as<std::string>() == "h") {
+                        std::cout << visible << std::endl;
                         exit(0);
 
                 } else if (!vm.count("db-file"))
@@ -112,9 +112,7 @@ int main(int ac, char* av[]) {
                                         throw std::runtime_error("no plot-file specified");
                                 else if (!vm.count("output-path"))
                                         throw std::runtime_error("no output-path specified");
-                                fs::path plotPath = absolute(fs::path(vm["plot-file"].as<std::string>()));
-                                if (vm.count("positional-arg"))
-                                  plotPath = absolute(fs::path(vm["positional-arg"].as<std::string>()));
+                                fs::path plotPath = absolute(fs::path(vm[vm.count("positional-arg") ? "positional-arg" : "plot-file"].as<std::string>()));
                                 fs::path outputPath = absolute(fs::path(vm["output-path"].as<std::string>()));
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.filename().string());
 
@@ -126,7 +124,7 @@ int main(int ac, char* av[]) {
                                                 throw std::runtime_error("Could not clear tables!");
                                 } else if (vm["command"].as<std::string>() != "append" && vm["command"].as<std::string>() != "a")
                                         throw std::runtime_error(std::string("Unknown command '") + vm["command"].as<std::string>() + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(absolute(fs::path(vm["xml-file"].as<std::string>())));
+                                Index(db, vm.count("verbose")).exec(absolute(fs::path(vm[vm.count("positional-arg") ? "positional-arg" : "xml-file"].as<std::string>())));
                         }
                 }
         } catch(std::exception& e) {
