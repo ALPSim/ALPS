@@ -10,7 +10,20 @@
 *****************************************************************************/
 
 // Legacy ALPS diagnostic output from src/apps/maxent/src/maxent_helper.cpp
-// at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f.
+// at d4533fd30c65656cf5ab7fa448dd6b921b39aa6f; original notice:
+/*****************************************************************************
+ *
+ * ALPS Project Applications
+ *
+ * Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
+ *                       Thomas Pruschke <pruschke@comp-phys.org>
+ *                       Matthias Troyer <troyer@comp-phys.org>
+ *               2011 by Emanuel Gull  <gull@phys.columbia.edu>
+ *
+ * ALPS Project: https://alps.comp-phys.org/
+ * SPDX-License-Identifier: MIT
+ *
+ *****************************************************************************/
 
 // Adapted from CQMP/Maxent src/maxent_helper.cpp at
 // e727650a1f0a427e95efebc409d907b4c84011ec.
