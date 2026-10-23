@@ -42,7 +42,6 @@ def test_extension_import_surface():
         "pyngsresults_c",
         "pyngsapi_c",
         "pyngsrandom01_c",
-        "pyngsaccumulator_c",
     }
     assert pyalps is not None
     assert expected <= set(vars(cxx))
@@ -212,18 +211,6 @@ def test_name_encoding_roundtrip():
 
     for value in ("plain", "with space", "slash/inside", "café"):
         assert hdf5_name_decode(hdf5_name_encode(value)) == value
-
-
-def test_accumulator_surface():
-    from pyalps.cxx.pyngsaccumulator_c import error_accumulator
-
-    accumulator = error_accumulator()
-    for sample in (1.0, 2.0, 3.0):
-        accumulator(sample)
-    result = accumulator.result()
-    assert result.count() == 3
-    assert result.mean() == 2.0
-    assert result.error() >= 0
 
 
 def test_optional_application_extension_surface():
@@ -1050,19 +1037,6 @@ def test_mcbase_save_load_overrides_reach_cpp_dispatch():
         assert calls == ["save", "load"]
 
 
-def test_accumulator_result_inplace_identity():
-    from pyalps.cxx.pyngsaccumulator_c import error_accumulator
-
-    accumulator = error_accumulator()
-    accumulator(1.0)
-    accumulator(2.0)
-    result = accumulator.result()
-    alias = result
-    alias += 1.0
-    assert alias is result
-    assert np.isclose(result.mean(), 2.5)
-
-
 def test_python3_property_comparison(monkeypatch):
     import pyalps
     import pyalps.apptest as apptest
@@ -1183,23 +1157,6 @@ def test_archive_setitem_rejects_mcdata_with_actionable_advice():
         restored = alea.MCScalarData()
         restored.load(target, "/simulation/results/Energy")
         assert restored.mean == pytest.approx(1.0)
-
-
-def test_accumulator_results_are_printable():
-    """__str__ returns std::string, which needs the caster in that module.
-
-    Without nanobind/stl/string.h in accumulator.cpp, str() on all ten
-    accumulator and result types raised TypeError.
-    """
-    from pyalps.cxx import pyngsaccumulator_c as accumulator
-
-    for name in ("count_accumulator", "mean_accumulator", "error_accumulator",
-                 "binning_analysis_accumulator", "max_num_binning_accumulator"):
-        accum = getattr(accumulator, name)()
-        for sample in range(16):
-            accum(float(sample))
-        assert isinstance(str(accum), str) and str(accum), name
-        assert isinstance(str(accum.result()), str) and str(accum.result()), name
 
 
 def test_numpy_arrays_are_writable_and_own_their_buffer():

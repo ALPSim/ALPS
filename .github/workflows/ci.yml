@@ -259,9 +259,9 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DMPIEXEC_PREFLAGS=--oversubscribe
         cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
-          mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 utilities_mpi_coexistence aleav2_mpi_twogauss \
+          mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 aleav2_mpi_twogauss \
           gf_one_index_gf_test_mpi gf_four_index_gf_test_mpi gf_four_index_gf_test_mismatched_mpi gf_four_index_gf_test_mismatched-tail_mpi \
-          gf_multiarray_bcast_mpi gf_mesh_test_mpi gf_new_test_mpi gf_new_tail_test_mpi gf_mpi_coexistence \
+          gf_multiarray_bcast_mpi gf_mesh_test_mpi gf_new_test_mpi gf_new_tail_test_mpi \
           accumulators_mpi_merge accumulators_mpi_merge_uneven accumulators_repeated_merge accumulators_zero_vector_mpi \
           params_serialize_variant_mpi params_dictionary_bcast_mpi params_bcast_mpi \
           mc_sum_mpi mc_reduce mc_signed_obs mc_custom_scheduler mc_reduce_unavailable_results

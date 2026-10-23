@@ -8,8 +8,8 @@ With the option off, none of these files are on the include path or installed.
 Not every interface removed since 3.0.0 has a forwarder here. The NGS
 parameters, Monte Carlo base, observables and accumulators are retired
 outright, because ALPSCore's replacements use the same class names;
-`CHANGELOG.md`'s Migration section records that exception, and
-`tests/cmake/preserved_public_headers.json` lists the headers under `retired`.
+`CHANGELOG.md`'s Migration section records that exception and lists the
+retired interfaces.
 
 | Path | What it keeps working | Replacement |
 | --- | --- | --- |
