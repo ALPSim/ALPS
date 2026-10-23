@@ -499,6 +499,8 @@ void DMRGTask<value_type>::dostep()
 ///////////////////////////////////////////////////////////////
 // Simulation
 ///////////////////////////////////////////////////////////////
+  // the Lanczos start vectors are random: seed them from the task's SEED
+  dmtk::seed_random(static_cast<long>(parms.value_or_default("SEED", 0)));
   hami = hami.reorder_terms();
   if(verbose)
     cout << hami.description() << endl;
