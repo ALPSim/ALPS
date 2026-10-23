@@ -835,7 +835,8 @@ class System
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
       {
          int n = this->get_signal_id(signal_id);
-         Signal<System<T> > signal(handler, this, n, data);
+         if(n < 0) return *this;   // unknown signal: nothing to connect
+         Signal<System<T> > signal(handler, this, static_cast<size_t>(n), data);
          this->handlers.push_back(signal);
          return *this;
       }
@@ -854,7 +855,8 @@ class System
     bool signal_emit(std::string signal_id)
       {
          int n = this->get_signal_id(signal_id);
-         if(n >= 0) return this->signal_emit(n);
+         if(n < 0) return true;   // unknown signal: nothing vetoed
+         return this->signal_emit(static_cast<size_t>(n));
       }
     std::string signal_description(size_t signal_id)
       {
