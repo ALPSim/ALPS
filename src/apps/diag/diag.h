@@ -53,7 +53,8 @@ public:
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
 
   DiagMatrix (const alps::ProcessList& , const boost::filesystem::path&,bool delay_construct=false,
-              void (*define_parameters)(alps::params&) = &DiagMatrix::define_parameters);
+              void (*define_parameters)(alps::params&) = &DiagMatrix::define_parameters,
+              const alps::params* settings = 0);
   ~DiagMatrix();
 
   /// Defines the parameters sparsediag and fulldiag read, with their defaults
@@ -105,8 +106,8 @@ private:
 
 template <class T, class M>
 DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
-                            void (*define_parameters)(alps::params&))
-    : alps::scheduler::DiagTask<T>(where,p,delay_construct,define_parameters)
+                            void (*define_parameters)(alps::params&), const alps::params* settings)
+    : alps::scheduler::DiagTask<T>(where,p,delay_construct,define_parameters,settings)
     , alps::hamiltonian_matrix<M>(this->get_parameters())
 { 
   if (this->calc_averages())

@@ -17,7 +17,7 @@ alps::params read(std::string const & text) {
     std::istringstream in(text);
     alps::Parameters parameters;
     in >> parameters;
-    return matrix_type::read_parameters(parameters, &matrix_type::define_parameters);
+    return matrix_type::read_parameters(parameters);
 }
 
 TEST(SparsediagParameters, Defaults) {
@@ -62,12 +62,16 @@ TEST(SparsediagParameters, NonIntegerNamesParameter) {
     }
 }
 
-TEST(SparsediagParameters, RejectsNegativeNumberOfEigenvalues) {
-    try {
-        read("NUMBER_EIGENVALUES = -1");
-        ADD_FAILURE() << "NUMBER_EIGENVALUES = -1 was accepted";
-    } catch (std::invalid_argument const & e) {
-        EXPECT_NE(std::string(e.what()).find("parameter 'NUMBER_EIGENVALUES'"), std::string::npos) << e.what();
+TEST(SparsediagParameters, RejectsNonPositiveCounts) {
+    for (std::string const name : {"NUMBER_EIGENVALUES", "MAX_ITERATIONS"}) {
+        for (std::string const value : {"-1", "0"}) {
+            try {
+                read(name + " = " + value);
+                ADD_FAILURE() << name << " = " << value << " was accepted";
+            } catch (std::invalid_argument const & e) {
+                EXPECT_NE(std::string(e.what()).find("parameter '" + name + "'"), std::string::npos) << e.what();
+            }
+        }
     }
 }
 

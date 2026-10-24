@@ -1,37 +1,72 @@
 # SPDX-License-Identifier: MIT
 #
-# Run fulldiag with --write-xml on a task with T and the field h = J/2. The
-# XML output has the averages at that temperature and field, so it must
-# succeed and list the field.
-# Usage: cmake -DAPP=<fulldiag> -DXML_PATH=<resources> -DWORK_DIR=<dir> -P ...
+# Run fulldiag with --write-xml, and then fulldiag_evaluate, on a task with T
+# and the field h = J/2, and on the same task with h = 0.5. Both must succeed,
+# and the averages and the evaluated plots must agree. The plots are over a
+# range of fields measured from h, so a wrong h would shift them.
+# Usage: cmake -DAPP=<fulldiag> -DEVALUATE=<fulldiag_evaluate> -DXML_PATH=<resources>
+#              -DWORK_DIR=<dir> -P ...
 
+set(ENV{ALPS_XML_PATH} "${XML_PATH}")
+set(ENV{ALPS_NO_CITATIONS} 1)
 file(REMOVE_RECURSE "${WORK_DIR}")
-file(MAKE_DIRECTORY "${WORK_DIR}")
-file(WRITE "${WORK_DIR}/task.in.xml" "<SIMULATION><PARAMETERS>
+
+# runs the task with field h in WORK_DIR/<name>; sets <name>_averages to the
+# averages of the XML output and <name>_plot to the evaluated magnetization
+function(run_task name h)
+  set(dir "${WORK_DIR}/${name}")
+  file(MAKE_DIRECTORY "${dir}")
+  file(WRITE "${dir}/task.in.xml" "<SIMULATION><PARAMETERS>
 <PARAMETER name=\"LATTICE\">chain lattice</PARAMETER>
 <PARAMETER name=\"MODEL\">spin</PARAMETER>
 <PARAMETER name=\"L\">4</PARAMETER>
 <PARAMETER name=\"J\">1</PARAMETER>
+<PARAMETER name=\"CONSERVED_QUANTUMNUMBERS\">Sz</PARAMETER>
 <PARAMETER name=\"T\">0.5</PARAMETER>
-<PARAMETER name=\"h\">J/2</PARAMETER>
+<PARAMETER name=\"h\">${h}</PARAMETER>
 </PARAMETERS></SIMULATION>
 ")
-file(WRITE "${WORK_DIR}/job.in.xml" "<JOB><OUTPUT file=\"job.out.xml\"/>"
-  "<TASK status=\"new\"><INPUT file=\"task.in.xml\"/><OUTPUT file=\"task.out.xml\"/></TASK></JOB>\n")
+  file(WRITE "${dir}/job.in.xml" "<JOB><OUTPUT file=\"job.out.xml\"/>"
+    "<TASK status=\"new\"><INPUT file=\"task.in.xml\"/><OUTPUT file=\"task.out.xml\"/></TASK></JOB>\n")
 
-set(ENV{ALPS_XML_PATH} "${XML_PATH}")
-set(ENV{ALPS_NO_CITATIONS} 1)
-execute_process(COMMAND "${APP}" --write-xml job.in.xml WORKING_DIRECTORY "${WORK_DIR}"
-  RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE err)
-set(log "exit status: ${result}\nstdout:\n${out}\nstderr:\n${err}")
+  execute_process(COMMAND "${APP}" --write-xml job.in.xml WORKING_DIRECTORY "${dir}"
+    RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE err)
+  set(log "h = ${h}: fulldiag exit status: ${result}\nstdout:\n${out}\nstderr:\n${err}")
+  if(NOT result STREQUAL "0")
+    message(FATAL_ERROR "expected exit status 0\n${log}")
+  endif()
+  if(NOT EXISTS "${dir}/task.out.xml")
+    message(FATAL_ERROR "no XML output\n${log}")
+  endif()
+  file(READ "${dir}/task.out.xml" xml)
+  if(NOT xml MATCHES "<AVERAGES>.*</AVERAGES>")
+    message(FATAL_ERROR "the XML output has no averages\n${log}")
+  endif()
+  set(${name}_averages "${CMAKE_MATCH_0}" PARENT_SCOPE)
 
-if(NOT result STREQUAL "0")
-  message(FATAL_ERROR "expected exit status 0\n${log}")
+  execute_process(COMMAND "${EVALUATE}" --T_MIN 0.1 --T_MAX 1 --DELTA_T 0.1
+    --H_MIN 0 --H_MAX 1 --DELTA_H 0.5 task.out.xml
+    WORKING_DIRECTORY "${dir}" RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE err)
+  set(log "h = ${h}: fulldiag_evaluate exit status: ${result}\nstdout:\n${out}\nstderr:\n${err}")
+  if(NOT result STREQUAL "0")
+    message(FATAL_ERROR "expected exit status 0\n${log}")
+  endif()
+  if(NOT EXISTS "${dir}/task.plot.magnetization.xml")
+    message(FATAL_ERROR "no magnetization plot\n${log}")
+  endif()
+  file(READ "${dir}/task.plot.magnetization.xml" plot)
+  set(${name}_plot "${plot}" PARENT_SCOPE)
+endfunction()
+
+run_task(expression "J/2")
+run_task(number "0.5")
+
+if(NOT expression_averages STREQUAL number_averages)
+  message(FATAL_ERROR "the averages differ\nh = J/2:\n${expression_averages}\nh = 0.5:\n${number_averages}")
 endif()
-if(NOT EXISTS "${WORK_DIR}/task.out.xml")
-  message(FATAL_ERROR "no XML output\n${log}")
+if(NOT expression_averages MATCHES "Magnetization")
+  message(FATAL_ERROR "the averages have no magnetization\n${expression_averages}")
 endif()
-file(READ "${WORK_DIR}/task.out.xml" xml)
-if(NOT xml MATCHES "<AVERAGES>")
-  message(FATAL_ERROR "the XML output has no averages\n${log}")
+if(NOT expression_plot STREQUAL number_plot)
+  message(FATAL_ERROR "the evaluated magnetizations differ\nh = J/2:\n${expression_plot}\nh = 0.5:\n${number_plot}")
 endif()

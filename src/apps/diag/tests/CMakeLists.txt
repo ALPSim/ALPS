@@ -19,6 +19,7 @@ endforeach()
 
 add_test(NAME diag.field_expression_fulldiag
   COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:fulldiag>"
+    "-DEVALUATE=$<TARGET_FILE:fulldiag_evaluate>"
     "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
     "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/field_expression_fulldiag"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/field_expression.cmake")

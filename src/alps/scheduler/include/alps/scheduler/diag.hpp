@@ -45,9 +45,11 @@ public:
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
   
   // define_parameters defines the parameters the task reads: a derived
-  // class passes its own, which calls this class's
+  // class passes its own, which calls this class's. settings, if given, are
+  // those parameters already read by read_parameters, as the factories do
   DiagTask (const ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false,
-            void (*define_parameters)(alps::params&) = &DiagTask::define_parameters);
+            void (*define_parameters)(alps::params&) = &DiagTask::define_parameters,
+            const alps::params* settings = 0);
 
   /// Defines the parameters DiagTask reads, with their defaults
   static void define_parameters(alps::params& parameters);
@@ -78,9 +80,9 @@ protected:
   std::vector<std::vector<value_type> > eigenvectors_;
   
   bool calc_vectors() const { return calc_averages() || print_vectors() || save_vectors();}
-  bool print_vectors() const { return settings_["PRINT_EIGENVECTORS"].template as<bool>();}
-  bool save_vectors() const { return settings_["SAVE_EIGENVECTORS"].template as<bool>();}
-  bool measure_energy() const { return settings_["MEASURE_ENERGY"].template as<bool>();}
+  bool print_vectors() const { return print_vectors_;}
+  bool save_vectors() const { return save_vectors_;}
+  bool measure_energy() const { return measure_energy_;}
   // the parameters define_parameters defined, read when the task is constructed
   const alps::params& settings() const { return settings_;}
 private:
@@ -88,18 +90,24 @@ private:
   unsigned number_eigenvalues(std::size_t n) const;
 
   const alps::params settings_;
+  const bool print_vectors_;
+  const bool save_vectors_;
+  const bool measure_energy_;
   bool skipped_vectors_;
   bool read_hdf5_;
 };
 
 template <class T, class G>
 DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
-                        void (*define_parameters)(alps::params&))
+                        void (*define_parameters)(alps::params&), const alps::params* settings)
     : scheduler::Task(where,p)
     , graph_helper<G>(this->get_parameters())
     , model_helper<>(this->get_parameters())
     , MeasurementOperators(this->get_parameters())
-    , settings_(read_parameters(this->get_parameters(), define_parameters))
+    , settings_(settings ? *settings : read_parameters(this->get_parameters(), define_parameters))
+    , print_vectors_(settings_["PRINT_EIGENVECTORS"].template as<bool>())
+    , save_vectors_(settings_["SAVE_EIGENVECTORS"].template as<bool>())
+    , measure_energy_(settings_["MEASURE_ENERGY"].template as<bool>())
     , skipped_vectors_(false)
     , read_hdf5_(false)
 {
@@ -124,8 +132,8 @@ alps::params DiagTask<T,G>::read_parameters(const Parameters& parms, void (*defi
   if (parameters.has_missing(errors))
     boost::throw_exception(std::invalid_argument(errors.str()));
   // define<unsigned> would accept -1
-  if (parameters.exists("NUMBER_EIGENVALUES") && parameters["NUMBER_EIGENVALUES"].template as<int>() < 0)
-    boost::throw_exception(std::invalid_argument("parameter 'NUMBER_EIGENVALUES' must not be negative"));
+  if (parameters.exists("NUMBER_EIGENVALUES") && parameters["NUMBER_EIGENVALUES"].template as<int>() <= 0)
+    boost::throw_exception(std::invalid_argument("parameter 'NUMBER_EIGENVALUES' must be positive"));
   return parameters;
 }
 
