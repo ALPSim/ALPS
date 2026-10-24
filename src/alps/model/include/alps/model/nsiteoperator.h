@@ -180,6 +180,18 @@ public:
   }
   expression::Expression<T> partial_evaluate_function(const std::string& name,
                                                       const expression::Expression<T>& argument, bool = false) const;
+  // Every function call passes through these overloads.
+  bool can_evaluate_function(const std::string& name, const std::vector<expression::Expression<T> >& args, bool isarg = false) const
+  {
+    refuse_random(name);
+    return super_type::can_evaluate_function(name, args, isarg);
+  }
+  expression::Expression<T> partial_evaluate_function(const std::string& name,
+                                                      const std::vector<expression::Expression<T> >& args, bool isarg = false) const
+  {
+    refuse_random(name);
+    return super_type::partial_evaluate_function(name, args, isarg);
+  }
 
   // the operators of the term on role r, in their original order
   const expression::Term<T>& site_operators(std::size_t r) const { return ops_[r]; }
@@ -195,6 +207,15 @@ public:
   }
 
 private:
+  // One table serves every n-site group of a type, so a random coupling would
+  // be drawn once and shared by all of them.
+  static void refuse_random(const std::string& name)
+  {
+    if (name == "random" || name == "gaussian_random" || name == "normal_random" || name == "integer_random")
+      boost::throw_exception(std::runtime_error("n-site term: " + name + "() is not supported; "
+        "n-site terms cannot carry disorder"));
+  }
+
   int role(const expression::Expression<T>& arg) const
   {
     for (std::size_t r = 0; r < sites_.size(); ++r)

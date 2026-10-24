@@ -486,6 +486,21 @@ TEST(SectorCheck, MomentumSectorsTogetherGiveTheFullSpectrum) {
     }
 }
 
+TEST(NSiteHamiltonian, RandomCouplingsAreRefused) {
+  // One local table serves every n-site group of a type, so a random coupling
+  // would be drawn once and shared by all groups.
+  const std::string library = std::string(spinless_model).substr(0, std::string(spinless_model).find("<HAMILTONIAN"));
+  for (const char* term : {"random()*n(i)*n(j)*n(k)", "gaussian_random(0,1)*n(i)*n(j)*n(k)",
+                           "sqrt(random())*n(i)*n(j)*n(k)", "R*n(i)*n(j)*n(k)"}) {
+    Files f(spinless_chain, library + "<HAMILTONIAN name=\"random\"><BASIS ref=\"spinless\"/>"
+            "<NSITETERM sites=\"i j k\">" + std::string(term) + "</NSITETERM></HAMILTONIAN>");
+    alps::Parameters p = f.parms();
+    p["LATTICE"] = "periodic three-site chain"; p["L"] = 5; p["MODEL"] = "random";
+    p["CONSERVED_QUANTUMNUMBERS"] = "N"; p["N_total"] = 3; p["R"] = "random()";
+    EXPECT_NE(build_error(p).find("cannot carry disorder"), std::string::npos) << term;
+  }
+}
+
 TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
   // operator_matrix (measurements) keeps dropping elements that leave the sector
   Files f(chain4, "<HAMILTONIAN name=\"hop\"><BASIS ref=\"fermion\"/>"
@@ -863,3 +878,4 @@ TEST(NSiteBoson, NoCutoffWarningForFermions) {
   spectrum(p);
   EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
 }
+
