@@ -30,6 +30,7 @@
 
 #include "maxent.hpp"
 #include "eigen_lapack.hpp"
+#include <cmath>
 #include <Eigen/SVD>
 #include <Eigen/Eigenvalues>
 #include <alps/hdf5/vector.hpp>
@@ -165,6 +166,9 @@ void ContiParameters::scale_data_with_error(const int ntab) {
   //in case of a diagonal covariance matrix, we have sigma_=SIGMA_X. 
   //Then define y := \bar{G}/sigma_ and K := (1/sigma_)\tilde{K}
   for (int i = 0; i < ndat(); i++) {
+    // ALPS: a zero error bar would put infinities into the kernel's SVD.
+    if (!(sigma_[i] != 0) || !std::isfinite(sigma_[i]))
+      throw std::invalid_argument("data error is zero or not finite at index " + std::to_string(i));
     y_[i] /= sigma_[i];
     for (int j = 0; j < ntab; ++j) {
       K_(i, j) /= sigma_[i];
@@ -369,6 +373,8 @@ MaxEntParameters::MaxEntParameters(alps::params& p) :
   // Preserve ALPS's optional normalization constraint on the final data row.
   if (p["ENFORCE_NORMALIZATION"].as<bool>()) {
     const double sigma = p["SIGMA_NORMALIZATION"].as<double>() / p["NORM"].as<double>();
+    if (!(sigma != 0) || !std::isfinite(sigma))
+      throw std::invalid_argument("SIGMA_NORMALIZATION is zero or not finite");
     for (int j=0; j<nfreq(); ++j)
       K_(ndat()-1,j) = 1. / sigma;
     y_[ndat()-1] = 1. / sigma;

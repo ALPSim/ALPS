@@ -13,7 +13,7 @@ import numpy as np
 BETA, COUNT, FREQUENCIES, ALPHAS, NORM = 4.0, 16, 48, 6, 2.5
 
 
-def solve(executable, directory, returncode=0, covariance=None, **overrides):
+def solve(executable, directory, returncode=0, covariance=None, error=None, **overrides):
     beta, count, frequencies, alphas, norm = BETA, COUNT, FREQUENCIES, ALPHAS, NORM
     tau = np.linspace(0.0, beta, count)
     poles = np.array([-1.0, 1.0])
@@ -34,7 +34,7 @@ def solve(executable, directory, returncode=0, covariance=None, **overrides):
     }
     with h5py.File(source, "w") as archive:
         archive["Data"] = norm * data
-        archive["Error"] = np.full(count, norm * 0.001)
+        archive["Error"] = np.full(count, norm * 0.001) if error is None else error
         if covariance is not None:
             archive["Covariance"] = covariance
         for name, value in parameters.items():
@@ -67,6 +67,10 @@ def check_rejected_input(executable, directory):
             covariance=np.eye(COUNT).ravel() * 1e-12, COVARIANCE_MATRIX="HDF5", CM_EIGENVALUE_CUTOFF=1e-10),
         "Default model point < 0": dict(DEFAULT_MODEL=str(model)),
         "N_ALPHA must be at least 2": dict(N_ALPHA=1),
+        "data error is zero or not finite at index 5": dict(
+            error=np.where(np.arange(COUNT) == 5, 0.0, NORM * 0.001)),
+        "frequency grid edges are not finite and increasing": dict(FREQUENCY_GRID="Lorentzian", CUT=0.5),
+        "SIGMA_NORMALIZATION is zero": dict(ENFORCE_NORMALIZATION=1, SIGMA_NORMALIZATION=0.0),
     }
     for diagnostic, overrides in cases.items():
         run = directory / ("rejected-" + diagnostic.split()[0])

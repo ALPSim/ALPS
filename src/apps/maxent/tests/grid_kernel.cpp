@@ -120,6 +120,19 @@ TEST(MaxEntGrid, EndpointsAndOrdering) {
   }
 }
 
+TEST(MaxEntGrid, RejectDegenerateLorentzianCut) {
+  for (const char* name : {"Lorentzian", "half lorentzian"}) {
+    SCOPED_TRACE(name);
+    alps::params parameters;
+    parameters["NFREQ"] = 31;
+    parameters["FREQUENCY_GRID"] = std::string(name);
+    parameters["CUT"] = 0.5;
+    EXPECT_THROW(grid invalid(parameters), std::invalid_argument);
+    parameters["CUT"] = std::numeric_limits<double>::quiet_NaN();
+    EXPECT_THROW(grid invalid(parameters), std::invalid_argument);
+  }
+}
+
 TEST(MaxEntGrid, LogarithmicBoundsAndSymmetry) {
   alps::params parameters;
   parameters["FREQUENCY_GRID"] = std::string("log");

@@ -56,6 +56,10 @@ t_array_(nfreq_+1){
   }
   else
     throw std::invalid_argument("No valid frequency grid specified");
+  // ALPS: e.g. CUT=0.5 collapses a Lorentzian grid to 0/0.
+  for (int i = 0; i < nfreq_+1; ++i)
+    if (!std::isfinite(t_array_[i]) || (i > 0 && !(t_array_[i] > t_array_[i-1])))
+      throw std::invalid_argument("frequency grid edges are not finite and increasing; check CUT, SPREAD or LOG_MIN");
 }
 void grid::initialize_linear_grid() {
   for (int i = 0; i < nfreq_+1; ++i)
