@@ -31,6 +31,7 @@
 #include <boost/numeric/bindings/upper.hpp>
 #include <boost/numeric/bindings/lower.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 template <class T> 
 struct pick_real_complex 
@@ -71,6 +72,9 @@ public:
   void print_eigenvectors(std::ostream& os) const;
   void append_eigenvectors(std::vector<value_type>& v) const;
 private:
+  // a temperature or field, which can be an expression in the model parameters
+  /** @throws std::invalid_argument naming the parameter if it is empty or cannot be evaluated */
+  static double parameter_value(const alps::Parameters& p, const std::string& name);
   magnitude_type groundstate_energy() const;
   void do_subspace();
   magnitude_type calculate_averages(MeasurementsPlot<magnitude_type>&) const;
@@ -106,6 +110,21 @@ FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost:
 }
 
     
+template <class T>
+double FullDiagMatrix<T>::parameter_value(const alps::Parameters& p, const std::string& name)
+{
+  std::string const text = boost::algorithm::trim_copy(std::string(p[name]));
+  if (text.empty())
+    boost::throw_exception(std::invalid_argument("parameter '" + name + "' is empty"));
+  try {
+    return alps::evaluate<double>(text, p);
+  }
+  catch (std::exception& e) {
+    boost::throw_exception(std::invalid_argument("Cannot evaluate parameter '" + name + "': " + e.what()));
+  }
+  return 0.;
+}
+
 template <class T>
 void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::string& basename) const
 {
@@ -178,15 +197,15 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
 
   if (have_t_range_parameters) {
     have_t_range=true;
-    tmin=p.defined("T_MIN") ? alps::evaluate<double>(p["T_MIN"], p) : 0.;
-    tmax=alps::evaluate<double>(p["T_MAX"], p);
-    deltaT=alps::evaluate<double>(p["DELTA_T"], p);
+    tmin=p.defined("T_MIN") ? parameter_value(p, "T_MIN") : 0.;
+    tmax=parameter_value(p, "T_MAX");
+    deltaT=parameter_value(p, "DELTA_T");
   }
   
   if (p.defined("T"))
-    beta = 1./alps::evaluate<double>(p["T"], p);
+    beta = 1./parameter_value(p, "T");
   else if (p.defined("beta"))
-    beta = alps::evaluate<double>(p["beta"], p);
+    beta = parameter_value(p, "beta");
   else if (!have_t_range)
   {
     std::cerr << "DELTA_T and T_MAX or T need to be defined\n";
@@ -204,14 +223,14 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   magnitude_type deltaH;
   
   if (have_field_range) {
-    hmin=p.defined(field_name_uc+"_MIN") ? alps::evaluate<double>(p[field_name_uc+"_MIN"], p) : 0.;
-    hmax=alps::evaluate<double>(p[field_name_uc+"_MAX"], p);
-    deltaH=alps::evaluate<double>(p["DELTA_"+field_name_uc], p);
-    field0 = p.defined(field_name) ? alps::evaluate<double>(p[field_name], p) : 0.;
+    hmin=p.defined(field_name_uc+"_MIN") ? parameter_value(p, field_name_uc+"_MIN") : 0.;
+    hmax=parameter_value(p, field_name_uc+"_MAX");
+    deltaH=parameter_value(p, "DELTA_"+field_name_uc);
+    field0 = p.defined(field_name) ? parameter_value(p, field_name) : 0.;
   }
   else {
    // define an h-range with 1 point
-   field0 = hmin = hmax = p.defined(field_name) ? alps::evaluate<double>(p[field_name], p) : 0.;
+   field0 = hmin = hmax = p.defined(field_name) ? parameter_value(p, field_name) : 0.;
    deltaH = 1;
   }
 
@@ -454,10 +473,10 @@ void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesys
     const alps::Parameters& pa = this->get_parameters();
     if (writeallxml && (pa.defined("T") || pa.defined("beta"))) {
         // T, beta, H and h can be expressions in the model parameters, such as h = J/2
-        beta = (pa.defined("T") ? 1./alps::evaluate<double>(pa["T"], pa)
-                           : alps::evaluate<double>(pa["beta"], pa));
-        field0 = field = (pa.defined("H") ? alps::evaluate<double>(pa["H"], pa)
-                          : pa.defined("h") ? alps::evaluate<double>(pa["h"], pa) : 0.);
+        beta = (pa.defined("T") ? 1./parameter_value(pa, "T")
+                           : parameter_value(pa, "beta"));
+        field0 = field = (pa.defined("H") ? parameter_value(pa, "H")
+                          : pa.defined("h") ? parameter_value(pa, "h") : 0.);
     conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();

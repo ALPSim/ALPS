@@ -3,7 +3,8 @@
 # Run fulldiag with --write-xml, and then fulldiag_evaluate, on a task with T
 # and the field h = J/2, and on the same task with h = 0.5. Both must succeed,
 # and the averages and the evaluated plots must agree. The plots are over a
-# range of fields measured from h, so a wrong h would shift them.
+# range of fields measured from h, so a wrong h would shift them. A blank or
+# unevaluable temperature or field must stop fulldiag_evaluate.
 # Usage: cmake -DAPP=<fulldiag> -DEVALUATE=<fulldiag_evaluate> -DXML_PATH=<resources>
 #              -DWORK_DIR=<dir> -P ...
 
@@ -70,3 +71,16 @@ endif()
 if(NOT expression_plot STREQUAL number_plot)
   message(FATAL_ERROR "the evaluated magnetizations differ\nh = J/2:\n${expression_plot}\nh = 0.5:\n${number_plot}")
 endif()
+
+# a temperature or field that is blank or cannot be evaluated is an error
+# naming it, not a plot of NaN
+foreach(case "T; " "h;K/2")
+  list(GET case 0 name)
+  list(GET case 1 value)
+  execute_process(COMMAND "${EVALUATE}" --T 0.5 --${name} "${value}" task.out.xml
+    WORKING_DIRECTORY "${WORK_DIR}/expression" RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE err)
+  if(result STREQUAL "0" OR NOT err MATCHES "parameter '${name}'")
+    message(FATAL_ERROR "${name} = '${value}': expected an error naming the parameter\n"
+      "exit status: ${result}\nstderr:\n${err}")
+  endif()
+endforeach()
