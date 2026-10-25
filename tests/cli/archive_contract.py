@@ -83,7 +83,8 @@ def main():
             plot.write_text('''<plot name="energy" output="text"><xaxis name="T" type="parameter"/>
 <yaxis name="Energy" type="mean"/>
 <constraint name="T" type="parameter" operator="greaterthan" value="2"></constraint>
-</plot>''')
+</plot>
+''')
             output = root / "plots"
             output.mkdir()
             run(command, "--command", "plot", "--db-file", database, "--output-path", output, plot)

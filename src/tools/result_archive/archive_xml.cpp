@@ -15,6 +15,7 @@
 
 /* $Id$ */
 
+#include <cctype>
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -327,6 +328,17 @@ std::string XML::readFile(fs::path filename)
   return buffer;
 }
 
+// parse_info::full is false on trailing whitespace, which the skipper does not consume
+static bool parsedToEnd(sp::parse_info<> const& info)
+{
+  if (!info.hit)
+    return false;
+  for (char const* c = info.stop; *c; ++c)
+    if (!std::isspace(static_cast<unsigned char>(*c)))
+      return false;
+  return true;
+}
+
 Node XML::operator()(fs::path inFileName, bool usePlotDTD)
 {
   std::clock_t timer = std::clock();
@@ -337,7 +349,7 @@ Node XML::operator()(fs::path inFileName, bool usePlotDTD)
       sp::parse(fileContent.c_str(), PlotDTD(), sp::space_p);
     // the whole file has to match: a plot file with trailing content
     // would otherwise be used as far as it parsed
-    if (!plotInfo.full)
+    if (!parsedToEnd(plotInfo))
       boost::throw_exception(std::runtime_error(std::string(
         "The Plotfile does not match the DTD! Fails parsing at: ") +
         plotInfo.stop));
@@ -345,7 +357,7 @@ Node XML::operator()(fs::path inFileName, bool usePlotDTD)
 
   sp::parse_info<> info =
     sp::parse(fileContent.c_str(), XMLEbnf(), sp::space_p);
-  if (usePlotDTD && !info.full)
+  if (usePlotDTD && !parsedToEnd(info))
     boost::throw_exception(std::runtime_error(std::string(
       "Fails parsing file ") + inFileName.string() + " at " + info.stop));
   if (mVerbose) {
