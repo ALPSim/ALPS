@@ -28,6 +28,9 @@
 #include <alps/hdf5/complex.hpp>
 #include <alps/type_traits/is_complex.hpp>
 
+#include <boost/lexical_cast.hpp>
+
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -46,7 +49,9 @@ public:
   
   // define_parameters defines the parameters the task reads: a derived
   // class passes its own, which calls this class's. settings, if given, are
-  // those parameters already read by read_parameters, as the factories do
+  // those parameters already read by read_parameters, as the factories do for
+  // a new run; without them the task reads an existing output, as
+  // fulldiag_evaluate and convert2xml do
   DiagTask (const ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false,
             void (*define_parameters)(alps::params&) = &DiagTask::define_parameters,
             const alps::params* settings = 0);
@@ -55,8 +60,12 @@ public:
   static void define_parameters(alps::params& parameters);
 
   /// A task's parameters, with the parameters `define_parameters` defines parsed
-  /** @throws std::invalid_argument naming each of them that does not parse */
-  static alps::params read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&));
+  /** @param stored whether parms are those of an existing output: a NUMBER_EIGENVALUES
+             that is not a positive integer is then ignored with a warning, so that
+             outputs written before it was checked can still be read
+      @throws std::invalid_argument naming each of them that does not parse */
+  static alps::params read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&),
+                                      bool stored = false);
 
   void dostep() { boost::throw_exception(std::logic_error("Cannot call dostep on the base class DiagTask")); }
 
@@ -104,7 +113,7 @@ DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path
     , graph_helper<G>(this->get_parameters())
     , model_helper<>(this->get_parameters())
     , MeasurementOperators(this->get_parameters())
-    , settings_(settings ? *settings : read_parameters(this->get_parameters(), define_parameters))
+    , settings_(settings ? *settings : read_parameters(this->get_parameters(), define_parameters, true))
     , print_vectors_(settings_["PRINT_EIGENVECTORS"].template as<bool>())
     , save_vectors_(settings_["SAVE_EIGENVECTORS"].template as<bool>())
     , measure_energy_(settings_["MEASURE_ENERGY"].template as<bool>())
@@ -125,8 +134,23 @@ void DiagTask<T,G>::define_parameters(alps::params& parameters) {
 }
 
 template <class T, class G>
-alps::params DiagTask<T,G>::read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&)) {
-  alps::params parameters = make_parameters_from_deprecated(parms);
+alps::params DiagTask<T,G>::read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&),
+                                            bool stored) {
+  Parameters checked(parms);
+  if (stored && checked.defined("NUMBER_EIGENVALUES")) {
+    std::string const value = checked["NUMBER_EIGENVALUES"];
+    int n = 0;
+    try {
+      n = boost::lexical_cast<int>(value);
+    }
+    catch (boost::bad_lexical_cast&) {}
+    if (n <= 0) {
+      std::cerr << "Warning: ignoring NUMBER_EIGENVALUES = " << value
+                << ", which is not a positive integer, and using all eigenvalues\n";
+      checked.erase("NUMBER_EIGENVALUES");
+    }
+  }
+  alps::params parameters = make_parameters_from_deprecated(checked);
   define_parameters(parameters);
   std::ostringstream errors;
   if (parameters.has_missing(errors))
