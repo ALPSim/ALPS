@@ -4,7 +4,6 @@ from pathlib import Path
 import shutil
 import stat
 import subprocess
-import xml.etree.ElementTree as ET
 
 import pytest
 
@@ -131,19 +130,11 @@ def test_malformed_stdin_preserves_output(legacy_install, tmp_path):
 
 
 def test_deprecated_helpers_warn_and_still_work(legacy_install, tmp_path):
-    # archivecat is unchanged: it splits names on spaces and expects the task
-    # file layout ALPS writes, with <PARAMETERS> on its own line.
-    tasks = [tmp_path / "task1.xml", tmp_path / "task2.xml"]
-    for path, x in zip(tasks, (1, 2)):
-        path.write_text('<?xml version="1.0"?>\n<SIMULATION>\n'
-                        + simulation(x, 3).removeprefix("<SIMULATION>"))
-    archive = run(legacy_install, "archivecat", *tasks)
-    assert archive.returncode == 0, archive.stderr
-    assert "archivecat is deprecated" in archive.stderr
-    assert archive.stdout.count("<SIMULATION>") == 2
-    assert ET.fromstring(archive.stdout.encode()).tag == "ARCHIVE"
+    task = tmp_path / "task1.xml"
+    task.write_text('<?xml version="1.0"?>\n<SIMULATION>\n'
+                    + simulation(1, 3).removeprefix("<SIMULATION>"))
     stylesheet = legacy_install[1] / "QMCXML2text.xsl"
-    transform = run(legacy_install, "xslttransform", tasks[0], stylesheet)
+    transform = run(legacy_install, "xslttransform", task, stylesheet)
     assert transform.returncode == 0, transform.stderr
     assert "xslttransform is deprecated" in transform.stderr
     assert "Energy" in transform.stdout

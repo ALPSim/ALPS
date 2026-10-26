@@ -23,6 +23,6 @@ if(UNIX)
   # Deprecated helpers without an alps-xml equivalent warn but keep working.
   configure_file(use_local_stylesheet use_local_stylesheet @ONLY NEWLINE_STYLE UNIX)
   install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/use_local_stylesheet"
-    archivecat xslttransform
+    xslttransform
     DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
 endif()

@@ -388,13 +388,14 @@ The historical command names remain installed in the same `xml` component as ali
 
 Wheels install `plot2text`, `plot2gp`, `plot2xmgr` and `convert2text` as aliases in the same way.
 
-Three shell helpers have no `alps-xml` equivalent. They still work, but each prints a deprecation warning, and they will be removed in a future release:
+Two shell helpers have no `alps-xml` equivalent. They still work, but each prints a deprecation warning, and they will be removed in a future release:
 
 | Deprecated helper | Replacement |
 | --- | --- |
-| `archivecat` | `alps-xml extract` reads task files directly |
 | `xslttransform` | `xsltproc stylesheet.xsl input.xml` |
 | `use_local_stylesheet` | `alps-xml convert html` writes viewable HTML. Default task output already refers to a local `ALPS.xsl` |
+
+`archivecat` has been removed; `alps-xml extract` reads task files directly.
 
 Application builds also retain the archive-producing commands in the `tools`
 installation component:
