@@ -1,0 +1,5 @@
+#! /bin/sh
+# Historical name for 'alps-xml @ALPS_XML_COMMAND@', kept for existing scripts.
+
+dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd) || exit 1
+exec "$dir/alps-xml" @ALPS_XML_COMMAND@ "$@"
