@@ -15,6 +15,8 @@
 
 #include <alps/model/siteterm.h>
 #include <alps/model/operatorsubstitution.h>
+#include <limits>
+#include <sstream>
 
 // some file (probably a python header) defines a tolower macro ...
 #undef tolower
@@ -60,7 +62,12 @@ void alps::SiteOperator::substitute_operators(const ModelLibrary& m, const Param
   Expression e(term());
   e.partial_evaluate(subs);
   e.simplify();
-  term_=boost::lexical_cast<std::string>(e);
+  // Full precision: lexical_cast prints 6 significant digits, which truncated
+  // parameter values substituted into the term (e.g. t0=0.123456789 -> 0.123457).
+  std::ostringstream os;
+  os.precision(std::numeric_limits<double>::max_digits10);
+  os << e;
+  term_=os.str();
 }
 
 

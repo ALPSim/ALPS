@@ -15,8 +15,8 @@
 /* $Id$ */
 
 #include <alps/config.h>
-#include <alps/utility/copyright.hpp>
-#include <alps/utility/citations.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/citations.hpp>
 #include <alps/version.h>
 
 void alps::print_copyright(std::ostream& out) {

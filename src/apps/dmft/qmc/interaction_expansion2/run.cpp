@@ -12,11 +12,17 @@
 
 #include <alps/solvers.hpp>
 #include "interaction_expansion.hpp"
+#include "sz_results.hpp"
 #include "fouriertransform.h"
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
+#include <alps/utilities/signal.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/mpiadapter.hpp>
+#include <functional>
 using sim_type = alps::mcmpiadapter<HubbardInteractionExpansion>;
 #else
 using sim_type = HubbardInteractionExpansion;
@@ -29,18 +35,23 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
 namespace {
 bool stop_requested(boost::posix_time::ptime const & end_time) {
 //stops the simulation if time > end_time or if signals received.
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 }
 
-void alps::solvers::ctint(alps::params const& parms, std::string const& output_file) {
+void alps::solvers::ctint(alps::params const& input, std::string const& output_file) {
+  alps::params parms(input);
+  sim_type::define_parameters(parms);
+  std::ostringstream missing;
+  if (parms.has_missing(missing))
+    throw std::invalid_argument("interaction: " + missing.str());
   int rank;
 #ifndef ALPS_HAVE_MPI
   rank=0;
   sim_type s(parms,rank);
 #else
-  boost::mpi::communicator c;
+  alps::mpi::communicator c;
   c.barrier();
   rank=c.rank();
   sim_type s(parms, c);
@@ -48,13 +59,23 @@ void alps::solvers::ctint(alps::params const& parms, std::string const& output_f
   if (rank==0) {
     alps::print_copyright(std::cout, "interaction");
     std::cout << std::flush;
+    parms.has_unused(std::cerr);
   }
   //run the simulation
   s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+#ifdef ALPS_HAVE_MPI
+  //a rank that is still thermalizing has no measurements. collect_results
+  //throws if only some ranks have them, but if none has, only rank 0 fails
+  //below while the others wait in the barrier, so check on all ranks here
+  if (alps::mpi::all_reduce(c, s.is_thermalized() ? 1 : 0, std::plus<int>()) < c.size())
+    throw std::runtime_error("interaction: the run ended before every MPI rank finished THERMALIZATION; increase SWEEPS or MAX_TIME");
+#endif
 
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
+    unsigned int n_site(parms["SITES"]);
+    divide_sz_results_by_sign(results, n_site);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);

@@ -14,7 +14,7 @@
 #ifndef ALPS_TUTORIAL_ISING_HPP
 #define ALPS_TUTORIAL_ISING_HPP
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
@@ -30,6 +30,8 @@ class ising_sim : public alps::mcbase {
     public:
         
         ising_sim(parameters_type const & parms, std::size_t seed_offset = 0);
+
+        static parameters_type & define_parameters(parameters_type & parameters);
 
         virtual void update();
         virtual void measure();

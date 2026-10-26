@@ -15,13 +15,14 @@
 //#define WITH_WARNINGS
 
 #include "dmtk/dmtk.h"
+#include "mps_export.h"
 
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/scheduler.h>
 #include <alps/scheduler/measurement_operators.h>
 #include <alps/numeric/real.hpp>
-#include <alps/utility/os.hpp>
+#include <alps/utilities/os.hpp>
 #include <alps/scheduler.h>
 
 #include <boost/tokenizer.hpp>
@@ -88,6 +89,7 @@ private:
                             std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami);
  
   void save_results(); 
+  void extract_mps();
   
   int num_sweeps;
   std::vector<int> num_states;
@@ -113,6 +115,10 @@ private:
   int start_dir;
   int start_iter;
 
+  // SAVE_MPS: final state as tensors [left bond][local state][right bond]
+  bool save_mps;
+  std::vector<std::vector<value_type> > mps_tensors;
+  std::vector<std::vector<std::size_t> > mps_shapes;
 };
 
 
@@ -171,6 +177,7 @@ void DMRGTask<value_type>::init()
   }
   start_iter = parms.value_or_default("START_ITER",1);
   verbose = parms.value_or_default("VERBOSE",0);
+  save_mps = parms.value_or_default("SAVE_MPS",false);
 
   // read number of states
   nwarmup = 20;
@@ -474,6 +481,7 @@ void DMRGTask<value_type>::dostep()
   S.corr += meas_terms;
   S.final_sweep(num_states[num_states.size()-1], dmtk::RIGHT2LEFT, 1, true); 
   if(!S.store_products()) S.measure();
+  if(save_mps) extract_mps();
   save_results();
   for(int i = 1; i < S._target.size(); i++){
     S.gs = S._target[i];
@@ -529,6 +537,122 @@ DMRGTask<value_type>::save_results()
   if (iter != S.corr.end())
     std::cerr << "Did not get right number of measurements\n";
 }
+
+// SAVE_MPS: assemble the ground state of the final sweep as an MPS.
+//
+// The last step of final_sweep (with rotation) leaves the wave function on
+// left block n = L/2-1, sites n and n+1, and right block L-n-2 in
+// gs_<name>_<n>_l, and the transformation that built left (right) block k
+// from block k-1 and one site in rho_<name>_<k>_l (_r). The basis stored
+// with each transformation is that of its rows, labelled (old block, site)
+// on the left and (site, old block) on the right. Left tensors are left
+// orthonormal, right tensors right orthonormal, and the two-site center is
+// split by SVD, so the MPS is in mixed canonical form with its center on
+// site n+1. Local states are in the order of the ALPS site basis.
+template<class value_type>
+void
+DMRGTask<value_type>::extract_mps()
+{
+  dmtk::System<value_type > &S = this->system;
+  const int L = num_sites();
+  if (L < 4)
+    boost::throw_exception(std::runtime_error("SAVE_MPS needs at least 4 sites"));
+  const int n = L/2 - 1;
+
+  // dmtk sorts each site basis by quantum numbers; State::i1 keeps the ALPS index
+  std::vector<std::vector<std::size_t> > alps_index(L);
+  for (int i = 0; i < L; ++i) {
+    const dmtk::Basis &b = site_block[site_type(i)].basis();
+    for (std::size_t p = 0; p < b.size(); ++p)
+      alps_index[i].push_back(b[p].i1);
+  }
+  std::vector<std::vector<value_type> > tensors(L);
+  std::vector<std::vector<std::size_t> > shapes(L, std::vector<std::size_t>(3));
+
+  // the single-site blocks at either end: bond index = dmtk site state
+  for (int i = 0; i < L; i += L-1) {
+    std::size_t d = alps_index[i].size();
+    shapes[i][0] = (i == 0 ? 1 : d); shapes[i][1] = d; shapes[i][2] = (i == 0 ? d : 1);
+    tensors[i].assign(d*d, value_type(0));
+    for (std::size_t p = 0; p < d; ++p) {
+      if (i == 0)
+        tensors[i][alps_index[i][p]*d + p] = 1.;   // [1][s][bond]
+      else
+        tensors[i][p*d + alps_index[i][p]] = 1.;   // [bond][s][1]
+    }
+  }
+
+  // block k on the left adds site k-1, block k on the right adds site L-k
+  for (int k = 2; k <= std::max(n, L-n-2); ++k)
+    for (int side = 0; side < 2; ++side) {
+      int position = (side == 0 ? dmtk::LEFT : dmtk::RIGHT);
+      int site = (side == 0 ? k-1 : L-k);
+      if ((side == 0 && k > n) || (side == 1 && k > L-n-2))
+        continue;
+      dmtk::BMatrix<value_type > u;
+      dmtk::Basis rows;
+      S.read_rho(u, rows, k, position);
+      std::size_t old_dim = (side == 0 ? shapes[site-1][2] : shapes[site+1][0]);
+      std::size_t d = alps_index[site].size();
+      std::size_t new_dim = 0;
+      for (typename dmtk::BMatrix<value_type>::const_iterator it = u.begin(); it != u.end(); ++it)
+        new_dim = std::max<std::size_t>(new_dim, it->col_range().end()+1);
+      if (side == 0) {
+        shapes[site][0] = old_dim; shapes[site][1] = d; shapes[site][2] = new_dim;
+      } else {
+        shapes[site][0] = new_dim; shapes[site][1] = d; shapes[site][2] = old_dim;
+      }
+      std::vector<value_type> &t = tensors[site];
+      t.assign(old_dim*d*new_dim, value_type(0));
+      for (typename dmtk::BMatrix<value_type>::const_iterator it = u.begin(); it != u.end(); ++it) {
+        std::size_t r0 = it->row_range().begin(), c0 = it->col_range().begin();
+        for (std::size_t i = 0; i < it->row_range().size(); ++i) {
+          const dmtk::State &st = rows[r0+i];
+          std::size_t old_state = (side == 0 ? st.i1 : st.i2);
+          std::size_t s = alps_index[site][side == 0 ? st.i2 : st.i1];
+          if (old_state >= old_dim)
+            boost::throw_exception(std::runtime_error("SAVE_MPS: block transformations of the final sweep do not chain"));
+          for (std::size_t j = 0; j < it->col_range().size(); ++j) {
+            std::size_t c = c0 + j;
+            if (side == 0)
+              t[(old_state*d + s)*new_dim + c] = (*it)(j, i);
+            else
+              t[(c*d + s)*old_dim + old_state] = (*it)(j, i);
+          }
+        }
+      }
+    }
+
+  // two-site wave function of the last step
+  char file[255];
+  snprintf(file, sizeof(file), "gs_%s_%i_l.dat", "ALPS", n);
+  std::ifstream in(dmtk::tmp_files.get_filename(file), std::ios::in|std::ios::binary);
+  if (!in)
+    boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: could not read ") + file));
+  dmtk::VectorState<value_type > gs;
+  gs.read(in);
+  // read() rebuilds the subspaces only when a quantum number is conserved,
+  // but the values are stored by subspace in either case (cf. System::read_gs)
+  gs.resize(gs.qn_mask());
+  std::size_t da = shapes[n-1][2], ds = alps_index[n].size(), dt = alps_index[n+1].size(), db = shapes[n+2][0];
+  if (gs.b1().dim() != da || gs.b2().dim() != ds || gs.b3().dim() != dt || gs.b4().dim() != db)
+    boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: ") + file + " does not match the blocks of the final sweep"));
+  std::vector<value_type> psi(da*ds*dt*db, value_type(0));
+  for (typename dmtk::VectorState<value_type>::const_iterator sp = gs.subspace_begin(); sp != gs.subspace_end(); ++sp) {
+    const dmtk::StateSpace &ss = *sp;
+    std::size_t idx = ss.start();
+    dmtk::SubSpace r1 = ss[1], r2 = ss[2], r3 = ss[3], r4 = ss[4];
+    for (std::size_t a = r1.begin(); a < r1.begin() + r1.dim(); ++a)
+      for (std::size_t s = r2.begin(); s < r2.begin() + r2.dim(); ++s)
+        for (std::size_t t = r3.begin(); t < r3.begin() + r3.dim(); ++t)
+          for (std::size_t b = r4.begin(); b < r4.begin() + r4.dim(); ++b)
+            psi[((a*ds + alps_index[n][s])*dt + alps_index[n+1][t])*db + b] = gs[idx++];
+  }
+  dmrg_mps::split_two_site(psi, da, ds, dt, db, tensors[n], shapes[n], tensors[n+1], shapes[n+1]);
+
+  mps_tensors.swap(tensors);
+  mps_shapes.swap(shapes);
+}
     
 #ifdef ALPS_HAVE_HDF5
 template<class value_type>
@@ -552,6 +676,31 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
       ar["simulation/results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value"] << it->second;
+
+  if (!mps_tensors.empty()) {
+    // tensors are row-major [left bond][local state][right bond]
+    ar["mps/length"] << int(mps_tensors.size());
+    ar["mps/center"] << int(mps_tensors.size()/2);
+    std::vector<int> types;
+    for (std::size_t i = 0; i < mps_tensors.size(); ++i) {
+      std::string site = "mps/tensors/" + boost::lexical_cast<std::string>(i);
+      ar[site + "/shape"] << mps_shapes[i];
+      ar[site + "/values"] << mps_tensors[i];
+      types.push_back(site_type(i));
+    }
+    ar["mps/site_type"] << types;
+    // quantum numbers of the local states, in the order of the ALPS site basis
+    for (int type = 0; type <= alps::maximum_vertex_type(graph()); ++type) {
+      alps::site_basis<short> b(site_basis(type));
+      for (std::size_t q = 0; q < site_basis(type).size(); ++q) {
+        std::vector<double> values;
+        for (std::size_t s = 0; s < b.size(); ++s)
+          values.push_back(b[s][q].to_double());
+        ar["mps/site_basis/" + boost::lexical_cast<std::string>(type) + "/"
+           + alps::hdf5_name_encode(site_basis(type)[q].name())] << values;
+      }
+    }
+  }
 }
 #endif
 

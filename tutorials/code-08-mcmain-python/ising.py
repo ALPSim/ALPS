@@ -43,7 +43,7 @@ class sim:
             i = int(float(self.length) * self.random())
             right = i + 1 if i + 1 < self.length else 0
             left = self.length - 1 if i - 1 < 0 else i - 1
-            p = np.exp(2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
+            p = np.exp(-2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
             if p >= 1. or self.random() < p:
                 self.spins[i] =- self.spins[i]
 
@@ -70,14 +70,6 @@ class sim:
 
     def fraction_completed(self):
         return 0 if self.sweeps < self.thermalization_sweeps else (self.sweeps - self.thermalization_sweeps) / float(self.total_sweeps)
-
-    def save(self, filename):
-        with hdf5.archive(filename, 'w') as ar:
-            ar['/simulation/realizations/0/clones/0'] = self
-
-    def load(self, filename):
-        with hdf5.archive(filename, 'r') as ar:
-            self = ar['/simulation/realizations/0/clones/0']
 
     def run(self, stopCallback):
         stopped = False
@@ -120,18 +112,23 @@ class sim:
 
         try:
         
-            self.parameters.load(ar["/parameters"]) # TODO: do we want to load the parameters?
+            self.parameters.load(ar, "/parameters")
+            for name, observable in self.measurements.items():
+                observable.load(ar, "measurements/" + name)
 
-            ar["measurements"] = self.measurements
+            self.length = int(self.parameters["L"])
+            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"])
+            self.total_sweeps = int(self.parameters["SWEEPS"])
+            self.beta = 1. / float(self.parameters["T"])
 
-            self.length = int(self.parameters["L"]);
-            self.thermalization_sweeps = int(self.parameters["THERMALIZATION"]);
-            self.total_sweeps = int(self.parameters["SWEEPS"]);
-            self.beta = 1. / double(self.parameters["T"]);
-
-            self.sweeps = ar["checkpoint/sweeps"]
+            self.sweeps = int(ar["checkpoint/sweeps"])
             self.spins = ar["checkpoint/spins"]
-            self.random.load(ar["checkpoint/engine"])
+            context = ar.context
+            ar.set_context("checkpoint/engine")
+            try:
+                self.random.load(ar)
+            finally:
+                ar.set_context(context)
 
         except:
             traceback.print_exc(file=sys.stderr)

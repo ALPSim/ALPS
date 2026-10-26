@@ -4,7 +4,7 @@
 #ifndef ALPS_DMTK_FILELIST_H
 #define ALPS_DMTK_FILELIST_H
 
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/throw_exception.hpp>
 #include <iostream>

@@ -7,7 +7,8 @@ NB_MODULE(ctint, module) {
   module.def("solve", [](nanobind::dict const& values) {
     pyalps::scoped_signal_handlers signal_handlers;
     auto parameters = pyalps::params_from_dict(values);
-    auto output_file = static_cast<std::string>(parameters["BASENAME"] | "results") + ".out.h5";
+    parameters.define<std::string>("BASENAME", "results", "base name of the output file");
+    auto output_file = parameters["BASENAME"].as<std::string>() + ".out.h5";
     alps::solvers::ctint(parameters, output_file);
   });
 }

@@ -22,6 +22,7 @@
     "LICENSE.txt",
     ".gitignore",
     "src/**/*.md",
+    "legacy/**/*.md",
     "tests/**/*.md",
     "tutorials/**/*.md",
     ".github/**/*.md",
@@ -33,6 +34,7 @@
       "paths": [
         ".github/**",
         "src/**",
+        "legacy/**",
         "tests/**",
         "tutorials/**",
         "python/**",
@@ -43,6 +45,7 @@
     "linux": {
       "paths": [
         "src/**",
+        "legacy/**",
         "third_party/**",
         "tutorials/**",
         "tests/**",
@@ -55,6 +58,7 @@
     "mpi": {
       "paths": [
         "src/**",
+        "legacy/**",
         "third_party/**",
         "tutorials/**",
         "tests/CMakeLists.txt",
@@ -69,6 +73,7 @@
     "sanitizers": {
       "paths": [
         "src/**",
+        "legacy/**",
         "third_party/**",
         "tutorials/**",
         "tests/CMakeLists.txt",
@@ -83,6 +88,7 @@
     "macos": {
       "paths": [
         "src/**",
+        "legacy/**",
         "third_party/**",
         "tutorials/**",
         "tests/CMakeLists.txt",
@@ -98,6 +104,7 @@
       "paths": [
         "python/**",
         "src/**",
+        "legacy/**",
         "third_party/**",
         "tests/packaging/**",
         "tests/cmake/**",

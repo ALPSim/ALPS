@@ -14,7 +14,9 @@
 #include "ndim_spin.hpp"
 
 #include <alps/parseargs.hpp>
-#include <alps/stop_callback.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/stop_callback.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -43,8 +45,12 @@ int main(int argc, char *argv[]) {
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         }
         else {
-            parameters = alps::parameters_type<sim_type>::type(options.input_file);
+            parameters = alps::make_parameters_from_file(options.input_file);
         }
+
+        sim_type::define_parameters(parameters);
+        if (parameters.has_missing(std::cerr))
+            return EXIT_FAILURE;
 
         // initialize the simulation
         sim_type sim(parameters);

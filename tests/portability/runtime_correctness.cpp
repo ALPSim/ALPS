@@ -5,11 +5,11 @@
 #include <gtest/gtest.h>
 #include <alps/alea.h>
 #include <alps/alea/mcdata.hpp>
-#include <alps/check_schedule.hpp>
+#include <alps/mc/check_schedule.hpp>
 #include <alps/parapack/integer_range.h>
 #include <limits>
 #include <alps/numeric/vector_valarray_conversion.hpp>
-#include <alps/utility/temporary_filename.hpp>
+#include <alps/utilities/temporary_filename.hpp>
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>
@@ -28,11 +28,10 @@ TEST(RuntimeCorrectness, PreservesSDKRegressions) {
     bool overflow = false;
     try { (void)full.size(); } catch (std::overflow_error const&) { overflow = true; }
     require(overflow, "unrepresentable range size");
-    alps::check_schedule schedule;
-    require(schedule.check_interval() == 0., "initial check interval");
+    alps::check_schedule schedule(60., 900.);
     require(schedule.pending(), "first check must be pending");
     schedule.update(0.);
-    require(schedule.check_interval() == 60., "first update interval");
+    require(!schedule.pending(), "first update schedules the next check");
     require(alps::numeric::vector2valarray(std::vector<double>{}).size() == 0,
             "empty vector conversion");
     require(alps::numeric::valarray2vector(std::valarray<double>{}).empty(),

@@ -4,7 +4,7 @@
 #ifndef PYALPS_SCOPED_SIGNAL_HANDLERS_HPP
 #define PYALPS_SCOPED_SIGNAL_HANDLERS_HPP
 
-#include <alps/ngs/signal.hpp>
+#include <alps/utilities/signal.hpp>
 
 #if !defined(BOOST_MSVC) && !defined(ALPS_NGS_NO_SIGNALS)
 #include <array>
@@ -27,11 +27,11 @@ public:
 
         struct sigaction action;
         std::memset(&action, 0, sizeof(action));
-        action.sa_handler = &alps::ngs::signal::slot;
+        action.sa_handler = &alps::signal::slot;
         for (std::size_t i = 0; i < termination_signal_count_; ++i)
             sigaction(signal_numbers_[i], &action, NULL);
 
-        action.sa_handler = &alps::ngs::signal::segfault;
+        action.sa_handler = &alps::signal::segfault;
         for (std::size_t i = termination_signal_count_; i < signal_numbers_.size(); ++i)
             sigaction(signal_numbers_[i], &action, NULL);
 #endif

@@ -16,7 +16,9 @@
 #define HYB_INT_HPP
 #include <vector>
 #include <fstream>
-#include <alps/ngs.hpp>
+#include <alps/params.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/hdf5/vector.hpp>
 #include "../green_function.h"
 
 //the interaction matrix keeps track of the impurity density-density interactions (other interactions are not possible in this code). Two general methods: either specify U (and optionally J and U'), or define a matrix and write it into a file, from where it is read in.
@@ -47,11 +49,11 @@ class chemical_potential{
 public:
   chemical_potential(const alps::params &p){
     extern int global_mpi_rank;
-    val_.resize(p["N_ORBITALS"], p["MU"]|0.);
-    if(p.defined("MU_VECTOR")){
-      if(p.defined("MU") && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR defined, ignoring parameter MU" << std::flush << std::endl; };
-      std::string mufilename=p["MU_VECTOR"].cast<std::string>();
-      if(p.defined("MU_IN_HDF5") && p["MU_IN_HDF5"].cast<bool>()){//attempt to read from h5 archive
+    val_.resize(p["N_ORBITALS"].as<int>(), p["MU"].as<double>());
+    if(!p["MU_VECTOR"].as<std::string>().empty()){
+      if(p.supplied("MU") && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR defined, ignoring parameter MU" << std::flush << std::endl; };
+      std::string mufilename=p["MU_VECTOR"].as<std::string>();
+      if(p["MU_IN_HDF5"].as<bool>()){//attempt to read from h5 archive
         alps::hdf5::archive ar(mufilename, alps::hdf5::archive::READ);
         ar>>alps::make_pvp("/MUvector",val_);
       }

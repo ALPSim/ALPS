@@ -121,6 +121,7 @@ class MaxEntSimulation : private MaxEntHelper
 public:
   
   MaxEntSimulation(alps::params const & parms,const std::string &outfile);
+  static void define_parameters(alps::params &parms); //define the parameters MaxEnt reads, with their defaults
   ~MaxEntSimulation();
   bool run(boost::function<bool()> const& stop_callback);
   void dostep();

@@ -13,7 +13,9 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/utilities/signal.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
@@ -35,7 +37,7 @@ struct stop_callback {
     }
 
     boost::chrono::duration<std::size_t> limit;
-    alps::ngs::signal signals;
+    alps::signal signals;
     boost::chrono::high_resolution_clock::time_point start;
 };
 
@@ -54,7 +56,10 @@ int main(int argc, char *argv[]) {
         boost::filesystem::path checkpoint_file = basename + ".clone0.h5";
         boost::filesystem::path output_file = basename +  ".out.h5";
 
-        alps::parameters_type<ising_sim>::type parameters(input_file);
+        alps::parameters_type<ising_sim>::type parameters = alps::make_parameters_from_file(input_file);
+        ising_sim::define_parameters(parameters);
+        if (parameters.has_missing(std::cerr))
+            return EXIT_FAILURE;
 
         ising_sim sim(parameters);
 

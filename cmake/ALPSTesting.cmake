@@ -122,13 +122,18 @@ function(alps_add_gtest target)
 endfunction()
 
 # MPI cases execute as a topology: every rank must enter the same collectives.
-# Each rank writes a distinct GoogleTest report; CTest records the whole run.
+# CTest records the whole run. The shared main() writes one GoogleTest report
+# per rank and fails every rank when any rank fails or selects no case.
+# OWN_MAIN: the test defines main() itself, as ALPSCore's MPI tests do. Those
+# tests link ALPSCore's alps::gtest_par_xml_output helper, which only rewrites
+# a --gtest_output argument, so they write no reports. The launcher fails the
+# run when any rank fails, and GoogleTest's summary fails a run without cases.
 function(alps_add_mpi_gtest target)
   if(NOT ALPS_BUILD_TESTING)
     return()
   endif()
   alps_require_googletest()
-  cmake_parse_arguments(PARSE_ARGV 1 TEST "" "COMPONENT;RANKS;TIMEOUT" "LABELS")
+  cmake_parse_arguments(PARSE_ARGV 1 TEST "OWN_MAIN" "COMPONENT;RANKS;TIMEOUT" "LABELS")
   if(TEST_UNPARSED_ARGUMENTS OR NOT TEST_COMPONENT OR NOT TEST_RANKS)
     message(FATAL_ERROR "alps_add_mpi_gtest requires COMPONENT and RANKS")
   endif()
@@ -138,14 +143,23 @@ function(alps_add_mpi_gtest target)
   if(NOT TEST_TIMEOUT)
     set(TEST_TIMEOUT 120)
   endif()
-  if(NOT TARGET alps_mpi_test_main)
-    add_library(alps_mpi_test_main STATIC
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../tests/support/mpi_main.cpp")
-    target_link_libraries(alps_mpi_test_main PUBLIC GTest::gtest MPI::MPI_CXX)
+  set(support "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../tests/support")
+  target_include_directories(${target} PRIVATE "${support}")
+  if(TEST_OWN_MAIN)
+    if(NOT TARGET alps_gtest_par_xml_output)
+      add_library(alps_gtest_par_xml_output STATIC "${support}/src/gtest_par_xml_output.cpp")
+      target_include_directories(alps_gtest_par_xml_output PUBLIC "${support}")
+      target_link_libraries(alps_gtest_par_xml_output PUBLIC ALPS::configuration ALPS::utilities)
+      target_compile_features(alps_gtest_par_xml_output PRIVATE cxx_std_17)
+    endif()
+    target_link_libraries(${target} PRIVATE alps_gtest_par_xml_output GTest::gtest MPI::MPI_CXX)
+  else()
+    if(NOT TARGET alps_mpi_test_main)
+      add_library(alps_mpi_test_main STATIC "${support}/mpi_main.cpp")
+      target_link_libraries(alps_mpi_test_main PUBLIC GTest::gtest MPI::MPI_CXX)
+    endif()
+    target_link_libraries(${target} PRIVATE alps_mpi_test_main)
   endif()
-  target_include_directories(${target} PRIVATE
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../tests/support")
-  target_link_libraries(${target} PRIVATE alps_mpi_test_main)
   target_compile_features(${target} PRIVATE cxx_std_17)
   set(name "${TEST_COMPONENT}.${target}.np${TEST_RANKS}")
   set(workdir "${CMAKE_CURRENT_BINARY_DIR}/test-work/${name}")
@@ -157,6 +171,10 @@ function(alps_add_mpi_gtest target)
     WORKING_DIRECTORY "${workdir}" TIMEOUT "${TEST_TIMEOUT}"
     PROCESSORS "${TEST_RANKS}" LABELS "${TEST_COMPONENT};mpi;integration;${TEST_LABELS}"
     ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+  if(TEST_OWN_MAIN)
+    set_tests_properties("${name}" PROPERTIES
+      FAIL_REGULAR_EXPRESSION "\\[  PASSED  \\] 0 tests")
+  endif()
 endfunction()
 
 # Golden-output tests need stdin and byte comparison in addition to CTest's

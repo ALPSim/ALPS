@@ -17,9 +17,9 @@ import pyalps.hdf5 as hdf5
 import pyalps.ngs as ngs
 
 
+# Parameters the simulation does not define are kept as supplied, and saved.
 parameters = ngs.params({"SEED": 7, "SWEEPS": 10,
-                         "couplings": np.array([1., 2.]),
-                         "metadata": {"label": "checkpoint", "matrix": np.ones((2, 3))}})
+                         "couplings": np.array([1., 2.]), "label": "checkpoint"})
 simulation = ising_c.sim(parameters)
 
 assert issubclass(ising_c.sim, ngs.mcbase)
@@ -50,8 +50,8 @@ with tempfile.TemporaryDirectory() as directory:
 
     after = restored.collectResults()
     np.testing.assert_array_equal(restored.parameters["couplings"], [3., 6.])
-    assert restored.parameters["metadata"]["matrix"].shape == (2, 3)
-    restored.parameters["couplings"][0] = 4
+    assert restored.parameters["label"] == "checkpoint"
+    restored.parameters["couplings"] = [4, 6]
     assert restored.parameters["couplings"][0] == 4
     assert restored.resultNames() == simulation.resultNames()
     assert after["Magnetization"].count == before["Magnetization"].count

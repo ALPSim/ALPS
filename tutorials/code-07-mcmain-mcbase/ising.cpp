@@ -27,12 +27,22 @@ ising_sim::ising_sim(parameters_type const & parms, std::size_t seed_offset)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-        << alps::accumulator::RealObservable("Energy")
-        << alps::accumulator::RealObservable("Magnetization")
-        << alps::accumulator::RealObservable("Magnetization^2")
-        << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealVectorObservable("Correlations")
+        << alps::accumulators::FullBinningAccumulator<double>("Energy")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Correlations")
     ;
+}
+
+// Defines the parameters the simulation reads; main() calls it before
+// constructing the simulation and reports missing ones.
+ising_sim::parameters_type & ising_sim::define_parameters(parameters_type & parameters) {
+    return alps::mcbase::define_parameters(parameters)
+        .define<int>("L", "number of sites")
+        .define<int>("THERMALIZATION", "number of thermalization sweeps")
+        .define<int>("SWEEPS", "number of measurement sweeps")
+        .define<double>("T", "temperature");
 }
 
 void ising_sim::update() {

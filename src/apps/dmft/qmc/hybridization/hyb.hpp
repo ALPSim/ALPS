@@ -14,9 +14,10 @@
 #ifndef HYB_HPP
 #define HYB_HPP
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
-#include <alps/ngs/signal.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/mcbase.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/utilities/signal.hpp>
 #include "green_function.h"
 #include "hybsegment.hpp"
 #include "hyblocal.hpp"
@@ -38,6 +39,7 @@ class hybridization:public alps::mcbase
 public:
   //constructor
   hybridization(const alps::params &parms, int crank);
+  static void define_parameters(alps::params &parms); //define the parameters the solver reads, with their defaults
   void sanity_check(const alps::params &parms); //check whether parameters make sense
   void show_info(const alps::params &parms, int crank);
   //Monte Carlo update and measurements functions

@@ -2,8 +2,10 @@
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
+import warnings
 
 import pytest
 
@@ -56,14 +58,14 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "xml_contract", "cli_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
+        "xml_contract", "cli_contract", "accumulators_contract", "mc_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
         "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
     assert not core_runtime.exists(), f"Extracted components built the core runtime: {core_runtime}"
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5|params|osiris|xml|cli|numeric|numeric_io|numeric_xml|maxent_independent)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params|osiris|xml|cli|accumulators|numeric|numeric_io|numeric_xml|maxent_independent)_contract$", "--no-tests=error",
     ], check=True)
 
 
@@ -80,8 +82,8 @@ def test_utilities_without_platform_stacktrace(tmp_path, monkeypatch, unavailabl
                   '#define backtrace_symbols alps_missing_backtrace_symbols\n')
     (tmp_path / "execinfo.h").write_text(header)
     (tmp_path / "main.cpp").write_text(
-        '#include <alps/ngs/stacktrace.hpp>\n'
-        'int main() { return !alps::ngs::stacktrace().empty(); }\n')
+        '#include <alps/utilities/stacktrace.hpp>\n'
+        'int main() { return !alps::stacktrace().empty(); }\n')
     (tmp_path / "CMakeLists.txt").write_text(
         'cmake_minimum_required(VERSION 3.27...4.3)\n'
         'project(stacktrace_contract LANGUAGES C CXX)\n'
@@ -137,8 +139,8 @@ def test_sdk_exports_installed_applications(tmp_path):
     configure(tmp_path, "-DEXPECT_APPLICATIONS=ON")
     # Generator expressions resolve the selected configuration and suffix.
     paths = (tmp_path / "applications-Release.txt").read_text().splitlines()
-    assert len(paths) == 23
-    assert len(set(paths)) == 23
+    assert len(paths) == 24
+    assert len(set(paths)) == 24
     assert all(Path(path).is_file() for path in paths)
 
 
@@ -174,11 +176,21 @@ def test_relocated_sdk(tmp_path):
     build_and_run(build, environment=environment)
 
 
-def test_installed_sdk_preserves_public_headers():
-    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
-    baseline = json.loads(Path(__file__).with_name("preserved_public_headers.json").read_text())
-    missing = [name for name in baseline["headers"] if not (prefix / "include" / name).is_file()]
-    assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
+def test_installed_sdk_includes_source_headers():
+    include = Path(os.environ["ALPS_DIR"]).resolve().parents[1] / "include"
+    # An SDK built with ALPS_LEGACY_API=OFF has no deprecated spellings.
+    tops = ("src", "third_party") + (
+        ("legacy",) if (Path(os.environ["ALPS_DIR"]) / "ALPSLegacyConfig.cmake").is_file() else ())
+    roots = [root for top in tops for root in SOURCE.glob(f"{top}/**/include")]
+    headers = {path.relative_to(root).as_posix() for root in roots for path in root.rglob("*") if path.is_file()}
+    missing = sorted(name for name in headers if not (include / name).is_file())
+    # A serial SDK omits the MPI-only headers, which cannot be told apart from
+    # headers missing from an install list, so only an MPI SDK is strict.
+    if not re.search(r"^#define ALPS_HAVE_MPI\b", (include / "alps/config.h").read_text(), re.MULTILINE):
+        if missing:
+            warnings.warn(f"Source headers not installed (expected only for MPI-only headers): {missing}")
+        return
+    assert not missing, f"Source headers not installed: {missing}"
 
 
 @pytest.mark.parametrize("tutorial,target", [

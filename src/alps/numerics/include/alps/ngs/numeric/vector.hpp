@@ -15,7 +15,7 @@
 #ifndef ALPS_NGS_NUMERIC_VECTOR_HEADER
 #define ALPS_NGS_NUMERIC_VECTOR_HEADER
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/utilities/stacktrace.hpp>
 #include <alps/ngs/numeric/inf.hpp>
 
 #include <alps/numeric/vector_functions.hpp>

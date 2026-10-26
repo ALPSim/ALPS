@@ -7,7 +7,7 @@ install in the `tools` component; `alps-xml` installs in `xml`. `pconfig` links
 Parameter tools retain the legacy `alps::Parameters` grammar, job generation and
 seeding. CLI integration tests and fixtures live in `tests/cli/`.
 
-`archive/` owns `txt2archive`, `xml2archive` and the optional SQLite `archive`
+`fcidump/` owns `alps2fcidump`. `archive/` owns `txt2archive`, `xml2archive` and the optional SQLite `archive`
 command. `xml/` provides `alps-xml` for plotting, conversion and extraction;
 see the [command examples](../../CONTRIBUTING.md#xml-resources-and-tools).
 

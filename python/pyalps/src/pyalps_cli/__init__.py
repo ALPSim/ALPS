@@ -18,7 +18,7 @@ NATIVE_PROGRAMS = (
     "checksign", "dirloop_sse", "dmft", "dmrg", "fulldiag", "fulldiag_evaluate",
     "hirschfye", "hybridization", "interaction", "loop", "qwl", "qwl_evaluate",
     "simplemc", "sparsediag", "spinmc", "spinmc_evaluate", "worm", "worm_evaluate",
-    "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent",
+    "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent", "alps2fcidump",
 )
 # The same commands and formats as the SDK's alps-xml (src/tools/xml), but
 # rendered with lxml so that wheels need no external xsltproc.

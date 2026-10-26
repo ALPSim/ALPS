@@ -37,7 +37,7 @@ endforeach()
 
 # Related cases share compilation and linkage, but CTest still discovers and
 # executes every GoogleTest case independently.
-foreach(name site_basis basis_states bloch_basis_states)
+foreach(name site_basis basis_states bloch_basis_states term_parameter_precision nsite_terms)
   add_executable(model_${name} ${name}.cpp)
   target_link_libraries(model_${name} PRIVATE ALPS::alps)
   alps_add_gtest(model_${name} COMPONENT model LABELS compatibility)

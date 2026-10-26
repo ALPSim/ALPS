@@ -16,8 +16,10 @@
 #ifndef DMFT_QMC_WEAK_COUPLING_H
 #define DMFT_QMC_WEAK_COUPLING_H
 
-#include <alps/ngs.hpp>
-#include <alps/mcbase.hpp>
+#include <alps/mc/api.hpp>
+#include <alps/mc/mcbase.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/numeric/vector_valarray_conversion.hpp>
 
 #include <alps/alea.h>
 #include <cmath>
@@ -209,13 +211,26 @@ private:
 
 
 
+//Parameters with older spellings, or whose defaults depend on other
+//parameters. The simulation and the evaluation read them through these.
+namespace ctint_parameters {
+  unsigned int n_flavors(const alps::params &p);               //FLAVORS, else N_ORBITALS
+  unsigned int n_matsubara(const alps::params &p);             //N_MATSUBARA, or its older name NMATSUBARA
+  unsigned int n_matsubara_measurements(const alps::params &p);//NMATSUBARA_MEASUREMENTS, else n_matsubara
+  unsigned int n_tau(const alps::params &p);                   //N_TAU, or its older name N
+  unsigned int n_self(const alps::params &p);                  //NSELF, else 10*n_tau
+  unsigned int measurement_period(const alps::params &p);      //MEASUREMENT_PERIOD, else N_MEAS
+  unsigned int convergence_check_period(const alps::params &p);//CONVERGENCE_CHECK_PERIOD, else RECALC_PERIOD
+}
+
 class InteractionExpansion: public alps::mcbase
 {
 public:
 
   InteractionExpansion(const alps::params& p, int rank);
+  static void define_parameters(alps::params &p); //define the parameters the solver reads, with their defaults
   ~InteractionExpansion() {}
-  bool is_thermalized() const {return true;} //thermalization is done in the constructor. It's not a big deal here.
+  bool is_thermalized() const {return thermalized;} //set by update() once step exceeds THERMALIZATION
   void update();
   void measure();
   double fraction_completed() const;
@@ -288,8 +303,6 @@ protected:
   
   /*InteractionExpansion's roundoff threshold*/
   const double almost_zero;                        
-  /*PRNG seed*/
-  const int seed;                                
   
   /*private member variables*/
   matsubara_green_function_t green_matsubara;

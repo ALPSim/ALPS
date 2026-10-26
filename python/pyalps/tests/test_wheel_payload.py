@@ -58,6 +58,7 @@ EXPECTED_BUNDLED_PROGRAMS = {
     "convert2xml",
     "snap2vtk",
     "maxent",
+    "alps2fcidump",
 }
 
 
