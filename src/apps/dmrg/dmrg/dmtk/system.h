@@ -344,9 +344,12 @@ class System
 
     void resume(size_t resume_sweep, size_t resume_dir, size_t resume_iter)
       {
-        for(int _sweep = resume_sweep; _sweep <= _numsweeps; _sweep++){
+        for(_sweep = resume_sweep; _sweep <= _numsweeps; _sweep++){
           cout << "NEW SWEEP " << _sweep << " " << _sweeps(0,_sweep-1) << " " << _sweeps(1,_sweep-1) << endl;
           sweep(_sweeps(0,_sweep-1),_sweeps(1,_sweep-1),(size_t)resume_dir,resume_iter);
+          // only the first sweep starts part-way
+          resume_dir = RIGHT2LEFT;
+          resume_iter = 1;
         }
       }
 
@@ -392,6 +395,7 @@ class System
     virtual T measure_operator(const BasicOp<T> &top, const VectorState<T> *v, bool &info);
 
     size_t get_iter() const { return iter; }
+    int get_sweep() const { return _sweep; }
     size_t get_dir() const { return dir; }
 
 
@@ -660,10 +664,11 @@ class System
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
 
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
 #ifdef DMTK_DEBUG
         cout << "WRITING GS " << file << endl;
 #endif // DMTK_DEBUG
@@ -682,7 +687,7 @@ class System
           _propagate_state[i].write(outputfile);
         }
         outputfile.close();
-
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -694,8 +699,8 @@ class System
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
 
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
 #ifdef DMTK_DEBUG
@@ -733,13 +738,15 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
         basis.write(outputfile);
         m.write(outputfile);
         outputfile.close();
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -754,8 +761,8 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
         basis.read(inputfile);
@@ -775,12 +782,14 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
         b.write(outputfile);
         outputfile.close();
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -803,8 +812,8 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
         b.read(inputfile);

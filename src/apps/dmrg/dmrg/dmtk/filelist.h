@@ -7,15 +7,55 @@
 #include <alps/utilities/temporary_filename.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/throw_exception.hpp>
+#include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <stdexcept>
+#include <vector>
+#include <fcntl.h>
+#include <unistd.h>
 
 namespace dmtk {
 
+namespace detail {
+
+// Flush a file (or directory) to disk; ofstream gives no access to its descriptor.
+inline bool sync_path(const boost::filesystem::path& path)
+{
+  int fd = ::open(path.c_str(), O_RDONLY);
+  if (fd < 0) return false;
+  bool ok = ::fsync(fd) == 0;
+  ::close(fd);
+  return ok;
+}
+
+// Replace path by contents so that a crash leaves either the old or the new file.
+inline void write_atomically(const boost::filesystem::path& path, const std::string& contents)
+{
+  boost::filesystem::path tmp = path;
+  tmp += ".tmp";
+  {
+    std::ofstream out(tmp.string().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+    out << contents;
+    out.close();
+    if (!out || !sync_path(tmp))
+      boost::throw_exception(std::runtime_error("could not write " + tmp.string()));
+  }
+  boost::filesystem::rename(tmp, path);
+  sync_path(path.parent_path()); // not supported on every filesystem
+}
+
+} // namespace detail
+
 // Own only the files allocated by this registry, never the user's scratch
 // directory or files belonging to another calculation.
+//
+// In checkpoint mode (open_entry) files keep their own names in the entry
+// directory so that a rerun can find them. Writes go to
+// <name>.new.<generation> and replace the committed files only in commit(),
+// so a run killed at any point leaves the last committed state intact.
 class FileList {
   public:
     FileList() : temp_dir(boost::filesystem::current_path()) {}
@@ -26,6 +66,7 @@ class FileList {
 
     void set_temp_dir(const char* dir)
     {
+      if (in_entry) cleanup();
       // Store absolute paths so a later working-directory change cannot make
       // cleanup remove a different file or lose track of the original one.
       boost::filesystem::path path = boost::filesystem::absolute(dir);
@@ -35,21 +76,107 @@ class FileList {
       std::cout << "ALPS DMRG temporary files will be written to " << temp_dir.string() << std::endl;
     }
 
+    // Use the checkpoint entry dir and return the caller's part of its last
+    // progress record, empty if nothing was committed. Staged files of a
+    // commit whose record was written are promoted, all others discarded.
+    std::string open_entry(const char* dir)
+    {
+      cleanup();
+      temp_dir = boost::filesystem::absolute(dir);
+      in_entry = true;
+      generation = 0;
+      std::string record;
+      const boost::filesystem::path progress = temp_dir / "progress";
+      if (boost::filesystem::exists(progress)) {
+        std::ifstream in(progress.string().c_str(), std::ios::in | std::ios::binary);
+        std::string magic, word;
+        std::size_t count = 0;
+        std::getline(in, magic);
+        if (magic != progress_magic() ||!(in >> word >> generation) || word != "generation"
+            || !(in >> word >> count) || word != "staged")
+          boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+        for (std::size_t i = 0; i < count; ++i) {
+          std::string name;
+          in >> name;
+          boost::filesystem::path staged = temp_dir / (name + suffix(generation));
+          if (boost::filesystem::exists(staged))
+            boost::filesystem::rename(staged, temp_dir / name);
+        }
+        in.ignore(1);
+        std::ostringstream rest;
+        rest << in.rdbuf();
+        record = rest.str();
+        ++generation;
+      }
+      for (boost::filesystem::directory_iterator it(temp_dir), end; it != end; ++it)
+        if (it->path().filename().string().find(".new.") != std::string::npos)
+          boost::filesystem::remove(it->path());
+      return record;
+    }
+
+    bool checkpointing() const { return in_entry; }
+
     const char* get_filename(const char* input)
     {
       auto old = _tmp_filenames.find(input);
       if (old != _tmp_filenames.end()) return old->second.c_str();
-      std::string name(input);
-      name = name.substr(0, name.find_first_of('.'));
-      std::string filename = alps::temporary_filename((temp_dir / name).string());
+      std::string filename;
+      if (in_entry) {
+        filename = (temp_dir / input).string();
+      } else {
+        std::string name(input);
+        name = name.substr(0, name.find_first_of('.'));
+        filename = alps::temporary_filename((temp_dir / name).string());
+        std::cout << "Creating temp file " << filename << std::endl;
+      }
       auto entry = _tmp_filenames.emplace(input, filename);
-      std::cout << "Creating temp file " << filename << std::endl;
       return entry.first->second.c_str();
+    }
+
+    // Checkpointed state: reads see this run's uncommitted writes.
+    const char* get_read_filename(const char* input)
+    {
+      auto staged = _staged.find(input);
+      if (staged != _staged.end()) return staged->second.c_str();
+      return get_filename(input);
+    }
+
+    const char* get_write_filename(const char* input)
+    {
+      if (!in_entry) return get_filename(input);
+      auto staged = _staged.find(input);
+      if (staged != _staged.end()) return staged->second.c_str();
+      auto entry = _staged.emplace(input, (temp_dir / (input + suffix(generation))).string());
+      return entry.first->second.c_str();
+    }
+
+    void write_failed(const char* input) { _failed_writes.push_back(input); }
+
+    // Make all staged files and the caller's record the state a rerun resumes from.
+    void commit(const std::string& record)
+    {
+      if (!_failed_writes.empty())
+        boost::throw_exception(std::runtime_error("could not write checkpoint file " + _failed_writes.front()
+          + " in " + temp_dir.string() + " (disk full or over quota?)"));
+      std::ostringstream out;
+      out << progress_magic() <<"\ngeneration " << generation << "\nstaged " << _staged.size() << "\n";
+      for (const auto& entry : _staged) {
+        if (!detail::sync_path(entry.second))
+          boost::throw_exception(std::runtime_error("could not write checkpoint file " + entry.second));
+        out << entry.first << "\n";
+      }
+      out << record;
+      detail::write_atomically(temp_dir / "progress", out.str());
+      for (const auto& entry : _staged)
+        boost::filesystem::rename(entry.second, temp_dir / entry.first);
+      _staged.clear();
+      ++generation;
     }
 
     void cleanup() noexcept
     {
-      for (const auto& entry : _tmp_filenames) {
+      // A checkpoint entry outlives the run; only uncommitted writes go.
+      for (const auto& entry : in_entry ? _staged : _tmp_filenames) {
         boost::system::error_code error;
         boost::filesystem::remove(entry.second, error);
         if (error)
@@ -57,11 +184,21 @@ class FileList {
                     << ": " << error.message() << std::endl;
       }
       _tmp_filenames.clear();
+      _staged.clear();
+      _failed_writes.clear();
+      in_entry = false;
     }
 
   private:
+    static const char* progress_magic() { return "ALPS DMRG progress 1"; }
+    static std::string suffix(unsigned long generation) { return ".new." + std::to_string(generation); }
+
     std::map<std::string, std::string> _tmp_filenames;
+    std::map<std::string, std::string> _staged;
+    std::vector<std::string> _failed_writes;
     boost::filesystem::path temp_dir;
+    bool in_entry = false;
+    unsigned long generation = 0;
 };
 
 } // namespace dmtk

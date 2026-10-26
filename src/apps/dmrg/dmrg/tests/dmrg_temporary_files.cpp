@@ -98,3 +98,68 @@ TEST(DmrgScratchFiles, LifetimesAndCleanup)
     throw;
   }
 }
+
+namespace {
+std::string slurp(const fs::path& p)
+{
+  std::ifstream in(p.string().c_str());
+  return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+}
+}
+
+TEST(DmrgScratchFiles, CheckpointEntryCommits)
+{
+  const fs::path entry = fs::temp_directory_path() / fs::unique_path("alps-dmrg-entry-%%%%-%%%%");
+  fs::create_directories(entry);
+  struct cleanup {
+    fs::path directory;
+    ~cleanup() { boost::system::error_code ignored; fs::remove_all(directory, ignored); }
+  } guard{entry};
+  const fs::path block = entry / "block_ALPS_2_l.dat";
+  {
+    dmtk::FileList files;
+    ASSERT_EQ(files.open_entry(entry.string().c_str()), "") << "empty entry has a record";
+    std::ofstream(files.get_write_filename("block_ALPS_2_l.dat")) << "first";
+    ASSERT_EQ(slurp(files.get_read_filename("block_ALPS_2_l.dat")), "first") << "reads miss staged writes";
+    ASSERT_FALSE(fs::exists(block)) << "write visible before commit";
+    files.commit("record 1\n");
+    ASSERT_EQ(slurp(block), "first") << "commit did not promote the staged file";
+
+    // A rerun after a crash before the next commit sees the committed state.
+    std::ofstream(files.get_write_filename("block_ALPS_2_l.dat")) << "second";
+    dmtk::FileList rerun;
+    ASSERT_EQ(rerun.open_entry(entry.string().c_str()), "record 1\n");
+    ASSERT_EQ(slurp(block), "first") << "uncommitted write replaced the committed file";
+    for (fs::directory_iterator it(entry), end; it != end; ++it)
+      ASSERT_EQ(it->path().filename().string().find(".new."), std::string::npos) << "uncommitted file kept";
+    rerun.cleanup();
+    files.cleanup();
+    ASSERT_EQ(slurp(block), "first") << "cleanup removed a committed checkpoint file";
+  }
+
+  // A crash after the record was written but before the renames finished:
+  // the files it lists are promoted.
+  {
+    std::ofstream(fs::path(entry / "progress").string().c_str())
+      << "ALPS DMRG progress 1\ngeneration 7\nstaged 1\nblock_ALPS_2_l.dat\nrecord 7\n";
+    std::ofstream((entry / "block_ALPS_2_l.dat.new.7").string().c_str()) << "seventh";
+    std::ofstream((entry / "block_ALPS_2_l.dat.new.8").string().c_str()) << "uncommitted";
+    dmtk::FileList files;
+    ASSERT_EQ(files.open_entry(entry.string().c_str()), "record 7\n");
+    ASSERT_EQ(slurp(block), "seventh") << "interrupted commit was not completed";
+    ASSERT_FALSE(fs::exists(entry / "block_ALPS_2_l.dat.new.8")) << "uncommitted file kept";
+    ASSERT_NE(std::string(files.get_write_filename("block_ALPS_2_l.dat")).find(".new.8"), std::string::npos)
+      << "generation did not continue after the recovered commit";
+  }
+
+  // Failed writes and unreadable records are errors, not silent corruption.
+  {
+    dmtk::FileList files;
+    files.open_entry(entry.string().c_str());
+    files.write_failed("rho_ALPS_2_l.dat");
+    ASSERT_THROW(files.commit("record\n"), std::runtime_error);
+  }
+  std::ofstream(fs::path(entry / "progress").string().c_str()) << "garbage\n";
+  dmtk::FileList files;
+  ASSERT_THROW(files.open_entry(entry.string().c_str()), std::runtime_error);
+}
