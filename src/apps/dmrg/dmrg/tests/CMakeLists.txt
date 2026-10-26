@@ -29,4 +29,12 @@ if(TARGET dmrg)
       -P "${CMAKE_CURRENT_SOURCE_DIR}/invalid_parameter.cmake")
   set_tests_properties(dmrg.invalid_parameter PROPERTIES LABELS "dmrg;cli"
     TIMEOUT 60 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+
+  add_test(NAME dmrg.same_seed
+    COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:dmrg>"
+      "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/same_seed"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/same_seed.cmake")
+  set_tests_properties(dmrg.same_seed PROPERTIES LABELS "dmrg"
+    TIMEOUT 120 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
 endif()

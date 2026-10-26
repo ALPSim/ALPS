@@ -31,6 +31,7 @@ TEST(DmrgParameters, Defaults) {
     EXPECT_EQ(p["VERBOSE"].as<int>(), 0);
     EXPECT_FALSE(p["SAVE_MPS"].as<bool>());
     EXPECT_EQ(p["NUM_WARMUP_STATES"].as<int>(), 20);
+    EXPECT_EQ(p["SEED"].as<long>(), 0);
     EXPECT_EQ(p["CONSERVED_QUANTUMNUMBERS"].as<std::string>(), "");
     EXPECT_FALSE(p.exists("TRUNCATION_ERROR"));
     EXPECT_FALSE(p.exists("LANCZOS_TOLERANCE"));
@@ -41,7 +42,7 @@ TEST(DmrgParameters, Defaults) {
 TEST(DmrgParameters, ReadsEveryParameter) {
     alps::params const p = read(
         "COMPLEX = true\nNUMBER_EIGENVALUES = 2\nSWEEPS = 3\nSTART_SWEEP = 1\nSTART_DIR = 1\n"
-        "START_ITER = 5\nVERBOSE = 1\nSAVE_MPS = 1\nNUM_WARMUP_STATES = 40\n"
+        "START_ITER = 5\nVERBOSE = 1\nSAVE_MPS = 1\nNUM_WARMUP_STATES = 40\nSEED = 1234567\n"
         "CONSERVED_QUANTUMNUMBERS = \"N,Sz\"\nTRUNCATION_ERROR = 1e-7\nLANCZOS_TOLERANCE = 1e-9\n"
         "MAXSTATES = 50\nTEMP_DIRECTORY = \"/tmp/x\"");
     EXPECT_TRUE(p["COMPLEX"].as<bool>());
@@ -53,6 +54,7 @@ TEST(DmrgParameters, ReadsEveryParameter) {
     EXPECT_EQ(p["VERBOSE"].as<int>(), 1);
     EXPECT_TRUE(p["SAVE_MPS"].as<bool>());
     EXPECT_EQ(p["NUM_WARMUP_STATES"].as<int>(), 40);
+    EXPECT_EQ(p["SEED"].as<long>(), 1234567);
     EXPECT_EQ(p["CONSERVED_QUANTUMNUMBERS"].as<std::string>(), "N,Sz");
     EXPECT_EQ(p["TRUNCATION_ERROR"].as<double>(), 1e-7);
     EXPECT_EQ(p["LANCZOS_TOLERANCE"].as<double>(), 1e-9);
@@ -71,7 +73,7 @@ TEST(DmrgParameters, StatesBeforeMaxstatesBeforeNumstates) {
 }
 
 TEST(DmrgParameters, NonIntegerNamesParameter) {
-    for (std::string const name : {"NUMBER_EIGENVALUES", "SWEEPS", "MAXSTATES"}) {
+    for (std::string const name : {"NUMBER_EIGENVALUES", "SWEEPS", "MAXSTATES", "SEED"}) {
         for (std::string const value : {"2.5", "L/2", "\"abc\""}) {
             try {
                 read(name + " = " + value);

@@ -135,6 +135,7 @@ private:
   std::vector<std::vector<std::size_t> > mps_shapes;
 
   std::optional<std::string> temp_directory;
+  long seed;
 };
 
 
@@ -187,6 +188,7 @@ void DMRGTask<value_type>::define_parameters(alps::params& parameters)
             .define<int>("VERBOSE", 0, "print progress")
             .define<bool>("SAVE_MPS", false, "save the final state as an MPS")
             .define<int>("NUM_WARMUP_STATES", 20, "states kept in the warmup")
+            .define<long>("SEED", 0, "seed of the random Lanczos start vectors")
             .define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers fixed by <name>_total");
   // without them, the number of states alone sets the truncation and the
   // Lanczos tolerance is DMTK's
@@ -264,6 +266,7 @@ void DMRGTask<value_type>::init()
     boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
   if (settings.exists("TEMP_DIRECTORY"))
     temp_directory = settings["TEMP_DIRECTORY"].as<std::string>();
+  seed = settings["SEED"].as<long>();
   
   // get all quantum numbers
   std::set<std::string> qns;
@@ -500,7 +503,7 @@ void DMRGTask<value_type>::dostep()
 // Simulation
 ///////////////////////////////////////////////////////////////
   // the Lanczos start vectors are random: seed them from the task's SEED
-  dmtk::seed_random(static_cast<long>(parms.value_or_default("SEED", 0)));
+  dmtk::seed_random(seed);
   hami = hami.reorder_terms();
   if(verbose)
     cout << hami.description() << endl;
