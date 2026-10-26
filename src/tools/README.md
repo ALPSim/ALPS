@@ -1,7 +1,8 @@
 # Command-line tools
 
 Each directory owns its command sources and installation rules. C++ commands
-install in the `tools` component; `alps-xml` installs in `xml`. `pconfig` links
+install in the `tools` component; `alps-xml`, its aliases and the deprecated
+XML helpers install in `xml`. `pconfig` links
 `ALPS::utilities`; other C++ commands use `ALPS::alps`.
 
 Parameter tools retain the legacy `alps::Parameters` grammar, job generation and

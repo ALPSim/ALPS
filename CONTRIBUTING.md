@@ -378,7 +378,7 @@ alps-xml extract text plot-definition.xml task*.out.xml --output measurements.tx
 
 Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources. Python wheels provide the same `alps-xml` command without requiring `xsltproc`.
 
-The historical command names remain installed in the `tools` component as aliases of `alps-xml`, with identical output. New scripts and documentation should use `alps-xml`.
+The historical command names remain installed in the same `xml` component as aliases of `alps-xml`, with identical output. New scripts and documentation should use `alps-xml`.
 
 | Historical name | `alps-xml` command |
 | --- | --- |

@@ -40,9 +40,9 @@ def legacy_install(request, tmp_path_factory):
         f"-DCMAKE_INSTALL_PREFIX={original}",
         f"-DCMAKE_INSTALL_BINDIR={bindir}", f"-DCMAKE_INSTALL_DATADIR={datadir}",
     ], check=True, capture_output=True, text=True)
-    for component in ("xml", "tools"):
-        subprocess.run(["cmake", "--install", str(build), "--component", component],
-                       check=True, capture_output=True, text=True)
+    # Aliases and deprecated helpers ship with alps-xml, which they call.
+    subprocess.run(["cmake", "--install", str(build), "--component", "xml"],
+                   check=True, capture_output=True, text=True)
     relocated = directory / "relocated prefix with spaces"
     shutil.move(original, relocated)
     return relocated / bindir, relocated / datadir / "alps/xml"

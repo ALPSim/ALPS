@@ -18,11 +18,11 @@ if(UNIX)
     list(GET alias 1 ALPS_XML_COMMAND)
     configure_file(legacy-alias.in ${ALPS_XML_ALIAS} @ONLY NEWLINE_STYLE UNIX)
     install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/${ALPS_XML_ALIAS}"
-      DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+      DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
   endforeach()
   # Deprecated helpers without an alps-xml equivalent warn but keep working.
   configure_file(use_local_stylesheet use_local_stylesheet @ONLY NEWLINE_STYLE UNIX)
   install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/use_local_stylesheet"
     archivecat xslttransform
-    DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+    DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT xml)
 endif()
