@@ -20,7 +20,7 @@ class Signal
     size_t signal_id() const { return _signal_id; }
 
     bool emit()
-      { return _handler(*_object, _signal_id, _data); }
+      { return _handler ? _handler(*_object, _signal_id, _data) : true; }
 
   private:
     callback _handler;

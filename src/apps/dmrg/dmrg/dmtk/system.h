@@ -192,7 +192,7 @@ class System
            ++n;
          }
          if(iter == _signal_id.end()) {
-            cerr << "ERROR: signal_connect : signal " << signal_id << " not found \n";
+            cerr << "WARNING: unknown signal " << signal_id << "\n";
             return -1;
          }
          return n;
@@ -828,6 +828,7 @@ class System
 
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, size_t signal_id, void *data)
       {
+         if(signal_id >= _signal_id.size()) return *this;   // unknown signal: nothing to connect
          Signal<System<T> > signal(handler, this, signal_id, data);
          this->handlers.push_back(signal);
          return *this;
@@ -835,14 +836,12 @@ class System
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
       {
          int n = this->get_signal_id(signal_id);
-         if(n < 0) return *this;   // unknown signal: nothing to connect
-         Signal<System<T> > signal(handler, this, static_cast<size_t>(n), data);
-         this->handlers.push_back(signal);
-         return *this;
+         return n < 0 ? *this : this->signal_connect(handler, static_cast<size_t>(n), data);
       }
 
     bool signal_emit(size_t signal_id)
       {
+         if(signal_id >= _signal_id.size()) return true;   // unknown signal: nothing vetoed
          typename std::list<Signal<System<T> > >::reverse_iterator siter;
          for(siter = handlers.rbegin(); siter != handlers.rend(); siter++){
            Signal<System<T> > &signal = *siter;
@@ -860,7 +859,7 @@ class System
       }
     std::string signal_description(size_t signal_id)
       {
-          return this->_signal_id[signal_id];
+          return signal_id < _signal_id.size() ? this->_signal_id[signal_id] : std::string();
       }
     int signal_id(std::string signal_id)
       {
