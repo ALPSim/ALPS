@@ -76,7 +76,7 @@ namespace detail {
 class ALPS_DECL BasicVertexReference {
 public:
   typedef GraphUnitCell::offset_type offset_type;
-  BasicVertexReference() {}
+  BasicVertexReference() : vertex_(0) {}
   BasicVertexReference(XMLTag);
   const offset_type& cell_offset() const { return cell_;}
   const offset_type& offset() const { return offset_;}

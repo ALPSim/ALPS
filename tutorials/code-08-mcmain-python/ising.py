@@ -43,7 +43,7 @@ class sim:
             i = int(float(self.length) * self.random())
             right = i + 1 if i + 1 < self.length else 0
             left = self.length - 1 if i - 1 < 0 else i - 1
-            p = np.exp(2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
+            p = np.exp(-2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
             if p >= 1. or self.random() < p:
                 self.spins[i] =- self.spins[i]
 

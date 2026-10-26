@@ -30,7 +30,8 @@ foreach(
   example9
   example10
   example11
-  label)
+  label
+  disorder)
   add_executable(lattice_${name} ${name}.C)
 
   target_link_libraries(lattice_${name} PRIVATE ALPS::alps)
