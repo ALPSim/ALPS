@@ -1,0 +1,48 @@
+FCIDUMP files written by alps2fcidump, solved by other codes (2026-10-26, ALPS e79167a81)
+
+The models are those of t9_fcidump.py plus a periodic Hubbard+V chain (src/tools/fcidump/tests/hubbard.par)
+and a 12-site open Hubbard+V chain. Each is solved by ALPS fulldiag (sparsediag for L=12) in the same
+(Nup, Ndown) sector; with FCIDUMP="file" set, that run wrote the same file as alps2fcidump in every case.
+max|dE| is the largest difference from ALPS over the 4 lowest levels (ground state only for block2, and
+for XDiag at L=12).
+
+  PySCF 2.14.0    pyscf.fci.direct_spin1, reads the FCIDUMP itself
+  block2 0.5.4    DMRG (SZ), reads the FCIDUMP itself; bond dimension up to 1000; open geometries only
+  QuSpin 1.0.1    spinful_fermion_basis_general; FCIDUMP read by a separate parser, terms built as operator strings
+  XDiag 0.6.0     Electron block (Julia); FCIDUMP read by a separate parser, terms built from Cdagup/Cup products
+
+case                                         norb  (Nup,Ndown)   E0 ALPS          PySCF    QuSpin   XDiag    block2
+Hubbard chain L=6 open                          6  (3,3)        -4.8925653195     4.2e-14  6.4e-14  3.8e-14  2.0e-11
+Hubbard chain L=6 open                          6  (3,1)        -5.2636016409     2.1e-14  2.2e-14  2.0e-14  7.6e-12
+Hubbard+V chain L=4 periodic                    4  (2,2)         0.5232142991     2.2e-15  8.2e-15  5.3e-15  -
+2x3 ladder, correlated hop K=0.7                6  (2,2)        -4.4263161393     2.8e-14  4.4e-14  6.8e-14  1.1e-11
+2x3 periodic, correlated hop K=0.9              6  (3,2)        -4.3574904234     1.2e-14  5.0e-14  4.4e-14  -
+2x4 ladder, correlated hop K=-1.1               8  (3,3)        -9.1900373397     2.5e-13  2.8e-13  1.7e-13  1.3e-11
+random 3-site (pq|rs), roles 2,0,1              3  (2,1)       -36.8537588949     1.1e-13  1.8e-14  2.8e-14  2.1e-14
+random 4-site (pq|rs), roles 3,1,0,2            4  (2,2)       -84.5437446577     1.6e-13  9.9e-14  1.1e-13  2.7e-13
+Hubbard+V open chain L=12, t=1 U=4 V=1         12  (6,6)         3.1934430273     3.3e-13  3.7e-14  3.8e-12  1.0e-11
+
+L=12, PySCF: with the default max_cycle=100, roots 3 and 4 were not converged (2.9e-7 off); the value
+above is from max_cycle=500, max_space=40.
+
+
+Jordan-Wigner qubit Hamiltonians from the same FCIDUMP files
+
+The FCIDUMP is mapped to a qubit Hamiltonian (2 norb qubits) by Jordan-Wigner, and that Hamiltonian is
+diagonalized in the (Nup, Ndown) sector. max|dE| is the largest difference from ALPS over the 4 lowest levels.
+The two Hubbard rings are also compared with the Bethe ansatz (Lieb-Wu equations) ground-state energy.
+
+  Qiskit Nature 0.8.0 (qiskit 2.6.1)  FCIDump.from_file -> fcidump_to_problem -> JordanWignerMapper
+  OpenFermion 1.8.1                   FCIDUMP read by a separate parser -> InteractionOperator -> jordan_wigner
+
+case                                       qubits  (Nup,Ndown)   E0 ALPS          Qiskit   OpenFermion  Bethe
+Hubbard chain L=6 open                         12  (3,3)        -4.8925653195     7.3e-14  5.1e-14      -
+Hubbard chain L=6 open                         12  (3,1)        -5.2636016409     3.2e-14  2.5e-14      -
+Hubbard+V chain L=4 periodic                    8  (2,2)         0.5232142991     7.8e-15  2.8e-15      -
+2x3 ladder, correlated hop K=0.7               12  (2,2)        -4.4263161393     3.4e-14  3.1e-14      -
+2x3 periodic, correlated hop K=0.9             12  (3,2)        -4.3574904234     6.0e-14  4.4e-14      -
+2x4 ladder, correlated hop K=-1.1              16  (3,3)        -9.1900373397     2.6e-13  1.5e-13      -
+random 3-site (pq|rs), roles 2,0,1              6  (2,1)       -36.8537588949     3.6e-14  1.4e-14      -
+random 4-site (pq|rs), roles 3,1,0,2            8  (2,2)       -84.5437446577     1.6e-13  5.7e-14      -
+Hubbard ring L=6, t=1 U=4                      12  (3,3)        -3.6687061789     2.2e-14  3.0e-14      8.9e-16
+Hubbard ring L=10, t=1 U=4                     20  (5,5)        -5.8343226358     9.6e-14  9.5e-14      5.5e-14

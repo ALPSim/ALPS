@@ -1,0 +1,5 @@
+LATTICE="chain lattice"
+L=2
+MODEL_LIBRARY="unconstrained_models.xml"
+MODEL="half-filled fermion Hubbard"
+U=4
