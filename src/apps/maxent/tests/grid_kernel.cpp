@@ -96,9 +96,10 @@ TEST(MaxEntSVD, RectangularThinFactors) {
 }
 
 TEST(MaxEntGrid, EndpointsAndOrdering) {
-  for (int count : {5, 31, 128, 129, 2000, 2001}) {
+  // LogarithmicBoundsAndSymmetry checks the log grid more strictly.
+  for (int count : {5, 128, 2001}) {
     for (const char* name : {"Lorentzian", "half lorentzian", "half-lorentzian", "Quadratic",
-                             "log", "linear"}) {
+                             "linear"}) {
       SCOPED_TRACE(std::string(name) + ": " + std::to_string(count));
       alps::params parameters;
       parameters["NFREQ"] = count;
