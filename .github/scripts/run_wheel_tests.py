@@ -1,5 +1,6 @@
 """Test the installed wheel and retain results across cibuildwheel interpreters."""
 
+import os
 from pathlib import Path
 import platform
 import subprocess
@@ -22,8 +23,10 @@ def main():
     (reports / f"{identifier}-import.txt").write_text(f"Python: {sys.executable}\npyalps: {package}\n")
     # The C++ SDK is identical across wheel ABIs. Compile its consumers once
     # per platform; Python/downstream-extension tests still run on every ABI.
+    # Pull requests skip tests/cmake here: the linux job already runs it, and
+    # it takes 8 to 15 minutes. Pushes and tags still run it on the wheel SDK.
     suites = [str(ROOT / 'python/pyalps/tests')]
-    if sys.version_info[:2] == (3, 12):
+    if sys.version_info[:2] == (3, 12) and os.environ.get("GITHUB_EVENT_NAME") != "pull_request":
         suites.append(str(ROOT / 'tests/cmake'))
     elif sys.version_info[:2] > (3, 12):
         # Reused abi3 artifact: check interpreter-facing behavior, without

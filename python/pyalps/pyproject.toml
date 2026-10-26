@@ -96,7 +96,7 @@ PYALPS_TEST_DOWNSTREAM_EXPORT = "1"
 
 # The bundled XDR implementation uses portable C11 on glibc and musl.
 [tool.cibuildwheel.linux]
-environment-pass = ["GITHUB_REF", "ALPS_VERSION_PRERELEASE", "CMAKE_BUILD_PARALLEL_LEVEL"]
+environment-pass = ["GITHUB_REF", "GITHUB_EVENT_NAME", "ALPS_VERSION_PRERELEASE", "CMAKE_BUILD_PARALLEL_LEVEL"]
 before-all = [
   "if command -v dnf >/dev/null 2>&1; then dnf install -y ccache hdf5-devel lapack-devel; else apk add --no-cache boost-dev ccache hdf5-dev lapack-dev; fi",
   "python -m pip install 'cmake>=3.27' 'ninja>=1.12'",
