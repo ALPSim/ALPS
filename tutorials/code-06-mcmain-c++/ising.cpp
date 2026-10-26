@@ -40,11 +40,11 @@ ising_sim::ising_sim(parameters_type const & params)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-        << alps::ngs::RealObservable("Energy")
-        << alps::ngs::RealObservable("Magnetization")
-        << alps::ngs::RealObservable("Magnetization^2")
-        << alps::ngs::RealObservable("Magnetization^4")
-        << alps::ngs::RealVectorObservable("Correlations")
+        << alps::accumulators::FullBinningAccumulator<double>("Energy")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Correlations")
     ;
 }
 
@@ -119,7 +119,7 @@ ising_sim::results_type ising_sim::collect_results() const {
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
     results_type partial_results;
     for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        partial_results.insert(*it, alps::mcresult(measurements[*it]));
+        partial_results.insert(*it, measurements[*it].result());
     return partial_results;
 }
 
