@@ -118,7 +118,8 @@ Numerical matrix/vector persistence now requires an explicit adapter: include `<
 | `<alps/utility/factory.hpp>` | Removed. It did not compile in 3.0.0, so no code can depend on it |
 | `<boost/numeric/bindings/...>` headers outside ALPS's include closure, including the `lapack.hpp` and `lapack/{computational,driver,auxiliary}.hpp` umbrellas | Include the specific routine header, such as `<boost/numeric/bindings/lapack/driver/heev.hpp>`, if ALPS still ships it; otherwise use your own Numeric Bindings copy (see above) |
 | `<alps/boost/accumulators/numeric/functional.hpp>`, `<alps/boost/accumulators/numeric/functional/{valarray,vector}.hpp>` | Boost's `<boost/accumulators/numeric/functional.hpp>` and `<boost/accumulators/numeric/functional/{valarray,vector}.hpp>` |
-| `<alps/numeric/deprecated/vector.hpp>` (`blas::vector<T>`), `<alps/numeric/resizeable_vector.h>` (`blas::rsvector`), `<alps/numeric/detail/deprecated/blasmacros.h>` | Removed. They did not compile in 3.0.0, so no code can depend on them. Use `alps::numeric::vector` |
+| `<alps/numeric/deprecated/vector.hpp>` (`blas::vector<T>`), `<alps/numeric/resizeable_vector.h>` (`blas::rsvector`) | Removed. They did not compile in 3.0.0, so no code can depend on them. Use `alps::numeric::vector` |
+| `<alps/numeric/detail/deprecated/blasmacros.h>` | Removed; nothing in ALPS included it. Define its `IMPLEMENT_FOR_*_BLAS_TYPES` macros locally if needed |
 | `blas::vector`, `blas::matrix`, `blas::general_matrix` from `<alps/numeric/detail/deprecated/*.hpp>` | `alps::numeric::vector`, `alps::numeric::matrix`; deprecated, removed in the next release |
 | `<alps/ngs/parapack/*.h>` | Removed with their five sources: a parapack front end on the NGS parameters, which nothing used. The parapack scheduler `<alps/parapack/*.h>` is unchanged |
 | `<alps/ngs/scheduler/proto/*.hpp>` | Removed: an unused prototype scheduler on the NGS parameters and `mcbase`. Use `alps::mcbase` with `<alps/mc/mpiadapter.hpp>` |
