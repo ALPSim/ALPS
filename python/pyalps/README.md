@@ -30,7 +30,7 @@ For older tutorials, use `python` instead of the removed `alpspython` wrapper, a
 
 ## Building from source
 
-Requires GIL-enabled CPython 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
+Requires GIL-enabled CPython 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Building the SDK with applications also requires Eigen >= 3.3 for MaxEnt; Eigen is not needed to link bindings against an installed SDK. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
 
 ```sh
 cmake --preset distribution

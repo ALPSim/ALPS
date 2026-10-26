@@ -29,6 +29,10 @@ namespace alps {
                 static boost::optional<T> apply(const std::string& in) {
                     T conv_result;
                     boost::optional<T> result;
+                    // ALPS: lexical_cast wraps "-1" to the largest unsigned value
+                    if constexpr (std::is_unsigned<T>::value) {
+                        if (!in.empty() && in[0] == '-') return result;
+                    }
                     if (boost::conversion::try_lexical_convert(in, conv_result)) {
                         result=conv_result;
                     }
@@ -119,7 +123,11 @@ namespace alps {
                 // that an integer parameter rejects
                 if constexpr (std::is_integral<T>::value && !std::is_same<T, bool>::value) {
                     double number;
-                    if (boost::conversion::try_lexical_convert(it->second, number)
+                    if (std::is_unsigned<T>::value
+                        && boost::conversion::try_lexical_convert(it->second, number)
+                        && std::signbit(number)) {
+                        message+=": '"+it->second+"' is negative, and this parameter cannot be";
+                    } else if (boost::conversion::try_lexical_convert(it->second, number)
                         && std::isfinite(number) && number == std::trunc(number)
                         && std::fabs(number) <= 9007199254740992.0) { // 2^53
                         std::ostringstream hint;
