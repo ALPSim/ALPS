@@ -17,6 +17,7 @@ target_sources(alps_headers INTERFACE
     include/alps/model/bondoperator.h
     include/alps/model/bondterm.h
     include/alps/model/default_term.h
+    include/alps/model/fcidump.hpp
     include/alps/model/globaloperator.h
     include/alps/model/half_integer.h
     include/alps/model/hamiltonian.h

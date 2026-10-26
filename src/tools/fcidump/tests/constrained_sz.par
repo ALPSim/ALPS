@@ -1,0 +1,5 @@
+LATTICE="chain lattice"
+L=4
+MODEL="alternative fermion Hubbard"
+U=4
+Sz_total=0

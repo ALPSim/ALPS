@@ -11,6 +11,7 @@ group; executable names and installation components remain stable.
 | `scheduler/` | `convert2xml`, `compactrun`, `snap2vtk` | None |
 | `parapack/` | `pevaluate`, `poutput`, `xml2archive` | None |
 | `diagnostics/` | `pconfig` | None |
+| `fcidump/` | `alps2fcidump` | None |
 | `xml/` | `alps-xml`, `txt2archive`, and historical shell wrappers | None |
 | `result_archive/` | Optional SQLite `archive` | None |
 | `alea/` | None | C++ and Python mean/variance analysis programs |
