@@ -11,6 +11,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `pyalps.ngs.params[key]` raises `KeyError` for a key that is neither defined nor supplied, as a `dict` does. It returned `None`, so a misspelled key failed later, away from the typo, and `params.get()` ignored its default. Use `key in p` or `p.get(key, default)` to test for a parameter.
 - Store an empty `std::map` in an HDF5 archive as an empty group, so it reads back as an empty map instead of a missing path. Older readers load such files as empty maps too.
 - Resolve HDF5 attribute paths written as `path@name` (ALPSCore's spelling) and attributes of the root group (`/@name`, or `@name` in the root context). These used to drop the character before `@` or fail; ALPS's `path/@name` spelling names the same object as before.
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.

@@ -16,6 +16,8 @@ import pyalps.ngs as ngs
 import os
 import tempfile
 
+import pytest
+
 orig_dict = {
     'val1' : 42,
     'val2' : '42',
@@ -45,8 +47,9 @@ def test_params():
         assert p.supplied(k)
         assert_type(p, k)
         print(k,'ok!')
-    ## Check nonetype
-    assert type(p["undefined"]) == type(None)
+    ## A missing key is a KeyError, as for a dict
+    with pytest.raises(KeyError):
+        p["undefined"]
     
     ## Write to and load from hdf5 without leaving test artifacts in the tree.
     with tempfile.TemporaryDirectory() as directory:
