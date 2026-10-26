@@ -49,17 +49,128 @@ def launcher(tmp_path):
     return run, package, env
 
 
+RESOURCES = Path(__file__).resolve().parents[2] / "src/alps/resources"
+PLOT = '<plot><set><point><x>1</x><y>2</y><dy>0.5</dy></point></set></plot>'
+SPECIFICATION = '''<plot name="Energy"><legend show="false"/>
+<xaxis label="Temperature" type="PARAMETER" name="T"/>
+<yaxis label="Energy" type="SCALAR_AVERAGE" name="Energy"/></plot>'''
+
+
+def simulation(x, y):
+    return f'''<SIMULATION><PARAMETERS><PARAMETER name="T">{x}</PARAMETER></PARAMETERS>
+<AVERAGES><SCALAR_AVERAGE name="Energy"><MEAN>{y}</MEAN>
+<ERROR>0.1</ERROR></SCALAR_AVERAGE></AVERAGES></SIMULATION>'''
+
+
 def test_exporter_without_pyalps_or_external_programs(launcher, tmp_path):
     run, package, _ = launcher
-    stylesheets = Path(__file__).resolve().parents[2] / "src/alps/resources"
-    shutil.copytree(stylesheets, package / "xml", dirs_exist_ok=True)
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
     source = tmp_path / "input with spaces.xml"
     source.write_text('<!DOCTYPE plot SYSTEM "https://invalid.example/unavailable.dtd">\n'
                       '<plot><set><point><x>1</x><y>2</y></point></set></plot>')
-    result = run(program="plot2text", isolated=False, args=[str(source)])
+    result = run(program="alps-xml", isolated=False, args=["plot", "text", str(source)])
     assert result.returncode == 0, result.stderr
     assert "1\t2" in result.stdout
     assert not result.stderr
+
+
+@pytest.mark.parametrize("program, command", [
+    ("plot2text", ["plot", "text"]), ("plot2gp", ["plot", "gnuplot"]),
+    ("plot2xmgr", ["plot", "grace"]), ("convert2text", ["convert", "text"]),
+])
+def test_exporter_alias_matches_alps_xml(launcher, tmp_path, program, command):
+    run, package, _ = launcher
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
+    source = tmp_path / "input.xml"
+    source.write_text(PLOT if command[0] == "plot" else simulation(1, 3))
+    expected = run(program="alps-xml", isolated=False, args=[*command, str(source)])
+    assert expected.returncode == 0, expected.stderr
+    result = run(program=program, isolated=False, args=[str(source)])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == expected.stdout
+    assert not result.stderr
+
+
+@pytest.mark.parametrize("format, marker", [
+    ("text", "1\t2\t0.5"), ("html", "<html"), ("gnuplot", "plot '-'"),
+    ("grace", "# Grace project file"), ("matplotlib", "errorbar("),
+])
+def test_alps_xml_plot_formats(launcher, tmp_path, format, marker):
+    run, package, _ = launcher
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
+    source = tmp_path / "plot.xml"
+    source.write_text(PLOT)
+    output = tmp_path / "result 'quoted'; name"
+    result = run(program="alps-xml", isolated=False,
+                 args=["plot", format, str(source), "--output", str(output)])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == ""
+    assert marker in output.read_text()
+
+
+@pytest.mark.parametrize("archive", [False, True])
+def test_alps_xml_extract_simulations_and_archives(launcher, tmp_path, archive):
+    run, package, _ = launcher
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
+    specification = tmp_path / "plot specification.xml"
+    specification.write_text(SPECIFICATION)
+    inputs = [tmp_path / "simulation one.xml", tmp_path / "simulation two.xml"]
+    for path, x, y in zip(inputs, (2, 1), (4, 3)):
+        content = simulation(x, y)
+        path.write_text(f"<ARCHIVE>{content}</ARCHIVE>" if archive else content)
+    result = run(program="alps-xml", isolated=False,
+                 args=["extract", "text", str(specification), *map(str, inputs)])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.splitlines() == ["1\t3\t0.1", "2\t4\t0.1"]
+
+
+@pytest.mark.parametrize("arguments", [
+    ["plot", "text", "missing.xml"],
+    ["extract", "text", "missing spec.xml", "missing.xml"],
+    ["convert", "pdf", "input.xml"],
+])
+def test_alps_xml_reports_errors(launcher, tmp_path, arguments):
+    run, package, _ = launcher
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
+    output = tmp_path / "existing.txt"
+    output.write_text("previous result")
+    result = run(program="alps-xml", isolated=False, args=[*arguments, "-o", str(output)])
+    assert result.returncode != 0
+    assert "alps-xml" in result.stderr
+    assert "Traceback" not in result.stderr
+    assert output.read_text() == "previous result"
+
+
+@pytest.mark.skipif(shutil.which("xsltproc") is None, reason="requires xsltproc")
+@pytest.mark.parametrize("arguments", [
+    ["plot", "text"], ["plot", "html"], ["plot", "gnuplot"], ["plot", "grace"],
+    ["plot", "matplotlib"], ["convert", "text"], ["convert", "html"],
+    ["extract", "text"], ["extract", "html"], ["extract", "gnuplot"], ["extract", "grace"],
+])
+def test_alps_xml_matches_sdk_command(launcher, tmp_path, arguments):
+    run, package, _ = launcher
+    shutil.copytree(RESOURCES, package / "xml", dirs_exist_ok=True)
+    sdk = tmp_path / "sdk/bin/alps-xml"
+    sdk.parent.mkdir(parents=True)
+    template = (RESOURCES.parents[2] / "src/tools/xml/alps-xml.in").read_text()
+    sdk.write_text(template.replace("@ALPS_XML_FROM_BINDIR@", os.path.relpath(RESOURCES, sdk.parent)))
+    if arguments[0] == "extract":
+        specification = tmp_path / "specification.xml"
+        specification.write_text(SPECIFICATION)
+        inputs = [tmp_path / "one.xml", tmp_path / "two.xml"]
+        for path, x, y in zip(inputs, (2, 1), (4, 3)):
+            path.write_text(simulation(x, y))
+        files = [specification, *inputs]
+    else:
+        source = tmp_path / "input.xml"
+        source.write_text(PLOT if arguments[0] == "plot" else simulation(1, 3))
+        files = [source]
+    expected = subprocess.run([sys.executable, str(sdk), *arguments, *map(str, files)],
+                              capture_output=True, text=True, timeout=30)
+    assert expected.returncode == 0, expected.stderr
+    result = run(program="alps-xml", isolated=False, args=[*arguments, *map(str, files)])
+    assert result.returncode == 0, result.stderr
+    assert result.stdout == expected.stdout
 
 
 def test_exporter_stdin_and_stylesheet_override(launcher, tmp_path):

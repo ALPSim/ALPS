@@ -1,0 +1,6 @@
+LATTICE="chain lattice"
+L=4
+MODEL="fermion Hubbard"
+U=4
+Nup_total=6
+Ndown_total=0

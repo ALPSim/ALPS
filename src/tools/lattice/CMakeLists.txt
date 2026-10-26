@@ -7,7 +7,6 @@ install(TARGETS printgraph
   RUNTIME_DEPENDENCY_SET alps_runtime
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
 
-# pltgraph.py and the historical local fixtures remain source-only.
 
 install(TARGETS lattice2xml
   RUNTIME_DEPENDENCY_SET alps_runtime

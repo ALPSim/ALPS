@@ -34,6 +34,7 @@
 #include <boost/smart_ptr.hpp>
 #include <boost/noncopyable.hpp>
 
+#include <exception>
 #include <iostream>
 
 namespace alps {
@@ -142,7 +143,7 @@ protected:
   std::vector<AbstractTask*> tasks;   // all simulations
   std::vector<int> taskstatus;    // status of the simulations
 
-  // remake a task and let it run on some nodes
+  // remake a task and let it run on some nodes; the task is null if that fails
   void remake_task(ProcessList&, const int);
 
   // the simulation is finished, do any cleanup work necessary
@@ -150,6 +151,10 @@ protected:
 
   // do a checkpoint
   void checkpoint();
+
+  // exit status after all creatable tasks are done: 0, or 2 (with a
+  // message on stderr) if any task could not be created
+  int exit_status() const;
 
 
 private:
@@ -159,6 +164,7 @@ private:
   boost::filesystem::path infilepath;
   
   void parse_job_file(const boost::filesystem::path&);
+  void task_failed(int, const std::exception&);
 };
 
 //=======================================================================

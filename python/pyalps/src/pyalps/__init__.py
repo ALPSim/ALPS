@@ -65,7 +65,6 @@ for _extension_name in (
     "pyngsresults_c",
     "pyngsapi_c",
     "pyngsrandom01_c",
-    "pyngsaccumulator_c",
 ):
     _extension = getattr(cxx, _extension_name)
     globals()[_extension_name] = _extension
