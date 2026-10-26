@@ -38,7 +38,8 @@ foreach(
   mergeobs_times
   mergeobs_times2
   mergeobs_divide
-  mergeobs_log)
+  mergeobs_log
+  regressions)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)
