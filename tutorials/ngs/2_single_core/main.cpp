@@ -13,9 +13,10 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/mc/api.hpp>
 #include <alps/parseargs.hpp>
-#include <alps/stop_callback.hpp>
+#include <alps/mc/stop_callback.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -38,7 +39,11 @@ int main(int argc, char *argv[]) {
         else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         else
-            parameters = alps::parameters_type<ising_sim>::type(options.input_file);
+            parameters = alps::make_parameters_from_file(options.input_file);
+
+        ising_sim::define_parameters(parameters);
+        if (parameters.has_missing(std::cerr))
+            return EXIT_FAILURE;
 
         ising_sim sim(parameters);
 

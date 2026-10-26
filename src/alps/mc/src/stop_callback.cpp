@@ -1,59 +1,49 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                                 *
- * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
- *                                                                                 *
- * ALPS Libraries                                                                  *
- *                                                                                 *
- * Copyright (C) 2010 - 2013 by Lukas Gamper <gamperl@gmail.com>,                  *
- *                              Synge Todo <wistaria@comp-phys.org>                *
- *                                                                                 *
- * ALPS Project: https://alps.comp-phys.org/                                       *
- * SPDX-License-Identifier: MIT                                                    *
- *                                                                                 *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/*
+ * Copyright (C) 1998-2018 ALPS Collaboration. See COPYRIGHT.TXT
+ * All rights reserved. Use is subject to license terms. See LICENSE.TXT
+ */
 
-#include <alps/ngs/signal.hpp>
-#include <alps/ngs/boost_mpi.hpp>
-#include <alps/stop_callback.hpp>
+#include <alps/mc/stop_callback.hpp>
+
+#include <alps/utilities/signal.hpp>
+#include <alps/utilities/boost_mpi.hpp>
 
 namespace alps {
 
     stop_callback::stop_callback(std::size_t timelimit)
         : limit(timelimit)
-        , start(boost::chrono::high_resolution_clock::now())
+        , start(clock_type::now_time())
     {}
 
 #ifdef ALPS_HAVE_MPI
-    stop_callback::stop_callback(boost::mpi::communicator const & cm, std::size_t timelimit)
-        : limit(timelimit), start(boost::chrono::high_resolution_clock::now()), comm(cm)
+    stop_callback::stop_callback(alps::mpi::communicator const & cm, std::size_t timelimit)
+        : limit(timelimit), start(clock_type::now_time()), comm(cm)
     {}
 #endif
 
-    bool stop_callback::operator()() {
+    bool stop_callback::operator()() const {
+        time_point_type now(clock_type::now_time());
 #ifdef ALPS_HAVE_MPI
         if (comm) {
             bool to_stop;
-            if (comm->rank() == 0)
-                to_stop = !signals.empty() || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
+            if (comm->rank() == 0) {
+                to_stop = !signals.empty() || (limit > 0 && clock_type::time_diff(now, start) >= limit);
+            }
             broadcast(*comm, to_stop, 0);
             return to_stop;
         } else
 #endif
-            return !signals.empty() || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
+            return !signals.empty() || (limit > 0 && clock_type::time_diff(now, start) >= limit);
     }
 
-#ifdef ALPS_HAVE_MPI
-    stop_callback_mpi::stop_callback_mpi(boost::mpi::communicator const & cm, std::size_t timelimit)
-        : comm(cm), limit(timelimit), start(boost::chrono::high_resolution_clock::now())
+
+    simple_time_callback::simple_time_callback(std::size_t timelimit)
+        : limit(timelimit)
+        , start(clock_type::now_time())
     {}
 
-    bool stop_callback_mpi::operator()() {
-        bool to_stop;
-        if (comm.rank() == 0)
-            to_stop = !signals.empty() 
-               || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
-        broadcast(comm, to_stop, 0);
-        return to_stop;
+    bool simple_time_callback::operator()() const {
+        time_point_type now(clock_type::now_time());
+        return (limit > 0 && clock_type::time_diff(now, start) >= limit);
     }
-#endif
 }

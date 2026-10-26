@@ -13,10 +13,11 @@
 
 #include "ising.hpp"
 
-#include <alps/ngs.hpp>
+#include <alps/mc/api.hpp>
 #include <alps/parseargs.hpp>
-#include <alps/stop_callback.hpp>
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/stop_callback.hpp>
+#include <alps/mc/mpiadapter.hpp>
+#include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
 #include <boost/chrono.hpp>
@@ -38,8 +39,8 @@ typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 int main(int argc, char *argv[]) {
 
     try {
-        boost::mpi::environment env(argc, argv);
-        boost::mpi::communicator comm_world;
+        alps::mpi::environment env(argc, argv);
+        alps::mpi::communicator comm_world;
 
         // TODO: accept space sparated input files, not comma
         alps::parseargs options(argc, argv);
@@ -62,7 +63,11 @@ int main(int argc, char *argv[]) {
 
             std::cout << color << std::endl;
 
-            boost::mpi::communicator comm_local = comm_world.split(color);
+            // alps::mpi::communicator has no split(); split the MPI
+            // communicator and let comm_local own the result.
+            MPI_Comm split_comm;
+            MPI_Comm_split(comm_world, int(color), comm_world.rank(), &split_comm);
+            alps::mpi::communicator comm_local(split_comm, alps::mpi::take_ownership);
             if (color >= input_files.size())
                 break;
 
@@ -77,8 +82,14 @@ int main(int argc, char *argv[]) {
             else if (boost::filesystem::path(infile).extension().string() == ".h5")
                 alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
-                parameters = alps::parameters_type<ising_sim>::type(infile);
-            broadcast(comm_local, parameters);
+                parameters = alps::make_parameters_from_file(infile);
+            alps::broadcast(comm_local, parameters);
+            alps::mcmpiadapter<ising_sim>::define_parameters(parameters);
+            if (parameters.has_missing()) {
+                if (comm_local.rank() == 0)
+                    parameters.has_missing(std::cerr);
+                return EXIT_FAILURE;
+            }
 
             alps::mcmpiadapter<ising_sim> sim(parameters, comm_local, alps::check_schedule(options.tmin, options.tmax));
 

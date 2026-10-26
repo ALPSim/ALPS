@@ -17,7 +17,7 @@
 #include <alps/export.h>
 #include <alps/parapack/process.h>
 #include <alps/parapack/types.h>
-#include <alps/utility/vmusage.hpp>
+#include <alps/utilities/vmusage.hpp>
 #include <iostream>
 #include <string>
 

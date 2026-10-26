@@ -54,6 +54,21 @@ for name in OBSERVABLES:
 assert -1.0 <= results["Energy"].mean <= 1.0
 assert len(results["Correlations"].mean) == PARAMETERS["L"]
 
+# The energy must match the exact periodic chain, not just lie in [-1, 1]: a
+# sampler with an inverted Metropolis acceptance gives the same magnitude with
+# the opposite sign. At T = 1 and L = 12, <E>/L = -(t + t^(L-1)) / (1 + t^L)
+# with t = tanh(1), i.e. -0.782; 1000 sweeps keep the statistical error well
+# inside the tolerance.
+PHYSICS_PARAMETERS = {"L": 12, "THERMALIZATION": 100, "SWEEPS": 1000, "T": 1.0}
+coupling = np.tanh(1.0 / PHYSICS_PARAMETERS["T"])
+length = PHYSICS_PARAMETERS["L"]
+exact_energy = -(coupling + coupling**(length - 1)) / (1 + coupling**length)
+
+physics = ising.sim(PHYSICS_PARAMETERS, 42)
+assert physics.run(lambda: False)
+energy = ngs.collectResults(physics)["Energy"].mean
+assert abs(energy - exact_energy) < 0.2, (energy, exact_energy)
+
 # A stop callback that fires immediately must report "stopped", not "finished".
 stopped = ising.sim(PARAMETERS, 42)
 assert not stopped.run(lambda: True)
@@ -69,11 +84,12 @@ with tempfile.TemporaryDirectory() as directory:
         # "/" here, so the base state lands at the root -- while the subclass
         # writes its own two values at absolute paths under the clone. The
         # asymmetry is the tutorial's; load() reads each back from where it
-        # was written.
+        # was written. mcbase defines SEED, with its default of 42.
         assert sorted(archive.list_children("/parameters")) == [
-            "L", "SWEEPS", "T", "THERMALIZATION"]
+            "L", "SEED", "SWEEPS", "T", "THERMALIZATION"]
         assert sorted(archive.list_children("/measurements")) == OBSERVABLES
-        assert archive.is_group("/checkpoint/engine")
+        # The random number generator's state, saved as one string.
+        assert archive.is_data("/checkpoint/engine")
         assert int(archive[CLONE + "/checkpoint/sweeps"]) == simulation.sweeps
         np.testing.assert_array_equal(
             archive[CLONE + "/checkpoint/spins"], simulation.spins)

@@ -15,8 +15,8 @@
 #define ALPS_NGS_HDF5_STD_PAIR
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
-#include <alps/ngs/detail/remove_cvr.hpp>
+#include <alps/utilities/cast.hpp>
+#include <alps/utilities/remove_cvr.hpp>
 
 #include <utility>
 

@@ -35,12 +35,12 @@
 // PyMCBase as its alias preserves the public base class of downstream
 // simulations, as in the Boost.Python bindings.
 //
-// Params ingestion: the public alps::mcbase ctor wants an alps::params.
-// We convert nb::dict → alps::params at the binding boundary through
-// the shared ladder in ../dict_to_params.hpp, so mcbase, params and
-// the application modules ingest parameters identically.
+// Params ingestion: the public alps::mcbase ctor wants an alps::params
+// defined by mcbase::define_parameters. We convert nb::dict → alps::params
+// at the binding boundary through ../dict_to_params.hpp, so mcbase, params
+// and the application modules ingest parameters identically.
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsbase_PyArrayHandle
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <nanobind/nanobind.h>
 #include "archive_savable.hpp"
@@ -50,6 +50,7 @@
 namespace nb = nanobind;
 #include <cstddef>
 #include <functional>
+#include <sstream>
 #include <type_traits>
 #include <utility>
 #include "dict_to_params.hpp"
@@ -57,11 +58,21 @@ namespace alps {
     static_assert(std::has_virtual_destructor<mcbase>::value,
                   "mcbase must safely destroy nanobind trampoline aliases");
 
+    // mcbase's parameters, random number generator and measurements are
+    // protected, and ALPSCore's mcbase has no accessors. Naming the members
+    // through a derived class gives pointers to mcbase's own members, which
+    // reach them in any simulation, whatever its class.
+    struct mcbase_members : mcbase {
+        using mcbase::parameters;
+        using mcbase::random;
+        using mcbase::measurements;
+    };
+
     // Trampoline: holds Python overrides for pure-virtuals.
     class PyMCBase : public mcbase {
         public:
             // Slot count = the number of NB_OVERRIDE* calls below.
-            // mcbase (src/alps/mc/include/alps/mcbase.hpp) declares five virtuals:
+            // mcbase (src/alps/mc/include/alps/mc/mcbase.hpp) declares five virtuals:
             // update / measure / fraction_completed (pure) and
             // save(archive&) / load(archive&); all five must be
             // forwarded so Python overrides are seen by C++ callers.
@@ -69,8 +80,19 @@ namespace alps {
             PyMCBase(nb::dict const & arg,
                      std::size_t seed_offset = 42,
                      nb::handle /*communicator*/ = nb::none())
-                : mcbase(pyalps::params_from_dict(arg), seed_offset)
+                : mcbase(defined(arg), seed_offset)
             {}
+
+            // The dict's values, supplied as text, with mcbase's definitions
+            // (SEED); the Python simulation reads the rest as supplied.
+            static parameters_type defined(nb::dict const & arg) {
+                parameters_type parameters = pyalps::params_from_dict(arg);
+                mcbase::define_parameters(parameters);
+                std::ostringstream missing;
+                if (parameters.has_missing(missing))
+                    throw nb::value_error(missing.str().c_str());
+                return parameters;
+            }
             void update() override {
                 NB_OVERRIDE_PURE(update);
             }
@@ -104,19 +126,19 @@ NB_MODULE(pyngsbase_c, m) {
         .def_prop_ro(
             "random",
             [](alps::mcbase & self) -> alps::random01 & {
-                return self.get_random();
+                return self.*(&alps::mcbase_members::random);
             },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "parameters",
             [](alps::mcbase & self) -> alps::mcbase::parameters_type & {
-                return self.get_parameters();
+                return self.*(&alps::mcbase_members::parameters);
             },
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "measurements",
-            [](alps::mcbase & self) -> alps::mcobservables & {
-                return self.get_measurements();
+            [](alps::mcbase & self) -> alps::accumulators::accumulator_set & {
+                return self.*(&alps::mcbase_members::measurements);
             },
             nb::rv_policy::reference_internal)
         .def("run",

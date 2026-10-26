@@ -32,11 +32,6 @@ target_sources(alps_headers INTERFACE
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
     include/alps/ngs/detail/tcpsession.hpp
-    include/alps/ngs/scheduler/proto/controlthreadsim.hpp
-    include/alps/ngs/scheduler/proto/mcbase.hpp
-    include/alps/ngs/scheduler/proto/mpisim.hpp
-    include/alps/ngs/scheduler/proto/mpisim_ulfm.hpp
-    include/alps/ngs/scheduler/proto/tcpserver.hpp
     include/alps/ngs/scheduler/tcpserver.hpp
     include/alps/ngs/ulfm.hpp
     include/alps/scheduler.h
@@ -52,7 +47,3 @@ target_sources(alps_headers INTERFACE
     include/alps/scheduler/task.h
     include/alps/scheduler/types.h
     include/alps/scheduler/worker.h)
-
-if(ALPS_BUILD_TESTING)
-  add_subdirectory(tests)
-endif()

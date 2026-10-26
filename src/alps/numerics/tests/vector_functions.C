@@ -71,3 +71,49 @@ TEST(VectorFunctions, ArithmeticAndTranscendentalsMatchScalarReferences)
     expect_elements(atanh(vecA), std::atanh(0.81), "atanh(vecA)");
     expect_elements(sqrt(vecA*vecA + vecB*vecB), std::sqrt(0.81*0.81 + 1.21*1.21), "sqrt(vecA*vecA + vecB*vecB)");
 }
+
+TEST(VectorFunctions, EmptyVectorActsAsZero)
+{
+    // ALPSCore's operators treat a default-constructed vector as the zero vector.
+    using namespace alps::numeric;
+    std::vector<double> empty, vecA(3, 0.5);
+    EXPECT_EQ(empty + vecA, vecA);
+    EXPECT_EQ(vecA + empty, vecA);
+    EXPECT_EQ(vecA - empty, vecA);
+    EXPECT_EQ(empty - vecA, std::vector<double>(3, -0.5));
+    EXPECT_TRUE((empty * vecA).empty());
+    EXPECT_THROW(vecA / empty, std::runtime_error);
+    std::vector<double> sum;
+    merge(sum, vecA);
+    EXPECT_EQ(sum, vecA);
+}
+
+TEST(VectorFunctions, CompoundAssignmentRejectsSizeMismatch)
+{
+    using namespace alps::numeric;
+    std::vector<double> vecA(3, 1.), vecB(2, 1.);
+    EXPECT_THROW(vecA += vecB, std::runtime_error);
+    vecA += std::vector<double>(3, 2.);
+    EXPECT_EQ(vecA, std::vector<double>(3, 3.));
+}
+
+TEST(VectorFunctions, ScalesByScalarOfAnotherType)
+{
+    // Boost's operators allowed this before ALPS adopted ALPSCore's header.
+    using namespace alps::numeric;
+    std::vector<double> vecA(2, 3.);
+    std::size_t n = 2;
+    EXPECT_EQ(vecA / n, std::vector<double>(2, 1.5));
+    EXPECT_EQ(vecA * 2, std::vector<double>(2, 6.));
+    EXPECT_EQ(2 * vecA, std::vector<double>(2, 6.));
+    std::vector<int> counts(2, 3);
+    EXPECT_EQ(counts / 2., std::vector<double>(2, 1.5));
+}
+
+TEST(VectorFunctions, InfinityMatchesSize)
+{
+    std::vector<double> vecA(4, 1.);
+    std::vector<double> inf = alps::numeric::inf<std::vector<double>>(vecA);
+    ASSERT_EQ(inf.size(), 4u);
+    for (double x : inf) EXPECT_TRUE(std::isinf(x) && x > 0);
+}

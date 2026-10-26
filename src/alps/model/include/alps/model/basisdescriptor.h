@@ -19,9 +19,12 @@
 
 #include <alps/model/sitebasisstates.h>
 #include <alps/model/substitute.h>
+#include <alps/model/half_integer.h>
 #include <alps/lattice/graph_helper.h>
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <string>
 #include <vector>
 
 namespace alps {
@@ -62,7 +65,9 @@ public:
   typedef typename super_type::iterator iterator;
   typedef typename super_type::const_iterator const_iterator;
   typedef std::map<std::string,SiteBasisDescriptor<I> > sitebasis_map_type;
-  typedef std::vector<std::pair<std::string,half_integer<I> > > constraints_type;
+  // totals over all sites: wider than the per-site half_integer<I>
+  typedef half_integer<int> total_type;
+  typedef std::vector<std::pair<std::string,total_type> > constraints_type;
   typedef alps::Expression expression_type;
   typedef std::vector<std::pair<std::string, expression_type> > unevaluated_constraints_type;
 
@@ -123,8 +128,11 @@ void BasisDescriptor<I>::check_constraints(const Parameters& p)
   evaluated_constraints_.clear();
   unevaluated_constraints_.clear();
   for (typename unevaluated_constraints_type::iterator it=constraints_.begin();it!=constraints_.end();++it)
-    if (it->second.can_evaluate(p))
-      evaluated_constraints_.push_back(std::make_pair(it->first,half_integer<I>(alps::evaluate<double>(it->second, p))));
+    if (it->second.can_evaluate(p)) {
+      double value = alps::evaluate<double>(it->second, p);
+      warn_if_outside_half_integer_range<int>(value, "<CONSTRAINT> " + it->first + " = " + boost::lexical_cast<std::string>(it->second));
+      evaluated_constraints_.push_back(std::make_pair(it->first,total_type(value)));
+    }
     else
       unevaluated_constraints_.push_back(*it);
 }

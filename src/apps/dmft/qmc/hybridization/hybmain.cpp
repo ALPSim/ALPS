@@ -14,9 +14,13 @@
  *****************************************************************************/
 
 #include <alps/solvers.hpp>
-#include <alps/ngs.hpp>
+#include <alps/hdf5/archive.hpp>
+#include <alps/ngs/mcoptions.hpp>
+#include <alps/params.hpp>
+#include <iostream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <boost/mpi/environment.hpp>
+#include <alps/utilities/mpi.hpp>
 #endif
 
 int main(int argc, char** argv) {
@@ -24,12 +28,16 @@ int main(int argc, char** argv) {
     alps::mcoptions options(argc, argv, "hybridization");
     if (!options.valid) return 0;
 #ifdef ALPS_HAVE_MPI
-    boost::mpi::environment env(argc, argv);
+    alps::mpi::environment env(argc, argv);
 #endif
-    alps::params parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
+    alps::params parms;
+    {
+      alps::hdf5::archive input(options.input_file, alps::hdf5::archive::READ);
+      input["/parameters"] >> parms;
+    }
     if (options.time_limit != 0)
       throw std::invalid_argument("time limit is passed in the parameter file!");
-    if (!parms.defined("MAX_TIME"))
+    if (!parms.supplied("MAX_TIME"))
       throw std::runtime_error("parameter MAX_TIME is not defined. How long do you want to run the code for? (in seconds)");
     alps::solvers::cthyb(parms, options.output_file);
   } catch (std::exception const& exc) {

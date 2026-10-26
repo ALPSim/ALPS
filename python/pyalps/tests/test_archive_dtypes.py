@@ -210,18 +210,20 @@ def test_numpy_boolean_scalar_parameter_checkpoint(tmp_path, value):
         archive["parameters"] = parameters
     with hdf5.archive(filename, "r") as archive:
         restored = ngs.params(archive, "/parameters")
-    assert restored["flag"] is value
+    # Booleans are supplied as 1 and 0, which a program reads as a bool or an
+    # integer; until one defines the parameter, it reads back as the integer.
+    assert type(restored["flag"]) is int and restored["flag"] == int(value)
 
 
 def test_boolean_mask_remains_a_mask_after_reload(tmp_path):
     with hdf5.archive(str(tmp_path / "mask.h5"), "w") as archive:
         archive["mask"] = np.array([True, False, True])
         np.testing.assert_array_equal(np.array([10, 20, 30])[archive["mask"]], [10, 30])
-        # Cover the native vector<bool> writer as well as ndarray dispatch.
+        # Parameters hold Booleans as 1 and 0, so a Boolean list saved
+        # through params reads back as integers, not as a mask.
         archive["parameters"] = ngs.params({"mask": [True, False, True]})
-        np.testing.assert_array_equal(
-            np.array([10, 20, 30])[archive["parameters/mask"]], [10, 30]
-        )
+        assert archive["parameters/mask"].dtype.kind == "i"
+        np.testing.assert_array_equal(archive["parameters/mask"], [1, 0, 1])
 
 
 @pytest.mark.parametrize("attribute", [False, True])

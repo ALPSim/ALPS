@@ -77,7 +77,7 @@ for entry in manifest['libraries']:
     stem = re.sub(r'(?:\.so(?:\.\d+)*|(?:\.\d+)*\.dylib|\.dll)$', '', library.name.lower())
     components.add(re.sub(r'-[0-9a-f]{6,}$', '', stem).removeprefix('lib'))
 required = {'alps', 'alps_utilities', 'alps_hdf5', 'alps_params',
-            'alps_osiris', 'alps_xml', 'alps_cli'}
+            'alps_osiris', 'alps_xml', 'alps_cli', 'alps_accumulators', 'alps_mc'}
 assert required <= components, f'Missing runtime components: {sorted(required - components)}'
 """
     def check(script):

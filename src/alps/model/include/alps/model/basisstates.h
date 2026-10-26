@@ -234,12 +234,11 @@ void basis_states<I,S,SS>::build(const std::vector<std::pair<std::string,half_in
           // AML/AH: truncates search tree if it is obvious that no new
           //         states can be found.
           //
-          bool breaked=false;
-          if(idx[k]<(int)(basis_descriptor_[k].size())){
-                  // if this condition is true I will quit this loop
-                  // principle, let us see now if the new partial state
-                  // idx[0,k] is compatible with any of the partial
-                  // states idx[k+1,last]
+          // Skip every value of site k for which idx[0,k] cannot be completed by
+          // any idx[k+1,last]; skipping only one value left whole infeasible
+          // subtrees to be enumerated.
+          while (idx[k]<(int)(basis_descriptor_[k].size())) {
+                  bool breaked=false;
                   for (std::size_t ic=0;ic<constraints.size();++ic) {
                           half_integer<J> val;
                           for (std::size_t is=0;is<=k;++is)
@@ -253,8 +252,9 @@ void basis_states<I,S,SS>::build(const std::vector<std::pair<std::string,half_in
                                   break;
                           }
                   }
-                  if(breaked)
-                        ++idx[k];
+                  if (!breaked)
+                        break;
+                  ++idx[k];
           }
           // end of new part
     }

@@ -28,7 +28,7 @@ when using OpenMPI.
 | `parapack / halt_mpi` | Shutdown waits for active groups to be released, receives every rank's acknowledgement, and remains halted on repeated calls. |
 | `parapack / filelock_mpi` | Every rank acquires in turn; other ranks fail a bounded single lock attempt while it is held. Explicit release and destructor release both permit the next owner. A blocking contender retries while rank zero holds the lock, then acquires after release. |
 | `parapack / info_test_mpi` | Reproducible per-rank worker seeds, common disorder seed, rank-specific checkpoints, master-only phase/host metadata, and progress updates. |
-| `scheduler / scheduler_sum_mpi` | A deterministic completion schedule takes 128 scalar/vector Monte Carlo measurements per rank; global counts, independently summed means, result arithmetic, and HDF5 persistence agree. |
+| `mc / mc_runner_mpi` | A deterministic completion schedule takes 128 scalar/vector Monte Carlo measurements per rank; global counts, independently summed means, result arithmetic, and HDF5 persistence agree. |
 
 ## Execution and reports
 

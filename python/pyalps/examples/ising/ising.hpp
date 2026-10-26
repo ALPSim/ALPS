@@ -4,7 +4,7 @@
 #ifndef ALPS_TUTORIAL_EXPORTED_ISING_HPP
 #define ALPS_TUTORIAL_EXPORTED_ISING_HPP
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 
 #include <cstddef>
 
@@ -12,6 +12,8 @@ class ising_sim : public alps::mcbase {
 public:
     explicit ising_sim(parameters_type const & parameters,
                        std::size_t seed_offset = 0);
+
+    static parameters_type & define_parameters(parameters_type & parameters);
 
     void update() override;
     void measure() override;

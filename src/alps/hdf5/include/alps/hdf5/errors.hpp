@@ -38,9 +38,13 @@ namespace alps {
             };
         DEFINE_ALPS_HDF5_EXCEPTION(archive_not_found)
         DEFINE_ALPS_HDF5_EXCEPTION(archive_closed)
+        DEFINE_ALPS_HDF5_EXCEPTION(archive_opened)
         DEFINE_ALPS_HDF5_EXCEPTION(invalid_path)
         DEFINE_ALPS_HDF5_EXCEPTION(path_not_found)
         DEFINE_ALPS_HDF5_EXCEPTION(wrong_type)
+        DEFINE_ALPS_HDF5_EXCEPTION(wrong_mode)
+        // From ALPSCore (96fd99a9, "Tensor hdf5 storage"); gf's alps/hdf5/tensor.hpp throws it.
+        DEFINE_ALPS_HDF5_EXCEPTION(wrong_dimensions)
         #undef DEFINE_ALPS_HDF5_EXCEPTION
     }
 };

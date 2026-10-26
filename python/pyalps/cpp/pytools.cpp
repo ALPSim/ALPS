@@ -7,7 +7,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>
 #include <alps/scheduler/convert.h>
-#include <alps/utility/encode.hpp>
+#include <alps/utilities/encode.hpp>
 #include <alps/random.h>
 #include <alps/parser/xslt_path.h>
 #include <boost/random/mersenne_twister.hpp>

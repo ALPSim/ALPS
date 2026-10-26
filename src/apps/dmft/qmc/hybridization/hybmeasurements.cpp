@@ -18,10 +18,14 @@
 
 using namespace alps::numeric;
 
-  #define NUM_BINS_CONSTRUCTOR_ARG NUM_BINS
+// NUM_BINS=0, the default, asks for the default number of bins, 128, as it
+// did with ALEA's observables. ALPSCore's accumulators would keep no
+// bins at all.
+  #define NUM_BINS_CONSTRUCTOR_ARG (NUM_BINS ? std::size_t(NUM_BINS) : std::size_t(128))
 
-typedef alps::accumulator::RealVectorObservable vec_obs_t;
-typedef alps::accumulator::RealObservable obs_t;
+typedef alps::accumulators::FullBinningAccumulator<std::vector<double> > vec_obs_t;
+typedef alps::accumulators::FullBinningAccumulator<double> obs_t;
+typedef alps::accumulators::NoBinningAccumulator<std::vector<double> > simple_vec_obs_t;
 
 void hybridization::create_measurements(){//called once in the constructor
 
@@ -124,18 +128,18 @@ void hybridization::create_measurements(){//called once in the constructor
       if(MEASURE_g2w){    //the two-particle Green's function is large and error is usually not needed -> declare as simple observable
         std::stringstream g2wr_name; g2wr_name<<"g2w_re_"<<i<<"_"<<j; g2wr_names[i].push_back(g2wr_name.str());
         std::stringstream g2wi_name; g2wi_name<<"g2w_im_"<<i<<"_"<<j; g2wi_names[i].push_back(g2wi_name.str());
-        measurements << alps::ngs::SimpleRealVectorObservable(g2wr_name.str());
-        measurements << alps::ngs::SimpleRealVectorObservable(g2wi_name.str());
+        measurements << simple_vec_obs_t(g2wr_name.str());
+        measurements << simple_vec_obs_t(g2wi_name.str());
       }
       if(MEASURE_h2w){
         std::stringstream h2wr_name; h2wr_name<<"h2w_re_"<<i<<"_"<<j; h2wr_names[i].push_back(h2wr_name.str());
         std::stringstream h2wi_name; h2wi_name<<"h2w_im_"<<i<<"_"<<j; h2wi_names[i].push_back(h2wi_name.str());
-        measurements << alps::ngs::SimpleRealVectorObservable(h2wr_name.str());
-        measurements << alps::ngs::SimpleRealVectorObservable(h2wi_name.str());
+        measurements << simple_vec_obs_t(h2wr_name.str());
+        measurements << simple_vec_obs_t(h2wi_name.str());
       }
     }
   }
-  measurements.reset(true);
+  measurements.reset();
 
   //initialize measurement vectors
   sgn=0.;

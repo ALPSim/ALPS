@@ -17,10 +17,8 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/mcobservables.hpp>
-#include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/observablewrappers.hpp>
+#include <alps/params.hpp>
+#include <alps/accumulators.hpp>
 #include <alps/ngs/numeric.hpp>
 
 #include <boost/function.hpp>
@@ -34,15 +32,17 @@
 
 class ising_sim {
 
-    typedef alps::mcobservables accumulators_type;
+    typedef alps::accumulators::accumulator_set accumulators_type;
 
     public:
 
         typedef alps::params parameters_type;
         typedef std::vector<std::string> result_names_type;
-        typedef alps::mcresults results_type;
+        typedef alps::accumulators::result_set results_type;
 
         ising_sim(parameters_type const & params);
+
+        static parameters_type & define_parameters(parameters_type & parameters);
 
         void update();
         void measure();

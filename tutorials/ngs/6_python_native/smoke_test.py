@@ -45,6 +45,21 @@ for name in OBSERVABLES:
 assert -1.0 <= results["Energy"].mean <= 1.0
 assert len(results["Correlations"].mean) == PARAMETERS["L"]
 
+# The energy must match the exact periodic chain, not just lie in [-1, 1]: a
+# sampler with an inverted Metropolis acceptance gives the same magnitude with
+# the opposite sign. At T = 1 and L = 12, <E>/L = -(t + t^(L-1)) / (1 + t^L)
+# with t = tanh(1), i.e. -0.782; 1000 sweeps keep the statistical error well
+# inside the tolerance.
+PHYSICS_PARAMETERS = {"L": 12, "THERMALIZATION": 100, "SWEEPS": 1000, "T": 1.0, "SEED": 42}
+coupling = np.tanh(1.0 / PHYSICS_PARAMETERS["T"])
+length = PHYSICS_PARAMETERS["L"]
+exact_energy = -(coupling + coupling**(length - 1)) / (1 + coupling**length)
+
+physics = ising.sim(PHYSICS_PARAMETERS)
+assert physics.run(lambda: False)
+energy = physics.collectResults()["Energy"].mean
+assert abs(energy - exact_energy) < 0.2, (energy, exact_energy)
+
 with tempfile.TemporaryDirectory() as directory:
     checkpoint = os.path.join(directory, "ising.clone0.h5")
 

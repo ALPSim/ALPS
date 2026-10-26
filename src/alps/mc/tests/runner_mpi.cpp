@@ -1,0 +1,98 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                                 *
+ * ALPS Project: Algorithms and Libraries for Physics Simulations                  *
+ *                                                                                 *
+ * ALPS Libraries                                                                  *
+ *                                                                                 *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
+ *                                                                                 *
+ * ALPS Project: https://alps.comp-phys.org/                                       *
+ * SPDX-License-Identifier: MIT                                                    *
+ *                                                                                 *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+#include "runner_simulation.hpp"
+#include <alps/mc/mpiadapter.hpp>
+#include <alps/utilities/mpi.hpp>
+#include <alps/testing/temporary_directory.hpp>
+#include <gtest/gtest.h>
+#include <functional>
+#include <string>
+
+// Make completion checks deterministic instead of depending on wall time.
+struct every_step {
+    bool pending() const { return true; }
+    void update(double) {}
+};
+
+TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
+    alps::mpi::communicator world;
+    ASSERT_GE(world.size(), 2);
+    alps::params parameters;
+    if (world.rank() == 0)
+        parameters.supply("COUNT", std::to_string(128 * world.size())).supply("SEED", "42");
+    // The supplied text reaches every rank, and each defines the parameters.
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
+    EXPECT_TRUE(simulation.run([] { return false; }));
+    EXPECT_EQ(simulation.count, 128);
+    EXPECT_DOUBLE_EQ(simulation.fraction_completed(), 1.);
+    const double sum = alps::mpi::all_reduce(world, simulation.sum, std::plus<double>());
+    const auto results = alps::collect_results(simulation);
+    // Every rank must finish the collectives before rank-specific assertions.
+    if (world.rank() == 0) {
+        const double expected = sum / (128 * world.size());
+        EXPECT_EQ(results["SValue"].count(), 128u * world.size());
+        EXPECT_NEAR(results["SValue"].mean<double>(), expected, 1e-12);
+        EXPECT_TRUE(std::isfinite(results["SValue"].error<double>()));
+        const auto vector = results["VValue"].mean<std::vector<double>>();
+        ASSERT_EQ(vector.size(), 3u);
+        for (double value : vector) EXPECT_NEAR(value, expected, 1e-12);
+        EXPECT_NEAR((results["SValue"] + 1.).mean<double>(), expected + 1., 1e-12);
+        EXPECT_NEAR((results["SValue"] + results["SValue"]).mean<double>(), 2. * expected, 1e-12);
+        alps::testing::TemporaryDirectory directory;
+        const auto filename = (directory.path() / "results.h5").string();
+        alps::save_results(results, parameters, filename, "/simulation/results");
+        alps::hdf5::archive archive(filename);
+        alps::accumulators::result_set restored;
+        archive["/simulation/results"] >> restored;
+        EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
+        EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
+    }
+}
+
+// collect_results() reduces each measured observable collectively. If only
+// some ranks measured, e.g. because the others were still thermalizing when
+// the run stopped, every rank must throw instead of some entering the
+// reduction and hanging.
+TEST(ParallelMonteCarloRunner, ThrowsOnEveryRankWhenOnlySomeRanksMeasured) {
+    alps::mpi::communicator world;
+    ASSERT_GE(world.size(), 2);
+    alps::params parameters;
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
+    if (world.rank() == 0) {
+        simulation.update();
+        simulation.measure();
+    }
+    EXPECT_THROW(alps::collect_results(simulation), std::runtime_error);
+}
+
+TEST(ParallelMonteCarloRunner, CollectsEmptyResultsWhenNoRankMeasured) {
+    alps::mpi::communicator world;
+    alps::params parameters;
+    if (world.rank() == 0)
+        parameters.supply("COUNT", "128").supply("SEED", "42");
+    alps::broadcast(world, parameters);
+    alps::mcmpiadapter<sum_simulation, every_step>::define_parameters(parameters);
+    ASSERT_TRUE(parameters.ok());
+    alps::mcmpiadapter<sum_simulation, every_step> simulation(parameters, world, every_step());
+    const auto results = alps::collect_results(simulation);
+    EXPECT_FALSE(results.has("SValue"));
+}

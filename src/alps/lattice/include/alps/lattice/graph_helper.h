@@ -250,6 +250,11 @@ public:
   lattice_type& lattice() { return l_; }
   const lattice_type& lattice() const { return l_; }
 
+  // n-site groups (<NSITE>s of the unit cell or graph), in addition to
+  // the sites and bonds of the graph
+  const nsite_group_list& nsite_groups() const { return nsite_groups_; }
+  std::size_t num_nsite_groups() const { return nsite_groups_.size(); }
+
   vertices_size_type num_vertices() const
   { return detail::num_vertices_wrap(graph()); }
   edges_size_type num_edges() const
@@ -606,6 +611,7 @@ public:
 private:
   graph_helper(const graph_helper& o)
    : LatticeLibrary(o),
+     nsite_groups_(o.nsite_groups_),
      to_delete_(o.to_delete_),
      g_(to_delete_ ? new graph_type(*o.g_) : o.g_),
      is_bipartite_(set_parity(graph())),
@@ -626,6 +632,7 @@ private:
   const graph_type& const_graph() const { return *g_;}
 
   lattice_type l_;
+  nsite_group_list nsite_groups_;  // filled by make_graph, so declared before g_
   bool to_delete_;
   InhomogeneityDescriptor d_;
   graph_type* g_;
@@ -665,12 +672,14 @@ G* graph_helper<G>::make_graph(const Parameters& parms)
     l_ = lattice_type(desc);
     d_ = desc.inhomogeneity();
     g = &(l_.graph());
+    nsite_groups_ = l_.nsite_groups();
     to_delete_=false;
     have_lattice_=true;
   }
   else if ((have_lattice || have_graph) && has_graph(name)) {
     g = new graph_type();
     get_graph(*g,name);
+    nsite_groups_ = graph_nsite_groups(name);
     to_delete_=true;
     have_lattice_=false;
   }
@@ -682,6 +691,7 @@ G* graph_helper<G>::make_graph(const Parameters& parms)
     l_ = lattice_type(desc);
     d_ = desc.inhomogeneity();
     g = &(l_.graph());
+    nsite_groups_ = l_.nsite_groups();
     to_delete_=false;
     have_lattice_=true;
   }

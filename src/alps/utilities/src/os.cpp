@@ -14,7 +14,7 @@
 
 /* $Id$ */
 
-#include <alps/utility/os.hpp>
+#include <alps/utilities/os.hpp>
 #include <alps/version.h>
 #include <boost/throw_exception.hpp>
 #include <boost/filesystem/operations.hpp>

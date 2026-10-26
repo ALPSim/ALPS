@@ -1,0 +1,53 @@
+<MODELS>
+<!-- The stock fermion basis without its Nup and Ndown constraints. -->
+<SITEBASIS name="fermion">
+  <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
+  <OPERATOR name="c_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="cdag_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="c_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="cdag_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="n_up" matrixelement="Nup"/>
+  <OPERATOR name="n_down" matrixelement="Ndown"/>
+</SITEBASIS>
+<BASIS name="unconstrained fermion">
+  <SITEBASIS ref="fermion"/>
+</BASIS>
+<BONDOPERATOR name="fermion_hop" source="x" target="y">
+  cdag_up(x)*c_up(y)+cdag_up(y)*c_up(x)+cdag_down(x)*c_down(y)+cdag_down(y)*c_down(x)
+</BONDOPERATOR>
+<HAMILTONIAN name="unconstrained fermion Hubbard">
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="U" default="0"/>
+  <BASIS ref="unconstrained fermion"/>
+  <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
+  <BONDTERM source="i" target="j">-t*fermion_hop(i,j)</BONDTERM>
+</HAMILTONIAN>
+<!-- A basis that fixes N to L, not to a parameter N_total of its own. -->
+<SITEBASIS name="counted fermion">
+  <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="N" min="Nup+Ndown" max="Nup+Ndown"/>
+  <OPERATOR name="n_up" matrixelement="Nup"/>
+  <OPERATOR name="n_down" matrixelement="Ndown"/>
+</SITEBASIS>
+<BASIS name="half-filled fermion">
+  <SITEBASIS ref="counted fermion"/>
+  <CONSTRAINT quantumnumber="Nup" value="Nup_total"/>
+  <CONSTRAINT quantumnumber="Ndown" value="Ndown_total"/>
+  <CONSTRAINT quantumnumber="N" value="L"/>
+</BASIS>
+<HAMILTONIAN name="half-filled fermion Hubbard">
+  <PARAMETER name="U" default="0"/>
+  <BASIS ref="half-filled fermion"/>
+  <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
+</HAMILTONIAN>
+</MODELS>

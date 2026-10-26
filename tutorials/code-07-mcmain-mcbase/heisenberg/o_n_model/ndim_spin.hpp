@@ -7,7 +7,7 @@
 
 #include "tinyvector/tinyvector.hpp"
 
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 #include <alps/ngs/numeric.hpp>
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/random/uniform_on_sphere_n.h>
@@ -34,6 +34,15 @@ class ALPS_DECL ndim_spin_sim : public alps::mcbase {
     public:
         typedef tinyvector<double, N, INTRIN_OPT> spintype;
         ndim_spin_sim(parameters_type const & parms, std::size_t seed_offset = 0);
+
+        // The parameters the simulation reads; LATTICE, L and the lattice's
+        // other parameters reach the lattice as supplied.
+        static parameters_type & define_parameters(parameters_type & parameters) {
+            return alps::mcbase::define_parameters(parameters)
+                .define<int>("THERMALIZATION", "number of thermalization sweeps")
+                .define<int>("SWEEPS", "number of measurement sweeps")
+                .define<double>("T", "temperature");
+        }
 
         virtual void update();
         virtual void measure();
@@ -81,12 +90,12 @@ ndim_spin_sim<N>::ndim_spin_sim(parameters_type const & parms, std::size_t seed_
     }
 
     measurements
-        << alps::accumulator::RealObservable("Energy")
-        << alps::accumulator::RealVectorObservable("Magnetization")
-        << alps::accumulator::RealObservable("Magnetization^2")
-        << alps::accumulator::RealObservable("Magnetization^4")
-        << alps::accumulator::RealVectorObservable("Correlations")
-        << alps::accumulator::RealVectorObservable("Distances")
+        << alps::accumulators::FullBinningAccumulator<double>("Energy")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Magnetization")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
+        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Correlations")
+        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Distances")
     ;
 
     using alps::ngs::numeric::operator-;

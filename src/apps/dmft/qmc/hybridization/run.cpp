@@ -16,10 +16,13 @@
 #include <alps/solvers.hpp>
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
-#include <alps/utility/copyright.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mcmpiadapter.hpp>
+#include <alps/mc/mpiadapter.hpp>
 using sim_type = alps::mcmpiadapter<hybridization>;
 #else
 using sim_type = hybridization;
@@ -30,7 +33,7 @@ int global_mpi_rank;
 
 namespace {
 bool stop_requested(boost::posix_time::ptime const & end_time) {
-  static alps::ngs::signal signal;
+  static alps::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 void master_final_tasks(const alps::results_type<hybridization>::type &results,
@@ -53,12 +56,17 @@ void master_final_tasks(const alps::results_type<hybridization>::type &results,
 
 }
 
-void alps::solvers::cthyb(alps::params const& parms, std::string const& output_file) {
+void alps::solvers::cthyb(alps::params const& input, std::string const& output_file) {
+  alps::params parms(input);
+  sim_type::define_parameters(parms);
+  std::ostringstream missing;
+  if (parms.has_missing(missing))
+    throw std::invalid_argument("hybridization: " + missing.str());
 #ifndef ALPS_HAVE_MPI
   global_mpi_rank=0;
   sim_type s(parms,global_mpi_rank);
 #else
-  boost::mpi::communicator c;
+  alps::mpi::communicator c;
   c.barrier();
   global_mpi_rank=c.rank();
   sim_type s(parms, c);
@@ -66,6 +74,7 @@ void alps::solvers::cthyb(alps::params const& parms, std::string const& output_f
   if (global_mpi_rank==0) {
     alps::print_copyright(std::cout, "hybridization");
     std::cout << std::flush;
+    parms.has_unused(std::cerr);
   }
   //run the simulation
   s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
@@ -73,7 +82,7 @@ void alps::solvers::cthyb(alps::params const& parms, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (global_mpi_rank==0){
     alps::results_type<hybridization>::type results = collect_results(s);
-    std::string output_path = boost::lexical_cast<std::string>(parms["BASEPATH"]|"")+"/simulation/results";
+    std::string output_path = parms["BASEPATH"].as<std::string>()+"/simulation/results";
     save_results(results, parms, output_file, output_path); //"/simulation/results");
     master_final_tasks(results, parms, output_file);
   }

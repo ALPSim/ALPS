@@ -8,16 +8,19 @@
 #define PYALPS_EXPORT_SIMULATION_HPP
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/mcbase.hpp>
+#include <alps/mc/mcbase.hpp>
 
 #include <nanobind/nanobind.h>
 #if PY_VERSION_HEX >= 0x030C0000 && !defined(Py_LIMITED_API)
 #error "pyalps consumers on Python 3.12+ must pass STABLE_ABI to nanobind_add_module"
 #endif
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/unique_ptr.h>
 #include <nanobind/stl/vector.h>
 
 #include <cstddef>
+#include <memory>
+#include <sstream>
 #include <string>
 
 namespace alps {
@@ -34,7 +37,19 @@ public:
 
     explicit exported_simulation(parameters_type const & parameters,
                                  std::size_t seed_offset = 0)
-        : Simulation(parameters, seed_offset) {}
+        : Simulation(defined(parameters), seed_offset) {}
+
+    // A copy defined by Simulation::define_parameters, which mcbase supplies
+    // if the simulation has none; missing or malformed parameters are a
+    // ValueError naming them.
+    static parameters_type defined(parameters_type const & parameters) {
+        parameters_type copy(parameters);
+        Simulation::define_parameters(copy);
+        std::ostringstream missing;
+        if (copy.has_missing(missing))
+            throw nb::value_error(missing.str().c_str());
+        return copy;
+    }
 
     ~exported_simulation() override = default;
 
@@ -45,10 +60,11 @@ public:
         });
     }
 
-    results_type collect_results_python(
+    // Built in place: copying ALPSCore's result_set gives an empty set.
+    std::unique_ptr<results_type> collect_results_python(
         result_names_type const & names = result_names_type()) const {
-        return names.empty() ? Simulation::collect_results()
-                             : Simulation::collect_results(names);
+        return std::unique_ptr<results_type>(new results_type(
+            names.empty() ? Simulation::collect_results() : Simulation::collect_results(names)));
     }
 
     alps::random01 & get_random() { return this->random; }

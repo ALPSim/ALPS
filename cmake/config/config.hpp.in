@@ -1,0 +1,28 @@
+// Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
+//
+// ALPSCore's code includes <alps/config.hpp>, its generated configuration
+// header. This is ALPS's version of it: <alps/config.h> holds ALPS's
+// configuration, including ALPS_HAVE_MPI and the alps::int*_t names, and this
+// header adds what ALPSCore's code in ALPS reads from its own. The macros
+// below are taken from ALPSCore's utilities/include/config.hpp.in at commit
+// 7146b9e1f017938a94e5dae35d88467cc5ba7969.
+#pragma once
+
+#include <alps/config.h>
+
+// ALPSCore modules this SDK provides
+#define ALPS_HAVE_ALPS_UTILITIES
+#define ALPS_HAVE_ALPS_HDF5
+#define ALPS_HAVE_ALPS_PARAMS
+#define ALPS_HAVE_ALPS_ACCUMULATORS
+#define ALPS_HAVE_ALPS_MC
+
+// == Accumulator value types ==
+
+// Default accumulator types always defined:
+
+#define ALPS_ACCUMULATOR_BASIC_VALUE_TYPES float, double, long double, std::vector<float>, std::vector<double>, std::vector<long double>
+#define ALPS_ACCUMULATOR_BASIC_VALUE_TYPES_SIZE 6
+
+#define ALPS_ACCUMULATOR_VALUE_TYPES ALPS_ACCUMULATOR_BASIC_VALUE_TYPES
+#define ALPS_ACCUMULATOR_VALUE_TYPES_SIZE ALPS_ACCUMULATOR_BASIC_VALUE_TYPES_SIZE

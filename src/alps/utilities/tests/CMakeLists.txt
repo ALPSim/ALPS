@@ -17,7 +17,7 @@
 #   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #   DEALINGS IN THE SOFTWARE.
 
-foreach(name vmusage bitops)
+foreach(name vmusage)
   add_executable(${name} ${name}.cpp)
 
   target_link_libraries(${name} PRIVATE ALPS::utilities)
@@ -37,3 +37,28 @@ alps_add_gtest(foundation_headers COMPONENT utilities LABELS architecture)
 add_executable(citations citations.cpp)
 target_link_libraries(citations PRIVATE ALPS::utilities)
 alps_add_gtest(citations COMPONENT utilities LABELS citations)
+
+if(ALPS_ENABLE_MPI)
+  # ALPSCore's tests of alps/utilities/mpi.hpp, copied with publication pointers removed with their
+  # helpers. They define main() themselves; the environment tests start and stop
+  # MPI inside their single case. mpi_utils_bcast_optional is not ported: it
+  # tests ALPSCore's alps/utilities/mpi_optional.hpp, which ALPS does not have.
+  foreach(name mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce
+               mpi_utils_env_exceptions1 mpi_utils_env_exceptions2)
+    add_executable(${name} ${name}.cpp)
+    target_link_libraries(${name} PRIVATE ALPS::utilities)
+    if(name MATCHES "exceptions")
+      # mpi_test_support.cpp intercepts MPI_Abort to count the calls.
+      target_sources(${name} PRIVATE mpi_test_support.cpp)
+    endif()
+    if(name STREQUAL "mpi_utils_env_exceptions1")
+      # The only one without a main(), as in ALPSCore.
+      target_link_libraries(${name} PRIVATE GTest::gtest_main)
+    endif()
+    # The copies keep ALPSCore's TYPED_TEST_CASE, which GoogleTest 1.10 deprecated.
+    target_compile_options(${name} PRIVATE
+      $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wno-deprecated-declarations>)
+    alps_add_mpi_gtest(${name} COMPONENT utilities RANKS 2 OWN_MAIN)
+    alps_add_mpi_gtest(${name} COMPONENT utilities RANKS 3 OWN_MAIN)
+  endforeach()
+endif()

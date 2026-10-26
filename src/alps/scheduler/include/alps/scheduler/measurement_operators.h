@@ -23,8 +23,8 @@
 #include <alps/parameter.h>
 #include <alps/xml.h>
 #include <alps/config.h>
-#include <alps/utility/encode.hpp>
-#include <alps/utility/numeric_cast.hpp>
+#include <alps/utilities/encode.hpp>
+#include <alps/numeric/numeric_cast.hpp>
 #include <alps/numeric/real.hpp>
 #include <boost/foreach.hpp>
 #include <vector>

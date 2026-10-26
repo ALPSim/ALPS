@@ -8,7 +8,6 @@ target_sources(alps_headers INTERFACE
   FILE_SET random_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
-    include/alps/ngs/random01.hpp
     include/alps/random.h
     include/alps/random/buffered_generator.hpp
     include/alps/random/buffered_rng.h

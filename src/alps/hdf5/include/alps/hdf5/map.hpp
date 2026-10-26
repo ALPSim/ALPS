@@ -15,7 +15,7 @@
 #define ALPS_NGS_HDF5_STD_MAP
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs/cast.hpp>
+#include <alps/utilities/cast.hpp>
 
 #include <map>
 
@@ -30,8 +30,14 @@ namespace alps {
             , std::vector<std::size_t> chunk = std::vector<std::size_t>()
             , std::vector<std::size_t> offset = std::vector<std::size_t>()
         ) {
-            if (ar.is_group(path))
+            // The root group cannot be deleted, so a map saved at the root
+            // replaces only the entries it writes.
+            if (ar.is_group(path) && ar.complete_path(path) != "/")
                 ar.delete_group(path);
+            // An empty map still writes its group, so it reads back as empty
+            // (from ALPSCore 99e8fa59).
+            if (!ar.is_group(path))
+                ar.create_group(path);
             for(typename std::map<K, T, C, A>::const_iterator it = value.begin(); it != value.end(); ++it)
                 save(ar, ar.complete_path(path) + "/" + ar.encode_segment(cast<std::string>(it->first)), it->second);
         }
@@ -45,7 +51,7 @@ namespace alps {
         ) {
             std::vector<std::string> children = ar.list_children(path);
             for (typename std::vector<std::string>::const_iterator it = children.begin(); it != children.end(); ++it)
-                load(ar, path + "/" +  *it, value[cast<K>(ar.decode_segment(*it))]);
+                load(ar, ar.complete_path(path) + "/" +  *it, value[cast<K>(ar.decode_segment(*it))]);
         }
     }
 }

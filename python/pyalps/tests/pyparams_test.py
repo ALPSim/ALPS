@@ -23,8 +23,12 @@ orig_dict = {
     'x' : 2,
     'b' : 3
 }
+# Values are supplied as text, as an INI file supplies them. Until a program
+# defines a parameter's type, it reads back as a number if its text is one,
+# so the string '42' reads back as the integer 42.
+expected = dict(orig_dict, val2=42)
 def assert_type(p, k):
-    assert type(p[k]) == type(orig_dict[k])
+    assert type(p[k]) == type(expected[k])
 
 def test_params():    
     ## Create params
@@ -37,7 +41,8 @@ def test_params():
     })
     ## check content
     for k in sorted(orig_dict.keys()):
-        assert p[k] == orig_dict[k]
+        assert p[k] == expected[k]
+        assert p.supplied(k)
         assert_type(p, k)
         print(k,'ok!')
     ## Check nonetype
@@ -61,7 +66,7 @@ def test_params():
                 p.load(iar)
 
         for k in sorted(orig_dict.keys()):
-            assert p[k] == orig_dict[k]
+            assert p[k] == expected[k]
             assert_type(p, k)
             print(k,'ok!')
 

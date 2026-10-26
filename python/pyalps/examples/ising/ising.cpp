@@ -5,15 +5,21 @@
 #include "ising.hpp"
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/ngs.hpp>
+#include <alps/accumulators.hpp>
 
 #include <algorithm>
 
 ising_sim::ising_sim(parameters_type const & parameters,
                      std::size_t seed_offset)
     : alps::mcbase(parameters, seed_offset),
-      total_sweeps_(parameters["SWEEPS"] | 10) {
-    measurements << alps::accumulator::RealObservable("Magnetization");
+      total_sweeps_(static_cast<std::size_t>(parameters["SWEEPS"].as<int>())) {
+    measurements << alps::accumulators::FullBinningAccumulator<double>("Magnetization");
+}
+
+// The exported constructor defines the parameters before constructing.
+ising_sim::parameters_type & ising_sim::define_parameters(parameters_type & parameters) {
+    return alps::mcbase::define_parameters(parameters)
+        .define<int>("SWEEPS", 10, "number of sweeps");
 }
 
 void ising_sim::update() {

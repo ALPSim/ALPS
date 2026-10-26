@@ -3,8 +3,10 @@ add_library(alps_utilities
   src/copyright.cpp
   src/citations.cpp
   src/encode.cpp
+  src/filename_operations.cpp
   src/os.cpp
   src/short_print.cpp
+  src/signal.cpp
   src/sleep.cpp
   src/stacktrace.cpp
   src/temporary_filename.cpp
@@ -46,6 +48,9 @@ if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
 endif()
 alps_configure_component(alps_utilities utilities)
+# ALPSCore's filename helpers (fs/*.hpp) declare no export macro; ALPS::params
+# calls them across the DLL boundary.
+set_target_properties(alps_utilities PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 target_include_directories(alps_utilities PRIVATE "${PROJECT_BINARY_DIR}/generated/include")
 target_sources(alps_utilities PUBLIC
   FILE_SET utilities_headers TYPE HEADERS
@@ -55,18 +60,13 @@ target_sources(alps_utilities PUBLIC
     include/alps/factory.h
     include/alps/lambda.hpp
     include/alps/ngs/boost_mpi.hpp
-    include/alps/ngs/cast.hpp
     include/alps/ngs/config.hpp
-    include/alps/ngs/detail/remove_cvr.hpp
-    include/alps/ngs/detail/type_wrapper.hpp
     include/alps/ngs/hash.hpp
     include/alps/ngs/mutex.hpp
-    include/alps/ngs/short_print.hpp
     include/alps/ngs/sleep.hpp
-    include/alps/ngs/stacktrace.hpp
-    include/alps/ngs/stringify.hpp
     include/alps/ngs/thread_exceptions.hpp
     include/alps/stringvalue.h
+    include/alps/testing/fp_compare.hpp
     include/alps/type_traits/average_type.hpp
     include/alps/type_traits/change_value_type.hpp
     include/alps/type_traits/covariance_type.hpp
@@ -82,22 +82,41 @@ target_sources(alps_utilities PUBLIC
     include/alps/type_traits/real_type.hpp
     include/alps/type_traits/slice.hpp
     include/alps/type_traits/type_tag.hpp
-    include/alps/utility/assign.hpp
-    include/alps/utility/bitops.hpp
-    include/alps/utility/copyright.hpp
-    include/alps/utility/citations.hpp
-    include/alps/utility/data.hpp
-    include/alps/utility/encode.hpp
-    include/alps/utility/factory.hpp
-    include/alps/utility/generator.hpp
-    include/alps/utility/make_copy.hpp
-    include/alps/utility/os.hpp
-    include/alps/utility/resize.hpp
-    include/alps/utility/set_zero.hpp
-    include/alps/utility/size.hpp
-    include/alps/utility/temporary_filename.hpp
-    include/alps/utility/vectorio.hpp
-    include/alps/utility/vmusage.hpp)
+    include/alps/utilities/cast.hpp
+    include/alps/utilities/citations.hpp
+    include/alps/utilities/copyright.hpp
+    include/alps/utilities/data.hpp
+    include/alps/utilities/deprecated.hpp
+    include/alps/utilities/encode.hpp
+    include/alps/utilities/fs/get_basename.hpp
+    include/alps/utilities/fs/get_dirname.hpp
+    include/alps/utilities/fs/get_extension.hpp
+    include/alps/utilities/fs/remove_extensions.hpp
+    include/alps/utilities/make_copy.hpp
+    include/alps/utilities/os.hpp
+    include/alps/utilities/remove_cvr.hpp
+    include/alps/utilities/resize.hpp
+    include/alps/utilities/short_print.hpp
+    include/alps/utilities/signal.hpp
+    include/alps/utilities/size.hpp
+    include/alps/utilities/stacktrace.hpp
+    include/alps/utilities/stringify.hpp
+    include/alps/utilities/temporary_filename.hpp
+    include/alps/utilities/type_wrapper.hpp
+    include/alps/utilities/vectorio.hpp
+    include/alps/utilities/vmusage.hpp)
+if(ALPS_ENABLE_MPI)
+  # ALPSCore's MPI wrapper, its vector reductions and its broadcasts of
+  # containers, with obsolete publication pointers removed and one local change to the wrapper
+  # (see README.md). They include <mpi.h>, so only MPI builds install them;
+  # ALPSCore's code reaches them only when ALPS_HAVE_MPI is set.
+  target_sources(alps_utilities PUBLIC FILE_SET utilities_headers FILES
+    include/alps/utilities/boost_mpi.hpp
+    include/alps/utilities/mpi.hpp
+    include/alps/utilities/mpi_map.hpp
+    include/alps/utilities/mpi_pair.hpp
+    include/alps/utilities/mpi_vector.hpp)
+endif()
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

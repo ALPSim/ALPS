@@ -1,19 +1,19 @@
 # C++ module layout
 
-Sources use `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API independently of the physical owner: NGS measurement headers live in `alea/include/alps/ngs/`, while typed parameters live in `params/include/alps/ngs/`.
+Sources use `include/`, `src/` and `tests/` where applicable. Public include spellings describe the API independently of the physical owner: the parameter adapters' `<alps/ngs/make_*.hpp>` headers live in `params/adapters/include/alps/ngs/`.
 
 ## Source ownership
 
 | Source module under `src/alps/` | Responsibility | Binary or compile owner |
 | --- | --- | --- |
-| `utilities/` | Utility functions, general helpers, type traits and NGS configuration helpers | `ALPS::utilities` |
+| `utilities/` | Utility functions, general helpers, signal handling, type traits and NGS configuration helpers | `ALPS::utilities` |
 | `containers/` | Fixed-capacity containers, ALPS multi-array storage and Boost serialization | `ALPS::containers` |
 | `numerics/` | Numerical helpers, array mathematics and matrix/vector interfaces | `ALPS::numerics` |
 | `numeric_io/` | HDF5 adapters for numerical matrices and vectors | `ALPS::numeric_io` |
 | `numeric_xml/` | Optional matrix XML output adapter | `ALPS::numeric_xml` |
 | `ietl/` | Iterative eigensolver headers under `include/ietl/` | `ALPS::headers` |
 | `hdf5/` | Archive API, container adapters, shared context registry and signal cleanup | `ALPS::hdf5` |
-| `params/` | Typed values, lookup/proxies, iteration and HDF5 checkpoints | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
+| `params/` | ALPSCore's parameters (`<alps/params.hpp>`, `<alps/dictionary.hpp>`, `<alps/params/*.hpp>`): typed definitions, values supplied as text by INI, parameter and XML files, HDF5 groups and Python, and HDF5 checkpoints; and the adapters from parameter and XML files and to `alps::Parameters` (`<alps/ngs/make_*.hpp>`). See [its README](params/README.md) | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
 | `osiris/` | Dump serialization, process/communication state and XDR implementation | `ALPS::osiris` |
 | `xml/` | XML parsing, handlers, attributes and output streams | `ALPS::xml` |
 | `cli/` | Existing `mcoptions` and `parseargs` command-line grammars | `ALPS::cli` |
@@ -21,8 +21,12 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `legacy_parameters/`, `expression/` | Older `alps::Parameters` and expression evaluation | `ALPS::alps` |
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
-| `alea/`, `accumulators/` | Observable/result facilities and accumulator implementations | `ALPS::alps` |
-| `mc/`, `scheduler/`, `parapack/` | Simulation API, execution and scheduling | `ALPS::alps` |
+| `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`); built when Eigen is found. See [its README](aleav2/README.md) | `ALPS::aleav2` |
+| `gf/` | ALPSCore's Green's functions on frequency, time and index meshes (`<alps/gf/*.hpp>`), with the tensors they use (`<alps/numeric/tensors.hpp>`); built when Eigen is found. See [its README](gf/README.md) | `ALPS::gf` |
+| `accumulators/` | ALPSCore's accumulators (`<alps/accumulators.hpp>`, `<alps/accumulators/*.hpp>`). See [its README](accumulators/README.md) | `ALPS::accumulators` |
+| `alea/` | ALEA observables and results (`<alps/alea.h>`, `<alps/alea/*.h>`) | `ALPS::alps` |
+| `mc/` | ALPSCore's Monte Carlo simulation base (`<alps/mc/*.hpp>`) and ALPS's `<alps/progress_callback.hpp>`. See [its README](mc/README.md) | `ALPS::mc` |
+| `scheduler/`, `parapack/` | Execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |
 | `solvers/` | Shared `<alps/solvers.hpp>` declarations for MaxEnt and CT-QMC | `ALPS::solver_headers` |
 | `resources/` | XML definitions and stylesheets | Installed data component |
@@ -35,7 +39,7 @@ Subsystem tests follow their source owner. Python package tests live in `python/
 
 `ALPS::configuration`, `ALPS::containers`, `ALPS::numerics`, `ALPS::numeric_io`, `ALPS::numeric_xml` and `ALPS::solver_headers` are interface targets. `ALPS::containers` supplies storage, while `ALPS::numerics` adds numerical algorithms and BLAS/LAPACK. Numerical archive adapters belong to `ALPS::numeric_io`, which combines numerics and HDF5; `ALPS::numeric_xml` combines numerics and XML output. See the [SDK usage and migration instructions](../../CONTRIBUTING.md#consuming-the-c-sdk).
 
-Utilities, HDF5, typed params, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params text/XML and older `Parameters` conversion adapters remain in `params/adapters/` and are compiled into `ALPS::alps`; their unchanged public header names are exposed through the aggregate interface.
+Utilities, HDF5, typed params, ALPSCore's accumulators and Monte Carlo simulation base, Osiris, XML and command-line parsing are separate runtime libraries. `ALPS::alps` links them transitively. The params adapters from parameter and XML files and to the older `Parameters` remain in `params/adapters/` and are compiled into `ALPS::alps`; their `<alps/ngs/make_*.hpp>` headers are exposed through the aggregate interface.
 
 `ALPS::maxent` links the foundations, Osiris and numerical providers. Its executable adds `ALPS::cli` and reads HDF5 params directly. Both use the shared `<alps/solvers.hpp>` declarations and link without `ALPS::alps`.
 
