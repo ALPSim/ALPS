@@ -19,10 +19,17 @@ void WRun::create_observables()
   create_common_observables();
   
   measurements << alps::RealVectorObservable("Statistics");
-  measurements << alps::make_observable(alps::RealVectorObservable("Winding number^2"), is_signed_);
+  // winding numbers need lattice directions; a <GRAPH> has none (dimension 0)
+  if (dimension() > 0) {
+    measurements << alps::make_observable(alps::RealVectorObservable("Winding number^2"), is_signed_);
 
-  if(use_1D_stiffness){   //@#$br: take care of D=1 ---> need a histogram of the winding numbers
-     measurements << alps::make_observable(alps::RealVectorObservable("Winding number histogram"), is_signed_); 
+    if(use_1D_stiffness){   //@#$br: take care of D=1 ---> need a histogram of the winding numbers
+       measurements << alps::make_observable(alps::RealVectorObservable("Winding number histogram"), is_signed_); 
+    }
+  }
+  else {
+    measurements.removeObservable("Stiffness");
+    std::cerr << "The lattice has no translation symmetry: winding numbers and the stiffness are not measured.\n";
   }
   
   // warn a user if using the D>1 stiffness estimator in 1D  
@@ -145,7 +152,67 @@ void WRun::make_meas()
     return;
   }
 
-  // measure winding numbers
+  double vol = num_sites();
+
+  measurements["Statistics"]  << stat; 
+  measurements["Energy"] << energy*Sign;
+  measurements["Energy Density"] << energy/vol*Sign;
+
+  if (dimension() > 0)
+    measure_winding_numbers();
+
+  if (measure_green_function_) {
+    green /= 2.*double(skip_measurements);
+    green *= Sign;
+    measurements["Green's Function"] << green;
+    green=0.;
+  }
+  if(chain_kappa) {
+    chain_n/=double(num_sites()/num_chains);
+    
+    std::valarray<double> chain_n2(0., dimension());
+    chain_n2 = chain_n2*chain_n2;
+
+    chain_n  *= Sign;
+    chain_n2 *= Sign;
+
+    measurements["Chain density"] << chain_n;
+    measurements["Chain density^2"] << chain_n2;
+  }
+
+}   // WRun::make_meas
+
+
+void WRun::measure_green()
+{
+/*
+  int delta=worm_head[1].site()-worm_head[0].site();
+  if (delta<0)
+    delta +=num_sites();
+  for (int h=0;h<(delta==0 ? 2 :1);++h) {
+    cyclic_iterator head=worm_head[1-h].kink();
+    cyclic_iterator start=head-1;
+    cyclic_iterator end=head+1;
+    site_descriptor s=worm_head[1-h].site();
+    bool do_create = (head->state() < start->state());
+
+    if ((end->time()-start->time())>=(end->time()-worm_head[h]->time())) {
+      // needs to be fixed ...
+      double statistical_weight= (onsite_energy(start->state(),s)-onsite_energy(head->state(),s));
+      double time_interval=end->time() - start->time();
+      double time_delta = worm_head[h]->time() - start->time();
+      if(time_delta==1.) 
+        time_delta=0.;
+      double P=exp(-beta*time_delta*statistical_weight)/integrated_weight(statistical_weight, beta*time_interval);
+      green[(delta!=0 || do_create) ? delta+1 : delta]+=P;    
+    }
+  }
+  */
+}   // WRun::measure_green
+
+
+void WRun::measure_winding_numbers()
+{
   bond_iterator bi, bi_end;
 
   std::vector<int> bond_dir(dimension());
@@ -203,61 +270,6 @@ void WRun::make_meas()
      measurements["Stiffness"] << stiffness*Sign/(dimension()*beta);
   }
 
-  double vol = num_sites();
-
-  measurements["Statistics"]  << stat; 
   winding_number2 *= Sign;
   measurements["Winding number^2"] << winding_number2;
-  measurements["Energy"] << energy*Sign;
-  measurements["Energy Density"] << energy/vol*Sign;
-  //measurements["Stiffness"] << stiffness*Sign/(dimension()*beta);
-
-  if (measure_green_function_) {
-    green /= 2.*double(skip_measurements);
-    green *= Sign;
-    measurements["Green's Function"] << green;
-    green=0.;
-  }
-  if(chain_kappa) {
-    chain_n/=double(num_sites()/num_chains);
-    
-    std::valarray<double> chain_n2(0., dimension());
-    chain_n2 = chain_n2*chain_n2;
-
-    chain_n  *= Sign;
-    chain_n2 *= Sign;
-
-    measurements["Chain density"] << chain_n;
-    measurements["Chain density^2"] << chain_n2;
-  }
-
-}   // WRun::make_meas
-
-
-void WRun::measure_green()
-{
-/*
-  int delta=worm_head[1].site()-worm_head[0].site();
-  if (delta<0)
-    delta +=num_sites();
-  for (int h=0;h<(delta==0 ? 2 :1);++h) {
-    cyclic_iterator head=worm_head[1-h].kink();
-    cyclic_iterator start=head-1;
-    cyclic_iterator end=head+1;
-    site_descriptor s=worm_head[1-h].site();
-    bool do_create = (head->state() < start->state());
-
-    if ((end->time()-start->time())>=(end->time()-worm_head[h]->time())) {
-      // needs to be fixed ...
-      double statistical_weight= (onsite_energy(start->state(),s)-onsite_energy(head->state(),s));
-      double time_interval=end->time() - start->time();
-      double time_delta = worm_head[h]->time() - start->time();
-      if(time_delta==1.) 
-        time_delta=0.;
-      double P=exp(-beta*time_delta*statistical_weight)/integrated_weight(statistical_weight, beta*time_interval);
-      green[(delta!=0 || do_create) ? delta+1 : delta]+=P;    
-    }
-  }
-  */
-}   // WRun::measure_green
-
+}
