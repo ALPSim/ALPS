@@ -41,6 +41,10 @@ installed; the feature itself is the code under `src/alps/lattice` and
     `pyscf`; takes about a minute.
   - `results/fcidump_solvers.txt`: exported FCIDUMP files solved by PySCF,
     block2, QuSpin and XDiag, compared with ALPS `fulldiag`/`sparsediag`.
+    A second table: the same files, and Hubbard rings L=6 and L=10 at U=4,
+    mapped to qubit Hamiltonians by Jordan-Wigner in Qiskit Nature and
+    OpenFermion, agree with ALPS to 3e-13; on the rings, ALPS's ground-state
+    energy matches the Bethe ansatz (Lieb-Wu equations) to 1e-13.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default
