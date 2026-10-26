@@ -178,9 +178,14 @@ def test_relocated_sdk(tmp_path):
         environment.pop(name, None)
     environment["PATH"] = (str(Path(os.environ["SystemRoot"]) / "System32")
                            if os.name == "nt" else "/usr/bin:/bin")
-    # Relocation affects how the runtime and its resources are found.
-    build_and_run(build, environment=environment, targets=("sdk_contract",),
-                  tests="^sdk_(contract|resources)$")
+    # Relocation affects how each exported library and the resources are found.
+    # The runtime links the other components, except these.
+    components = ["numeric", "numeric_io", "numeric_xml"]
+    components += [name.lower() for name in ("Aleav2", "Gf")
+                   if (relocated / f"share/alps/ALPS{name}Targets.cmake").is_file()]
+    build_and_run(build, environment=environment,
+                  targets=("sdk_contract", *(f"{name}_contract" for name in components)),
+                  tests=f"^(sdk_(contract|resources)|({'|'.join(components)})_contract)$")
 
 
 def test_installed_sdk_includes_source_headers():

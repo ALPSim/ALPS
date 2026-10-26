@@ -143,7 +143,9 @@ endfunction()
 # component's usage requirements. The component's header sets list the headers
 # that this SDK installed. ONLY and EXCLUDE are regular expressions on include
 # names; EXCLUDE names headers that are parts of others and need them first.
-# These are most of the consumer's sources, so only CHECK_HEADERS builds them.
+# These are most of the consumer's sources; a caller that checks only other
+# contracts turns CHECK_HEADERS off.
+option(CHECK_HEADERS "Compile each installed header on its own" ON)
 function(add_header_contract component)
   if(NOT CHECK_HEADERS)
     return()
