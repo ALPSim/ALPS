@@ -22,6 +22,11 @@
 #include <cstddef>
 #include <algorithm>
 #include <cassert>
+// Internal uses stay quiet; downstream uses of the deprecated types still warn.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 inline double expfunc(double entry)
 {
@@ -31,7 +36,7 @@ inline double expfunc(double entry)
 namespace blas{
     
   //simple BLAS vector that uses BLAS calls for operations.
-  class vector{
+  class [[deprecated("blas::vector will be removed in the next ALPS release; use alps::numeric::vector<double>")]] vector{
     public:
       vector(int size=0, double initial_value=0.)
       : values_(size, initial_value), size_(size)
@@ -227,4 +232,7 @@ namespace blas{
   }
 } //namespace
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif 
