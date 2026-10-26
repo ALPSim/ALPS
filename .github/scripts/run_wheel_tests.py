@@ -24,7 +24,10 @@ def main():
     # per platform; Python/downstream-extension tests still run on every ABI.
     suites = [str(ROOT / 'python/pyalps/tests')]
     if sys.version_info[:2] == (3, 12):
-        suites.append(str(ROOT / 'tests/cmake'))
+        # The static-components check builds the source tree, not the wheel's
+        # SDK; the linux job runs it.
+        suites += [str(ROOT / 'tests/cmake'),
+                   '-k', 'not test_components_link_without_building_the_core_runtime']
     elif sys.version_info[:2] > (3, 12):
         # Reused abi3 artifact: check interpreter-facing behavior, without
         # repeating its numerical regressions on every newer interpreter.
