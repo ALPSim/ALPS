@@ -143,7 +143,11 @@ endfunction()
 # component's usage requirements. The component's header sets list the headers
 # that this SDK installed. ONLY and EXCLUDE are regular expressions on include
 # names; EXCLUDE names headers that are parts of others and need them first.
+# These are most of the consumer's sources, so only CHECK_HEADERS builds them.
 function(add_header_contract component)
+  if(NOT CHECK_HEADERS)
+    return()
+  endif()
   cmake_parse_arguments(PARSE_ARGV 1 ARG "" "ONLY;EXCLUDE" "")
   get_target_property(header_sets ALPS::${component} INTERFACE_HEADER_SETS)
   set(sources "")
@@ -223,8 +227,10 @@ if(TARGET ALPS::gf)
     "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
   # As in ALPSCore, the mesh/ headers and mpi_bcast.hpp are parts of others.
   add_header_contract(gf EXCLUDE "^alps/gf/(mesh/|mpi_bcast\\.hpp$)")
-  target_compile_definitions(gf_header_contract PRIVATE
-    "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+  if(TARGET gf_header_contract)
+    target_compile_definitions(gf_header_contract PRIVATE
+      "$<IF:$<CONFIG:Debug>,ALPS_GF_DEBUG,BOOST_DISABLE_ASSERTS>")
+  endif()
 endif()
 # Code written against 3.0.0 builds unchanged while the legacy layer is installed.
 if(ALPS_LEGACY_API)
