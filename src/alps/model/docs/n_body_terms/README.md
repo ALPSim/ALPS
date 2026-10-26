@@ -39,6 +39,8 @@ installed; the feature itself is the code under `src/alps/lattice` and
     exported FCIDUMP; `fulldiag` with `FCIDUMP="file"` must write the same
     file. Models FCIDUMP cannot hold must be refused by both. Needs
     `pyscf`; takes about a minute.
+  - `results/fcidump_solvers.txt`: exported FCIDUMP files solved by PySCF,
+    block2, QuSpin and XDiag, compared with ALPS `fulldiag`/`sparsediag`.
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default
