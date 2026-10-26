@@ -34,7 +34,6 @@ _EXTENSIONS = (
     "pyngsresults_c",
     "pyngsapi_c",
     "pyngsrandom01_c",
-    "pyngsaccumulator_c",
 )
 
 import importlib

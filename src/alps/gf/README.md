@@ -32,9 +32,7 @@ build, `ALPS::gf` links `ALPS::utilities` and MPI, and installs
 `<alps/gf/mpi_bcast.hpp>`. gf's `broadcast()` takes the `alps::mpi::communicator`
 of ALPSCore's [`<alps/utilities/mpi.hpp>`](../utilities/README.md#alpscores-mpi-wrapper),
 which `ALPS::utilities` installs in MPI builds. GF includes both only in MPI
-builds. ALPS's `<alps/ngs/mpi.hpp>` adds different names to the same namespace,
-and one program can use both; `gf_mpi_coexistence` checks this with a Green's
-function.
+builds.
 
 `<alps/gf/mesh.hpp>` warns unless `BOOST_DISABLE_ASSERTS` and `NDEBUG` are
 defined, or `ALPS_GF_DEBUG` is. ALPSCore's build defined `BOOST_DISABLE_ASSERTS`
@@ -81,7 +79,7 @@ defines too.
 The tests also use ALPSCore's `near.hpp`, its MPI test helpers and the
 `<alps/config.hpp>` stand-in from the repository's
 [shared test support](../../../tests/support/README.md). The CMake files,
-`tests/mpi_coexistence.cpp` and this README are ALPS's own.
+This README is ALPS's own.
 
 ### Local changes
 

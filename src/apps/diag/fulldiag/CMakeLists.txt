@@ -36,6 +36,17 @@ if(ALPS_BUILD_TESTING)
   set_tests_properties(fulldiag_evaluate_help fulldiag_evaluate_license
     fulldiag_evaluate_no_arguments PROPERTIES LABELS "fulldiag;cli" TIMEOUT 60
     ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+  if(TARGET parameter2xml)
+    add_test(NAME fulldiag_fcidump_tasks
+      COMMAND ${CMAKE_COMMAND}
+        "-Dfulldiag=$<TARGET_FILE:fulldiag>"
+        "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+        "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/fcidump-tasks"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/fcidump_tasks.cmake")
+    set_tests_properties(fulldiag_fcidump_tasks PROPERTIES LABELS "fulldiag" TIMEOUT 120
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+  endif()
 endif()
 
 alps_install_applications(fulldiag fulldiag_evaluate)

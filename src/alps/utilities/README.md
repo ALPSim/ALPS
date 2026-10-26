@@ -76,10 +76,8 @@ with publication pointers removed, adds its `std::vector` reductions, which ALPS
 The container broadcasts `mpi_vector.hpp`, `mpi_pair.hpp` and `mpi_map.hpp`,
 which ALPSCore's parameters use, are copied from the same commit.
 
-Its names share namespace `alps::mpi` with ALPS's `<alps/ngs/mpi.hpp>`, without
-overlapping; `utilities_mpi_coexistence` uses both in one program. Its
-`environment`, like Boost.MPI's, leaves MPI alone if something else initialized
-it.
+Its `environment`, like Boost.MPI's, leaves MPI alone if something else
+initialized it.
 
 `tests/` holds ALPSCore's tests of the header (`utilities/test/`):
 `mpi_utils_env`, `mpi_utils_comm`, `mpi_utils_bcast`, `mpi_utils_reduce` and the

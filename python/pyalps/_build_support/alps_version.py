@@ -166,7 +166,7 @@ def dynamic_metadata(settings, project):  # noqa: ARG001 - provider protocol
     scripts = {}
     if bundle_applications():
         cli = runpy.run_path(str(Path(__file__).resolve().parents[1] / "src/pyalps_cli/__init__.py"))
-        scripts = {name: "pyalps_cli:main" for name in (*cli["NATIVE_PROGRAMS"], *cli["EXPORTERS"])}
+        scripts = {name: "pyalps_cli:main" for name in cli["COMMANDS"]}
     return {"version": version(), "scripts": scripts}
 
 

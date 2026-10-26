@@ -124,7 +124,7 @@ def test_entry_points_cover_bundled_programs(wheel_cli):
         if entry.group == "console_scripts"
     }
     programs = {p.name for p in (package / "bin").iterdir() if p.is_file()}
-    assert set(entries) == programs | {"convert2text", "plot2text", "plot2gp", "plot2xmgr"}
+    assert set(entries) == programs | {"alps-xml", "convert2text", "plot2text", "plot2gp", "plot2xmgr"}
     for name, entry in entries.items():
         assert (scripts / name).is_file()
         assert callable(entry.load())
@@ -159,7 +159,7 @@ SEED=42
     run("convert2xml", *[str(path) for path in checkpoints])
     converted = list(tmp_path.glob("*.run*.xml"))
     assert converted
-    assert "Energy" in run("convert2text", str(converted[0])).stdout
+    assert "Energy" in run("alps-xml", "convert", "text", str(converted[0])).stdout
 
 
 def test_printgraph_uses_bundled_lattice_library(wheel_cli):
@@ -189,13 +189,19 @@ J=1
     plots = sorted(tmp_path.glob("*.plot.xml"))
     assert plots
     source = str(plots[0])
-    rows = run("plot2text", source).stdout.splitlines()
+    rows = run("alps-xml", "plot", "text", source).stdout.splitlines()
     # The stylesheet also emits a legend label before each data series.
     values = [[float(value) for value in row.split()] for row in rows if "\t" in row]
     assert len(values) == 4
     assert all(math.isfinite(value) for row in values for value in row)
-    assert "set xlabel" in run("plot2gp", source).stdout
-    assert "# Grace project file" in run("plot2xmgr", source).stdout
+    assert "set xlabel" in run("alps-xml", "plot", "gnuplot", source).stdout
+    assert "# Grace project file" in run("alps-xml", "plot", "grace", source).stdout
+    # The historical names remain aliases of alps-xml.
+    for alias, command in (("plot2text", "plot text"), ("plot2gp", "plot gnuplot"),
+                           ("plot2xmgr", "plot grace")):
+        result = run(alias, source)
+        assert result.stdout == run("alps-xml", *command.split(), source).stdout
+        assert not result.stderr
 
 
 def test_fulldiag_saved_eigenvectors(wheel_cli, tmp_path):

@@ -61,8 +61,4 @@ if(ALPS_ENABLE_MPI)
     alps_add_mpi_gtest(${name} COMPONENT utilities RANKS 2 OWN_MAIN)
     alps_add_mpi_gtest(${name} COMPONENT utilities RANKS 3 OWN_MAIN)
   endforeach()
-
-  add_executable(utilities_mpi_coexistence mpi_coexistence.cpp)
-  target_link_libraries(utilities_mpi_coexistence PRIVATE ALPS::utilities ALPS::alps)
-  alps_add_mpi_gtest(utilities_mpi_coexistence COMPONENT utilities RANKS 2)
 endif()
