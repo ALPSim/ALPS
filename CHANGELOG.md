@@ -11,6 +11,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `fulldiag` and `sparsediag` results written with `MEASURE_ENERGY=false` and no custom measurements can be read again: `fulldiag_evaluate` and `convert2xml` stopped with `The group '/spectrum/sectors/0/results' does not exist`, because the reader expected the per-sector results the writer had left out.
 - Store an empty `std::map` in an HDF5 archive as an empty group, so it reads back as an empty map instead of a missing path. Older readers load such files as empty maps too.
 - Resolve HDF5 attribute paths written as `path@name` (ALPSCore's spelling) and attributes of the root group (`/@name`, or `@name` in the root context). These used to drop the character before `@` or fail; ALPS's `path/@name` spelling names the same object as before.
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.
