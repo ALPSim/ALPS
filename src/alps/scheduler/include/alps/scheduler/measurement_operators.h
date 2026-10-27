@@ -164,6 +164,10 @@ void EigenvectorMeasurements<ValueType>::save(alps::hdf5::archive& ar) const
 template <class ValueType>
 void EigenvectorMeasurements<ValueType>::load(alps::hdf5::archive & ar)
 {
+  // save() writes the results only when something was measured, e.g. not
+  // for MEASURE_ENERGY=false without custom measurements
+  if (!ar.is_group(ar.get_context()+"/results"))
+    return;
   std::vector<std::string> list = ar.list_children(ar.get_context()+"/results");
   for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
     std::string name = hdf5_name_decode(*it);
