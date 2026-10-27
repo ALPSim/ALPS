@@ -73,6 +73,7 @@ Build and install the C++ SDK with CMake, then build the Python package against 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
 - For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
+- Eigen ≥ 3.3 for the applications, which need it for MaxEnt. Library-only builds (`ALPS_BUILD_APPLICATIONS=OFF`) can do without it; they then leave out the components copied from ALPSCore that need it, such as [ALEA v2](src/alps/aleav2/README.md).
 - Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions.
@@ -81,14 +82,14 @@ For example, on Ubuntu 24.04:
 
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential libboost-all-dev libhdf5-dev libblas-dev liblapack-dev
+sudo apt-get install build-essential libboost-all-dev libhdf5-dev libblas-dev liblapack-dev libeigen3-dev
 ```
 
 On macOS, install Apple's Command Line Tools with `xcode-select --install` if needed. If you use Homebrew:
 
 ```sh
-brew install boost hdf5 openblas
-export CMAKE_PREFIX_PATH="$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas)"
+brew install boost hdf5 openblas eigen
+export CMAKE_PREFIX_PATH="$(brew --prefix boost):$(brew --prefix hdf5):$(brew --prefix openblas):$(brew --prefix eigen)"
 ```
 
 These are optional provider examples. For another non-system installation, set the `CMAKE_PREFIX_PATH` environment variable to its dependency prefixes, separated by colons on Linux/macOS. Keep it set for both SDK and Python builds. The CMake command-line form instead uses semicolons: `-DCMAKE_PREFIX_PATH="/prefix/one;/prefix/two"`.
@@ -376,7 +377,42 @@ alps-xml convert html simulation.out.xml --output results.html
 alps-xml extract text plot-definition.xml task*.out.xml --output measurements.txt
 ```
 
-Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources.
+Plot/extraction formats are `text`, `html`, `gnuplot`, `matplotlib` and `grace`; conversion supports `text` and `html`. The `xml` installation component includes the command and resources. Python wheels provide the same `alps-xml` command without requiring `xsltproc`.
+
+The historical command names remain installed in the same `xml` component as aliases of `alps-xml`, with identical output. New scripts and documentation should use `alps-xml`.
+
+| Historical name | `alps-xml` command |
+| --- | --- |
+| `plot2text`, `plot2html`, `plot2gp`, `plot2mpl`, `plot2xmgr` | `alps-xml plot text`, `html`, `gnuplot`, `matplotlib`, `grace` |
+| `convert2text`, `convert2html` | `alps-xml convert text`, `html` |
+| `extracttext`, `extracthtml`, `extractgp`, `extractmpl`, `extractxmgr` | `alps-xml extract text`, `html`, `gnuplot`, `matplotlib`, `grace`. The earlier shell versions of these exited successfully with empty output |
+
+Wheels install `plot2text`, `plot2gp`, `plot2xmgr` and `convert2text` as aliases in the same way.
+
+Two shell helpers have no `alps-xml` equivalent. They still work, but each prints a deprecation warning, and they will be removed in a future release:
+
+| Deprecated helper | Replacement |
+| --- | --- |
+| `xslttransform` | `xsltproc stylesheet.xsl input.xml` |
+| `use_local_stylesheet` | `alps-xml convert html` writes viewable HTML. Default task output already refers to a local `ALPS.xsl` |
+
+`archivecat` has been removed; `alps-xml extract` reads task files directly.
+
+Application builds also retain the archive-producing commands in the `tools`
+installation component:
+
+```sh
+txt2archive --xaxis T --yaxis Energy --with-error measurements.txt > results.archive.xml
+xml2archive simulation.in.xml > results.archive.xml
+```
+
+`txt2archive` reads x/y columns, with an optional third error column;
+`xml2archive` collects a master JOB XML file's task results. These operations
+produce archive XML rather than render it. If SQLite development headers and
+libraries are available at configure time, the `archive` tool is also built.
+It retains its existing SQLite schema and `install`, `append`, `rebuild`, `list`
+and `plot` commands; existing databases can be reopened without conversion.
+Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
 ---
 

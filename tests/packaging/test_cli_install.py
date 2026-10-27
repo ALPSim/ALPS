@@ -11,7 +11,7 @@ import venv
 
 PROJECT = Path(__file__).resolve().parents[2] / "python/pyalps"
 CLI = runpy.run_path(str(PROJECT / "src/pyalps_cli/__init__.py"))
-COMMANDS = (*CLI["NATIVE_PROGRAMS"], *CLI["EXPORTERS"])
+COMMANDS = CLI["COMMANDS"]
 
 
 def _run(command, **kwargs):

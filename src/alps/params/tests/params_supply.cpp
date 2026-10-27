@@ -77,6 +77,23 @@ TEST(ParamsSupply, WholeNumberTextForAnIntegerSaysHowToWriteIt) {
     EXPECT_EQ(std::string::npos, missing_message(p).find("write")) << missing_message(p);
 }
 
+// Negative text for an unsigned parameter is an error, not a wrapped value.
+TEST(ParamsSupply, NegativeTextForAnUnsignedIsAnError) {
+    for (std::string const text : {"-1", "-0", "-4.0"}) {
+        alps::params p;
+        p.supply("SEED", text);
+        p.define<unsigned int>("SEED", 42, "seed");
+        EXPECT_TRUE(p.has_missing()) << "'" << text << "'";
+        EXPECT_NE(std::string::npos, missing_message(p).find("SEED")) << missing_message(p);
+        EXPECT_EQ(std::string::npos, missing_message(p).find("write")) << missing_message(p);
+    }
+    alps::params p;
+    p.supply("SEED", "4294967295");
+    p.define<unsigned int>("SEED", 42, "seed");
+    EXPECT_FALSE(p.has_missing()) << missing_message(p);
+    EXPECT_EQ(4294967295u, p["SEED"].as<unsigned int>());
+}
+
 TEST(ParamsSupply, ExponentTextIsADouble) {
     alps::params p;
     p.supply("SWEEPS", "1e6");

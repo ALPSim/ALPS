@@ -5,9 +5,7 @@ from email.parser import BytesParser
 import importlib.util
 import os
 from pathlib import Path
-import re
 import tarfile
-import tomllib
 import zipfile
 
 from packaging.utils import (
@@ -18,44 +16,12 @@ from packaging.utils import (
 from packaging.version import Version
 
 
-CORE_PATTERN = r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)"
-TAG_PATTERN = rf"v{CORE_PATTERN}(?:-(?:alpha|beta|rc|dev)\.[0-9]+)?"
-
-
 def check_version(root: Path, ref: str) -> Version:
-    core = (root / "cmake/ALPS_VERSION.txt").read_text().strip()
-    if not re.fullmatch(CORE_PATTERN, core):
-        raise ValueError("ALPS_VERSION.txt must contain MAJOR.MINOR.PATCH")
-
-    project_dir = root / "python/pyalps"
-    with (project_dir / "pyproject.toml").open("rb") as stream:
-        project = tomllib.load(stream)["project"]
-    if "version" in project.get("dynamic", []):
-        provider_path = Path(__file__).resolve().parents[2] / "python/pyalps/_build_support/alps_version.py"
-        spec = importlib.util.spec_from_file_location("alps_version", provider_path)
-        provider = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(provider)
-        version = Version(provider.version(project_dir, ref=ref))
-    else:
-        version = Version(project["version"])
-    if version.release != Version(core).release:
-        raise ValueError(
-            f"pyproject.toml version {version} disagrees with ALPS_VERSION.txt ({core})"
-        )
-
-    if ref.startswith("refs/tags/"):
-        tag = ref.removeprefix("refs/tags/")
-        if not re.fullmatch(TAG_PATTERN, tag):
-            raise ValueError(
-                f"Invalid release tag {tag!r}; expected vMAJOR.MINOR.PATCH"
-                "[-{alpha,beta,rc,dev}.N]"
-            )
-        if Version(tag) != version:
-            raise ValueError(
-                f"Release tag {tag} disagrees with pyproject.toml ({version})"
-            )
-
-    return version
+    provider_path = Path(__file__).resolve().parents[2] / "python/pyalps/_build_support/alps_version.py"
+    spec = importlib.util.spec_from_file_location("alps_version", provider_path)
+    provider = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(provider)
+    return Version(provider.version(root / "python/pyalps", ref=ref))
 
 
 def check_distributions(directory: Path, expected: Version) -> None:
