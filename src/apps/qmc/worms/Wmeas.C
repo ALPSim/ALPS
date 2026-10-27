@@ -29,7 +29,7 @@ void WRun::create_observables()
   }
   else {
     measurements.removeObservable("Stiffness");
-    std::cerr << "The lattice has no translation symmetry: winding numbers and the stiffness are not measured.\n";
+    std::cerr << "The lattice has no periodic lattice directions: winding numbers and the stiffness are not measured.\n";
   }
   
   // warn a user if using the D>1 stiffness estimator in 1D  

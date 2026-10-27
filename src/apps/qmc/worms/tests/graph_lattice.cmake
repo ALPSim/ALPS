@@ -1,5 +1,5 @@
-# A <GRAPH> lattice has no translation symmetry, so there are no lattice
-# directions to count winding numbers along. The worm must run anyway, say that
+# A <GRAPH> lattice has no periodic lattice directions to count winding
+# numbers along. The worm must run anyway, say that
 # it skips the winding numbers and the stiffness, and produce the other results.
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")
@@ -39,7 +39,7 @@ endfunction()
 
 run(parameter2xml "${parameter2xml}" triangle)
 run(worm "${worm}" --Tmin 1 triangle.in.xml)
-if(NOT output MATCHES "no translation symmetry: winding numbers and the stiffness are not measured")
+if(NOT output MATCHES "no periodic lattice directions: winding numbers and the stiffness are not measured")
   message(FATAL_ERROR "worm did not say that it skips the winding numbers:\n${output}")
 endif()
 run(convert2xml "${convert2xml}" triangle.task1.out.xml)
