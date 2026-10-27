@@ -20,9 +20,11 @@
 #include <iostream>
 #include <iosfwd>
 #include <list>
+#include <stdexcept>
 #include <string>
 #include <iomanip>
 #include <math.h>
+#include <boost/throw_exception.hpp>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -181,7 +183,6 @@ class System
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_START_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_MEASURE"));
-        _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_SWEEP"));
     }
     int get_signal_id(std::string signal_id){
          int n = 0;
@@ -192,7 +193,7 @@ class System
            ++n;
          }
          if(iter == _signal_id.end()) {
-            cerr << "ERROR: signal_connect : signal " << signal_id << " not found \n";
+            cerr << "WARNING: unknown signal " << signal_id << "\n";
             return -1;
          }
          return n;
@@ -828,6 +829,8 @@ class System
 
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, size_t signal_id, void *data)
       {
+         if(signal_id >= _signal_id.size())
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal id"));
          Signal<System<T> > signal(handler, this, signal_id, data);
          this->handlers.push_back(signal);
          return *this;
@@ -835,13 +838,14 @@ class System
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
       {
          int n = this->get_signal_id(signal_id);
-         Signal<System<T> > signal(handler, this, n, data);
-         this->handlers.push_back(signal);
-         return *this;
+         if(n < 0)
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal " + signal_id));
+         return this->signal_connect(handler, static_cast<size_t>(n), data);
       }
 
     bool signal_emit(size_t signal_id)
       {
+         if(signal_id >= _signal_id.size()) return true;   // unknown signal: nothing vetoed
          typename std::list<Signal<System<T> > >::reverse_iterator siter;
          for(siter = handlers.rbegin(); siter != handlers.rend(); siter++){
            Signal<System<T> > &signal = *siter;
@@ -854,11 +858,12 @@ class System
     bool signal_emit(std::string signal_id)
       {
          int n = this->get_signal_id(signal_id);
-         if(n >= 0) return this->signal_emit(n);
+         if(n < 0) return true;   // unknown signal: nothing vetoed
+         return this->signal_emit(static_cast<size_t>(n));
       }
     std::string signal_description(size_t signal_id)
       {
-          return this->_signal_id[signal_id];
+          return signal_id < _signal_id.size() ? this->_signal_id[signal_id] : std::string();
       }
     int signal_id(std::string signal_id)
       {
