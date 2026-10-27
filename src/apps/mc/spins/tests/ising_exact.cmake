@@ -1,7 +1,8 @@
 # The two-dimensional Ising model on small periodic square lattices has an
 # exactly known energy. spinmc must reproduce it, with both update schemes,
-# within its own error bars. The run is not reproducible bit for bit even
-# with a fixed SEED, so this is a statistical test: five error bars.
+# within its own error bars. A fixed SEED does not make the run repeat
+# step for step, since the scheduler stops on elapsed time rather than on
+# a step count, so this is a statistical test: five error bars.
 include("${helpers}")
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")

@@ -1,7 +1,8 @@
 # The loop algorithm must reproduce the energy of small antiferromagnetic
 # Heisenberg clusters that full diagonalization gives exactly, within its
-# own error bars. The run is not reproducible bit for bit even with a fixed
-# SEED, so this is a statistical test: five error bars.
+# own error bars. A fixed SEED does not make the run repeat step for step,
+# since the scheduler stops on elapsed time rather than on a step count, so
+# this is a statistical test: five error bars.
 include("${helpers}")
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")
