@@ -99,10 +99,14 @@ foreach(hook throw:3 kill:6 kill-staged:5 term:10 kill:16)
   expect("NOT EXISTS \"${${name}_checkpoint}\"" "${hook}: resumed run left its checkpoint")
 endforeach()
 
-# SIGUSR1 and SIGUSR2 ask ALPS programs for a checkpoint; the run goes on.
+# SIGUSR1 and SIGUSR2 ask ALPS programs for a checkpoint; the run goes on,
+# also after a second one (the ALPS handlers are one-shot).
 run_dmrg(usr1 "" "usr1:5")
 expect("usr1_exit EQUAL 0" "SIGUSR1 ended the run:\n${usr1_output}")
 expect("usr1_energy STREQUAL reference_energy" "SIGUSR1 changed the energy")
+run_dmrg(usr1_twice "" "usr1-twice:5")
+expect("usr1_twice_exit EQUAL 0" "a second SIGUSR1 ended the run:\n${usr1_twice_output}")
+expect("usr1_twice_energy STREQUAL reference_energy" "two SIGUSR1 changed the energy")
 
 # Fail twice in a row: the second run resumes and fails again, the third finishes.
 run_dmrg(twice "" "kill:6")
@@ -114,13 +118,18 @@ expect("twice_output MATCHES \"resuming from checkpoint after sweep 2/2\"" "thir
 expect("twice_energy STREQUAL reference_energy" "twice resumed energy ${twice_energy} differs from ${reference_energy}")
 
 # A regenerated input with a new SEED, as parameter2xml and pyalps.writeInputFiles
-# write it, still resumes.
+# write it, still resumes. The run continues with the SEED it started with,
+# so it gives the reference results and its output lists that SEED.
 run_dmrg(reseed "" "kill:6")
 string(REPLACE "SEED=12345" "SEED=777" reseeded "${physics}")
 change_parameters(reseed "${reseeded}")
 run_dmrg(reseed "" "")
 expect("reseed_exit EQUAL 0" "rerun with a new SEED failed:\n${reseed_output}")
 expect("reseed_output MATCHES \"resuming from checkpoint\"" "rerun with a new SEED did not resume")
+expect("reseed_output MATCHES \"started with SEED=12345\"" "original SEED not reported:\n${reseed_output}")
+expect("reseed_energy STREQUAL reference_energy" "reseeded energy ${reseed_energy} differs from ${reference_energy}")
+file(READ "${test_dir}/reseed/parameters.task1.out.xml" reseed_xml)
+expect("reseed_xml MATCHES \"name=\\\"SEED\\\">12345<\"" "output does not list the SEED the results follow")
 
 # Changed parameters start over.
 run_dmrg(params "" "kill:4")
@@ -185,6 +194,15 @@ run_dmrg(blocked "" "")
 expect("blocked_exit EQUAL 0" "unusable checkpoint location failed the run:\n${blocked_output}")
 expect("blocked_output MATCHES \"continues without checkpoints\"" "no warning for an unusable location:\n${blocked_output}")
 expect("blocked_energy STREQUAL reference_energy" "run without checkpoints changed the energy")
+
+# A directory that is in the way but is not a checkpoint is left alone.
+file(MAKE_DIRECTORY "${test_dir}/foreign/parameters.task1.checkpoint")
+file(WRITE "${test_dir}/foreign/parameters.task1.checkpoint/notes.txt" "keep me\n")
+run_dmrg(foreign "" "")
+expect("foreign_exit EQUAL 0" "foreign directory failed the run:\n${foreign_output}")
+expect("foreign_output MATCHES \"is not a DMRG checkpoint\"" "no warning for a foreign directory:\n${foreign_output}")
+expect("EXISTS \"${foreign_checkpoint}/notes.txt\"" "contents of a foreign directory were deleted")
+expect("foreign_energy STREQUAL reference_energy" "run next to a foreign directory changed the energy")
 
 # Two runs of the same task at once (execute_process starts its commands
 # together): the one that does not hold the checkpoint goes on without it.

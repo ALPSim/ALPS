@@ -170,7 +170,7 @@ void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >&
   // warmup and the final sweep are redone after a failure
   if (!in_sweeps || S.in_warmup() || !checkpoint.active())
     return;
-  dmrg_checkpoint::Position at = {S.get_sweep(), int(S.get_dir()), int(S.get_iter()), dmtk::random_state()};
+  dmrg_checkpoint::Position at = {S.get_sweep(), int(S.get_dir()), int(S.get_iter()), dmtk::random_state(), seed};
   std::ostringstream note;
   note << "sweep " << at.sweep << "/" << num_sweeps << ", "
        << (at.dir == dmtk::LEFT2RIGHT ? "left-to-right" : "right-to-left") << " iteration " << at.iter;
@@ -587,6 +587,14 @@ void DMRGTask<value_type>::dostep()
       }
     }
     std::cout << "ALPS DMRG: resuming from checkpoint after " << note << std::endl;
+    // the results follow the SEED the checkpoint was started with, so the
+    // output lists that one
+    if (at.seed != seed) {
+      std::cout << "ALPS DMRG: the checkpoint was started with SEED=" << at.seed
+                << ", which this run continues with instead of SEED=" << seed << std::endl;
+      seed = at.seed;
+      parms["SEED"] = seed;
+    }
     dmtk::random_state() = at.random_state;
     S.resume(sweep, dir, iter);
   } else if(start_sweep != 0) {

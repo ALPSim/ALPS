@@ -40,9 +40,9 @@ const char* const meta_magic = "ALPS DMRG checkpoint 1";
 // checkpoint is taken to be what makes them fail
 const int max_resume_attempts = 2;
 
-// Last committed iteration of a regular sweep, and the state of the Lanczos
-// start vector generator after it.
-struct Position { int sweep; int dir; int iter; long random_state; };
+// Last committed iteration of a regular sweep, the state of the Lanczos
+// start vector generator after it, and the SEED the run started with.
+struct Position { int sweep; int dir; int iter; long random_state; long seed; };
 
 typedef std::map<std::string, std::vector<double> > Series;
 
@@ -100,7 +100,7 @@ inline std::string write_progress(const Position& at, const std::string& note, c
 {
   std::ostringstream out;
   out << "sweep " << at.sweep << "\ndir " << at.dir << "\niter " << at.iter
-      << "\nrandom " << at.random_state << "\nnote " << note << "\nseries " << series.size() << "\n";
+      << "\nrandom " << at.random_state << "\nseed " << at.seed << "\nnote " << note << "\nseries " << series.size() << "\n";
   char buf[32];
   for (const auto& s : series) {
     out << s.first << "\n" << s.second.size();
@@ -120,7 +120,7 @@ inline bool read_progress(const std::string& record, Position& at, std::string& 
   std::size_t count;
   if (!(in >> word >> at.sweep) || word != "sweep" || !(in >> word >> at.dir) || word != "dir"
       || !(in >> word >> at.iter) || word != "iter" || !(in >> word >> at.random_state) || word != "random"
-      || !(in >> word) || word != "note")
+      || !(in >> word >> at.seed) || word != "seed" || !(in >> word) || word != "note")
     return false;
   in.ignore(1);
   std::getline(in, note);
@@ -158,6 +158,23 @@ inline bool read_meta(const fs::path& entry, std::string& fingerprint)
   return true;
 }
 
+// The ALPS handlers of SIGUSR1 and SIGUSR2 are one-shot: a second signal
+// would kill the run. While checkpoints are kept, a handler that is not
+// one-shot passes each of them on to the ALPS one.
+typedef void (*signal_handler)(int);
+
+inline signal_handler& alps_user_handler(int signal)
+{
+  static signal_handler handlers[2] = {0, 0};
+  return handlers[signal == SIGUSR1 ? 0 : 1];
+}
+
+extern "C" inline void forward_user_signal(int signal)
+{
+  signal_handler handler = alps_user_handler(signal);
+  if (handler) handler(signal);
+}
+
 class Cache {
 public:
   Cache() {}
@@ -181,6 +198,11 @@ public:
     fingerprint_ = fingerprint;
     try {
       entry_ = location(task_file, fingerprint_);
+      if (!ours(entry_)) {
+        std::cerr << "ALPS DMRG: " << entry_.string() << " exists and is not a DMRG checkpoint; "
+                     "this run continues without checkpoints." << std::endl;
+        return false;
+      }
       fs::create_directories(entry_);
       lock_fd_ = ::open((entry_ / "lock").c_str(), O_RDWR | O_CREAT, 0644);
       if (lock_fd_ < 0)
@@ -229,6 +251,7 @@ public:
     }
     std::cout << "ALPS DMRG checkpoint files will be written to " << entry_.string() << std::endl;
     active_ = true;
+    forward_signals();
     return true;
   }
 
@@ -240,6 +263,7 @@ public:
     dmtk::tmp_files.commit(record);
     record_ = record;
     simulate_failure(false);
+    simulate_signals();
     // The scheduler only looks at signals between tasks. SIGUSR1 and SIGUSR2
     // ask for a checkpoint, which the commit just made.
     typedef alps::scheduler::SignalHandler Signals;
@@ -279,6 +303,51 @@ public:
   }
 
 private:
+  // A directory this code may clear: absent, or holding a meta file, or only
+  // what open() writes before the meta file.
+  static bool ours(const fs::path& entry)
+  {
+    if (!fs::exists(entry) || fs::exists(entry / "meta"))
+      return true;
+    if (!fs::is_directory(entry))
+      return false;
+    for (fs::directory_iterator it(entry), end; it != end; ++it) {
+      std::string name = it->path().filename().string();
+      if (name != "lock" && name != "meta.tmp")
+        return false;
+    }
+    return true;
+  }
+
+  static const int* user_signals() { static const int signals[2] = {SIGUSR1, SIGUSR2}; return signals; }
+
+  void forward_signals()
+  {
+    for (int i = 0; i < 2; ++i) {
+      int signal = user_signals()[i];
+      saved_[i] = ::sigaction(signal, 0, &actions_[i]) == 0 && !(actions_[i].sa_flags & SA_SIGINFO)
+        && actions_[i].sa_handler != SIG_DFL && actions_[i].sa_handler != SIG_IGN;
+      if (!saved_[i]) continue;
+      alps_user_handler(signal) = actions_[i].sa_handler;
+      struct sigaction forward;
+      std::memset(&forward, 0, sizeof(forward));
+      sigemptyset(&forward.sa_mask);
+      forward.sa_flags = SA_RESTART;
+      forward.sa_handler = &forward_user_signal;
+      ::sigaction(signal, &forward, 0);
+    }
+  }
+
+  // Back to the ALPS handlers, armed again.
+  void restore_signals()
+  {
+    for (int i = 0; i < 2; ++i)
+      if (saved_[i]) {
+        ::sigaction(user_signals()[i], &actions_[i], 0);
+        saved_[i] = false;
+      }
+  }
+
   // Count a run resuming from the last commit; false once max_resume_attempts
   // runs have done so without committing again.
   bool count_attempt()
@@ -315,6 +384,7 @@ private:
 
   void release()
   {
+    restore_signals();
     if (lock_fd_ >= 0) {
       ::flock(lock_fd_, LOCK_UN);
       ::close(lock_fd_);
@@ -325,7 +395,7 @@ private:
   // ALPS_DMRG_CHECKPOINT_TEST=<action>:<n> fails the n-th commit of this
   // process for the tests: kill-staged (SIGKILL before the commit), or kill,
   // throw, term (SIGTERM) or usr1 (SIGUSR1) after it; sleep holds the
-  // checkpoint for 3 seconds.
+  // checkpoint for 3 seconds. See also simulate_signals.
   void simulate_failure(bool before_commit) const
   {
     const char* test = std::getenv("ALPS_DMRG_CHECKPOINT_TEST");
@@ -345,6 +415,15 @@ private:
     if (action == "sleep") ::sleep(3);
   }
 
+  // usr1-twice:<n> raises SIGUSR1 twice after commit n, before either is seen.
+  void simulate_signals() const
+  {
+    const char* test = std::getenv("ALPS_DMRG_CHECKPOINT_TEST");
+    if (!test || std::strncmp(test, "usr1-twice:", 11) != 0 || std::atoi(test + 11) != commits_) return;
+    std::raise(SIGUSR1);
+    std::raise(SIGUSR1);
+  }
+
   bool enabled_ = true;
   bool active_ = false;
   fs::path entry_;
@@ -352,6 +431,8 @@ private:
   std::string record_;
   int lock_fd_ = -1;
   int commits_ = 0;
+  struct sigaction actions_[2];
+  bool saved_[2] = {false, false};
 };
 
 } // namespace dmrg_checkpoint
