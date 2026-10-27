@@ -5,6 +5,7 @@
 #include "dmtk/dmtk.h"
 #include <cstring>
 #include <new>
+#include <stdexcept>
 
 namespace {
 
@@ -42,17 +43,18 @@ TEST(DmrgSignals, DefaultConstructedSignalEmitsNothing)
   EXPECT_TRUE(signal.emit());
 }
 
-TEST(DmrgSignals, UnknownNameConnectsNothing)
+TEST(DmrgSignals, UnknownNameThrowsOnConnect)
 {
   System S;
   Calls calls = {0, false};
-  S.signal_connect(record, std::string("NO_SUCH_SIGNAL"), &calls);
+  EXPECT_THROW(S.signal_connect(record, std::string("NO_SUCH_SIGNAL"), &calls),
+               std::invalid_argument);
   // get_signal_id() returns -1 here; it must not become a size_t id.
   EXPECT_TRUE(S.signal_emit(static_cast<size_t>(-1)));
   EXPECT_EQ(calls.count, 0);
 }
 
-TEST(DmrgSignals, UnknownIdConnectsNothing)
+TEST(DmrgSignals, UnknownIdThrowsOnConnect)
 {
   // signal_id() returns -1 for an unknown name, which the size_t overloads
   // see as SIZE_MAX.
@@ -60,7 +62,8 @@ TEST(DmrgSignals, UnknownIdConnectsNothing)
   Calls calls = {0, false};
   const int id = S.signal_id("NO_SUCH_SIGNAL");
   ASSERT_EQ(id, -1);
-  S.signal_connect(record, static_cast<size_t>(id), &calls);
+  EXPECT_THROW(S.signal_connect(record, static_cast<size_t>(id), &calls),
+               std::invalid_argument);
   EXPECT_TRUE(S.signal_emit(static_cast<size_t>(id)));
   EXPECT_EQ(calls.count, 0);
   EXPECT_EQ(S.signal_description(static_cast<size_t>(id)), "");

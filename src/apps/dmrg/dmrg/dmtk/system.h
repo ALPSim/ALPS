@@ -20,9 +20,11 @@
 #include <iostream>
 #include <iosfwd>
 #include <list>
+#include <stdexcept>
 #include <string>
 #include <iomanip>
 #include <math.h>
+#include <boost/throw_exception.hpp>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -181,7 +183,6 @@ class System
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_START_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_MEASURE"));
-        _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_SWEEP"));
     }
     int get_signal_id(std::string signal_id){
          int n = 0;
@@ -828,7 +829,8 @@ class System
 
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, size_t signal_id, void *data)
       {
-         if(signal_id >= _signal_id.size()) return *this;   // unknown signal: nothing to connect
+         if(signal_id >= _signal_id.size())
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal id"));
          Signal<System<T> > signal(handler, this, signal_id, data);
          this->handlers.push_back(signal);
          return *this;
@@ -836,7 +838,9 @@ class System
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
       {
          int n = this->get_signal_id(signal_id);
-         return n < 0 ? *this : this->signal_connect(handler, static_cast<size_t>(n), data);
+         if(n < 0)
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal " + signal_id));
+         return this->signal_connect(handler, static_cast<size_t>(n), data);
       }
 
     bool signal_emit(size_t signal_id)
