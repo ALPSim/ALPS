@@ -234,6 +234,20 @@ inline double quickran(long & idum)
     return double(idum) * scale;
 }
 
+// State of quickran for randomize(), shared by all vectors and matrices so
+// that seed_random() makes a run reproducible
+inline long & random_state()
+{
+    static long idum = 0;
+    return idum;
+}
+
+inline void seed_random(long seed)
+{
+    const long im = 134456;
+    random_state() = ((seed % im) + im) % im;
+}
+
 } // namespace dmtk
 
 #endif // __DMTK_ARRAY_UTIL_H__
