@@ -25,3 +25,17 @@ add_executable(spinmc_evaluate spinmc_evaluate.C)
 target_link_libraries(spinmc PRIVATE spinmc_impl)
 target_link_libraries(spinmc_evaluate PRIVATE spinmc_impl)
 alps_install_applications(spinmc spinmc_evaluate)
+
+if(ALPS_BUILD_TESTING AND TARGET parameter2xml AND TARGET convert2xml)
+  add_test(NAME spinmc_ising_exact
+    COMMAND ${CMAKE_COMMAND}
+      "-Dspinmc=$<TARGET_FILE:spinmc>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dconvert2xml=$<TARGET_FILE:convert2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dhelpers=${PROJECT_SOURCE_DIR}/cmake/ALPSStatisticalTest.cmake"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/ising-exact"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/ising_exact.cmake")
+  set_tests_properties(spinmc_ising_exact PROPERTIES LABELS "spinmc" TIMEOUT 300
+    ENVIRONMENT "OMP_NUM_THREADS=1")
+endif()

@@ -23,3 +23,17 @@ add_executable(qwl_evaluate qwl_evaluate.C)
 target_link_libraries(qwl PRIVATE ALPS::alps)
 target_link_libraries(qwl_evaluate PRIVATE ALPS::alps)
 alps_install_applications(qwl qwl_evaluate)
+
+if(ALPS_BUILD_TESTING AND TARGET parameter2xml)
+  add_test(NAME qwl_heisenberg_exact
+    COMMAND ${CMAKE_COMMAND}
+      "-Dqwl=$<TARGET_FILE:qwl>"
+      "-Dqwl_evaluate=$<TARGET_FILE:qwl_evaluate>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dhelpers=${PROJECT_SOURCE_DIR}/cmake/ALPSStatisticalTest.cmake"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/heisenberg-exact"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/heisenberg_exact.cmake")
+  set_tests_properties(qwl_heisenberg_exact PROPERTIES LABELS "qwl" TIMEOUT 600
+    ENVIRONMENT "OMP_NUM_THREADS=1")
+endif()

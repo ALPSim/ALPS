@@ -21,3 +21,16 @@ add_executable(loop loop.C loop_custom.C loop_model.C path_integral.C sse.C)
 target_include_directories(loop PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loop PRIVATE ALPS::alps)
 alps_install_applications(loop)
+
+if(ALPS_BUILD_TESTING AND TARGET parameter2xml)
+  add_test(NAME loop_heisenberg_exact
+    COMMAND ${CMAKE_COMMAND}
+      "-Dloop=$<TARGET_FILE:loop>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dhelpers=${PROJECT_SOURCE_DIR}/cmake/ALPSStatisticalTest.cmake"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/heisenberg-exact"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/heisenberg_exact.cmake")
+  set_tests_properties(loop_heisenberg_exact PROPERTIES LABELS "loop" TIMEOUT 300
+    ENVIRONMENT "OMP_NUM_THREADS=1")
+endif()
