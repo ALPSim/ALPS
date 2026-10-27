@@ -227,11 +227,9 @@ void DMRGTask<value_type>::define_parameters(alps::params& parameters)
     parameters.define<int>("NUMSTATES", "states kept in each half sweep");
   if (parameters.supplied("TEMP_DIRECTORY"))
     parameters.define<std::string>("TEMP_DIRECTORY", "directory for scratch files");
-  parameters.define<bool>("CHECKPOINT", true, "keep a checkpoint of a failed run to resume from")
-            .define<double>("CHECKPOINT_MAX_SIZE", dmrg_checkpoint::default_max_size_gb,
-                            "size in GB above which the oldest checkpoints are deleted");
-  if (parameters.supplied("CHECKPOINT_DIRECTORY"))
-    parameters.define<std::string>("CHECKPOINT_DIRECTORY", "directory for checkpoints");
+  // a run given TEMP_DIRECTORY keeps its files there, as before checkpoints
+  parameters.define<bool>("CHECKPOINT", !parameters.supplied("TEMP_DIRECTORY"),
+                          "keep the files of a failed run next to the task files to resume from");
 }
 
 template<class value_type>
@@ -543,7 +541,7 @@ void DMRGTask<value_type>::dostep()
   if(verbose)
     cout << hami.description() << endl;
   if (checkpoint.enabled()) {
-    if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION)))
+    if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION), infilename))
       use_temporary_directory();
     else if (temp_directory)
       std::cout << "ALPS DMRG: TEMP_DIRECTORY is not used while checkpoints are on; set CHECKPOINT=0 to use it" << std::endl;

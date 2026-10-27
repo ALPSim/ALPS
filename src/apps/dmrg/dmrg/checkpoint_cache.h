@@ -3,11 +3,10 @@
 #ifndef ALPS_DMRG_CHECKPOINT_CACHE_H
 #define ALPS_DMRG_CHECKPOINT_CACHE_H
 
-// Checkpoint cache for DMRG runs. Each run writes its files to
-// <CHECKPOINT_DIRECTORY>/<key>/ from the start; a run that fails, by any
-// means, leaves the entry behind and a rerun with the same parameters resumes
-// from it. Entries are deleted after a successful run, 72 hours after their
-// last update, or oldest first when the cache exceeds CHECKPOINT_MAX_SIZE.
+// Checkpoints of DMRG runs. A task writes its files to <task>.checkpoint/
+// next to its task files from the start; a run that fails, by any means,
+// leaves the directory behind and rerunning the job resumes from it. It is
+// removed after a successful run.
 
 #include "dmtk/filelist.h"
 #include <alps/parameter.h>
@@ -15,29 +14,21 @@
 #include <alps/scheduler/signal.hpp>
 #include <boost/filesystem.hpp>
 #include <algorithm>
-#include <cctype>
 #include <cerrno>
-#include <chrono>
-#include <condition_variable>
 #include <csignal>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <ctime>
+#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <map>
-#include <mutex>
 #include <sstream>
 #include <string>
-#include <thread>
 #include <utility>
 #include <vector>
 #include <fcntl.h>
-#include <poll.h>
 #include <sys/file.h>
-#include <sys/statvfs.h>
 #include <unistd.h>
 
 namespace dmrg_checkpoint {
@@ -45,19 +36,9 @@ namespace dmrg_checkpoint {
 namespace fs = boost::filesystem;
 
 const char* const meta_magic = "ALPS DMRG checkpoint 1";
-const double ttl_hours = 72;
-const double default_max_size_gb = 10;
-const double min_free_gb = 1;
-// flock may not see a lock taken on another host of a network filesystem, so
-// a run touches its meta file this often and an entry of another host counts
-// as live until it has not been touched for other_host_live_hours
-const int heartbeat_seconds = 300;
-const double other_host_live_hours = 1;
 // reruns that may fail to commit anything after resuming before the
 // checkpoint is taken to be what makes them fail
 const int max_resume_attempts = 2;
-// how long the prompt for a checkpoint location waits for an answer
-const int prompt_timeout_seconds = 120;
 
 // Last committed iteration of a regular sweep, and the state of the Lanczos
 // start vector generator after it.
@@ -65,79 +46,13 @@ struct Position { int sweep; int dir; int iter; long random_state; };
 
 typedef std::map<std::string, std::vector<double> > Series;
 
-// Host name, with the machine id where there is one: containers on different
-// nodes can share a host name.
-inline std::string hostname()
-{
-  char buf[256] = {0};
-  gethostname(buf, sizeof(buf) - 1);
-  std::string host(buf);
-  for (const char* file : {"/etc/machine-id", "/var/lib/dbus/machine-id"}) {
-    std::ifstream in(file);
-    std::string id;
-    if (in >> id && !id.empty())
-      return host + ":" + id;
-  }
-  return host;
-}
-
-// Expand a leading ~ and $NAME or ${NAME}, which a parameter file passes on
-// literally. False if a variable is not set.
-inline bool expand_path(const std::string& path, std::string& result, std::string& error)
-{
-  result.clear();
-  std::string::size_type i = 0;
-  if (!path.empty() && path[0] == '~' && (path.size() == 1 || path[1] == '/')) {
-    const char* home = std::getenv("HOME");
-    if (!home || !*home) {
-      error = "HOME is not set";
-      return false;
-    }
-    result = home;
-    i = 1;
-  }
-  while (i < path.size()) {
-    if (path[i] != '$') {
-      result += path[i++];
-      continue;
-    }
-    std::string name;
-    std::string::size_type j = i + 1;
-    if (j < path.size() && path[j] == '{') {
-      std::string::size_type close = path.find('}', j);
-      if (close == std::string::npos) {
-        error = "unterminated ${ in " + path;
-        return false;
-      }
-      name = path.substr(j + 1, close - j - 1);
-      j = close + 1;
-    } else {
-      while (j < path.size() && (std::isalnum(static_cast<unsigned char>(path[j])) || path[j] == '_'))
-        name += path[j++];
-    }
-    if (name.empty()) {
-      result += path[i++];
-      continue;
-    }
-    const char* value = std::getenv(name.c_str());
-    if (!value) {
-      error = "environment variable " + name + " is not set";
-      return false;
-    }
-    result += value;
-    i = j;
-  }
-  return true;
-}
-
 // Everything that makes a checkpoint invalid for another run. Parameters that
 // only affect where or how results are written are left out, and so is SEED:
 // parameter2xml and pyalps.writeInputFiles choose a new one on each call. A
 // resumed run continues with the generator state of the run it resumes.
 inline std::string fingerprint(const alps::Parameters& parms, const std::string& hamiltonian, const char* version)
 {
-  static const char* const ignored[] = {"CHECKPOINT", "CHECKPOINT_DIRECTORY", "CHECKPOINT_MAX_SIZE",
-                                        "TEMP_DIRECTORY", "VERBOSE", "SAVE_MPS", "SEED"};
+  static const char* const ignored[] = {"CHECKPOINT", "TEMP_DIRECTORY", "VERBOSE", "SAVE_MPS", "SEED"};
   std::vector<std::pair<std::string, std::string> > values;
   for (alps::Parameters::const_iterator it = parms.begin(); it != parms.end(); ++it) {
     if (std::find(std::begin(ignored), std::end(ignored), it->key()) != std::end(ignored))
@@ -153,7 +68,6 @@ inline std::string fingerprint(const alps::Parameters& parms, const std::string&
   return out.str();
 }
 
-// FNV-1a; the full fingerprint stored in the entry is what is compared.
 inline std::string key(const std::string& fingerprint)
 {
   std::uint64_t h = 14695981039346656037ull;
@@ -164,6 +78,22 @@ inline std::string key(const std::string& fingerprint)
   char buf[17];
   std::snprintf(buf, sizeof(buf), "%016llx", static_cast<unsigned long long>(h));
   return buf;
+}
+
+// <dir>/<base>.checkpoint for the task file <dir>/<base>.in.xml or
+// <base>.out.xml; a task without a file uses the working directory.
+inline fs::path location(const fs::path& task_file, const std::string& fingerprint)
+{
+  if (task_file.empty())
+    return fs::current_path() / ("dmrg-" + key(fingerprint) + ".checkpoint");
+  fs::path file = fs::absolute(task_file);
+  std::string base = file.filename().string();
+  for (const char* suffix : {".xml", ".h5", ".in", ".out"}) {
+    std::size_t n = std::strlen(suffix);
+    if (base.size() > n && base.compare(base.size() - n, n, suffix) == 0)
+      base.erase(base.size() - n);
+  }
+  return file.parent_path() / (base + ".checkpoint");
 }
 
 inline std::string write_progress(const Position& at, const std::string& note, const Series& series)
@@ -214,90 +144,18 @@ inline bool read_progress(const std::string& record, Position& at, std::string& 
   return true;
 }
 
-struct Meta {
-  bool valid = false;
-  std::string host;
-  long pid = 0;
-  std::string fingerprint;
-};
-
-// The first line marks a directory as an entry; nothing else is ever deleted.
-inline Meta read_meta(const fs::path& entry)
+// The fingerprint of the run that wrote the checkpoint; false if there is no
+// readable meta file of this version.
+inline bool read_meta(const fs::path& entry, std::string& fingerprint)
 {
-  Meta meta;
   std::ifstream in((entry / "meta").string().c_str(), std::ios::in | std::ios::binary);
-  std::string line, word;
-  if (!std::getline(in, line) || line != meta_magic)
-    return meta;
-  if (!(in >> word >> meta.host) || word != "host" || !(in >> word >> meta.pid) || word != "pid")
-    return meta;
-  in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  if (!std::getline(in, line) || line != "fingerprint")
-    return meta;
+  std::string line;
+  if (!std::getline(in, line) || line != meta_magic || !std::getline(in, line) || line != "fingerprint")
+    return false;
   std::ostringstream rest;
   rest << in.rdbuf();
-  meta.fingerprint = rest.str();
-  meta.valid = true;
-  return meta;
-}
-
-inline std::time_t heartbeat(const fs::path& entry)
-{
-  boost::system::error_code error;
-  std::time_t t = fs::last_write_time(entry / "meta", error);
-  if (error) t = 0;
-  std::time_t progress = fs::last_write_time(entry / "progress", error);
-  return error ? t : std::max(t, progress);
-}
-
-inline std::uintmax_t entry_size(const fs::path& entry)
-{
-  std::uintmax_t total = 0;
-  boost::system::error_code error;
-  for (fs::recursive_directory_iterator it(entry, error), end; !error && it != end; it.increment(error)) {
-    std::uintmax_t size = fs::file_size(it->path(), error);
-    if (!error) total += size;
-    error.clear();
-  }
-  return total;
-}
-
-// Held by a running process, or that process is seen alive on this host.
-inline bool live(const fs::path& entry, const Meta& meta, std::time_t now)
-{
-  bool local = meta.host == hostname();
-  int fd = ::open((entry / "lock").c_str(), O_RDWR);
-  if (fd >= 0) {
-    int locked = ::flock(fd, LOCK_EX | LOCK_NB);
-    int error = errno;
-    ::close(fd);
-    if (locked != 0 && error == EWOULDBLOCK)
-      return true;
-    if (locked == 0 && local)
-      return false;
-  }
-  if (local)
-    return meta.pid > 0 && (::kill(static_cast<pid_t>(meta.pid), 0) == 0 || errno == EPERM);
-  return std::difftime(now, heartbeat(entry)) < other_host_live_hours * 3600;
-}
-
-inline std::string format_time(std::time_t t)
-{
-  char buf[32];
-  std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M", std::localtime(&t));
-  return buf;
-}
-
-inline fs::path default_directory()
-{
-  const char* xdg = std::getenv("XDG_CACHE_HOME");
-  if (xdg && *xdg && fs::path(xdg).is_absolute())
-    return fs::path(xdg) / "alps" / "dmrg";
-  const char* home = std::getenv("HOME");
-  if (home && *home)
-    return fs::path(home) / ".cache" / "alps" / "dmrg";
-  // per user: another user's directory is not writable
-  return fs::temp_directory_path() / ("alps-dmrg-" + std::to_string(::getuid()));
+  fingerprint = rest.str();
+  return true;
 }
 
 class Cache {
@@ -307,61 +165,43 @@ public:
   Cache& operator=(const Cache&) = delete;
   ~Cache() { release(); }
 
-  void configure(const alps::params& settings)
-  {
-    enabled_ = settings["CHECKPOINT"].as<bool>();
-    root_error_.clear();
-    if (settings.exists("CHECKPOINT_DIRECTORY")) {
-      std::string dir;
-      if (expand_path(settings["CHECKPOINT_DIRECTORY"].as<std::string>(), dir, root_error_) && !dir.empty())
-        root_ = fs::absolute(dir);
-      else if (root_error_.empty())
-        root_error_ = "CHECKPOINT_DIRECTORY is empty";
-    } else {
-      root_ = default_directory();
-    }
-    max_size_ = settings["CHECKPOINT_MAX_SIZE"].as<double>() * 1e9;
-  }
+  void configure(const alps::params& settings) { enabled_ = settings["CHECKPOINT"].as<bool>(); }
 
   bool enabled() const { return enabled_; }
   bool active() const { return active_; }
+  const fs::path& directory() const { return entry_; }
   // Progress record of the last commit, empty if none.
   const std::string& record() const { return record_; }
 
-  // Take the entry for this run and point dmtk::tmp_files at it. False if the
-  // run has to go on without checkpoints; a checkpoint problem never fails a run.
-  bool open(const std::string& fingerprint)
+  // Take the checkpoint of the task in task_file and point dmtk::tmp_files at
+  // it. False if the run has to go on without checkpoints; a checkpoint
+  // problem never fails a run.
+  bool open(const std::string& fingerprint, const fs::path& task_file)
   {
     fingerprint_ = fingerprint;
-    if (!root_error_.empty()) {
-      std::cerr << "ALPS DMRG: cannot use CHECKPOINT_DIRECTORY: " << root_error_ << std::endl;
-      if (!choose_location())
-        return false;
-    } else if (!usable(root_) && !choose_location()) {
-      return false;
-    }
     try {
-      collect_garbage();
-    } catch (const std::exception& e) {
-      std::cerr << "ALPS DMRG: checkpoint cleanup failed: " << e.what() << std::endl;
-    }
-    entry_ = root_ / key(fingerprint_);
-    try {
+      entry_ = location(task_file, fingerprint_);
       fs::create_directories(entry_);
       lock_fd_ = ::open((entry_ / "lock").c_str(), O_RDWR | O_CREAT, 0644);
       if (lock_fd_ < 0)
-        throw std::runtime_error("cannot create " + (entry_ / "lock").string());
-      if (::flock(lock_fd_, LOCK_EX | LOCK_NB) != 0 && errno == EWOULDBLOCK) {
-        std::cerr << "ALPS DMRG: another run with the same parameters is using " << entry_.string()
-                  << "; this run continues without checkpoints." << std::endl;
-        release();
-        return false;
+        throw std::runtime_error(std::string("cannot create the lock file: ") + std::strerror(errno));
+      if (::flock(lock_fd_, LOCK_EX | LOCK_NB) != 0) {
+        if (errno == EWOULDBLOCK) {
+          std::cerr << "ALPS DMRG: another run of this task is using " << entry_.string()
+                    << "; this run continues without checkpoints." << std::endl;
+          release();
+          return false;
+        }
+        // some network filesystems have no flock
+        std::cerr << "ALPS DMRG: cannot lock " << (entry_ / "lock").string() << " (" << std::strerror(errno)
+                  << "); do not run this task twice at the same time." << std::endl;
       }
-      Meta meta = read_meta(entry_);
-      if (!meta.valid || meta.fingerprint != fingerprint_) {
+      std::string written_by;
+      bool readable = read_meta(entry_, written_by);
+      if (!readable || written_by != fingerprint_) {
         if (fs::exists(entry_ / "meta"))
           std::cout << "ALPS DMRG: discarding checkpoint " << entry_.string() << ": "
-                    << (meta.valid ? "it belongs to other parameters" : "unreadable or from another version") << std::endl;
+                    << (readable ? "it belongs to other parameters" : "unreadable or from another version") << std::endl;
         clear_entry();
       }
       write_meta();
@@ -389,7 +229,6 @@ public:
     }
     std::cout << "ALPS DMRG checkpoint files will be written to " << entry_.string() << std::endl;
     active_ = true;
-    start_heartbeat();
     return true;
   }
 
@@ -413,9 +252,10 @@ public:
   {
     if (!active_) return;
     active_ = false;
-    stop_heartbeat();
     boost::system::error_code error;
     fs::remove_all(entry_, error);
+    if (error)
+      std::cerr << "ALPS DMRG: could not remove checkpoint " << entry_.string() << ": " << error.message() << std::endl;
     release();
   }
 
@@ -423,115 +263,22 @@ public:
   {
     if (!active_) return;
     active_ = false;
-    stop_heartbeat();
+    release();
     Position at;
     std::string note;
     Series series;
     if (!read_progress(record_, at, note, series)) {
       boost::system::error_code error;
       fs::remove_all(entry_, error);
-      release();
       std::cerr << "DMRG run failed before its first checkpoint; there is nothing to resume." << std::endl;
       return;
     }
-    release();
-    std::time_t expiry = heartbeat(entry_) + static_cast<std::time_t>(ttl_hours * 3600);
-    std::cerr << "DMRG run failed. Checkpoint kept at " << entry_.string() << " (" << note << ").\n"
-              << "Rerunning with the same parameters will resume automatically.\n"
-              << "This checkpoint will be deleted after " << format_time(expiry)
-              << " (72 hours after its last update)." << std::endl;
+    std::cerr << "DMRG run failed. Checkpoint kept in " << entry_.string() << " (" << note << ").\n"
+              << "Rerunning this job with the same parameters resumes from it; "
+                 "delete the directory to start over." << std::endl;
   }
 
 private:
-  bool usable(const fs::path& dir) const
-  {
-    boost::system::error_code error;
-    fs::create_directories(dir, error);
-    if (error) {
-      std::cerr << "ALPS DMRG: cannot create checkpoint directory " << dir.string() << ": " << error.message() << std::endl;
-      return false;
-    }
-    struct statvfs info;
-    if (::statvfs(dir.c_str(), &info) == 0) {
-      double free_gb = static_cast<double>(info.f_bavail) * info.f_frsize / 1e9;
-      if (free_gb < min_free_gb) {
-        std::cerr << "ALPS DMRG: only " << free_gb << " GB free in " << dir.string() << " for checkpoints." << std::endl;
-        return false;
-      }
-    }
-    return true;
-  }
-
-  static void continue_without()
-  {
-    std::cerr << "ALPS DMRG: continuing without checkpoints, so a failed run cannot be resumed. "
-                 "Set CHECKPOINT_DIRECTORY to a location with more space (for example scratch), "
-                 "or CHECKPOINT=0 to turn checkpoints off." << std::endl;
-  }
-
-  // A line from the terminal, or false after prompt_timeout_seconds or at its end.
-  static bool read_answer(std::string& answer)
-  {
-    struct pollfd in = {STDIN_FILENO, POLLIN, 0};
-    int ready;
-    do {
-      ready = ::poll(&in, 1, prompt_timeout_seconds * 1000);
-    } while (ready < 0 && errno == EINTR);
-    if (ready <= 0) {
-      std::cerr << "\nALPS DMRG: no answer in " << prompt_timeout_seconds << " seconds." << std::endl;
-      return false;
-    }
-    return static_cast<bool>(std::getline(std::cin, answer));
-  }
-
-  // Ask where checkpoints should go when someone is at the terminal: not in a
-  // batch job, where nobody answers, nor in the background, where reading the
-  // terminal stops the process.
-  bool choose_location()
-  {
-    if (!::isatty(STDIN_FILENO) || !::isatty(STDERR_FILENO) || ::tcgetpgrp(STDIN_FILENO) != ::getpgrp()) {
-      continue_without();
-      return false;
-    }
-    for (;;) {
-      std::cerr << "Where should DMRG checkpoints go?\n"
-                << "  1) the current directory (" << fs::current_path().string() << ")\n"
-                << "  2) another directory\n"
-                << "  3) nowhere: continue without checkpoints\n> " << std::flush;
-      std::string answer;
-      if (!read_answer(answer) || answer == "3") {
-        continue_without();
-        return false;
-      }
-      fs::path dir;
-      if (answer == "1") {
-        dir = fs::current_path();
-      } else if (answer == "2") {
-        std::cerr << "Directory: " << std::flush;
-        if (!read_answer(answer)) {
-          continue_without();
-          return false;
-        }
-        std::string expanded, error;
-        if (answer.empty())
-          continue;
-        if (!expand_path(answer, expanded, error)) {
-          std::cerr << "ALPS DMRG: " << error << std::endl;
-          continue;
-        }
-        dir = fs::absolute(expanded);
-      } else {
-        continue;
-      }
-      if (usable(dir)) {
-        root_ = dir;
-        root_error_.clear();
-        std::cerr << "To skip this question, set CHECKPOINT_DIRECTORY=\"" << dir.string() << "\"" << std::endl;
-        return true;
-      }
-    }
-  }
-
   // Count a run resuming from the last commit; false once max_resume_attempts
   // runs have done so without committing again.
   bool count_attempt()
@@ -550,75 +297,6 @@ private:
     return true;
   }
 
-  void start_heartbeat()
-  {
-    stop_heartbeat();
-    stop_ = false;
-    const fs::path meta = entry_ / "meta";
-    heartbeat_ = std::thread([this, meta]() {
-      std::unique_lock<std::mutex> lock(mutex_);
-      while (!wake_.wait_for(lock, std::chrono::seconds(heartbeat_seconds), [this]() { return stop_; })) {
-        boost::system::error_code error;
-        fs::last_write_time(meta, std::time(0), error);
-      }
-    });
-  }
-
-  void stop_heartbeat()
-  {
-    if (!heartbeat_.joinable()) return;
-    {
-      std::lock_guard<std::mutex> lock(mutex_);
-      stop_ = true;
-    }
-    wake_.notify_all();
-    heartbeat_.join();
-  }
-
-  void collect_garbage()
-  {
-    struct Candidate { std::time_t beat; std::uintmax_t size; fs::path path; };
-    std::vector<fs::path> entries;
-    for (fs::directory_iterator it(root_), end; it != end; ++it)
-      if (fs::is_directory(it->path()) && read_meta(it->path()).valid)
-        entries.push_back(it->path());
-
-    const std::time_t now = std::time(0);
-    const std::string current = key(fingerprint_);
-    std::vector<Candidate> evictable;
-    std::uintmax_t total = 0;
-    for (const fs::path& entry : entries) {
-      std::uintmax_t size = entry_size(entry);
-      total += size;
-      if (entry.filename().string() == current || live(entry, read_meta(entry), now))
-        continue;
-      std::time_t beat = heartbeat(entry);
-      if (std::difftime(now, beat) > ttl_hours * 3600) {
-        remove_entry(entry, "not updated for 72 hours");
-        total -= size;
-      } else {
-        evictable.push_back(Candidate{beat, size, entry});
-      }
-    }
-    std::sort(evictable.begin(), evictable.end(),
-              [](const Candidate& a, const Candidate& b) { return a.beat < b.beat; });
-    for (const Candidate& c : evictable) {
-      if (total <= max_size_) break;
-      remove_entry(c.path, "checkpoint cache larger than CHECKPOINT_MAX_SIZE");
-      total -= c.size;
-    }
-  }
-
-  static void remove_entry(const fs::path& entry, const char* reason)
-  {
-    boost::system::error_code error;
-    fs::remove_all(entry, error);
-    if (error)
-      std::cerr << "ALPS DMRG: could not remove checkpoint " << entry.string() << ": " << error.message() << std::endl;
-    else
-      std::cout << "ALPS DMRG: removed checkpoint " << entry.string() << " (" << reason << ")" << std::endl;
-  }
-
   // Keep the lock file: removing it would let another run lock a new one.
   void clear_entry()
   {
@@ -632,14 +310,11 @@ private:
 
   void write_meta()
   {
-    std::ostringstream out;
-    out << meta_magic << "\nhost " << hostname() << "\npid " << ::getpid() << "\nfingerprint\n" << fingerprint_;
-    dmtk::detail::write_atomically(entry_ / "meta", out.str());
+    dmtk::detail::write_atomically(entry_ / "meta", std::string(meta_magic) + "\nfingerprint\n" + fingerprint_);
   }
 
   void release()
   {
-    stop_heartbeat();
     if (lock_fd_ >= 0) {
       ::flock(lock_fd_, LOCK_UN);
       ::close(lock_fd_);
@@ -649,7 +324,8 @@ private:
 
   // ALPS_DMRG_CHECKPOINT_TEST=<action>:<n> fails the n-th commit of this
   // process for the tests: kill-staged (SIGKILL before the commit), or kill,
-  // throw, term (SIGTERM) or usr1 (SIGUSR1) after it.
+  // throw, term (SIGTERM) or usr1 (SIGUSR1) after it; sleep holds the
+  // checkpoint for 3 seconds.
   void simulate_failure(bool before_commit) const
   {
     const char* test = std::getenv("ALPS_DMRG_CHECKPOINT_TEST");
@@ -666,22 +342,16 @@ private:
     if (action == "throw") throw std::runtime_error("simulated DMRG failure");
     if (action == "term") std::raise(SIGTERM);
     if (action == "usr1") std::raise(SIGUSR1);
+    if (action == "sleep") ::sleep(3);
   }
 
   bool enabled_ = true;
   bool active_ = false;
-  fs::path root_;
-  std::string root_error_;
   fs::path entry_;
-  double max_size_ = default_max_size_gb * 1e9;
   std::string fingerprint_;
   std::string record_;
   int lock_fd_ = -1;
   int commits_ = 0;
-  std::thread heartbeat_;
-  std::mutex mutex_;
-  std::condition_variable wake_;
-  bool stop_ = false;
 };
 
 } // namespace dmrg_checkpoint
