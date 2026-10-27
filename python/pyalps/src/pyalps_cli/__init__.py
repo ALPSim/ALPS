@@ -18,14 +18,24 @@ NATIVE_PROGRAMS = (
     "checksign", "dirloop_sse", "dmft", "dmrg", "fulldiag", "fulldiag_evaluate",
     "hirschfye", "hybridization", "interaction", "loop", "qwl", "qwl_evaluate",
     "simplemc", "sparsediag", "spinmc", "spinmc_evaluate", "worm", "worm_evaluate",
-    "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent",
+    "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent", "alps2fcidump",
 )
-EXPORTERS = {
-    "convert2text": "QMCXML2text.xsl",
-    "plot2text": "plot2text.xsl",
-    "plot2gp": "plot2gp.xsl",
-    "plot2xmgr": "plot2xmgr.xsl",
+# The same commands and formats as the SDK's alps-xml (src/tools/xml), but
+# rendered with lxml so that wheels need no external xsltproc.
+XML_STYLES = {
+    "plot": {"text": "plot2text.xsl", "html": "ALPS.xsl", "gnuplot": "plot2gp.xsl",
+             "matplotlib": "plot2mpl.xsl", "grace": "plot2xmgr.xsl"},
+    "convert": {"text": "QMCXML2text.xsl", "html": "ALPS.xsl"},
 }
+XML_STYLES["extract"] = XML_STYLES["plot"]
+# Historical names, kept as aliases of alps-xml commands.
+EXPORTERS = {
+    "convert2text": ("convert", "text"),
+    "plot2text": ("plot", "text"),
+    "plot2gp": ("plot", "gnuplot"),
+    "plot2xmgr": ("plot", "grace"),
+}
+COMMANDS = (*NATIVE_PROGRAMS, "alps-xml", *EXPORTERS)
 
 
 def runtime_directory():
@@ -92,38 +102,105 @@ def _run(program):
         return 126
 
 
-def _transform(program, stylesheet):
-    # Import the XSLT dependency only for exporters. Native commands remain
+def _render(command, style, inputs, specification=None):
+    # Import the XSLT dependency only for XML commands. Native commands remain
     # independent of both lxml and the scientific Python stack.
-    import argparse
     from lxml import etree
 
-    parser = argparse.ArgumentParser(prog=program, description="Export ALPS XML to stdout.")
-    parser.add_argument("input", help="input XML file, or - for standard input")
-    args = parser.parse_args()
-    package = runtime_directory()
-    xml_dir = Path(os.environ.get("ALPS_XML_PATH", package / "xml"))
+    xml_dir = Path(os.environ.get("ALPS_XML_PATH", runtime_directory() / "xml")).resolve()
     # ALPS XML files can refer to a remote DTD; conversion needs only their
     # contents. Keep relative xsl:include resolution for helpers.xsl.
-    xml_parser = etree.XMLParser(load_dtd=False, resolve_entities=False, no_network=True)
+    parser = etree.XMLParser(load_dtd=False, resolve_entities=False, no_network=True)
+
+    def parse(source):
+        return etree.parse(sys.stdin.buffer if str(source) == "-" else str(source), parser)
+
+    def stylesheet(name):
+        return etree.XSLT(etree.parse(str(xml_dir / name), parser))
+
+    if command != "extract":
+        return bytes(stylesheet(style)(parse(inputs[0])))
+    archive = etree.Element("ARCHIVE")
+    for source in inputs:
+        root = parse(source).getroot()
+        if root.tag == "SIMULATION":
+            archive.append(root)
+        elif root.tag == "ARCHIVE":
+            archive.extend(root.findall("SIMULATION"))
+        else:
+            raise ValueError(f"{source}: expected SIMULATION or ARCHIVE XML")
+    if not len(archive):
+        raise ValueError("The input contains no simulations")
+    # Reparse each intermediate result, as the SDK command does with files:
+    # the stylesheets emit part of their markup as unescaped text.
+    generated = etree.fromstring(bytes(stylesheet("plot2xsl.xsl")(parse(specification))), parser)
+    # The generated stylesheet has no location; resolve its library includes
+    # against the installed resources.
+    for include in generated.findall("{http://www.w3.org/1999/XSL/Transform}include"):
+        include.set("href", (xml_dir / include.get("href")).as_uri())
+    plot = etree.fromstring(bytes(etree.XSLT(generated)(etree.ElementTree(archive))), parser)
+    return bytes(stylesheet(style)(etree.ElementTree(plot)))
+
+
+def _emit(program, command, format, inputs, specification=None, output=None):
+    from lxml import etree
+
     if hasattr(signal, "SIGPIPE"):
         signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     try:
-        source = sys.stdin.buffer if args.input == "-" else args.input
-        document = etree.parse(source, xml_parser)
-        transform = etree.XSLT(etree.parse(str(xml_dir / stylesheet), xml_parser))
-        sys.stdout.buffer.write(bytes(transform(document)))
-        sys.stdout.buffer.flush()
-    except (OSError, etree.Error) as error:
+        result = _render(command, XML_STYLES[command][format], inputs, specification)
+        # Publish output only after the transformation succeeded.
+        if output is None:
+            sys.stdout.buffer.write(result)
+            sys.stdout.buffer.flush()
+        else:
+            output.write_bytes(result)
+    except (OSError, ValueError, etree.Error) as error:
         print(f"{program}: {error}", file=sys.stderr)
         return 1
     return 0
 
 
+def _xml_tool(program):
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog=program, description="Render ALPS plots and simulation XML.")
+    commands = parser.add_subparsers(dest="command", required=True)
+    for command, help_text in (
+        ("plot", "render a plot XML file"),
+        ("convert", "render simulation or job XML"),
+        ("extract", "extract a plot from simulation or archive XML"),
+    ):
+        subparser = commands.add_parser(command, help=help_text)
+        subparser.add_argument("format", choices=XML_STYLES[command])
+        if command == "extract":
+            subparser.add_argument("specification", help="plot definition XML")
+        subparser.add_argument("input", nargs="+" if command == "extract" else None)
+        subparser.add_argument("-o", "--output", type=Path,
+                               help="write to a file instead of stdout")
+    args = parser.parse_args()
+    inputs = args.input if args.command == "extract" else [args.input]
+    return _emit(program, args.command, args.format, inputs,
+                 getattr(args, "specification", None), args.output)
+
+
+def _exporter(program):
+    import argparse
+
+    command, format = EXPORTERS[program]
+    parser = argparse.ArgumentParser(
+        prog=program, description=f"Same as 'alps-xml {command} {format}'.")
+    parser.add_argument("input", help="input XML file, or - for standard input")
+    return _emit(program, command, format, [parser.parse_args().input])
+
+
 def main():
     program = Path(sys.argv[0]).name
+    if program == "alps-xml":
+        return _xml_tool(program)
     if program in EXPORTERS:
-        return _transform(program, EXPORTERS[program])
+        return _exporter(program)
     if program in NATIVE_PROGRAMS:
         return _run(program)
     print(f"{program}: unknown ALPS command", file=sys.stderr)

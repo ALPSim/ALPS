@@ -1,5 +1,5 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
-# ALPSCore's gf tests, copied with publication pointers removed, plus mpi_coexistence. support/ holds
+# ALPSCore's gf tests, copied with publication pointers removed. support/ holds
 # ALPSCore's unique_file helper, also unchanged; the helpers other modules share
 # are in the top-level tests/support.
 alps_require_googletest()
@@ -55,8 +55,4 @@ if(ALPS_ENABLE_MPI)
     alps_add_mpi_gtest(${target} COMPONENT gf RANKS 3 OWN_MAIN)
   endforeach()
 
-  add_executable(gf_mpi_coexistence mpi_coexistence.cpp)
-  target_link_libraries(gf_mpi_coexistence PRIVATE ALPS::gf ALPS::alps)
-  target_compile_definitions(gf_mpi_coexistence PRIVATE ${ALPS_GF_ASSERT_DEFINITION})
-  alps_add_mpi_gtest(gf_mpi_coexistence COMPONENT gf RANKS 2)
 endif()

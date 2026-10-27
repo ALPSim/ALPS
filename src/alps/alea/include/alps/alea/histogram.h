@@ -27,6 +27,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 
+#include <type_traits>
 #include <vector>
 
 
@@ -167,8 +168,12 @@ inline void HistogramObservable<T>::set_range(T min, T max, T stepsize)
   min_=min;
   max_=max;
   stepsize_=stepsize;
-  //std::cout<<"*** "<<(max-min)/stepsize<<std::endl;
-  histogram_.resize(static_cast<size_type>((max-min)/stepsize+0.5));
+  // add() accepts every x in [min, max), so an integer range needs a ceiling
+  // division to give it a bin
+  if (std::is_integral<T>::value)
+    histogram_.resize(static_cast<size_type>((max-min+stepsize-1)/stepsize));
+  else
+    histogram_.resize(static_cast<size_type>((max-min)/stepsize+0.5));
 }
 
 template <class T>
@@ -176,9 +181,13 @@ inline void HistogramObservable<T>::add(const T& x)
 {
   if (x>= min_ && x< max_)
   {
-    //std::cout<<(x-min_)/stepsize_<<std::endl;
-    histogram_[uint32_t((x-min_)/stepsize_)]++;
-    count_++;
+    // a floating-point range that is not a whole number of steps rounds its
+    // bin count down, leaving no bin for the top of the range
+    uint32_t bin = uint32_t((x-min_)/stepsize_);
+    if (bin < histogram_.size()) {
+      histogram_[bin]++;
+      count_++;
+    }
   }
 }
 

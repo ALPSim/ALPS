@@ -56,7 +56,7 @@ int SerialScheduler::run()
     if(taskstatus[i]==TaskFinished)
       std::cout << "Task " << i+1 << " finished.\n";
     else if(taskstatus[i]==TaskNotExisting)
-      std::cout  << "Task " << i+1 << " does not exist.\n";
+      std::cout  << "Task " << i+1 << " could not be created.\n";
     else if(taskstatus[i]==TaskNotStarted || taskstatus[i]==TaskRunning ||
             (taskstatus[i]==TaskHalted)) {
       unsigned int n=tasks[i]->cpus();
@@ -130,7 +130,7 @@ int SerialScheduler::run()
     }
   }
   std::cout << "Finished with everything.\n";
-  return 0;
+  return exit_status();
 }
 
 } // namespace scheduler

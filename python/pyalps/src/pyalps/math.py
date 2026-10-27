@@ -16,21 +16,28 @@ import numpy as np
 from pyalps.alea import *
 import math as pm
 
-global_function = "def OPERATION(obj): \n\
-  # math library \n\
-  if (isinstance(obj,float)): \n\
-    return pm.OPERATION(obj) \n\
-  if (isinstance(obj,int)): \n\
-    return pm.OPERATION(obj) \n\
-\n\
-  # numpy array \n\
-  if (isinstance(obj,np.ndarray)) : \n\
-    return np.OPERATION(obj)\n\
-  # other types \n\
-  return obj.OPERATION() \n\
-\n\
-"
+# Python math and NumPy spell some of these operations differently, have no
+# sq/cb at all, and math.cbrt needs Python 3.11. Other types (alea
+# observables) provide every operation as a method.
+_scalar_ops = {"sq": lambda x: x*x, "cb": lambda x: x*x*x, "cbrt": lambda x: pm.copysign(abs(x)**(1./3.), x)}
+_array_ops = {"sq": np.square, "cb": lambda x: x*x*x,
+              "asin": np.arcsin, "acos": np.arccos, "atan": np.arctan,
+              "asinh": np.arcsinh, "acosh": np.arccosh, "atanh": np.arctanh}
+
+def _make_dispatcher(operation):
+  scalar_op = _scalar_ops.get(operation) or getattr(pm, operation)
+  array_op = _array_ops.get(operation) or getattr(np, operation)
+  def dispatcher(obj):
+    # math library
+    if (isinstance(obj,(float,int))):
+      return scalar_op(obj)
+    # numpy array
+    if (isinstance(obj,np.ndarray)):
+      return array_op(obj)
+    # other types
+    return getattr(obj, operation)()
+  dispatcher.__name__ = operation
+  return dispatcher
 
 for operation in ["sq", "sqrt", "cb", "cbrt", "exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh"]:
-  function = global_function.replace("OPERATION",operation)
-  exec(function)
+  globals()[operation] = _make_dispatcher(operation)

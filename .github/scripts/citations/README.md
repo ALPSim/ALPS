@@ -132,6 +132,9 @@ caller. The scheduler, mcoptions, and both parapack implementations use this hel
 `start_single` also accepts an explicit component key; its original overload defaults
 to the scheduler profile. Library callers that own MPI should initialize it before
 starting work. The printing helper does not change the calculation's execution mode.
+CT-INT, CT-HYB and MaxEnt emit calculation startup guidance from their shared
+solver entry points, so native and Python callers use the same registry and
+printing behavior. Keep their CLI wrappers free of duplicate startup notices.
 
 CTest compares each shipped simulation/diagnostic entry point's information output
 with the catalog, checks help/license separation and absence of output files, and

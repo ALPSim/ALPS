@@ -2,8 +2,10 @@
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
+import warnings
 
 import pytest
 
@@ -25,16 +27,20 @@ def configure(build, *options, success=True):
     return result.stdout + result.stderr
 
 
-def build_and_run(build, *, environment=None):
-    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2"], check=True)
-    subprocess.run([shutil.which("ctest"), "--test-dir", str(build), "-C", "Release", "--output-on-failure"],
+def build_and_run(build, *, environment=None, targets=(), tests=None):
+    # Build and run only the named contracts, or all of them.
+    subprocess.run(["cmake", "--build", str(build), "--config", "Release", "--parallel", "2",
+                    *(("--target", *targets) if targets else ())], check=True)
+    subprocess.run([shutil.which("ctest"), "--test-dir", str(build), "-C", "Release", "--output-on-failure",
+                    *(("-R", tests, "--no-tests=error") if tests else ())],
                    check=True, env=environment)
 
 
 @pytest.mark.parametrize("standard", (17, 20))
 def test_installed_sdk_preserves_parent_settings(tmp_path, standard):
+    # The installed headers compile on their own at the minimum standard.
     configure(tmp_path, f"-DCMAKE_CXX_STANDARD={standard}",
-              "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON")
+              "-DCMAKE_FIND_PACKAGE_PREFER_CONFIG=ON", f"-DCHECK_HEADERS={standard == 17}")
     build_and_run(tmp_path)
 
 
@@ -137,8 +143,8 @@ def test_sdk_exports_installed_applications(tmp_path):
     configure(tmp_path, "-DEXPECT_APPLICATIONS=ON")
     # Generator expressions resolve the selected configuration and suffix.
     paths = (tmp_path / "applications-Release.txt").read_text().splitlines()
-    assert len(paths) == 23
-    assert len(set(paths)) == 23
+    assert len(paths) == 24
+    assert len(set(paths)) == 24
     assert all(Path(path).is_file() for path in paths)
 
 
@@ -146,7 +152,8 @@ def test_sdk_exports_solver_libraries(tmp_path):
     if not (Path(os.environ["ALPS_DIR"]) / "ALPSApplicationTargets.cmake").is_file():
         pytest.skip("requires an SDK with solvers")
     configure(tmp_path, "-DEXPECT_SOLVERS=ON")
-    build_and_run(tmp_path)
+    build_and_run(tmp_path, targets=("solver_contract", "maxent_independent_contract"),
+                  tests="^(solver|maxent_independent)_contract$")
 
 
 def test_relocated_sdk(tmp_path):
@@ -171,24 +178,31 @@ def test_relocated_sdk(tmp_path):
         environment.pop(name, None)
     environment["PATH"] = (str(Path(os.environ["SystemRoot"]) / "System32")
                            if os.name == "nt" else "/usr/bin:/bin")
-    build_and_run(build, environment=environment)
+    # Relocation affects how each exported library and the resources are found.
+    # The runtime links the other components, except these.
+    components = ["numeric", "numeric_io", "numeric_xml"]
+    components += [name.lower() for name in ("Aleav2", "Gf")
+                   if (relocated / f"share/alps/ALPS{name}Targets.cmake").is_file()]
+    build_and_run(build, environment=environment,
+                  targets=("sdk_contract", *(f"{name}_contract" for name in components)),
+                  tests=f"^(sdk_(contract|resources)|({'|'.join(components)})_contract)$")
 
 
-def test_installed_sdk_preserves_public_headers():
-    prefix = Path(os.environ["ALPS_DIR"]).resolve().parents[1]
-    baseline = json.loads(Path(__file__).with_name("preserved_public_headers.json").read_text())
-    # Retired headers are listed with the reason; none of them may come back.
-    retired = baseline.get("retired", {})
+def test_installed_sdk_includes_source_headers():
+    include = Path(os.environ["ALPS_DIR"]).resolve().parents[1] / "include"
     # An SDK built with ALPS_LEGACY_API=OFF has no deprecated spellings.
-    legacy = SOURCE / "legacy" / "include"
-    legacy_only = set() if (Path(os.environ["ALPS_DIR"]) / "ALPSLegacyConfig.cmake").is_file() else {
-        path.relative_to(legacy).as_posix() for path in legacy.rglob("*") if path.is_file()}
-    missing = [name for name in baseline["headers"]
-               if name not in retired and name not in legacy_only
-               and not (prefix / "include" / name).is_file()]
-    assert not missing, f"Public headers lost from {baseline['source_commit']}: {missing}"
-    returned = [name for name in retired if (prefix / "include" / name).is_file()]
-    assert not returned, f"Retired headers installed again: {returned}"
+    tops = ("src", "third_party") + (
+        ("legacy",) if (Path(os.environ["ALPS_DIR"]) / "ALPSLegacyConfig.cmake").is_file() else ())
+    roots = [root for top in tops for root in SOURCE.glob(f"{top}/**/include")]
+    headers = {path.relative_to(root).as_posix() for root in roots for path in root.rglob("*") if path.is_file()}
+    missing = sorted(name for name in headers if not (include / name).is_file())
+    # A serial SDK omits the MPI-only headers, which cannot be told apart from
+    # headers missing from an install list, so only an MPI SDK is strict.
+    if not re.search(r"^#define ALPS_HAVE_MPI\b", (include / "alps/config.h").read_text(), re.MULTILINE):
+        if missing:
+            warnings.warn(f"Source headers not installed (expected only for MPI-only headers): {missing}")
+        return
+    assert not missing, f"Source headers not installed: {missing}"
 
 
 @pytest.mark.parametrize("tutorial,target", [

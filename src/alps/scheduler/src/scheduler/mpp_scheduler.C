@@ -116,7 +116,7 @@ int MPPScheduler::run()
   }
   else
     std::cout  << "Finished with all tasks.\n" ;
-  return 0;
+  return exit_status();
 }
 
 
@@ -342,7 +342,7 @@ void MPPScheduler::determine_active()
     if(taskstatus[i]==TaskFinished)
         std::cout  << "Simulation " << i+1 << " finished.\n";
     else if(taskstatus[i]==TaskNotExisting)
-        std::cout  << "Simulation " << i+1 << " does not exist.\n";
+        std::cout  << "Simulation " << i+1 << " could not be created.\n";
     else if(taskstatus[i]==TaskNotStarted || taskstatus[i]==TaskRunning ||
             (taskstatus[i]==TaskHalted && !tasks[i]->finished_notime()))
       { // create new copy in memory (new start)

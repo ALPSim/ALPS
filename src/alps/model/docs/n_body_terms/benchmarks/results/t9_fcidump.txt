@@ -1,0 +1,19 @@
+Hubbard chain L=6 (stock), (3,3)               E0 ALPS   -4.8925653195  PySCF FCI   -4.8925653195  max|dE| (4 levels) 4.2e-14  FCIDUMP= same
+Hubbard chain L=6 (stock), (3,1)               E0 ALPS   -5.2636016409  PySCF FCI   -5.2636016409  max|dE| (4 levels) 2.1e-14  FCIDUMP= same
+2x3 ladder, correlated hop K=0.7, (2,2)        E0 ALPS   -4.4263161393  PySCF FCI   -4.4263161393  max|dE| (4 levels) 2.8e-14  FCIDUMP= same
+2x3 periodic, correlated hop K=0.9, (3,2)      E0 ALPS   -4.3574904234  PySCF FCI   -4.3574904234  max|dE| (4 levels) 1.2e-14  FCIDUMP= same
+2x4 ladder, correlated hop K=-1.1, (3,3)       E0 ALPS   -9.1900373397  PySCF FCI   -9.1900373397  max|dE| (4 levels) 2.5e-13  FCIDUMP= same
+random 3-site (pq|rs), roles 2,0,1, (2,1)      E0 ALPS  -36.8537588949  PySCF FCI  -36.8537588949  max|dE| (4 levels) 1.1e-13  FCIDUMP= same
+random 4-site (pq|rs), roles 3,1,0,2, (2,2)    E0 ALPS  -84.5437446577  PySCF FCI  -84.5437446577  max|dE| (4 levels) 1.6e-13  FCIDUMP= same
+refused: Heisenberg chain (spin basis)         yes   [alps2fcidump: site 0 does not use a spin-1/2 fermion basis with quantum numbers Nup and Ndown (e.g. BASIS "fer]
+   and fulldiag FCIDUMP=                        yes
+refused: Zeeman field h*(n_up - n_down)        yes   [alps2fcidump: h(1,1) differs between up and down electrons; FCIDUMP (restricted) needs a spin-independent Hami]
+   and fulldiag FCIDUMP=                        yes
+refused: singlet pair hopping (t1_ladder)      yes   [alps2fcidump: (1 3|2 4) lacks the symmetry (pq|rs) = (qp|rs) = (pq|sr) of real orbitals that FCIDUMP assumes: ]
+   and fulldiag FCIDUMP=                        yes
+refused: walkthrough term (spin-dependent)     yes   [alps2fcidump: (1 3|2 4) changes when up and down are swapped; FCIDUMP needs a spin-independent interaction: 0.]
+   and fulldiag FCIDUMP=                        yes
+refused: three-body n(i)*n(j)*n(k)             yes   [Note: Nup_total/Ndown_total not set; writing half filling, NELEC=4, MS2=0.
+alps2fcidump: the model is not a sp]
+   and fulldiag FCIDUMP=                        yes
+ALL OK

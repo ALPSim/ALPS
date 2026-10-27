@@ -189,11 +189,11 @@ def test_hdf5io():
         nps = ar["/npscalars"]
         assert isinstance(nps, np.ndarray) and np.issubdtype(nps.dtype, np.integer)
         np.testing.assert_array_equal(nps, [0, 1, 2])
-        # HDF5 has no native bool: bool arrays are stored (and read
-        # back) as their int8 storage type; only the values survive
+        # numpy-bool lists stack into a bool array that keeps its dtype,
+        # as test_archive_dtypes requires for bool arrays
         npb = ar["/npboollist"]
         assert isinstance(npb, np.ndarray)
-        assert npb.dtype == np.bool_ or npb.dtype == np.int8
+        assert npb.dtype == np.bool_
         np.testing.assert_array_equal(npb, [1, 0])
 
         # regression: rectangular ndarray/list mixes stack, like legacy

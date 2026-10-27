@@ -21,9 +21,10 @@ checks this, including both kinds of result in one archive.
 
 ALEA v2 needs [Eigen](https://eigen.tuxfamily.org) 3.3 or newer; it was tested with
 Eigen 5.0.1. ALPS builds `ALPS::aleav2` only when CMake finds Eigen, and reports
-otherwise during configuration. Set `CMAKE_DISABLE_FIND_PACKAGE_Eigen3=ON` to
-leave it out. An installed SDK provides it as a separate component, so other
-consumers do not need Eigen:
+otherwise during configuration. The applications need Eigen for MaxEnt, so only
+a library-only build (`ALPS_BUILD_APPLICATIONS=OFF`) can leave ALEA v2 out, with
+`CMAKE_DISABLE_FIND_PACKAGE_Eigen3=ON`. An installed SDK provides it as a
+separate component, so other consumers do not need Eigen:
 
 ```cmake
 find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
