@@ -9,6 +9,7 @@
 #include <boost/throw_exception.hpp>
 #include <fstream>
 #include <iostream>
+#include <cstdint>
 #include <map>
 #include <sstream>
 #include <string>
@@ -79,12 +80,15 @@ class FileList {
     // Use the checkpoint entry dir and return the caller's part of its last
     // progress record, empty if nothing was committed. Staged files of a
     // commit whose record was written are promoted, all others discarded.
+    // Throws if a committed file is missing or has the wrong size: DMTK only
+    // prints an error for a file it cannot read and goes on with an empty block.
     std::string open_entry(const char* dir)
     {
       cleanup();
       temp_dir = boost::filesystem::absolute(dir);
       in_entry = true;
       generation = 0;
+      _committed.clear();
       std::string record;
       const boost::filesystem::path progress = temp_dir / "progress";
       if (boost::filesystem::exists(progress)) {
@@ -101,6 +105,22 @@ class FileList {
           boost::filesystem::path staged = temp_dir / (name + suffix(generation));
           if (boost::filesystem::exists(staged))
             boost::filesystem::rename(staged, temp_dir / name);
+        }
+        if (!in || !(in >> word >> count) || word != "files")
+          boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+        for (std::size_t i = 0; i < count; ++i) {
+          std::string name;
+          std::uintmax_t size;
+          if (!(in >> name >> size))
+            boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+          boost::system::error_code error;
+          std::uintmax_t actual = boost::filesystem::file_size(temp_dir / name, error);
+          if (error)
+            boost::throw_exception(std::runtime_error("checkpoint file " + name + " is missing"));
+          if (actual != size)
+            boost::throw_exception(std::runtime_error("checkpoint file " + name + " has "
+              + std::to_string(actual) + " bytes instead of " + std::to_string(size)));
+          _committed[name] = size;
         }
         in.ignore(1);
         std::ostringstream rest;
@@ -160,18 +180,28 @@ class FileList {
           + " in " + temp_dir.string() + " (disk full or over quota?)"));
       std::ostringstream out;
       out << progress_magic() <<"\ngeneration " << generation << "\nstaged " << _staged.size() << "\n";
+      std::map<std::string, std::uintmax_t> committed = _committed;
       for (const auto& entry : _staged) {
-        if (!detail::sync_path(entry.second))
+        boost::system::error_code error;
+        committed[entry.first] = boost::filesystem::file_size(entry.second, error);
+        if (error || !detail::sync_path(entry.second))
           boost::throw_exception(std::runtime_error("could not write checkpoint file " + entry.second));
         out << entry.first << "\n";
       }
+      out << "files " << committed.size() << "\n";
+      for (const auto& entry : committed)
+        out << entry.first << " " << entry.second << "\n";
       out << record;
       detail::write_atomically(temp_dir / "progress", out.str());
       for (const auto& entry : _staged)
         boost::filesystem::rename(entry.second, temp_dir / entry.first);
       _staged.clear();
+      _committed.swap(committed);
       ++generation;
     }
+
+    // Generation of the last commit, or of the first one if there was none.
+    unsigned long last_generation() const { return generation == 0 ? 0 : generation - 1; }
 
     void cleanup() noexcept
     {
@@ -195,6 +225,8 @@ class FileList {
 
     std::map<std::string, std::string> _tmp_filenames;
     std::map<std::string, std::string> _staged;
+    // name and size of every file the last commit left in the entry
+    std::map<std::string, std::uintmax_t> _committed;
     std::vector<std::string> _failed_writes;
     boost::filesystem::path temp_dir;
     bool in_entry = false;

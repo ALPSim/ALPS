@@ -169,3 +169,93 @@ run_dmrg(relative "CHECKPOINT_DIRECTORY=\"here\"" "kill:4")
 entries("${test_dir}/relative/here" kept)
 list(LENGTH kept count)
 expect("count EQUAL 1" "relative CHECKPOINT_DIRECTORY not used: ${relative_output}")
+
+# SIGUSR1 and SIGUSR2 ask ALPS programs for a checkpoint; the run goes on.
+run_dmrg(usr1 "CHECKPOINT_DIRECTORY=\"${test_dir}/cache_usr1\"" "usr1:5")
+expect("usr1_exit EQUAL 0" "SIGUSR1 ended the run:\n${usr1_output}")
+expect("usr1_energy STREQUAL reference_energy" "SIGUSR1 changed the energy")
+
+# Fail twice in a row: the second run resumes and fails again, the third finishes.
+set(cache "${test_dir}/cache_twice")
+run_dmrg(twice "CHECKPOINT_DIRECTORY=\"${cache}\"" "kill:6")
+run_dmrg(twice "" "kill:3")
+expect("twice_output MATCHES \"resuming from checkpoint\"" "second run did not resume")
+run_dmrg(twice "" "")
+expect("twice_exit EQUAL 0" "third run failed:\n${twice_output}")
+expect("twice_output MATCHES \"resuming from checkpoint after sweep 2/2\"" "third run did not resume from the second")
+expect("twice_energy STREQUAL reference_energy" "twice resumed energy ${twice_energy} differs from ${reference_energy}")
+
+# A regenerated input with a new SEED, as parameter2xml and pyalps.writeInputFiles
+# write it, still resumes.
+set(cache "${test_dir}/cache_reseed")
+run_dmrg(reseed "CHECKPOINT_DIRECTORY=\"${cache}\"" "kill:6")
+file(REMOVE "${test_dir}/reseed/parameters.in.xml")
+string(REPLACE "SEED=12345" "SEED=777" reseeded "${physics}")
+file(WRITE "${test_dir}/reseed/parameters" "${reseeded}CHECKPOINT_DIRECTORY=\"${cache}\"\n")
+execute_process(COMMAND "${parameter2xml}" parameters
+  WORKING_DIRECTORY "${test_dir}/reseed" OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
+run_dmrg(reseed "" "")
+expect("reseed_exit EQUAL 0" "rerun with a new SEED failed:\n${reseed_output}")
+expect("reseed_output MATCHES \"resuming from checkpoint\"" "rerun with a new SEED did not resume")
+
+# A checkpoint file that is missing or truncated is never resumed from: DMTK
+# would go on with an empty block and give wrong results.
+foreach(damage missing truncated)
+  set(cache "${test_dir}/cache_${damage}")
+  run_dmrg(${damage} "CHECKPOINT_DIRECTORY=\"${cache}\"" "kill:6")
+  file(GLOB blocks "${cache}/*/block_*")
+  list(GET blocks 0 victim)
+  if(damage STREQUAL "missing")
+    file(REMOVE "${victim}")
+  else()
+    file(WRITE "${victim}" "short")
+  endif()
+  run_dmrg(${damage} "" "")
+  expect("${damage}_exit EQUAL 0" "${damage} file: rerun failed:\n${${damage}_output}")
+  expect("${damage}_output MATCHES \"discarding checkpoint\"" "${damage} file: checkpoint not discarded:\n${${damage}_output}")
+  expect("NOT ${damage}_output MATCHES \"resuming\"" "${damage} file: resumed from a damaged checkpoint")
+  expect("${damage}_energy STREQUAL reference_energy" "${damage} file: energy ${${damage}_energy} differs")
+endforeach()
+
+# A checkpoint that every resumed run fails on is dropped after two attempts.
+set(cache "${test_dir}/cache_attempts")
+run_dmrg(attempts "CHECKPOINT_DIRECTORY=\"${cache}\"" "kill:6")
+foreach(attempt 1 2)
+  run_dmrg(attempts "" "kill-staged:1")
+  expect("attempts_output MATCHES \"resuming\"" "attempt ${attempt} did not resume")
+endforeach()
+run_dmrg(attempts "" "")
+expect("attempts_exit EQUAL 0" "run after failed resumes failed:\n${attempts_output}")
+expect("attempts_output MATCHES \"failed before the next checkpoint\"" "checkpoint kept after failed resumes:\n${attempts_output}")
+expect("attempts_energy STREQUAL reference_energy" "fresh start after failed resumes changed the energy")
+
+# ~ and environment variables in CHECKPOINT_DIRECTORY are expanded; an unset
+# variable warns and the run goes on without checkpoints. A parameter file
+# only passes ${NAME} on; XML input can also use $NAME.
+set(ENV{HOME} "${test_dir}/home")
+set(ENV{ALPS_DMRG_TEST_SCRATCH} "${test_dir}/scratch")
+run_dmrg(tilde "CHECKPOINT_DIRECTORY=\"~/checkpoints\"" "kill:4")
+entries("${test_dir}/home/checkpoints" kept)
+list(LENGTH kept count)
+expect("count EQUAL 1" "~ not expanded: ${tilde_output}")
+run_dmrg(variable "CHECKPOINT_DIRECTORY=\"\${ALPS_DMRG_TEST_SCRATCH}/x\"" "kill:4")
+entries("${test_dir}/scratch/x" kept)
+list(LENGTH kept count)
+expect("count EQUAL 1" "environment variables not expanded: ${variable_output}")
+run_dmrg(unset "CHECKPOINT_DIRECTORY=\"\${ALPS_DMRG_TEST_UNSET}/x\"" "")
+expect("unset_exit EQUAL 0" "unset variable failed the run:\n${unset_output}")
+expect("unset_output MATCHES \"ALPS_DMRG_TEST_UNSET is not set\"" "no warning for an unset variable:\n${unset_output}")
+
+# An entry of a run on another host stays while that run updates it, even
+# over CHECKPOINT_MAX_SIZE, since a lock on a network filesystem may not be
+# seen from here.
+set(cache "${test_dir}/cache_remote")
+file(MAKE_DIRECTORY "${cache}/remote")
+file(WRITE "${cache}/remote/meta" "ALPS DMRG checkpoint 1\nhost elsewhere:0\npid 1\nfingerprint\nfake\n")
+file(WRITE "${cache}/remote/data" "${payload}")
+fake_entry("${cache}/local" 999999)
+file(WRITE "${cache}/local/data" "${payload}")
+run_dmrg(remote "CHECKPOINT_DIRECTORY=\"${cache}\"\nCHECKPOINT_MAX_SIZE=0.001" "")
+expect("remote_exit EQUAL 0" "run next to a remote entry failed:\n${remote_output}")
+expect("EXISTS \"${cache}/remote\"" "entry of a live run on another host was removed")
+expect("NOT EXISTS \"${cache}/local\"" "dead local entry was kept over the size cap")

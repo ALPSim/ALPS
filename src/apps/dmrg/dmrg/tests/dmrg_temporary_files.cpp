@@ -141,7 +141,8 @@ TEST(DmrgScratchFiles, CheckpointEntryCommits)
   // the files it lists are promoted.
   {
     std::ofstream(fs::path(entry / "progress").string().c_str())
-      << "ALPS DMRG progress 1\ngeneration 7\nstaged 1\nblock_ALPS_2_l.dat\nrecord 7\n";
+      << "ALPS DMRG progress 1\ngeneration 7\nstaged 1\nblock_ALPS_2_l.dat\n"
+      << "files 1\nblock_ALPS_2_l.dat 7\nrecord 7\n";
     std::ofstream((entry / "block_ALPS_2_l.dat.new.7").string().c_str()) << "seventh";
     std::ofstream((entry / "block_ALPS_2_l.dat.new.8").string().c_str()) << "uncommitted";
     dmtk::FileList files;
@@ -150,6 +151,27 @@ TEST(DmrgScratchFiles, CheckpointEntryCommits)
     ASSERT_FALSE(fs::exists(entry / "block_ALPS_2_l.dat.new.8")) << "uncommitted file kept";
     ASSERT_NE(std::string(files.get_write_filename("block_ALPS_2_l.dat")).find(".new.8"), std::string::npos)
       << "generation did not continue after the recovered commit";
+  }
+
+  // A committed file that is missing or truncated is an error: DMTK would
+  // otherwise go on with an empty block.
+  {
+    dmtk::FileList files;
+    files.open_entry(entry.string().c_str());
+    std::ofstream(files.get_write_filename("rho_ALPS_2_l.dat")) << "rho";
+    files.commit("record 9\n");
+    files.cleanup();
+    dmtk::FileList rerun;
+    ASSERT_EQ(rerun.open_entry(entry.string().c_str()), "record 9\n") << "manifest not accepted";
+    rerun.cleanup();
+    std::ofstream((entry / "block_ALPS_2_l.dat").string().c_str()) << "short";
+    dmtk::FileList truncated;
+    ASSERT_THROW(truncated.open_entry(entry.string().c_str()), std::runtime_error) << "truncated file accepted";
+    fs::remove(entry / "rho_ALPS_2_l.dat");
+    std::ofstream((entry / "block_ALPS_2_l.dat").string().c_str()) << "seventh";
+    dmtk::FileList missing;
+    ASSERT_THROW(missing.open_entry(entry.string().c_str()), std::runtime_error) << "missing file accepted";
+    fs::remove(entry / "progress");
   }
 
   // Failed writes and unreadable records are errors, not silent corruption.
