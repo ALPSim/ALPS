@@ -26,7 +26,7 @@ template<typename WALKER>
 struct multiple_initializer_helper<WALKER, no_initializer> {
   typedef WALKER walker_type;
   static boost::shared_ptr<walker_type>
-  create_walker(boost::mpi::communicator const& comm, alps::Parameters const& params, no_initializer const&) {
+  create_walker(alps::mpi::communicator const& comm, alps::Parameters const& params, no_initializer const&) {
     return boost::shared_ptr<walker_type>(new walker_type(comm, params));
   }
 
@@ -44,7 +44,7 @@ struct multiple_initializer_helper {
   typedef WALKER walker_type;
   typedef INITIALIZER initializer_type;
   static boost::shared_ptr<walker_type>
-  create_walker(boost::mpi::communicator const& comm, alps::Parameters const& params, initializer_type const& init) {
+  create_walker(alps::mpi::communicator const& comm, alps::Parameters const& params, initializer_type const& init) {
     return boost::shared_ptr<walker_type>(new walker_type(comm, params, init));
   }
   static void init_observables(boost::shared_ptr<walker_type> walker_ptr, alps::Parameters const& params, initializer_type const& init, alps::ObservableSet& obs) {
@@ -71,7 +71,7 @@ public:
   static std::string version() { return walker_type::version(); }
   static void print_copyright(std::ostream& out) { walker_type::print_copyright(out); }
 
-  multiple_parallel_exchange_worker(boost::mpi::communicator const& comm, alps::Parameters const& params)
+  multiple_parallel_exchange_worker(alps::mpi::communicator const& comm, alps::Parameters const& params)
     : super_type(params), process_helper_(comm, params.value_or_default("PROCESS_PER_WORKER", 1)),
       comm_(process_helper_.comm_ctrl()), work_(process_helper_.comm_work()),
       head_(process_helper_.comm_head()), init_(params), beta_(params), mcs_(params),
@@ -213,13 +213,13 @@ public:
         if (head_.rank() == 0) {
           std::copy(wp_local_.begin(), wp_local_.begin() + nrep_local_, wp_.begin());
           for (int p = 1; p < nreps_.size(); ++p)
-            head_.recv(p, 0, &wp_[offsets_[p]], nreps_[p]);
+            alps::mpi::recv(head_, p, 0, &wp_[offsets_[p]], nreps_[p]);
           for (int w = 0; w < nrep; ++w) {
             int p = tid_[w];
             weight_parameters_[p] += wp_[w];
           }
         } else {
-          head_.send(0, 0, &wp_local_[0], nrep_local_);
+          alps::mpi::send(head_, 0, 0, &wp_local_[0], nrep_local_);
         }
 
         if (head_.rank() == 0) {
@@ -402,10 +402,10 @@ public:
       if (head_) {
         if (head_.rank() == 0) {
           for (int p = 1; p < nreps_.size(); ++p)
-            head_.send(p, 0, &tid_[offsets_[p]], nreps_[p]);
+            alps::mpi::send(head_, p, 0, &tid_[offsets_[p]], nreps_[p]);
           std::copy(tid_.begin(), tid_.begin() + nrep_local_, tid_local_.begin());
         } else {
-          head_.recv(0, 0, &tid_local_[0], nrep_local_);
+          alps::mpi::recv(head_, 0, 0, &tid_local_[0], nrep_local_);
         }
       }
       for (int i = 0; i < nrep_local_; ++i)
@@ -447,7 +447,7 @@ protected:
 
 private:
   alps::process_helper_mpi process_helper_;
-  boost::mpi::communicator comm_, work_, head_;
+  alps::mpi::communicator comm_, work_, head_;
 
   int nrep_local_;           // number of walkers (replicas) on this process
   int offset_local_;         // first (global) id of walker on this process

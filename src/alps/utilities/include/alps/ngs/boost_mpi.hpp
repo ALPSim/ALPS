@@ -11,6 +11,11 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+// Boost.MPI reductions for std::vector, boost::array and boost::multi_array.
+// ALPS itself no longer uses or links Boost.MPI: code that includes this
+// header links Boost::mpi itself. <alps/utilities/mpi.hpp> is the plain-MPI
+// replacement.
+
 #ifndef ALPS_NGS_BOOST_MPI_HPP
 #define ALPS_NGS_BOOST_MPI_HPP
 

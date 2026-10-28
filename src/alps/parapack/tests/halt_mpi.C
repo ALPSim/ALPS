@@ -15,7 +15,7 @@
 #include "process_mpi_checks.hpp"
 
 TEST(ParallelHalt, WaitsForActiveGroupsThenAcknowledgesEveryRank) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   alps::process_helper_mpi process(world, 1);
   alps::process_group active;

@@ -39,6 +39,7 @@ target_sources(alps_headers INTERFACE
     include/alps/parapack/mc_worker.h
     include/alps/parapack/measurement.h
     include/alps/parapack/montecarlo.h
+    include/alps/parapack/mpi.h
     include/alps/parapack/option.h
     include/alps/parapack/parapack.h
     include/alps/parapack/permutation.h

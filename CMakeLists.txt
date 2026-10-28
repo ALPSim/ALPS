@@ -110,8 +110,12 @@ find_package(Threads REQUIRED)
 set(ALPS_BOOST_COMPONENTS serialization program_options)
 if(ALPS_ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
-  list(APPEND ALPS_BOOST_COMPONENTS mpi)
   set(ALPS_HAVE_MPI 1)
+endif()
+# Only the optional ULFM support (src/alps/scheduler/src/ngs/ulfm.cpp) still
+# uses Boost.MPI; everything else calls MPI through alps::mpi.
+if(ALPS_NGS_OPENMPI_ULFM)
+  list(APPEND ALPS_BOOST_COMPONENTS mpi)
   set(ALPS_HAVE_BOOST_MPI 1)
 endif()
 find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})

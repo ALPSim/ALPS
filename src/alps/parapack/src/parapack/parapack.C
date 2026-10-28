@@ -727,11 +727,11 @@ int run_sequential_mpi(int argc, char** argv) {
   if (p == 0 && omp_get_max_threads() != 1) omp_set_num_threads(1);
 #endif
 
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world;
+  alps::mpi::environment env(argc, argv);
+  alps::mpi::communicator world;
   alps::ParameterList parameterlist;
   if (world.rank() == 0) std::cin >> parameterlist;
-  broadcast(world, parameterlist, 0);
+  alps::mpi::broadcast_object(world, parameterlist, 0);
   if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cerr);
 
   for (int i = 0; i < parameterlist.size(); ++i) {
@@ -820,8 +820,8 @@ int start_mpi(int argc, char** argv) {
     help.print(std::cout);
   })) return 0;
 
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world;
+  alps::mpi::environment env(argc, argv);
+  alps::mpi::communicator world;
   option opt(argc, argv, /* for_evaluate = */ false);
   if (!opt.valid) {
     if (world.rank() == 0) {
@@ -1031,11 +1031,12 @@ int start_mpi(int argc, char** argv) {
           }
 
           while (!process.is_halting() || process.num_allocated() > 0) {
-            boost::optional<boost::mpi::status> status;
-            if ((status = process.comm_ctrl().iprobe(boost::mpi::any_source, boost::mpi::any_tag))) {
+            std::optional<alps::mpi::status> status;
+            if ((status = alps::mpi::iprobe(process.comm_ctrl(), alps::mpi::any_source,
+                                            alps::mpi::any_tag))) {
               if (status->tag() == mcmp_tag::clone_info) {
                 clone_info_msg_t msg;
-                process.comm_ctrl().recv(status->source(), status->tag(), msg);
+                alps::mpi::recv(process.comm_ctrl(), status->source(), status->tag(), msg);
                 if (msg.info.progress() < 1) {
                   std::cout << logger::header() << "progress report: "
                             << logger::clone(msg.task_id, msg.clone_id) << " is "
@@ -1048,7 +1049,7 @@ int start_mpi(int argc, char** argv) {
                 }
               } else if (status->tag() == mcmp_tag::clone_checkpoint) {
                 clone_info_msg_t msg;
-                process.comm_ctrl().recv(status->source(), status->tag(), msg);
+                alps::mpi::recv(process.comm_ctrl(), status->source(), status->tag(), msg);
                 std::cout << logger::header() << "regular checkpoint: "
                           << logger::clone(msg.task_id, msg.clone_id) << " is " << msg.info.phase()
                           << " (" << precision(msg.info.progress() * 100, 3) << "% done)\n";
@@ -1056,7 +1057,7 @@ int start_mpi(int argc, char** argv) {
                   tasks[msg.task_id].info_updated(msg.clone_id, msg.info);
               } else if (status->tag() == mcmp_tag::clone_suspend) {
                 clone_info_msg_t msg;
-                process.comm_ctrl().recv(status->source(), status->tag(), msg);
+                alps::mpi::recv(process.comm_ctrl(), status->source(), status->tag(), msg);
                 tasks[msg.task_id].clone_suspended(msg.clone_id, process_group(msg.group_id),
                                                    msg.info);
                 if (tasks[msg.task_id].num_running() == 0) {
@@ -1067,7 +1068,7 @@ int start_mpi(int argc, char** argv) {
                 process.release(msg.group_id);
               } else if (status->tag() == mcmp_tag::clone_halt) {
                 clone_halt_msg_t msg;
-                process.comm_ctrl().recv(status->source(), status->tag(), msg);
+                alps::mpi::recv(process.comm_ctrl(), status->source(), status->tag(), msg);
                 task_status_t old_status = tasks[msg.task_id].status();
                 tasks[msg.task_id].clone_halted(msg.clone_id);
                 if (old_status != task_status::Continuing && old_status != task_status::Idling &&
@@ -1087,10 +1088,10 @@ int start_mpi(int argc, char** argv) {
                 std::cout << "Warning: ignoring a message in comm_ctrl with an unknown tag "
                           << status->tag() << std::endl;
               }
-            } else if ((status = world.iprobe(boost::mpi::any_source, boost::mpi::any_tag))) {
+            } else if ((status = alps::mpi::iprobe(world, alps::mpi::any_source, alps::mpi::any_tag))) {
               if (status->tag() == mcmp_tag::process_vmusage) {
                 std::string u;
-                world.recv(status->source(), status->tag(), u);
+                alps::mpi::recv(world, status->source(), status->tag(), u);
                 std::cout << logger::header() << "vmusage repport: " << " rank = "
                           << status->source() << ", " << u << std::endl;
               } else {
@@ -1167,7 +1168,7 @@ int start_mpi(int argc, char** argv) {
             check_queue_t::value_type q = check_queue.top();
             check_queue.pop();
             if (q.type == check_type::vmusage) {
-              world.send(0, mcmp_tag::process_vmusage, logger::usage(alps::vmusage()));
+              alps::mpi::send(world, 0, mcmp_tag::process_vmusage, logger::usage(alps::vmusage()));
               check_queue.push(next_vmusage(opt.vmusage_interval));
             }
           }
@@ -1184,10 +1185,10 @@ int start_mpi(int argc, char** argv) {
 
         } else {
 
-          if (world.rank() != 0 && process.comm_ctrl().iprobe(0, mcmp_tag::clone_create)) {
+          if (world.rank() != 0 && alps::mpi::iprobe(process.comm_ctrl(), 0, mcmp_tag::clone_create)) {
             // create a clone
             clone_create_msg_t msg;
-            process.comm_ctrl().recv(0, mcmp_tag::clone_create, msg);
+            alps::mpi::recv(process.comm_ctrl(), 0, mcmp_tag::clone_create, msg);
             clone_ptr = new clone_mpi(process.comm_ctrl(), process.comm_work(), basedir, opt, msg);
           }
 

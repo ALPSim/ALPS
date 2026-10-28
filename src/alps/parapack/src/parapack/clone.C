@@ -280,7 +280,7 @@ void clone::output() const{
 // clone_mpi
 //
 
-clone_mpi::clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
+clone_mpi::clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicator const& work,
   std::filesystem::path const& basedir, alps::parapack::option opt, clone_create_msg_t const& msg)
   : ctrl_(ctrl), work_(work), task_id_(msg.task_id), clone_id_(msg.clone_id),
     group_id_(msg.group_id), params_(msg.params), basedir_(basedir), dump_format_(opt.dump_format),
@@ -305,7 +305,9 @@ clone_mpi::clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communica
       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_)) &&
       (std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
        std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_)));
-    exists = boost::mpi::all_reduce(work_, exists, boost::mpi::bitwise_and<bool>());
+    int all_exist = exists;
+    MPI_Allreduce(MPI_IN_PLACE, &all_exist, 1, MPI_INT, MPI_LAND, work_);
+    exists = all_exist;
     if (exists) {
       this->load();
     } else {
@@ -342,8 +344,8 @@ clone_mpi::~clone_mpi() {}
 
 void clone_mpi::run() {
   int tag = (info_.progress() < 1) ? mcmp_tag::do_step : mcmp_tag::do_nothing;
-  if (work_.rank() == 0 && ctrl_.iprobe(0, boost::mpi::any_tag)) {
-    boost::mpi::status stat = ctrl_.recv(0, boost::mpi::any_tag);
+  if (work_.rank() == 0 && mpi::iprobe(ctrl_, 0, mpi::any_tag)) {
+    mpi::status stat = mpi::recv(ctrl_, 0, mpi::any_tag);
     tag = stat.tag();
     if (tag == mcmp_tag::clone_suspend && info_.progress() >= 1)
       tag = mcmp_tag::clone_halt;
@@ -525,14 +527,14 @@ void clone_mpi::output() const{
 void clone_mpi::send_info(mcmp_tag_t tag) {
   if (work_.rank() == 0) {
     if (ctrl_.rank() == 0) std::cerr << "Error: sending to myself in clone_mpi::send_info()\n";
-    ctrl_.send(0, tag, clone_info_msg_t(task_id_, clone_id_, group_id_, info_));
+    mpi::send(ctrl_, 0, tag, clone_info_msg_t(task_id_, clone_id_, group_id_, info_));
   }
 }
 
 void clone_mpi::send_halted() {
   if (work_.rank() == 0) {
     if (ctrl_.rank() == 0) std::cerr << "Error: sending to myself in clone_mpi::send_halted()\n";
-    ctrl_.send(0, mcmp_tag::clone_halt, clone_halt_msg_t(task_id_, clone_id_, group_id_));
+    mpi::send(ctrl_, 0, mcmp_tag::clone_halt, clone_halt_msg_t(task_id_, clone_id_, group_id_));
   }
 }
 

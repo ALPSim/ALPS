@@ -150,7 +150,7 @@ struct clone_halt_msg_t {
 
 class ALPS_DECL clone_mpi : public abstract_clone {
 public:
-  clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
+  clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicator const& work,
     std::filesystem::path const& basedir, alps::parapack::option opt,
     clone_create_msg_t const& msg);
   virtual ~clone_mpi();
@@ -181,7 +181,7 @@ protected:
   void send_halted();
 
 private:
-  boost::mpi::communicator ctrl_, work_;
+  alps::mpi::communicator ctrl_, work_;
 
   tid_t task_id_;
   cid_t clone_id_;
