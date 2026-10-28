@@ -32,7 +32,7 @@ oxstream::oxstream()
 oxstream::oxstream(std::ostream& os, uint32_t incr)
   : of_(), os_(os), stack_(), attr_(), context_(NotSpecified),
     linebreak_(true), offset_(0), offset_incr_(incr) {}
-oxstream::oxstream(const boost::filesystem::path& file, uint32_t incr)
+oxstream::oxstream(const std::filesystem::path& file, uint32_t incr)
   : of_(file), os_(of_), stack_(), attr_(), context_(NotSpecified),
     linebreak_(true), offset_(0), offset_incr_(incr) {}
 oxstream::~oxstream() {

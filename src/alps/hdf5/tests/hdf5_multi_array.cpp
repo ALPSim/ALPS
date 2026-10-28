@@ -20,7 +20,7 @@
 #include <alps/hdf5/multi_array.hpp>
 
 #include <boost/multi_array.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <vector>
 
@@ -30,8 +30,8 @@ using boost::multi_array;
 TEST(Hdf5, MultiArray)
 {
     alps::testing::TemporaryDirectory temporary;
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
 
     multi_array<double,2> a( boost::extents[3][3] );
     multi_array<double,2> b( boost::extents[4][4] );
@@ -62,7 +62,7 @@ TEST(Hdf5, MultiArray)
         EXPECT_EQ(w[1], a);
     }
 
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "test_hdf5_multi_array.h5").string()));
 
 }

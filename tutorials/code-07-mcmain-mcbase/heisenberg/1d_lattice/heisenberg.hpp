@@ -14,7 +14,7 @@
 #include <alps/hdf5/array.hpp>
 
 #include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/array.hpp>
 
 #include <vector>

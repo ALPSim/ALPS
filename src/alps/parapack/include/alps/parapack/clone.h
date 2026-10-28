@@ -61,7 +61,7 @@ public:
 
 class ALPS_DECL clone : public abstract_clone {
 public:
-  clone(boost::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid, cid_t cid,
+  clone(std::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid, cid_t cid,
     Parameters const& params, std::string const& base, bool is_new);
   virtual ~clone();
 
@@ -91,7 +91,7 @@ private:
 
   Parameters params_;
 
-  boost::filesystem::path basedir_;
+  std::filesystem::path basedir_;
   clone_info info_;
   std::vector<ObservableSet> measurements_;
 
@@ -151,7 +151,7 @@ struct clone_halt_msg_t {
 class ALPS_DECL clone_mpi : public abstract_clone {
 public:
   clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
-    boost::filesystem::path const& basedir, alps::parapack::option opt,
+    std::filesystem::path const& basedir, alps::parapack::option opt,
     clone_create_msg_t const& msg);
   virtual ~clone_mpi();
 
@@ -189,7 +189,7 @@ private:
 
   Parameters params_;
 
-  boost::filesystem::path basedir_;
+  std::filesystem::path basedir_;
   clone_info info_;
   std::vector<ObservableSet> measurements_;
 

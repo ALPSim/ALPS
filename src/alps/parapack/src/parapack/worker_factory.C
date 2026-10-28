@@ -130,12 +130,12 @@ worker_factory::worker_pointer_type worker_factory::make_worker(Parameters const
 }
 
 alps::scheduler::MCSimulation* worker_factory::make_task(alps::ProcessList const& nodes,
-  boost::filesystem::path const& file) {
+  std::filesystem::path const& file) {
   return new alps::scheduler::MCSimulation(nodes, file);
 }
 
 alps::scheduler::MCSimulation* worker_factory::make_task(alps::ProcessList const& nodes,
-  boost::filesystem::path const& file, alps::Parameters const&) {
+  std::filesystem::path const& file, alps::Parameters const&) {
   return new alps::scheduler::MCSimulation(nodes, file);
 }
 

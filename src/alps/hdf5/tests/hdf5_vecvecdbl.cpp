@@ -19,7 +19,7 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <complex>
@@ -29,8 +29,8 @@ using namespace std;
 TEST(Hdf5, Vecvecdbl)
 {
     alps::testing::TemporaryDirectory temporary;
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "vvdbl.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvdbl.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "vvdbl.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "vvdbl.h5").string()));
     {
         vector<vector<double> > v;
         for(int i = 0; i < 3; ++i)
@@ -46,5 +46,5 @@ TEST(Hdf5, Vecvecdbl)
         ASSERT_EQ(v.size(), 3u);
         for (int i = 0; i < 3; ++i) EXPECT_EQ(v[i], vector<double>(i + 1, 2 * i));
     }
-    boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvdbl.h5").string()));
+    std::filesystem::remove(std::filesystem::path((temporary.path() / "vvdbl.h5").string()));
 }

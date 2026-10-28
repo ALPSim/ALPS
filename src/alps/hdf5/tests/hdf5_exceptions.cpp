@@ -17,7 +17,7 @@
 #include <alps/hdf5/archive.hpp>
 
 #include <boost/random.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <string>
 #include <stdexcept>
@@ -28,8 +28,8 @@
 TEST(Hdf5, Exceptions) {
     alps::testing::TemporaryDirectory temporary;
     std::string const filename = (temporary.path() / "test_hdf5_exceptions.h5").string();
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    if (std::filesystem::exists(std::filesystem::path(filename)))
+        std::filesystem::remove(std::filesystem::path(filename));
     {
         alps::hdf5::archive oar(filename, "a");
     }
@@ -46,7 +46,7 @@ TEST(Hdf5, Exceptions) {
             EXPECT_EQ(str.substr(0, start), "the path does not exist: /not/existing/path");
         }
     }
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    std::filesystem::remove(std::filesystem::path(filename));
 
 }
 

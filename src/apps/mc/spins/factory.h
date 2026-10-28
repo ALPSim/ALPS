@@ -23,7 +23,7 @@ public:
   SpinFactory() {}
   
   alps::scheduler::MCSimulation* make_task(const alps::ProcessList& w,
-          const boost::filesystem::path& fn) const;
+          const std::filesystem::path& fn) const;
 
   alps::scheduler::Worker* make_worker(const alps::ProcessList& where,
           const alps::Parameters& parms, int node) const;

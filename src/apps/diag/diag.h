@@ -19,8 +19,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <cmath>
 #include <cstddef>
 #include <map>
@@ -52,7 +51,7 @@ public:
 
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
 
-  DiagMatrix (const alps::ProcessList& , const boost::filesystem::path&,bool delay_construct=false,
+  DiagMatrix (const alps::ProcessList& , const std::filesystem::path&,bool delay_construct=false,
               void (*define_parameters)(alps::params&) = &DiagMatrix::define_parameters,
               const alps::params* settings = 0);
   ~DiagMatrix();
@@ -105,7 +104,7 @@ private:
 
 
 template <class T, class M>
-DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
+DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const std::filesystem::path& p, bool delay_construct,
                             void (*define_parameters)(alps::params&), const alps::params* settings)
     : alps::scheduler::DiagTask<T>(where,p,delay_construct,define_parameters,settings)
     , alps::hamiltonian_matrix<M>(this->get_parameters())
@@ -113,7 +112,7 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
   if (this->calc_averages())
     multiplicities_ = this->distance_multiplicities();
   if (this->alps::scheduler::Task::parms.defined("FCIDUMP")) {
-    std::string file = boost::filesystem::absolute(
+    std::string file = std::filesystem::absolute(
         static_cast<std::string>(this->alps::scheduler::Task::parms["FCIDUMP"])).lexically_normal().string();
     std::map<std::string, std::pair<const void*, std::string> >::const_iterator
         it = fcidump_claims().find(file);

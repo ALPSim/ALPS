@@ -21,8 +21,8 @@
 #include <alps/parser/xmlattributes.h>
 
 #include <boost/config.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
+#include <fstream>
 #include <boost/lexical_cast.hpp>
 #include <iomanip>
 #include <iostream>
@@ -91,7 +91,7 @@ class ALPS_XML_DECL oxstream
 public:
   oxstream();
   oxstream(std::ostream& os, uint32_t incr = 2);
-  oxstream(const boost::filesystem::path& file, uint32_t incr = 2);
+  oxstream(const std::filesystem::path& file, uint32_t incr = 2);
   ~oxstream();
 
   oxstream& operator<<(const detail::header_t& c);
@@ -167,7 +167,7 @@ protected:
 private:
   enum Context { NotSpecified, StartTag, PI, Text, Comment, Cdata };
 
-  boost::filesystem::ofstream of_;
+  std::ofstream of_;
   std::ostream& os_;
   std::stack<std::pair<std::string, bool> > stack_;
   XMLAttributes attr_;

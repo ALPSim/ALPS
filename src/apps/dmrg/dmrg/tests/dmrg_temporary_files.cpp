@@ -4,23 +4,30 @@
 #include "dmtk/filelist.h"
 #include <fstream>
 #include <iterator>
+#include <random>
+#include <string>
+#include <system_error>
 #include <stdexcept>
 #include <vector>
 #include <fcntl.h>
 #include <unistd.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 TEST(DmrgScratchFiles, LifetimesAndCleanup)
 {
-  const fs::path root = fs::temp_directory_path() / fs::unique_path("alps-dmrg-%%%%-%%%%");
+  std::string name = "alps-dmrg-";
+  std::mt19937 engine(std::random_device{}());
+  for (int i = 0; i < 8; ++i)
+    name += "0123456789abcdef"[std::uniform_int_distribution<int>(0, 15)(engine)];
+  const fs::path root = fs::temp_directory_path() / name;
   fs::create_directories(root / "first");
   fs::create_directories(root / "second");
   const fs::path original_directory = fs::current_path();
   struct cleanup {
     fs::path previous, directory;
     ~cleanup() {
-      boost::system::error_code ignored;
+      std::error_code ignored;
       fs::current_path(previous, ignored);
       fs::remove_all(directory, ignored);
     }
@@ -113,7 +120,7 @@ TEST(DmrgScratchFiles, CheckpointEntryCommits)
   fs::create_directories(entry);
   struct cleanup {
     fs::path directory;
-    ~cleanup() { boost::system::error_code ignored; fs::remove_all(directory, ignored); }
+    ~cleanup() { std::error_code ignored; fs::remove_all(directory, ignored); }
   } guard{entry};
   const fs::path block = entry / "block_ALPS_2_l.dat";
   {

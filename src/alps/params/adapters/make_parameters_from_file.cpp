@@ -17,7 +17,8 @@
 
 #include "evaluated_parameters.hpp"
 
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 #include <boost/spirit/include/classic_core.hpp>
 
 #include <sstream>
@@ -49,8 +50,8 @@ namespace alps {
         }
     }
 
-    params make_parameters_from_file(boost::filesystem::path const & path) {
-        boost::filesystem::ifstream ifs(path);
+    params make_parameters_from_file(std::filesystem::path const & path) {
+        std::ifstream ifs(path);
         std::ostringstream contents;
         contents << ifs.rdbuf();
 

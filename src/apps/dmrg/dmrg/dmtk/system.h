@@ -43,7 +43,7 @@
 #include <unistd.h>
 #endif // WITH_PTHREADS
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include "filelist.h"
 
 using namespace std;

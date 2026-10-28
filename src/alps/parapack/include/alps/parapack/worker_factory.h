@@ -169,9 +169,9 @@ public:
   static worker_pointer_type make_worker(Parameters const& params);
 
   static alps::scheduler::MCSimulation* make_task(alps::ProcessList const& nodes,
-    boost::filesystem::path const& file);
+    std::filesystem::path const& file);
   static alps::scheduler::MCSimulation* make_task(alps::ProcessList const& nodes,
-    boost::filesystem::path const& file, alps::Parameters const& params);
+    std::filesystem::path const& file, alps::Parameters const& params);
   static alps::scheduler::MCSimulation* make_task(alps::ProcessList const& nodes,
     alps::Parameters const& params);
   static alps::scheduler::MCRun* make_worker(alps::ProcessList const& nodes,

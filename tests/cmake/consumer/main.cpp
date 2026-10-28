@@ -11,7 +11,7 @@
 #include <alps/parser/xslt_path.h>
 #include <alps/osiris/xdrdump.h>
 #include <alps/numeric/functional.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <vector>
 
 template<class Accumulator> bool check_accumulator() {
@@ -26,8 +26,8 @@ template<class Accumulator> bool check_accumulator() {
 int main(int argc, char** argv) {
     if (argc == 2) {
         for (const char* resource : {"lattices.xml", "models.xml", "ALPS.xsl"}) {
-            if (!boost::filesystem::equivalent(alps::search_xml_library_path(resource),
-                                               boost::filesystem::path(argv[1]) / resource))
+            if (!std::filesystem::equivalent(alps::search_xml_library_path(resource),
+                                               std::filesystem::path(argv[1]) / resource))
                 return 1;
         }
         return 0;

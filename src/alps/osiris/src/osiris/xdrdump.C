@@ -289,7 +289,7 @@ void OXDRFileDump::open_file(const std::string& fn,bool append)
 
 
 // create a new dump file
-OXDRFileDump::OXDRFileDump(const boost::filesystem::path& fn, bool append)
+OXDRFileDump::OXDRFileDump(const std::filesystem::path& fn, bool append)
 {
   open_file(fn.string(),append);
 }
@@ -315,7 +315,7 @@ void OXDRFileDump::flush()
 //-----------------------------------------------------------------------
 
 // open a dump file
-IXDRFileDump::IXDRFileDump(const boost::filesystem::path& p)
+IXDRFileDump::IXDRFileDump(const std::filesystem::path& p)
 {
   open_file(p.string());
 }

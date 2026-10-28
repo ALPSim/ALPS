@@ -18,7 +18,7 @@
 
 class SparseDiagFactory : public alps::scheduler::Factory {
   alps::scheduler::Task* make_task(const alps::ProcessList&, 
-     const boost::filesystem::path&, const alps::Parameters&) const;  
+     const std::filesystem::path&, const alps::Parameters&) const;  
   void print_copyright(std::ostream& out) const;
 };
 

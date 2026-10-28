@@ -19,7 +19,7 @@
 
 #include <alps/export.h>
 #include <alps/config.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <string>
 
 namespace alps {
@@ -54,7 +54,7 @@ public:
 class ALPS_DECL Options : public NoJobfileOptions
 {
 public:
-  boost::filesystem::path jobfilename;      // name of the jobfile
+  std::filesystem::path jobfilename;      // name of the jobfile
 
   Options(int argc, char** argv);
   Options(int argc, char** argv, const std::string& citation_component);

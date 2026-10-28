@@ -16,7 +16,7 @@
 
 #include <alps/hdf5.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 class my_class {
     public:
@@ -37,8 +37,8 @@ class my_class {
 TEST(Hdf5, Misc) {
     alps::testing::TemporaryDirectory temporary;
 
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "data.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "data.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "data.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "data.h5").string()));
 
     {
         alps::hdf5::archive ar((temporary.path() / "data.h5").string(), "w");
@@ -132,6 +132,6 @@ TEST(Hdf5, Misc) {
         EXPECT_EQ(str, "hello");
     }
 
-    boost::filesystem::remove(boost::filesystem::path((temporary.path() / "data.h5").string()));
+    std::filesystem::remove(std::filesystem::path((temporary.path() / "data.h5").string()));
 
 }

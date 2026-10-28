@@ -22,12 +22,12 @@
 #include <map>
 #include <list>
 #include <vector>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include "archive_sqlite.hpp"
 #include "archive_node.hpp"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class Plot {
         SQLite &mDB;

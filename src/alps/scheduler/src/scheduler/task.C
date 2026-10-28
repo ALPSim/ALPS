@@ -20,8 +20,8 @@
 #include <alps/expression.h>
 #include <alps/parser/parser.h>
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 #include <boost/throw_exception.hpp>
 #include <fstream>
 #include <stdexcept>
@@ -36,7 +36,7 @@ void Task::print_copyright(std::ostream& out)
 }
 
 
-Task::Task(const ProcessList& w,const boost::filesystem::path& filename)
+Task::Task(const ProcessList& w,const std::filesystem::path& filename)
   : AbstractTask(w),
     finished_(false),
     infilename(filename),
@@ -78,7 +78,7 @@ void Task::parse_task_file(bool read_parms_only)
   else
     h5name = infilename.string().substr(0, infilename.string().find_last_of('.')) + ".h5";
   
-  if (boost::filesystem::exists(boost::filesystem::path(h5name))) {
+  if (std::filesystem::exists(std::filesystem::path(h5name))) {
     hdf5::archive ar(h5name);
     if (read_parms_only)
       ar["/parameters"] >> parms;
@@ -87,7 +87,7 @@ void Task::parse_task_file(bool read_parms_only)
   } 
 #endif
   if (read_xml) {
-    boost::filesystem::ifstream infile(infilename);
+    std::ifstream infile(infilename);
 
     // read outermost tag (e.g. <SIMULATION>)
     XMLTag tag=parse_tag(infile,true);
@@ -126,7 +126,7 @@ void Task::parse_task_file(bool read_parms_only)
 Parameters Task::parse_ext_task_file(std::string infilename)
 {
   Parameters res;
-  boost::filesystem::ifstream infile(infilename);
+  std::ifstream infile(infilename);
 
   // read outermost tag (e.g. <SIMULATION>)
   XMLTag tag=parse_tag(infile,true);
@@ -231,17 +231,17 @@ void Task::write_xml_trailer(oxstream& out) const
 }
 
 // checkpoint: save into a file
-void Task::checkpoint(const boost::filesystem::path& fn, bool writeallxml) const
+void Task::checkpoint(const std::filesystem::path& fn, bool writeallxml) const
 {
-  boost::filesystem::path dir=fn.parent_path();
-  bool make_backup = boost::filesystem::exists(fn);
+  std::filesystem::path dir=fn.parent_path();
+  bool make_backup = std::filesystem::exists(fn);
 
 #ifdef ALPS_HAVE_HDF5
   std::string task_path = fn.string().substr(0, fn.string().find_last_of('.')) + ".h5";
   std::string task_backup = fn.string().substr(0, fn.string().find_last_of('.')) + ".h5.bak";
-  bool task_exists = boost::filesystem::exists(task_path);
-  if (boost::filesystem::exists(task_backup))
-      boost::filesystem::remove(task_backup);
+  bool task_exists = std::filesystem::exists(task_path);
+  if (std::filesystem::exists(task_backup))
+      std::filesystem::remove(task_backup);
 
   make_backup = make_backup || task_exists; 
 
@@ -253,7 +253,7 @@ void Task::checkpoint(const boost::filesystem::path& fn, bool writeallxml) const
 #endif
 
 #ifndef ALPS_ONE_CHECKPOINT_FILE_ONLY
-  boost::filesystem::path filename = (make_backup ? dir/(fn.filename().string()+".bak") : fn);
+  std::filesystem::path filename = (make_backup ? dir/(fn.filename().string()+".bak") : fn);
   {
     alps::oxstream out (filename);
     write_xml_header(out);
@@ -264,30 +264,30 @@ void Task::checkpoint(const boost::filesystem::path& fn, bool writeallxml) const
 #endif
 
   if(make_backup) {
-    if (boost::filesystem::exists(fn))
-      boost::filesystem::remove(fn);
+    if (std::filesystem::exists(fn))
+      std::filesystem::remove(fn);
 #ifndef ALPS_ONE_CHECKPOINT_FILE_ONLY
-    boost::filesystem::rename(filename,fn);
+    std::filesystem::rename(filename,fn);
 #endif
 #ifdef ALPS_HAVE_HDF5
-    if (boost::filesystem::exists(task_path))
-      boost::filesystem::remove(task_path);
-    boost::filesystem::rename(task_backup, task_path);
+    if (std::filesystem::exists(task_path))
+      std::filesystem::remove(task_path);
+    std::filesystem::rename(task_backup, task_path);
 #endif
   }
 }
 
-void Task::checkpoint_hdf5(const boost::filesystem::path& fn) const
+void Task::checkpoint_hdf5(const std::filesystem::path& fn) const
 {
 #ifdef ALPS_HAVE_HDF5
-  boost::filesystem::path dir=fn.parent_path();
-  bool make_backup = boost::filesystem::exists(fn);
+  std::filesystem::path dir=fn.parent_path();
+  bool make_backup = std::filesystem::exists(fn);
 
   std::string task_path = fn.string().substr(0, fn.string().find_last_of('.')) + ".h5";
   std::string task_backup = fn.string().substr(0, fn.string().find_last_of('.')) + ".h5.bak";
-  bool task_exists = boost::filesystem::exists(task_path);
-  if (boost::filesystem::exists(task_backup))
-      boost::filesystem::remove(task_backup);
+  bool task_exists = std::filesystem::exists(task_path);
+  if (std::filesystem::exists(task_backup))
+      std::filesystem::remove(task_backup);
 
   make_backup = make_backup || task_exists; 
 
@@ -297,21 +297,21 @@ void Task::checkpoint_hdf5(const boost::filesystem::path& fn) const
   } // close file
   
   if(make_backup) {
-    if (boost::filesystem::exists(task_path))
-      boost::filesystem::remove(task_path);
-    boost::filesystem::rename(task_backup, task_path);
+    if (std::filesystem::exists(task_path))
+      std::filesystem::remove(task_path);
+    std::filesystem::rename(task_backup, task_path);
   }
 #endif
 }
 
 // checkpoint: save into a file
-void Task::checkpoint_xml(const boost::filesystem::path& fn, bool writeallxml) const
+void Task::checkpoint_xml(const std::filesystem::path& fn, bool writeallxml) const
 {
-  boost::filesystem::path dir=fn.parent_path();
-  bool make_backup = boost::filesystem::exists(fn);
+  std::filesystem::path dir=fn.parent_path();
+  bool make_backup = std::filesystem::exists(fn);
 
 #ifndef ALPS_ONE_CHECKPOINT_FILE_ONLY
-  boost::filesystem::path filename = (make_backup ? dir/(fn.filename().string()+".bak") : fn);
+  std::filesystem::path filename = (make_backup ? dir/(fn.filename().string()+".bak") : fn);
   {
     alps::oxstream out (filename);
     write_xml_header(out);
@@ -322,10 +322,10 @@ void Task::checkpoint_xml(const boost::filesystem::path& fn, bool writeallxml) c
 #endif
 
   if(make_backup) {
-    if (boost::filesystem::exists(fn))
-      boost::filesystem::remove(fn);
+    if (std::filesystem::exists(fn))
+      std::filesystem::remove(fn);
 #ifndef ALPS_ONE_CHECKPOINT_FILE_ONLY
-    boost::filesystem::rename(filename,fn);
+    std::filesystem::rename(filename,fn);
 #endif
   }
 }

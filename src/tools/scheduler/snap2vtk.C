@@ -25,8 +25,8 @@
 #include <alps/osiris.h>
 #include <alps/scheduler/types.h>
 #include <alps/utilities/vectorio.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 #include <regex>
 #include <complex>
 #include <iostream>
@@ -46,10 +46,10 @@ int main(int argc, char **argv) {
 
   for (int i = 1; i < argc; ++i) {
     std::string basename = std::regex_replace(std::string(argv[i]), std::regex("\\.snap$"), "");
-    boost::filesystem::path snapfile =
-      absolute(boost::filesystem::path(basename + ".snap")).lexically_normal();
-    boost::filesystem::path vtkfile =
-      absolute(boost::filesystem::path(basename + ".vtk")).lexically_normal();
+    std::filesystem::path snapfile =
+      absolute(std::filesystem::path(basename + ".snap")).lexically_normal();
+    std::filesystem::path vtkfile =
+      absolute(std::filesystem::path(basename + ".vtk")).lexically_normal();
     if (!exists(snapfile)) {
       std::cerr << "Warning: " << snapfile << " not found. Skipped.\n";
       continue;
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
       for (int j = 0; j < 3; ++j) coords[s][j] -= center[j];
     }
 
-    boost::filesystem::ofstream vtk(vtkfile);
+    std::ofstream vtk(vtkfile);
     vtk << "# vtk DataFile Version 3.0\n"
         << "snapshot\n"
         << "ASCII\n"

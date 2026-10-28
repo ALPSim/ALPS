@@ -76,7 +76,7 @@ E=0.2, F=100
   alps::ParameterList params(input);
   expect_parameters(params);
   alps::testing::TemporaryDirectory directory;
-  const boost::filesystem::path dump((directory.path() / "parameters.xdr").string());
+  const std::filesystem::path dump((directory.path() / "parameters.xdr").string());
   {
     alps::OXDRFileDump output(dump);
     output << params;

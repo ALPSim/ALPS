@@ -11,7 +11,7 @@ add_library(alps_utilities
   src/stacktrace.cpp
   src/temporary_filename.cpp
   src/vmusage.cpp)
-target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Boost::filesystem Threads::Threads)
+target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Threads::Threads)
 
 # Stacktraces require both platform headers and linkable runtime symbols.
 # Detect them for every build, including embedded consumers on musl.
@@ -88,6 +88,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/data.hpp
     include/alps/utilities/deprecated.hpp
     include/alps/utilities/encode.hpp
+    include/alps/utilities/fs/absolute.hpp
     include/alps/utilities/fs/get_basename.hpp
     include/alps/utilities/fs/get_dirname.hpp
     include/alps/utilities/fs/get_extension.hpp
