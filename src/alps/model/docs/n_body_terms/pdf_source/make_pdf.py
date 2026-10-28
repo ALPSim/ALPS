@@ -213,8 +213,7 @@ for line in RUNS:
 assert np.abs(FD["0.5"] - E5).max() < 1e-12 and np.abs(FD["0"] - E0).max() < 1e-12
 STOCK = [l for l in RUNS if l.startswith("stock")][0].split("E0 = ")[1]
 NO_NSITE = [l for l in RUNS if l.startswith("K=0.5 model")][0].split("E0 = ")[1]
-DMRG = float([l for l in RUNS if l.startswith("dmrg")][0].split("K=0.5: E0 = ")[1])
-assert abs(DMRG - E5[0]) < 1e-7
+DMRG = [l for l in RUNS if l.startswith("dmrg")][0].split(": ", 1)[1]
 
 
 def num(v):
@@ -247,7 +246,7 @@ story += [
         "of sites, attached to a new <b>&lt;NSITE&gt;</b> element of the lattice. A molecular Hamiltonian's "
         "(pq|rs), a ring exchange or a correlated pair hop can now be written down exactly, with nothing "
         "truncated. The terms are used by exact diagonalization (<font face='Mono'>fulldiag</font>, "
-        "<font face='Mono'>sparsediag</font>) and by <font face='Mono'>dmrg</font>.", P),
+        "<font face='Mono'>sparsediag</font>).", P),
     Paragraph(
         "This document follows one small problem through ALPS: the input files, the n-site group's local table, "
         "the fill of the many-body matrix, and the eigenvalues. It is the same system as "
@@ -264,11 +263,11 @@ story += [
         ["yes", "no", "n-site groups are ignored", f"stock 'fermion Hubbard' on this lattice:\nE0 = {float(STOCK):.10f}"],
         ["no", "yes", "term has nothing to act on\n(like a BONDTERM on a graph without edges)",
          f"K = 0.5 model, n-site group removed:\nE0 = {float(NO_NSITE):.10f} (= the K = 0 value)"],
-        ["yes", "yes", "fulldiag / sparsediag / dmrg add the term;\nthe QMC codes stop with a message",
-         f"this document; dmrg on the same input:\nE0 = {DMRG:.10f} (Step 8 f)"],
+        ["yes", "yes", "fulldiag / sparsediag add the term;\nDMRG and QMC codes stop with a message",
+         "this document; dmrg refuses (below)"],
     ], widths=[1.15 * inch, 1.3 * inch, 2.25 * inch, 2.4 * inch], fs=7.5),
     Spacer(1, 3),
-    Paragraph("The QMC codes refuse such a model with a message, so it is never silently truncated.", SMALL),
+    Paragraph("The refusal, so a model is never silently truncated: <i>" + DMRG.replace("<", "&lt;").replace(">", "&gt;") + "</i>", SMALL),
 ]
 
 # ---- Step 1 lattice
@@ -460,39 +459,6 @@ def count(name, pat):
     return sum(1 for l in read(res, name).splitlines() if re.search(pat, l))
 
 
-dcasci = read(res, "casci_vs_dmrg.txt").splitlines()
-drow = [["molecule", "sector\n(N↑,N↓)", "QDK CASCI", "ALPS dmrg", "|ΔE|"]]
-for line in dcasci:
-    m = re.match(r"(.{30})\s*(\(\d,\d\))\s+(\S+)\s+(\S+)\s+(\S+)", line)
-    if m:
-        drow.append([m.group(1).strip(), m.group(2), m.group(3), m.group(4), m.group(5)])
-t7 = [l for l in read(res, "t7_dmrg.txt").splitlines() if "max|dE|" in l or "refused" in l or "warning" in l]
-dmrg_story = [
-    Paragraph(
-        "<b>(f) DMRG.</b> <font face='Mono'>dmrg</font> takes the same input. Each product of the term becomes "
-        "one DMRG term with one site operator per site (the split of Step 5, before the table is built); "
-        "operators in the same block are combined into block operators, as for bond terms between distant "
-        f"sites. On this document's example it gives E0 = {DMRG:.10f} (fulldiag {E5[0]:.10f}). "
-        "Molecules, every (pq|rs) an n-site term on 2–4 orbitals, against QDK CASCI "
-        f"(H3+ is left out: dmrg needs at least 4 sites, for any model): <b>{dcasci[-1].strip()}</b>.", P),
-    table(drow, widths=[1.9 * inch, 0.7 * inch, 1.2 * inch, 1.2 * inch, 0.7 * inch], fs=7),
-    Spacer(1, 4),
-    Paragraph(
-        "Lattice cases (benchmarks/alps_checks/t7_dmrg.py): ladders vs fulldiag; random 4-operator and "
-        "6-operator (3-body) fermion terms on 4- and 3-site n-site groups in scrambled site order vs a dense "
-        "Jordan–Wigner matrix (E0 and E1, odd sectors included); Moore–Read; a 2×6 ladder where DMRG truncates, "
-        "vs sparsediag; the conserved-quantum-number refusal and the Nmax warning. "
-        f"{last_line('t7_dmrg.txt')}.", P),
-    Paragraph(
-        "With <font face='Mono'>SAVE_MPS=1</font> (ALPSim/ALPS#216) dmrg also writes its ground state as an MPS. "
-        "Contracted to a state vector, it matches the CASCI wave function of every molecule above determinant by "
-        f"determinant ({last_line('casci_vs_mps.txt')}), and the exact ground states of fermion, boson and spin "
-        f"models with n-site terms component by component ({last_line('t8_mps.txt')}): "
-        "benchmarks/results/casci_vs_mps.txt, t8_mps.txt.", P),
-    code("\n".join(l.rstrip() for l in t7), MONO_S),
-    Spacer(1, 6),
-]
-
 story += [
     Paragraph("Step 8 — Benchmarks", H1),
     Paragraph(
@@ -532,14 +498,12 @@ story += [
              if re.match(r"\s*\d+\s+\d+\s+\d+", l)],
           widths=[0.4 * inch, 0.4 * inch, 0.6 * inch, 1.2 * inch, 0.85 * inch, 0.85 * inch, 0.8 * inch], fs=7),
     Spacer(1, 6),
-] + dmrg_story + [
     Paragraph(
-        "<b>(g) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell n-site groups at open and "
+        "<b>(f) Unit tests.</b> src/alps/model/tests/nsite_terms.cpp (GoogleTest): unit-cell n-site groups at open and "
         "periodic boundaries, GRAPH n-site groups, invalid n-site groups, ladder reference energies, K = 0 equals the "
         "plain model, the analytic case above, sector violation, typed and # terms, parameter precision, the "
         "refusal in other applications, and bosons: N-conserving and non-conserving terms vs a dense reference, "
-        "truncation at Nmax and its warning. For dmrg, src/apps/dmrg/dmrg/tests/dmrg_nsite_terms.cmake runs two "
-        "ladders with the pair-hopping term against their fulldiag energies. Full ctest: 937/937 pass.", P),
+        "truncation at Nmax and its warning. Full ctest: 936/936 pass.", P),
     Paragraph("Raw output and the scripts are in <font face='Mono'>benchmarks/</font>.", SMALL),
 ]
 
@@ -560,8 +524,6 @@ story += [
         ["model/model_helper.h", "applications without support refuse n-site terms instead of dropping them"],
         ["model/siteterm.C, bondterm.C", "fix: parameters were rounded to 6 digits (see below)"],
         ["model/tests/nsite_terms.cpp (new)", "unit tests"],
-        ["apps/dmrg/dmrg/dmrg.h", "n-site terms as DMRG terms, one site operator per site; same checks as ED"],
-        ["apps/dmrg/dmrg/tests/\ndmrg_nsite_terms.cmake (new)", "dmrg test against fulldiag energies"],
         ["CHANGELOG.md, model/docs/", "changelog entry, syntax reference (nsite_terms.md), this folder"],
     ], widths=[2.4 * inch, 4.6 * inch], fs=7.5, align="LEFT"),
     Spacer(1, 6),
@@ -572,9 +534,8 @@ story += [
         "with full double precision. Inputs with short parameter values (t = 1, U = 4, …) give bit-identical "
         "results; longer values are now used exactly as given.", P),
     Paragraph(
-        "<b>Limits.</b> The QMC codes refuse n-site terms. In dmrg every distinct product is its own term "
-        "with its own block operators, so the cost grows with the number of products (O(N<super>4</super>) for "
-        "a molecule with N orbitals). N-site groups in a &lt;GRAPH&gt; are not "
+        "<b>Limits.</b> Only exact diagonalization supports n-site terms for now; DMRG and the QMC codes "
+        "refuse them. N-site groups in a &lt;GRAPH&gt; are not "
         "yet written back out when ALPS writes a lattice library to XML.", P),
 ]
 
