@@ -31,6 +31,7 @@
 #include <boost/numeric/bindings/upper.hpp>
 #include <boost/numeric/bindings/lower.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 template <class T> 
 struct pick_real_complex 
@@ -64,11 +65,16 @@ public:
   typedef typename super_type::site_descriptor site_descriptor;
   typedef typename super_type::operator_matrix_type operator_matrix_type;
   
-  FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
+  // settings, if given, are the parameters already read by read_parameters
+  FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,
+                  const alps::params* settings = 0);
   void evaluate(const alps::Parameters&, const std::string&) const;
   void print_eigenvectors(std::ostream& os) const;
   void append_eigenvectors(std::vector<value_type>& v) const;
 private:
+  // a temperature or field, which can be an expression in the model parameters
+  /** @throws std::invalid_argument naming the parameter if it is empty or cannot be evaluated */
+  static double parameter_value(const alps::Parameters& p, const std::string& name);
   magnitude_type groundstate_energy() const;
   void do_subspace();
   magnitude_type calculate_averages(MeasurementsPlot<magnitude_type>&) const;
@@ -93,22 +99,39 @@ private:
 };
 
 template <class T>
-FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p) 
- : super_type(where,p,true)
+FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,
+                                   const alps::params* settings)
+ : super_type(where,p,true,&FullDiagMatrix::define_parameters,settings)
  , field(0.)
  , field0(0.) 
  , have_Conserved(false) 
 { 
   this->construct(); 
 }
+
     
-    
+template <class T>
+double FullDiagMatrix<T>::parameter_value(const alps::Parameters& p, const std::string& name)
+{
+  std::string const text = boost::algorithm::trim_copy(std::string(p[name]));
+  if (text.empty())
+    boost::throw_exception(std::invalid_argument("parameter '" + name + "' is empty"));
+  try {
+    return alps::evaluate<double>(text, p);
+  }
+  catch (std::exception& e) {
+    boost::throw_exception(std::invalid_argument("Cannot evaluate parameter '" + name + "': " + e.what()));
+  }
+  return 0.;
+}
+
 template <class T>
 void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::string& basename) const
 {
   alps::Parameters p(this->get_parameters());
   alps::graph_helper<> lattice(this->get_parameters());
   p << parmsin;
+  alps::params settings = alps::make_parameters_from_deprecated(p);
   
   bool have_t_range=false;
   bool muN = false;        // coupling -mu N ?
@@ -123,8 +146,11 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   std::string second_moment_name = "Uniform Susceptibility";
 
   // If you wish to change the coupling to a conserved quantity, you have to change the following block:  
-  muN = (p["couple"] == "mu");
-  if(p["couple"] == "MU")
+  settings.define<std::string>("couple", "", "mu or MU: couple -mu N instead of -h Sz")
+          .define<std::string>("versus", "", "the field name, in either case: plot versus the field instead of T");
+  std::string const couple = settings["couple"].as<std::string>();
+  muN = (couple == "mu");
+  if(couple == "MU")
      muN = true;
   if(muN)            // Switch to coupling -mu N
    {
@@ -142,32 +168,44 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   std::string second_moment_name_lc = boost::algorithm::to_lower_copy(second_moment_name);
   boost::algorithm::replace_all(second_moment_name_lc, " ", "_");
 
-  measure_properties = p.value_or_default(muN?"MEASURE_CHARGE_PROPERTIES":
-                                  "MEASURE_MAGNETIC_PROPERTIES",1);
-  bool densities = p.value_or_default("DENSITIES",1);
+  // define only what this evaluation reads; the others need not be numbers.
+  // The temperatures and fields can be expressions in the model parameters,
+  // such as h = J/2, so they are evaluated below instead
+  std::string const measure_name = muN?"MEASURE_CHARGE_PROPERTIES":"MEASURE_MAGNETIC_PROPERTIES";
+  settings.define<bool>(measure_name, true, "measure the conserved quantity and its second moment")
+          .define<bool>("DENSITIES", true, "divide by the number of sites");
+  bool const have_t_range_parameters = p.defined("T_MAX") && p.defined("DELTA_T");
+  bool const have_field_range = p.defined(field_name_uc+"_MAX") && p.defined("DELTA_"+field_name_uc);
+  std::ostringstream errors;
+  if (settings.has_missing(errors))
+    boost::throw_exception(std::invalid_argument(errors.str()));
+
+  measure_properties = settings[measure_name].as<bool>();
+  bool densities = settings["DENSITIES"].as<bool>();
 
   std::string dstr = densities?" Density":"";
   std::string sstr = densities?" per Site":""; 
 
   magnitude_type perSite = densities?num_sites(lattice.graph()):1;
 
-  bool versus_field = (p["versus"] == field_name);
-  if(p["versus"] == field_name_uc)
+  std::string const versus = settings["versus"].as<std::string>();
+  bool versus_field = (versus == field_name);
+  if(versus == field_name_uc)
       versus_field = true;
 
   std::string vstr = versus_field?field_label:"Temperature";
 
-  if (p.defined("T_MAX") && p.defined("DELTA_T")) {
+  if (have_t_range_parameters) {
     have_t_range=true;
-    tmin=p.value_or_default("T_MIN",0.);
-    tmax=p["T_MAX"];
-    deltaT=p["DELTA_T"];
+    tmin=p.defined("T_MIN") ? parameter_value(p, "T_MIN") : 0.;
+    tmax=parameter_value(p, "T_MAX");
+    deltaT=parameter_value(p, "DELTA_T");
   }
   
   if (p.defined("T"))
-    beta = 1./double(p["T"]);
+    beta = 1./parameter_value(p, "T");
   else if (p.defined("beta"))
-    beta = p["beta"];
+    beta = parameter_value(p, "beta");
   else if (!have_t_range)
   {
     std::cerr << "DELTA_T and T_MAX or T need to be defined\n";
@@ -184,15 +222,15 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   magnitude_type hmax;
   magnitude_type deltaH;
   
-  if (p.defined(field_name_uc+"_MAX") && p.defined("DELTA_"+field_name_uc)) {
-    hmin=p.value_or_default(field_name_uc+"_MIN",0.);
-    hmax=p[field_name_uc+"_MAX"];
-    deltaH=p["DELTA_"+field_name_uc];
-    field0 = p.value_or_default(field_name, 0.);
+  if (have_field_range) {
+    hmin=p.defined(field_name_uc+"_MIN") ? parameter_value(p, field_name_uc+"_MIN") : 0.;
+    hmax=parameter_value(p, field_name_uc+"_MAX");
+    deltaH=parameter_value(p, "DELTA_"+field_name_uc);
+    field0 = p.defined(field_name) ? parameter_value(p, field_name) : 0.;
   }
   else {
    // define an h-range with 1 point
-   field0 = hmin = hmax = p.value_or_default(field_name, 0.);
+   field0 = hmin = hmax = p.defined(field_name) ? parameter_value(p, field_name) : 0.;
    deltaH = 1;
   }
 
@@ -432,12 +470,13 @@ typename FullDiagMatrix<T>::magnitude_type FullDiagMatrix<T>::calculate_averages
 template <class T>
 void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {
-    alps::Parameters pa = this ->get_parameters();
+    const alps::Parameters& pa = this->get_parameters();
     if (writeallxml && (pa.defined("T") || pa.defined("beta"))) {
-  
-        beta = (pa.defined("T") ? 1./double(pa["T"]) 
-                           : double(pa["beta"]));
-        field0 = field = pa.value_or_default("H",pa.value_or_default("h",0.));
+        // T, beta, H and h can be expressions in the model parameters, such as h = J/2
+        beta = (pa.defined("T") ? 1./parameter_value(pa, "T")
+                           : parameter_value(pa, "beta"));
+        field0 = field = (pa.defined("H") ? parameter_value(pa, "H")
+                          : pa.defined("h") ? parameter_value(pa, "h") : 0.);
     conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();

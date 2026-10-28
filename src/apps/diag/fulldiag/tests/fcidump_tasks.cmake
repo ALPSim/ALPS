@@ -1,6 +1,7 @@
 # FCIDUMP="file" with several tasks: tasks with their own FCIDUMP each write
-# theirs; a second task naming the same FCIDUMP fails the run before any task
-# runs, instead of overwriting the first one's file.
+# theirs; a second task naming the same FCIDUMP cannot be created, so the
+# scheduler reports it, runs the other tasks and exits non-zero. The first
+# task's file is written once and never overwritten.
 # A task that fixes only Nup_total and scans the Ndown sectors still runs.
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")
@@ -49,9 +50,10 @@ if(NOT output MATCHES "shared.fcidump is also the FCIDUMP of [^\n]*shared.task1.
 endif()
 string(REGEX MATCHALL "Wrote FCIDUMP" writes "${output}")
 list(LENGTH writes writes)
-if(NOT writes EQUAL 0 OR EXISTS "${test_dir}/shared.fcidump")
-  message(FATAL_ERROR "a task ran although the FCIDUMP was shared:\n${output}")
+if(NOT writes EQUAL 1 OR NOT EXISTS "${test_dir}/shared.fcidump")
+  message(FATAL_ERROR "the shared FCIDUMP was not written exactly once:\n${output}")
 endif()
+require_u(shared.fcidump 2)
 
 file(WRITE "${test_dir}/lone" [=[
 LATTICE="chain lattice"

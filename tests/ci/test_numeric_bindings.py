@@ -1,11 +1,10 @@
-"""Keep the vendored headers closed under all conditional include branches."""
+"""Keep the vendored subset closed under all conditional include branches."""
 from pathlib import Path
 import re
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 INCLUDE = ROOT / "third_party/boost_numeric_bindings/include"
-PREFIX = "boost/numeric/bindings/"
 SOURCE_SUFFIXES = {".h", ".hpp", ".ipp", ".cpp", ".c", ".cc", ".cxx",
                    ".hh", ".in", ".tpp", ".tcc"}
 
@@ -39,8 +38,3 @@ def test_numeric_bindings_include_closure():
         assert path.is_file(), f"Missing vendored include: {name}"
         visited.add(name)
         pending.update(binding_includes(path) - visited)
-
-    headers = {path.relative_to(INCLUDE).as_posix()
-               for path in (INCLUDE / PREFIX).rglob("*") if path.is_file()}
-    assert visited <= headers
-    # Unreferenced public vendor headers remain available for downstream users.

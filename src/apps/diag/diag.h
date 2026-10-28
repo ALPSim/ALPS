@@ -52,8 +52,16 @@ public:
 
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
 
-  DiagMatrix (const alps::ProcessList& , const boost::filesystem::path&,bool delay_construct=false);
+  DiagMatrix (const alps::ProcessList& , const boost::filesystem::path&,bool delay_construct=false,
+              void (*define_parameters)(alps::params&) = &DiagMatrix::define_parameters,
+              const alps::params* settings = 0);
   ~DiagMatrix();
+
+  /// Defines the parameters sparsediag and fulldiag read, with their defaults
+  static void define_parameters(alps::params& parameters);
+  /// Whether a task with these parameters is diagonalized as a complex matrix
+  /** @param is_graph whether GRAPH or LATTICE names a graph, which is never complex by default */
+  static bool use_complex(const alps::params& parameters, bool is_graph);
 
   void dostep();
 
@@ -97,8 +105,9 @@ private:
 
 
 template <class T, class M>
-DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p, bool delay_construct) 
-    : alps::scheduler::DiagTask<T>(where,p,delay_construct)
+DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
+                            void (*define_parameters)(alps::params&), const alps::params* settings)
+    : alps::scheduler::DiagTask<T>(where,p,delay_construct,define_parameters,settings)
     , alps::hamiltonian_matrix<M>(this->get_parameters())
 { 
   if (this->calc_averages())
@@ -130,6 +139,26 @@ DiagMatrix<T,M>::~DiagMatrix()
 }
 
 template <class T, class M>
+void DiagMatrix<T,M>::define_parameters(alps::params& parameters)
+{
+  alps::scheduler::DiagTask<T>::define_parameters(parameters);
+  parameters.define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers whose sectors are diagonalized separately")
+            .define<bool>("TRANSLATION_SYMMETRY", true, "diagonalize each momentum sector separately");
+  // without COMPLEX, use_complex() decides. TOTAL_MOMENTUM is read by the
+  // model library; here only whether it is supplied matters.
+  if (parameters.supplied("COMPLEX"))
+    parameters.define<bool>("COMPLEX", "diagonalize a complex matrix");
+}
+
+template <class T, class M>
+bool DiagMatrix<T,M>::use_complex(const alps::params& parameters, bool is_graph)
+{
+  if (parameters.exists("COMPLEX"))
+    return parameters["COMPLEX"].as<bool>();
+  return !is_graph && (parameters["TRANSLATION_SYMMETRY"].as<bool>() || parameters.supplied("TOTAL_MOMENTUM"));
+}
+
+template <class T, class M>
 void DiagMatrix<T,M>::dostep() 
 {
   if (this->finished()) 
@@ -147,16 +176,16 @@ void DiagMatrix<T,M>::dostep()
       boost::throw_exception(std::runtime_error("FCIDUMP: " + std::string(e.what())));
     }
   }
-  build_subspaces(this->alps::scheduler::Task::parms["CONSERVED_QUANTUMNUMBERS"]);
+  build_subspaces(this->settings()["CONSERVED_QUANTUMNUMBERS"].template as<std::string>());
   std::vector<total_type> indices(ranges_.size());
   std::vector<std::string> momenta;
-  if (this->alps::scheduler::Task::parms.value_or_default("TRANSLATION_SYMMETRY",true)) {
+  if (this->settings()["TRANSLATION_SYMMETRY"].template as<bool>()) {
     std::vector<vector_type> k = this->translation_momenta();
     for (typename std::vector<vector_type>::const_iterator it=k.begin();it!=k.end();++it)
       momenta.push_back(alps::write_vector(*it));
   }
   unsigned ik=0;
-  bool loop_momenta = ! this->alps::scheduler::Task::parms.defined("TOTAL_MOMENTUM");    // Loop over momenta ?
+  bool loop_momenta = ! this->settings().supplied("TOTAL_MOMENTUM");    // Loop over momenta ?
   bool done;
   do { 
     // set QN

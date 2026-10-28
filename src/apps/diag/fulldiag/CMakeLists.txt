@@ -47,6 +47,19 @@ if(ALPS_BUILD_TESTING)
     set_tests_properties(fulldiag_fcidump_tasks PROPERTIES LABELS "fulldiag" TIMEOUT 120
       ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
   endif()
+  if(TARGET parameter2xml AND TARGET convert2xml)
+    add_test(NAME fulldiag_measure_energy_false
+      COMMAND ${CMAKE_COMMAND}
+        "-Dfulldiag=$<TARGET_FILE:fulldiag>"
+        "-Dfulldiag_evaluate=$<TARGET_FILE:fulldiag_evaluate>"
+        "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+        "-Dconvert2xml=$<TARGET_FILE:convert2xml>"
+        "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/measure-energy-false"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/measure_energy_false.cmake")
+    set_tests_properties(fulldiag_measure_energy_false PROPERTIES LABELS "fulldiag" TIMEOUT 120
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+  endif()
 endif()
 
 alps_install_applications(fulldiag fulldiag_evaluate)

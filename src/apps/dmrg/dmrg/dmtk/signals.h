@@ -10,7 +10,7 @@ class Signal
   public:
     typedef bool (*callback) (A &object, size_t signal_id, void *data);
 
-    Signal() {}
+    Signal() : _handler(0), _object(0), _signal_id(0), _data(0) {}
     Signal(callback handler, A *object, size_t signal_id, void *data):
       _handler(handler), _object(object), _signal_id(signal_id), _data(data) {}
 
@@ -20,7 +20,7 @@ class Signal
     size_t signal_id() const { return _signal_id; }
 
     bool emit()
-      { return _handler(*_object, _signal_id, _data); }
+      { return _handler ? _handler(*_object, _signal_id, _data) : true; }
 
   private:
     callback _handler;

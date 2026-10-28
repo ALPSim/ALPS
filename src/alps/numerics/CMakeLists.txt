@@ -12,9 +12,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/multi_array/functions.hpp
     include/alps/multi_array/operators.hpp
     include/alps/functional.h
-    include/alps/boost/accumulators/numeric/functional.hpp
-    include/alps/boost/accumulators/numeric/functional/valarray.hpp
-    include/alps/boost/accumulators/numeric/functional/vector.hpp
     include/alps/ngs/numeric.hpp
     include/alps/ngs/numeric/array.hpp
     include/alps/ngs/numeric/detail.hpp
@@ -28,9 +25,7 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/check_size.hpp
     include/alps/numeric/checked_divide.hpp
     include/alps/numeric/conj.hpp
-    include/alps/numeric/deprecated/vector.hpp
     include/alps/numeric/detail/deprecated/blasheader.hpp
-    include/alps/numeric/detail/deprecated/blasmacros.h
     include/alps/numeric/detail/deprecated/general_matrix.hpp
     include/alps/numeric/detail/deprecated/matrix.hpp
     include/alps/numeric/detail/deprecated/vector.hpp
@@ -96,7 +91,6 @@ target_sources(alps_numerics INTERFACE
     include/alps/numeric/real.hpp
     include/alps/numeric/rectangularize.hpp
     include/alps/numeric/regression.hpp
-    include/alps/numeric/resizeable_vector.h
     include/alps/numeric/round.hpp
     include/alps/numeric/scalar.hpp
     include/alps/numeric/scalar_product.hpp

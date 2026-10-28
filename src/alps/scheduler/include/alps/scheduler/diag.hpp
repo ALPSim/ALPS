@@ -19,12 +19,20 @@
 #include <alps/model/model_helper.h>
 #include <alps/lattice/graph_helper.h>
 #include <alps/scheduler/task.h>
+#include <alps/params.hpp>
+#include <alps/ngs/make_parameters_from_deprecated.hpp>
 
 #include <alps/numeric/matrix/vector.hpp>
 #include <alps/hdf5/numeric_vector.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/type_traits/is_complex.hpp>
+
+#include <boost/lexical_cast.hpp>
+
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace alps { namespace scheduler {
 
@@ -39,7 +47,25 @@ public:
   typedef model_helper<>::half_integer_type half_integer_type;
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
   
-  DiagTask (const ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false);
+  // define_parameters defines the parameters the task reads: a derived
+  // class passes its own, which calls this class's. settings, if given, are
+  // those parameters already read by read_parameters, as the factories do for
+  // a new run; without them the task reads an existing output, as
+  // fulldiag_evaluate and convert2xml do
+  DiagTask (const ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false,
+            void (*define_parameters)(alps::params&) = &DiagTask::define_parameters,
+            const alps::params* settings = 0);
+
+  /// Defines the parameters DiagTask reads, with their defaults
+  static void define_parameters(alps::params& parameters);
+
+  /// A task's parameters, with the parameters `define_parameters` defines parsed
+  /** @param stored whether parms are those of an existing output: a NUMBER_EIGENVALUES
+             that is not a positive integer is then ignored with a warning, so that
+             outputs written before it was checked can still be read
+      @throws std::invalid_argument naming each of them that does not parse */
+  static alps::params read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&),
+                                      bool stored = false);
 
   void dostep() { boost::throw_exception(std::logic_error("Cannot call dostep on the base class DiagTask")); }
 
@@ -65,26 +91,80 @@ protected:
   bool calc_vectors() const { return calc_averages() || print_vectors() || save_vectors();}
   bool print_vectors() const { return print_vectors_;}
   bool save_vectors() const { return save_vectors_;}
+  bool measure_energy() const { return measure_energy_;}
+  // the parameters define_parameters defined, read when the task is constructed
+  const alps::params& settings() const { return settings_;}
 private:
-  bool print_vectors_;
-  bool save_vectors_;
+  // NUMBER_EIGENVALUES, at most all n eigenvalues of a sector
+  unsigned number_eigenvalues(std::size_t n) const;
+
+  const alps::params settings_;
+  const bool print_vectors_;
+  const bool save_vectors_;
+  const bool measure_energy_;
   bool skipped_vectors_;
   bool read_hdf5_;
 };
 
 template <class T, class G>
-DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path& p, bool delay_construct) 
+DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
+                        void (*define_parameters)(alps::params&), const alps::params* settings)
     : scheduler::Task(where,p)
     , graph_helper<G>(this->get_parameters())
     , model_helper<>(this->get_parameters())
     , MeasurementOperators(this->get_parameters())
-    , print_vectors_(this->get_parameters().value_or_default("PRINT_EIGENVECTORS",false))
-    , save_vectors_(this->get_parameters().value_or_default("SAVE_EIGENVECTORS",false))
+    , settings_(settings ? *settings : read_parameters(this->get_parameters(), define_parameters, true))
+    , print_vectors_(settings_["PRINT_EIGENVECTORS"].template as<bool>())
+    , save_vectors_(settings_["SAVE_EIGENVECTORS"].template as<bool>())
+    , measure_energy_(settings_["MEASURE_ENERGY"].template as<bool>())
     , skipped_vectors_(false)
     , read_hdf5_(false)
 {
   if (!delay_construct)
     this->construct();
+}
+
+template <class T, class G>
+void DiagTask<T,G>::define_parameters(alps::params& parameters) {
+  parameters.define<bool>("PRINT_EIGENVECTORS", false, "print the eigenvectors")
+            .define<bool>("SAVE_EIGENVECTORS", false, "save the eigenvectors and their basis to the HDF5 output")
+            .define<bool>("MEASURE_ENERGY", true, "write the energy of each eigenstate");
+  if (parameters.supplied("NUMBER_EIGENVALUES"))
+    parameters.define<int>("NUMBER_EIGENVALUES", "number of eigenvalues per sector");
+}
+
+template <class T, class G>
+alps::params DiagTask<T,G>::read_parameters(const Parameters& parms, void (*define_parameters)(alps::params&),
+                                            bool stored) {
+  Parameters checked(parms);
+  if (stored && checked.defined("NUMBER_EIGENVALUES")) {
+    std::string const value = checked["NUMBER_EIGENVALUES"];
+    int n = 0;
+    try {
+      n = boost::lexical_cast<int>(value);
+    }
+    catch (boost::bad_lexical_cast&) {}
+    if (n <= 0) {
+      std::cerr << "Warning: ignoring NUMBER_EIGENVALUES = " << value
+                << ", which is not a positive integer, and using all eigenvalues\n";
+      checked.erase("NUMBER_EIGENVALUES");
+    }
+  }
+  alps::params parameters = make_parameters_from_deprecated(checked);
+  define_parameters(parameters);
+  std::ostringstream errors;
+  if (parameters.has_missing(errors))
+    boost::throw_exception(std::invalid_argument(errors.str()));
+  // define<unsigned> would accept -1
+  if (parameters.exists("NUMBER_EIGENVALUES") && parameters["NUMBER_EIGENVALUES"].template as<int>() <= 0)
+    boost::throw_exception(std::invalid_argument("parameter 'NUMBER_EIGENVALUES' must be positive"));
+  return parameters;
+}
+
+template <class T, class G>
+unsigned DiagTask<T,G>::number_eigenvalues(std::size_t n) const {
+  return settings_.exists("NUMBER_EIGENVALUES")
+    ? (std::min)(unsigned(settings_["NUMBER_EIGENVALUES"].template as<int>()), unsigned(n)) : unsigned(n);
 }
 
 
@@ -148,7 +228,7 @@ void DiagTask<T,G>::save(hdf5::archive & ar) const {
       ar << make_pvp(sectorpath + "/quantumnumbers/" + this->quantumnumbervalues_[i][j].first,
                      this->quantumnumbervalues_[i][j].second);
     ar << make_pvp(sectorpath + "/energies",eigenvalues_[i]);
-    if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true))
+    if (calc_averages() || measure_energy())
       ar << make_pvp(sectorpath,measurements_[i]);
     if (i < eigenvectors_.size()) {
       std::vector<std::size_t> shape(2);
@@ -187,8 +267,7 @@ void DiagTask<T,G>::write_xml_body(oxstream& out, const boost::filesystem::path&
 {
   if (writeallxml) {
     for (unsigned i=0;i<eigenvalues_.size();++i) {
-      unsigned num_eigenvalues = (std::min)(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                  eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
+      unsigned num_eigenvalues = number_eigenvalues(eigenvalues_[i].size());
       out << start_tag("EIGENVALUES") << attribute("number",num_eigenvalues);
       for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
         out << start_tag("QUANTUMNUMBER") << attribute("name",this->quantumnumbervalues_[i][j].first)
@@ -198,10 +277,9 @@ void DiagTask<T,G>::write_xml_body(oxstream& out, const boost::filesystem::path&
       out << end_tag("EIGENVALUES");
     }
 
-    if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true)) {
+    if (calc_averages() || measure_energy()) {
       for (unsigned i=0;i<eigenvalues_.size();++i) {
-         unsigned num_eigenvalues = (std::min)(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                  eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
+         unsigned num_eigenvalues = number_eigenvalues(eigenvalues_[i].size());
         out << start_tag("EIGENSTATES") << attribute("number",num_eigenvalues);
         for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
           out << start_tag("QUANTUMNUMBER") << attribute("name",this->quantumnumbervalues_[i][j].first)

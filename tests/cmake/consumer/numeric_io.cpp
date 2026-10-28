@@ -8,6 +8,11 @@
 #include <stdexcept>
 #include <vector>
 
+// The deprecated blas:: classes stay covered until they are removed.
+#if defined(__GNUC__)
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 int main() {
     using Complex = std::complex<double>;
     alps::numeric::matrix<Complex> source(2, 3);
