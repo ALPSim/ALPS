@@ -2,44 +2,21 @@
 
 <!-- What does this PR do and why? One or two sentences. -->
 
-## Type of change
+## Validated against
 
-<!-- Check all that apply -->
+<!-- Only for changes that affect results: what did you compare with (exact
+     diagonalization, an analytic value, a previous release, a published number),
+     and how close was it? -->
 
-- [ ] Bug fix
-- [ ] New feature or algorithm
-- [ ] Documentation or tutorial improvement
-- [ ] Build system / dependency update
-- [ ] Refactor (no behaviour change)
-- [ ] Other: <!-- describe -->
+## Risk
 
-## Testing
+<!-- What breaks if this change is wrong? Which users or result files are affected? -->
 
-<!-- How was this tested? Check all that apply and describe any manual steps. -->
+## How to revert
 
-- [ ] Existing tests pass (`ctest --output-on-failure`)
-- [ ] New tests added for changed behaviour
-- [ ] Results verified against known reference values or published results
-- [ ] Tested on Linux
-- [ ] Tested on macOS
-
-## For simulation code changes
-
-<!-- If this PR adds or modifies a simulation method, please complete this section. Skip if not applicable. -->
-
-- [ ] Physical results match expected behaviour (describe briefly below)
-- [ ] Parameter files / input format changes are documented
-- [ ] Relevant tutorial or documentation updated
-
-<!-- Brief description of physical validation, if applicable: -->
-
-## Checklist
-
-- [ ] CI passes (build + tests on all platforms)
-- [ ] No new compiler warnings (`-Wall -Wextra`)
-- [ ] Code follows the style of the surrounding code
-- [ ] Commit messages are descriptive and in the imperative mood
+<!-- Usually "revert the commit". Say so if more is needed, e.g. result files
+     written in a new format, a changed parameter default, or a migration step. -->
 
 ## Related issues
 
-<!-- Link any related issues: "Closes #...", "Related to #..." -->
+<!-- "Closes #...", "Related to #..." -->
