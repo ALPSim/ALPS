@@ -67,9 +67,13 @@ integer parameter.
 `make_parameters_from_file()` and `make_parameters_from_xml()` evaluate
 expressions as the legacy applications do: with `J=2`, `T=J/4` is supplied as
 `0.5`. Numbers and text that is not an expression, such as `chain lattice`,
-are supplied as written. A parameter file with one `{ }` block is read as that
-block with the keys set before it; one with more blocks is an error, and
-`parameter2xml` writes one XML job file per block.
+are supplied as written, and so are values that use `random()`, which the
+model library draws per site and bond. Quotes do not mark a value as text: with
+`T=0.5`, `FILE="T"` is supplied as `0.5`, and `"Pi"` as its value.
+
+A parameter file with one `{ }` block is read as that block with the keys set
+before it. Keys after the block, `#clear` and `#stop` are errors, and so is a
+file with more blocks; `parameter2xml` writes one XML job file per block.
 
 `alps::make_deprecated_parameters(parameters)`, in
 `<alps/ngs/make_deprecated_parameters.hpp>`, converts to the legacy

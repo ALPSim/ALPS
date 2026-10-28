@@ -13,7 +13,7 @@ namespace alps {
         /** A value that the expression library evaluates to a number against
             the other parameters, such as `J/4`, is supplied as that number;
             numbers and other text, such as `chain lattice`, are supplied as
-            written. Used by make_parameters_from_file() and
+            written, and so are values that use `random()`. Used by make_parameters_from_file() and
             make_parameters_from_xml(). */
         params make_parameters_evaluated(Parameters const & parameters);
 

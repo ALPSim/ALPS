@@ -58,7 +58,26 @@ TEST(ParamsLegacyAdapters, TextExpressionsAreEvaluated) {
     ASSERT_TRUE(parameters.ok());
     EXPECT_EQ(parameters["L"].as<int>(), 10);
     EXPECT_EQ(parameters["T"].as<double>(), 0.5);
+    {
+        std::ofstream output(text.string());
+        output << "J=random(); K=2*J; D=0.1*random()\n";
+    }
+    // The model library draws random() per site and bond, so it stays text.
+    const std::map<std::string, std::string> random = {
+        {"D", "0.1*random()"}, {"J", "random()"}, {"K", "2*J"}};
+    EXPECT_EQ(alps::make_parameters_from_file(text).supplied_text(), random);
     boost::filesystem::remove(text);
+}
+
+namespace {
+std::string load_error(const boost::filesystem::path& path) {
+    try {
+        (void)alps::make_parameters_from_file(path);
+    } catch (const std::runtime_error& error) {
+        return error.what();
+    }
+    return "";
+}
 }
 
 TEST(ParamsLegacyAdapters, TextBlocks) {
@@ -75,15 +94,28 @@ TEST(ParamsLegacyAdapters, TextBlocks) {
     EXPECT_EQ(parameters.supplied_text(), supplied);
     {
         std::ofstream output(text.string());
-        output << "L=10\n{ T = 0.5 }\n{ T = 1.0 }\n";
+        output << "// comment\nT=1; L=10 /* inline */\n{\n  T=2\n}\n";
     }
-    try {
-        (void)alps::make_parameters_from_file(text);
-        FAIL() << "two blocks were accepted";
-    } catch (const std::runtime_error& error) {
-        EXPECT_NE(std::string(error.what()).find("2 parameter sets"), std::string::npos)
-            << error.what();
-    }
+    // The block's keys replace those set before it.
+    const std::map<std::string, std::string> replaced = {{"L", "10"}, {"T", "2"}};
+    EXPECT_EQ(alps::make_parameters_from_file(text).supplied_text(), replaced);
+
+    const auto error_for = [&](const char* contents) {
+        {
+            std::ofstream output(text.string());
+            output << contents;
+        }
+        return load_error(text);
+    };
+    EXPECT_NE(error_for("L=10\n{ T = 0.5 }\n{ T = 1.0 }\n").find("2 parameter sets"),
+              std::string::npos);
+    EXPECT_NE(error_for("L=10\n{ T=1 }\nSWEEPS=100\n").find("text after its { } block"),
+              std::string::npos);
+    // Without a block, #clear and nested braces report the parse error.
+    EXPECT_EQ(error_for("L=10\n#clear\nT=1\n").rfind("parameter parse error", 0), 0u);
+    EXPECT_EQ(error_for("L=10\n{ { T=1 } }\n").rfind("parameter parse error", 0), 0u);
+    EXPECT_EQ(error_for("L=10\n{{ T=1 }}\n").rfind("parameter parse error", 0), 0u);
+    EXPECT_EQ(error_for("L=10\n{ T=1 }}\n").rfind("parameter parse error", 0), 0u);
     boost::filesystem::remove(text);
 }
 

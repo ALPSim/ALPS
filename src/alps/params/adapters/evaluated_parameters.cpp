@@ -23,13 +23,15 @@ namespace alps {
         }
 
         params make_parameters_evaluated(Parameters const & parameters) {
+            // Without random(): the model library draws it per site and bond
+            expression::ParameterEvaluator<double> const evaluator(parameters, false);
             params res;
             for (Parameters::const_iterator it = parameters.begin(); it != parameters.end(); ++it) {
                 std::string text = it->value();
                 if (!text.empty() && !is_number(text)) {
                     try {
-                        if (can_evaluate(text, parameters))
-                            text = params_ns::to_text(evaluate<double>(text, parameters));
+                        if (can_evaluate(text, evaluator))
+                            text = params_ns::to_text(evaluate<double>(text, evaluator));
                     } catch (std::exception const &) {
                         // The expression parser rejects it, as it does `chain lattice`
                     }
