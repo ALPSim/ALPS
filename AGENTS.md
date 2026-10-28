@@ -6,24 +6,11 @@ including its provenance and scientific credit policy, and
 
 ## Verify before opening a pull request
 
-Build and run the tests that cover the change, and report the actual output
-rather than a claim that it passes. `CMakePresets.json` defines the presets;
-`dev` builds the C++ library only, `default` adds the applications, `mpi`
-enables MPI.
-
-```sh
-cmake --preset dev
-cmake --build --preset dev --parallel 2
-ctest --preset dev -R <component or test pattern>
-```
-
-Application and tutorial tests need the `default` preset. Python changes are
-tested after the editable install described in
-[CONTRIBUTING.md](CONTRIBUTING.md#build):
-
-```sh
-python -m pytest python/pyalps/tests -q
-```
+Build and run the tests that cover the change, following the
+[build](CONTRIBUTING.md#build) and [test](CONTRIBUTING.md#run-the-tests)
+instructions in CONTRIBUTING.md and the preset guide in
+[tests/README.md](tests/README.md). Report the actual output rather than a
+claim that it passes.
 
 For a change that affects numerical results, compare against an exact or
 independent value (exact diagonalization, an analytic result, a previous
