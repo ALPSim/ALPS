@@ -41,6 +41,52 @@ TEST(ParamsLegacyAdapters, TextGrammarAndLegacyConversion) {
     boost::filesystem::remove(text);
 }
 
+TEST(ParamsLegacyAdapters, TextExpressionsAreEvaluated) {
+    alps::testing::TemporaryDirectory temporary;
+    const boost::filesystem::path text((temporary.path() / "legacy-params-expressions.parm").string());
+    {
+        std::ofstream output(text.string());
+        output << "LATTICE=\"chain lattice\"; J=2; T=J/4; L=2*5; H=0.123456789123;\n"
+               << "MODEL=\"spin\"; SIZES=\"1,2,3\"\n";
+    }
+    auto parameters = alps::make_parameters_from_file(text);
+    const std::map<std::string, std::string> supplied = {
+        {"H", "0.123456789123"}, {"J", "2"}, {"L", "10"}, {"LATTICE", "chain lattice"},
+        {"MODEL", "spin"}, {"SIZES", "1,2,3"}, {"T", "0.5"}};
+    EXPECT_EQ(parameters.supplied_text(), supplied);
+    parameters.define<int>("L", "length").define<double>("T", "temperature");
+    ASSERT_TRUE(parameters.ok());
+    EXPECT_EQ(parameters["L"].as<int>(), 10);
+    EXPECT_EQ(parameters["T"].as<double>(), 0.5);
+    boost::filesystem::remove(text);
+}
+
+TEST(ParamsLegacyAdapters, TextBlocks) {
+    alps::testing::TemporaryDirectory temporary;
+    const boost::filesystem::path text((temporary.path() / "legacy-params-blocks.parm").string());
+    {
+        std::ofstream output(text.string());
+        output << "LATTICE=\"chain lattice\"\nL=10\nJ=2\n{ T = J/4 }\n";
+    }
+    // One block is the parameter set, with the keys set before it.
+    auto parameters = alps::make_parameters_from_file(text);
+    const std::map<std::string, std::string> supplied = {
+        {"J", "2"}, {"L", "10"}, {"LATTICE", "chain lattice"}, {"T", "0.5"}};
+    EXPECT_EQ(parameters.supplied_text(), supplied);
+    {
+        std::ofstream output(text.string());
+        output << "L=10\n{ T = 0.5 }\n{ T = 1.0 }\n";
+    }
+    try {
+        (void)alps::make_parameters_from_file(text);
+        FAIL() << "two blocks were accepted";
+    } catch (const std::runtime_error& error) {
+        EXPECT_NE(std::string(error.what()).find("2 parameter sets"), std::string::npos)
+            << error.what();
+    }
+    boost::filesystem::remove(text);
+}
+
 // The bridge passes on what was supplied, as text, and leaves defaults to the
 // code that reads the alps::Parameters.
 TEST(ParamsLegacyAdapters, BridgePassesSuppliedTextOnly) {
@@ -72,5 +118,23 @@ TEST(ParamsLegacyAdapters, XmlSeedDefaultsAndExplicitValues) {
         EXPECT_EQ(from_xml["L"].as<int>(), 12);
         EXPECT_EQ(from_xml["SEED"].as<int>(), (explicit_seed ? 23 : 0));
     }
+    boost::filesystem::remove(xml);
+}
+
+TEST(ParamsLegacyAdapters, XmlExpressionsAreEvaluated) {
+    alps::testing::TemporaryDirectory temporary;
+    const boost::filesystem::path xml((temporary.path() / "legacy-params-expressions.xml").string());
+    {
+        std::ofstream output(xml.string());
+        output << "<SIMULATION><PARAMETERS>"
+               << "<PARAMETER name=\"LATTICE\">chain lattice</PARAMETER>"
+               << "<PARAMETER name=\"J\">2</PARAMETER>"
+               << "<PARAMETER name=\"T\">J/4</PARAMETER>"
+               << "</PARAMETERS></SIMULATION>\n";
+    }
+    auto from_xml = alps::make_parameters_from_xml(xml);
+    const std::map<std::string, std::string> supplied = {
+        {"J", "2"}, {"LATTICE", "chain lattice"}, {"SEED", "0"}, {"T", "0.5"}};
+    EXPECT_EQ(from_xml.supplied_text(), supplied);
     boost::filesystem::remove(xml);
 }

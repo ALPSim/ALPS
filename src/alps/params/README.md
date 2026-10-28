@@ -58,11 +58,18 @@ integer parameter.
 | Source | Read with |
 | --- | --- |
 | INI file, command line | ALPSCore's constructors, `alps::params(argc, argv)` and `alps::params(filename)` |
-| ALPS parameter file (`L=10; T=2.25;`) | `alps::make_parameters_from_file(path)`, `<alps/ngs/make_parameters_from_file.hpp>` |
+| ALPS parameter file (`L=10; T=2.25;`) | `alps::make_parameters_from_file(path)`, `<alps/ngs/make_parameters_from_file.hpp>`; at most one `{ }` block |
 | `alps::Parameters` | `alps::make_parameters_from_deprecated(parameters)`, `<alps/ngs/make_parameters_from_deprecated.hpp>` |
 | XML job file (`<PARAMETERS>`) | `alps::make_parameters_from_xml(path)`, `<alps/ngs/make_parameters_from_xml.hpp>`; `SEED` is `0` unless the file sets it |
 | HDF5 group | `archive["/parameters"] >> parameters`; see the HDF5 local change below |
 | Python dict | `pyalps.ngs.params(dict)` and the solver bindings; see [Python](#python) |
+
+`make_parameters_from_file()` and `make_parameters_from_xml()` evaluate
+expressions as the legacy applications do: with `J=2`, `T=J/4` is supplied as
+`0.5`. Numbers and text that is not an expression, such as `chain lattice`,
+are supplied as written. A parameter file with one `{ }` block is read as that
+block with the keys set before it; one with more blocks is an error, and
+`parameter2xml` writes one XML job file per block.
 
 `alps::make_deprecated_parameters(parameters)`, in
 `<alps/ngs/make_deprecated_parameters.hpp>`, converts to the legacy
