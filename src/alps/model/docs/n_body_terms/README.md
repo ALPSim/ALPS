@@ -1,4 +1,4 @@
-# n-body (n-site) terms: walkthrough and benchmarks
+# n-body (n-site) terms: benchmarks
 
 Supporting material for `<NSITE>` / `<NSITETERM>` (syntax:
 [`../nsite_terms.md`](../nsite_terms.md)). Nothing here is built or
@@ -6,12 +6,6 @@ installed; the feature itself is the code under `src/alps/lattice` and
 `src/alps/model`. It is opt-in: inputs without `<NSITE>` and
 `<NSITETERM>` behave exactly as before.
 
-- `ALPS_n_body_terms.pdf`: one 2x2 plaquette with a 4-site quartic term,
-  followed through ALPS step by step (input files, local table, matrix fill,
-  eigenvalues), then the benchmarks and the list of changes.
-- `pdf_source/`: the example input (`lattice.xml`, `model.xml`, `parm`), the
-  program that prints ALPS's basis, table and matrix (`dump_nsite_group.cpp`),
-  its output (`data/`), and `make_pdf.py`, which builds the PDF from them.
 - `benchmarks/`
   - `casci/compare_casci_nsite.py`: molecules (H3+, H4, LiH, H6), full
     (pq|rs), ALPS `fulldiag` vs QDK CASCI vs a dense Jordan-Wigner matrix.
