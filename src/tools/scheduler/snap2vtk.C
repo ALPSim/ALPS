@@ -27,7 +27,7 @@
 #include <alps/utilities/vectorio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <complex>
 #include <iostream>
 #include <string>
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   }
 
   for (int i = 1; i < argc; ++i) {
-    std::string basename = regex_replace(std::string(argv[i]), boost::regex("\\.snap$"), "");
+    std::string basename = std::regex_replace(std::string(argv[i]), std::regex("\\.snap$"), "");
     boost::filesystem::path snapfile =
       absolute(boost::filesystem::path(basename + ".snap")).lexically_normal();
     boost::filesystem::path vtkfile =

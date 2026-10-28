@@ -24,7 +24,7 @@
 
 #include <boost/config.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace alps {
 
@@ -37,12 +37,12 @@ task::task() : status_(task_status::Undefined) {}
 task::task(boost::filesystem::path const& file) : status_(task_status::Undefined) {
   basedir_ = file.parent_path();
   file_in_str_ = file.filename().string();
-  file_out_str_ = regex_replace(file.filename().string(), boost::regex("\\.in\\.xml$"), ".out.xml");
+  file_out_str_ = std::regex_replace(file.filename().string(), std::regex("\\.in\\.xml$"), ".out.xml");
   if (file_in_str_ == file_out_str_) {
-    file_in_str_ = regex_replace(file.filename().string(), boost::regex("\\.out\\.xml$"), ".in.xml");
+    file_in_str_ = std::regex_replace(file.filename().string(), std::regex("\\.out\\.xml$"), ".in.xml");
     file_out_str_ = file.filename().string();
   }
-  base_ = regex_replace(file_out_str_, boost::regex("\\.out\\.xml$"), "");
+  base_ = std::regex_replace(file_out_str_, std::regex("\\.out\\.xml$"), "");
 }
 
 bool task::on_memory() const {

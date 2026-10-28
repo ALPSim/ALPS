@@ -30,7 +30,6 @@
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/upper.hpp>
 #include <boost/numeric/bindings/lower.hpp>
-#include <boost/regex.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 template <class T> 

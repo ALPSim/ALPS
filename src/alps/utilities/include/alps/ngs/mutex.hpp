@@ -19,7 +19,7 @@
 #include <boost/shared_ptr.hpp>
 
 #ifndef ALPS_NGS_SINGLE_THREAD
-    #include <boost/thread/mutex.hpp>
+    #include <mutex>
 #endif
 
 namespace alps {
@@ -116,7 +116,7 @@ namespace alps {
     typedef detail::mutex_derived<detail::noop_mutex> noop_lockable;
     
     #ifndef ALPS_NGS_SINGLE_THREAD
-        typedef detail::mutex_derived<boost::mutex> native_lockable;
+        typedef detail::mutex_derived<std::mutex> native_lockable;
     #endif
 }
 

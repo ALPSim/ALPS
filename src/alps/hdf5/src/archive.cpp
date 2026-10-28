@@ -31,7 +31,7 @@
 #ifdef ALPS_NGS_SINGLE_THREAD
     #define ALPS_HDF5_LOCK_MUTEX
 #else
-    #define ALPS_HDF5_LOCK_MUTEX boost::lock_guard<boost::recursive_mutex> guard(mutex_);
+    #define ALPS_HDF5_LOCK_MUTEX std::lock_guard<std::recursive_mutex> guard(mutex_);
 #endif
 
 #ifdef H5_HAVE_THREADSAFE
@@ -1419,7 +1419,7 @@ namespace alps {
         }
     
 #ifndef ALPS_NGS_SINGLE_THREAD
-        boost::recursive_mutex archive::mutex_;
+        std::recursive_mutex archive::mutex_;
 #endif
         std::map<std::string, std::pair<detail::archivecontext *, std::size_t> > archive::ref_cnt_;
     }

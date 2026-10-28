@@ -30,7 +30,7 @@
 
 #ifndef ALPS_NGS_SINGLE_THREAD
 
-#include <boost/thread.hpp>
+#include <mutex>
 
 #endif
 
@@ -233,7 +233,7 @@ namespace alps {
                 detail::archivecontext * context_;
 
 #ifndef ALPS_NGS_SINGLE_THREAD
-                static boost::recursive_mutex mutex_;
+                static std::recursive_mutex mutex_;
 #endif
                 static std::map<std::string, std::pair<detail::archivecontext *, std::size_t> > ref_cnt_;
 

@@ -36,7 +36,7 @@
 #include <boost/config.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 #include <ctime>
 #include <iostream>
@@ -247,7 +247,7 @@ int load_filename(boost::filesystem::path const& file, std::string& file_in_str,
     if (file_out_str.empty())
       file_out_str = file.filename().string();
     if (file_in_str.empty())
-      file_in_str = regex_replace(file_out_str, boost::regex("\\.out\\.xml$"), ".in.xml");
+      file_in_str = std::regex_replace(file_out_str, std::regex("\\.out\\.xml$"), ".in.xml");
   }
   return is_master ? 1 : 2;
 }
@@ -494,8 +494,8 @@ int start_sgl(int argc, char** argv) {
     }
     file_in = absolute(boost::filesystem::path(file_in_str), basedir);
     file_out = absolute(boost::filesystem::path(file_out_str), basedir);
-    file_term = absolute(boost::filesystem::path(regex_replace(file_out_str,
-                  boost::regex("\\.out\\.xml$"), ".term")), basedir);
+    file_term = absolute(boost::filesystem::path(std::regex_replace(file_out_str,
+                  std::regex("\\.out\\.xml$"), ".term")), basedir);
 
     master_lock.set_file(file_out);
     master_lock.lock(0);
@@ -940,10 +940,10 @@ int start_mpi(int argc, char** argv) {
       }
       file_in = absolute(boost::filesystem::path(file_in_str), basedir);
       file_out = absolute(boost::filesystem::path(file_out_str), basedir);
-      file_term = absolute(boost::filesystem::path(regex_replace(file_out_str,
-                    boost::regex("\\.out\\.xml$"), ".term")), basedir);
-      file_chp = absolute(boost::filesystem::path(regex_replace(file_out_str,
-                    boost::regex("\\.out\\.xml$"), ".checkpoints")), basedir);
+      file_term = absolute(boost::filesystem::path(std::regex_replace(file_out_str,
+                    std::regex("\\.out\\.xml$"), ".term")), basedir);
+      file_chp = absolute(boost::filesystem::path(std::regex_replace(file_out_str,
+                    std::regex("\\.out\\.xml$"), ".checkpoints")), basedir);
 
       master_lock.set_file(file_out);
       master_lock.lock(0);

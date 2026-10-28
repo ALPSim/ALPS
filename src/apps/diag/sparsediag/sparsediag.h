@@ -19,7 +19,6 @@
 #include <ietl/vectorspace.h>
 #include <ietl/lanczos.h>
 #include <boost/random.hpp>
-#include <boost/regex.hpp> 
 #include <complex>
 
 template <class T>
