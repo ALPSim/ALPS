@@ -22,7 +22,7 @@
 foreach(name serialize_variant dictionary params dots_in_keys params_default_vectors
              params_string_vectors params_formats params_cmdline params_defaulted
              params_has_unused params_origins convenience_params dictval_eq dictionary_eq
-             params_eq dictionary_hdf5 params_hdf5 params_hdf5_enum params_hdf5_with_ini params_vec_hdf5)
+             params_eq dictionary_hdf5 params_hdf5 params_hdf5_with_ini params_vec_hdf5)
   if(name MATCHES "^params")
     set(target ${name})
   else()
