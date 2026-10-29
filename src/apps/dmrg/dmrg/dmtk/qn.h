@@ -40,6 +40,12 @@ class QN
     alps::half_integer<short> _qn4;
     alps::half_integer<short> _qn5;
 
+    // Writes to a quantum number the model does not define (e.g. dqn.sz() = 0
+    // for a model without Sz) land here. Slots 4 and 5 are never used as
+    // quantum numbers because QN_MAX_SIZE is 4, and the const accessors
+    // return 0 for such names, so the stored value is never read.
+    half_integer_type& unused_slot() { return _qn5; }
+
   public:
     static size_t QN_LAST;
     QN(): _qn0(0),_qn1(0),_qn2(0),_qn3(0),_qn4(0),_qn5(0) {}
@@ -95,7 +101,10 @@ class QN
     half_integer_type operator[](const std::string& str) const
       { return operator[](get_qn_index(str)); }
     half_integer_type& operator[](const std::string& str)
-      { return operator[](get_qn_index(str)); }
+      {
+        size_t idx = get_qn_index(str);
+        return (idx < QN_MAX_SIZE?operator[](idx):unused_slot());
+      }
 
     bool equal(const QN &qn, int mask) const;
     bool operator==(const QN &qn) const;
@@ -120,7 +129,7 @@ class QN
         size_t idx = get_qn_index("Sz"); 
         if(idx >= QN_MAX_SIZE) idx = get_qn_index("SZ"); 
         if(idx >= QN_MAX_SIZE) idx = get_qn_index("sz"); 
-        return (operator[](idx)); 
+        return (idx < QN_MAX_SIZE?operator[](idx):unused_slot()); 
       }
     half_integer_type n() const 
       { 
@@ -132,7 +141,7 @@ class QN
       { 
         size_t idx = get_qn_index("N"); 
         if(idx >= QN_MAX_SIZE) idx = get_qn_index("n"); 
-        return (operator[](idx)); 
+        return (idx < QN_MAX_SIZE?operator[](idx):unused_slot()); 
       }
 
     int fermion_sign() const;

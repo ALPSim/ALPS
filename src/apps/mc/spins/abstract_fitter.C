@@ -837,7 +837,7 @@ std::vector<ResidualType> AbstractFitter::get_residuum(unsigned int pos,
                 << "\nTemperature of oberved data is " << exp_res[i].T
                 << "\nTemperature of simulation data is " << eff_res[i].T
                 << "\nNo residuum will be computed\n\n";
-    } else
+    } else {
       res[i].T = exp_res[i].T;
       res[i].mean = exp_res[i].mean - eff_res[i].mean;
       if (exp_res[i].error == 0)
@@ -845,6 +845,7 @@ std::vector<ResidualType> AbstractFitter::get_residuum(unsigned int pos,
       else
         res[i].error = sqrt(SQUARE(eff_res[i].error)
                            +SQUARE(exp_res[i].error));
+    }
   }
   return res;
 }

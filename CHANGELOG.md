@@ -13,6 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `dmrg` no longer writes a quantum-number update for `Sz` or `N` past the end of the quantum-number record when the model defines neither (an assertion failure in debug builds). `spinmc`'s fitter skips the residuum for a measurement whose temperature differs from the simulation's, as its message says, instead of computing it anyway. Adding two `QuantumNumberDescriptor`s resets the cached limits of the sum. `std::multimap` and `std::multiset` can be written to an osiris dump.
 - `dmrg` with `START_SWEEP` started every remaining sweep at `START_DIR` and `START_ITER`; only the first sweep does now.
 - `fulldiag` and `sparsediag` results written with `MEASURE_ENERGY=false` and no custom measurements can be read again: `fulldiag_evaluate` and `convert2xml` stopped with `The group '/spectrum/sectors/0/results' does not exist`, because the reader expected the per-sector results the writer had left out.
 - Store an empty `std::map` in an HDF5 archive as an empty group, so it reads back as an empty map instead of a missing path. Older readers load such files as empty maps too.

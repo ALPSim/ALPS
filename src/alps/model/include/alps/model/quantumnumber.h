@@ -223,8 +223,8 @@ const QuantumNumberDescriptor<I>& QuantumNumberDescriptor<I>::operator+=(const Q
   }
   if (fermionic() != rhs.fermionic())
     boost::throw_exception(std::runtime_error("Adding fermionic and bosonic quantum numbers: " + name() + " + " + rhs.name()));
-return *this;
   reset_limits();
+  return *this;
 }
 
 template <class I>
