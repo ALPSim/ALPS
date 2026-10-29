@@ -73,6 +73,16 @@
       }
     },
     {
+      "name": "debug",
+      "displayName": "Debug build with assertions, applications and tests",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ALPS_BUILD_APPLICATIONS": "ON",
+        "ALPS_BUILD_TESTING": "ON"
+      }
+    },
+    {
       "name": "extensive",
       "inherits": "default",
       "cacheVariables": {
@@ -126,6 +136,10 @@
     {
       "name": "dev",
       "configurePreset": "dev"
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug"
     },
     {
       "name": "extensive",
