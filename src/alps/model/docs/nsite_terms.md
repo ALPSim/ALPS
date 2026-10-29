@@ -89,8 +89,8 @@ Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
 `dmrg` takes the same input. Each product in the term becomes one DMRG term
 with one operator per site; operators that fall into the same block are
 combined and carried along as block operators, as for bond terms between
-distant sites. The same checks apply: a term that changes a quantum number in
-`CONSERVED_QUANTUMNUMBERS` is refused, and the cutoff warning above is printed.
+distant sites. `dmrg` refuses a term that changes the total of any quantum
+number, whether or not it is in `CONSERVED_QUANTUMNUMBERS`.
 
 - The DMRG site order is the ALPS site order. n-site groups may span any
   sites, but terms between distant sites need more states for the same

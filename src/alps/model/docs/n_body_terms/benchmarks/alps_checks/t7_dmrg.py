@@ -8,7 +8,7 @@
 3. Bosonic Moore-Read (t6): one n-site group over all orbitals, products of 6
    boson operators with several on one orbital. Zero mode and gap vs dense.
 4. A 2x6 ladder, where DMRG truncates, vs ALPS sparsediag.
-5. Refusals and warnings shared with exact diagonalization.
+5. dmrg refuses a term that changes N, conserved or not; fulldiag warns.
 
 DMRG needs at least 4 sites (a limit of ALPS dmrg itself, also for plain
 SITETERM/BONDTERM models), so 3-site systems are not tested.
@@ -165,15 +165,16 @@ check("2x6 open U=8 K=1.1 (4,4), 400 states", abs(dm[0] - ed[0]), 1e-5,
 print("5. refusals and warnings")
 lat4 = f'<LATTICES><GRAPH name="g4" vertices="4"><NSITE type="0">{"".join(map(site, range(4)))}</NSITE></GRAPH></LATTICES>'
 pair = '<HAMILTONIAN name="b"><BASIS ref="boson"/><NSITETERM sites="i j k l">bdag(i)*bdag(j)*b(k) + bdag(k)*b(j)*b(i)</NSITETERM></HAMILTONIAN>'
-try:
-    alpsrun.run(lat4, pair, {"GRAPH": "g4", "MODEL": "b", "Nmax": 2, "CONSERVED_QUANTUMNUMBERS": "N",
-                             "N_total": 2, **DMRG}, program="dmrg")
-    msg = ""
-except RuntimeError as e:
-    msg = str(e)
-ok = "CONSERVED_QUANTUMNUMBERS" in msg and "changes the total N" in msg
-bad += not ok
-print(f"  {'N-changing term with N conserved is refused':44} {'yes' if ok else 'NO  <-- FAIL'}")
+for label, conserved in (("conserved", {"CONSERVED_QUANTUMNUMBERS": "N", "N_total": 2}),
+                         ("not conserved", {"CONSERVED_QUANTUMNUMBERS": ""})):
+    try:
+        alpsrun.run(lat4, pair, {"GRAPH": "g4", "MODEL": "b", "Nmax": 2, **conserved, **DMRG}, program="dmrg")
+        msg = ""
+    except RuntimeError as e:
+        msg = str(e)
+    ok = "changes the total N" in msg
+    bad += not ok
+    print(f"  {'N-changing term, N ' + label + ', refused':44} {'yes' if ok else 'NO  <-- FAIL'}")
 
 
 def stderr_of(program):
@@ -194,10 +195,9 @@ def stderr_of(program):
     return "".join(captured)
 
 
-for program in ("fulldiag", "dmrg"):
-    ok = "Warning: an <NSITETERM> changes the total N" in stderr_of(program)
-    bad += not ok
-    print(f"  {'Nmax cutoff warning in ' + program:44} {'yes' if ok else 'NO  <-- FAIL'}")
+ok = "Warning: an <NSITETERM> changes the total N" in stderr_of("fulldiag")
+bad += not ok
+print(f"  {'Nmax cutoff warning in fulldiag':44} {'yes' if ok else 'NO  <-- FAIL'}")
 
 print("ALL OK" if not bad else f"{bad} FAILED")
 sys.exit(1 if bad else 0)

@@ -125,7 +125,6 @@ private:
   std::vector<dmtk::Block<value_type > > site_block;
   // site operators (by site type and name) whose matrix is zero
   std::map<std::pair<int,std::string>,bool> zero_site_operator;
-  bool warned_cutoff;
   
   int num_eigenvalues;
   int verbose;
@@ -252,7 +251,6 @@ alps::params DMRGTask<value_type>::read_parameters(const alps::Parameters& parms
 template<class value_type>
 void DMRGTask<value_type>::init()
 {
-  warned_cutoff = false;
   alps::params const settings = read_parameters(parms);
   num_eigenvalues = settings["NUMBER_EIGENVALUES"].as<int>();
    
@@ -990,10 +988,9 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
 }
 
 // Split an n-site term into products of site operators (nsiteoperator.h).
-// As in exact diagonalization, a term that changes a conserved quantum number
-// or has an odd number of fermion operators is refused (building the local
-// table checks both), and one that changes a quantity capped by a cutoff
-// (Nmax) warns.
+// A term with an odd number of fermion operators is refused (building the
+// local table checks it), and so is a term that changes the total of any
+// quantum number, conserved or not: dmrg gives wrong energies for those.
 template<class value_type>
 std::vector<alps::nsite_product<value_type> >
 DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p)
@@ -1002,24 +999,17 @@ DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::
   for (std::size_t r = 0; r < p.sites.size(); ++r)
     bases.push_back(basis().site_basis(site_type(p.sites[r])));
   alps::nsite_matrix<value_type> mat = op.template matrix<value_type>(bases,parms);
-  for (std::size_t i = 0; i < quantumnumber_names.size(); ++i)
-    if (conserved_quantumnumber[i] && mat.nonconserved.count(quantumnumber_names[i]))
-      boost::throw_exception(std::runtime_error("<NSITETERM> on n-site groups of type "
-        + boost::lexical_cast<std::string>(p.type) + " changes the total " + quantumnumber_names[i]
-        + ", which is in CONSERVED_QUANTUMNUMBERS. Remove it from CONSERVED_QUANTUMNUMBERS or fix the term."));
-  if (!warned_cutoff && !mat.nonconserved.empty()) {
-    std::string warning = alps::nsite_cutoff_warning(mat.nonconserved,bases,parms);
-    if (!warning.empty()) {
-      std::cerr << warning;
-      warned_cutoff = true;
-    }
-  }
+  if (!mat.nonconserved.empty())
+    boost::throw_exception(std::runtime_error("<NSITETERM> on n-site groups of type "
+      + boost::lexical_cast<std::string>(p.type) + " changes the total " + *mat.nonconserved.begin()
+      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag."));
   return op.template split<value_type>(bases,parms);
 }
 
 // One dmtk term per product of the n-site term: coef * O_0 * O_1 * ... in
 // role order, one site operator per site of the group. dmtk reorders the
-// operators by site with the fermion sign (Hami::reorder_terms).
+// operators by site with the fermion sign (Hami::reorder_terms). A constant
+// (a product without site operators) is the identity on the first site.
 template<class value_type>
 void
 DMRGTask<value_type>::build_nsite_operator(std::vector<alps::nsite_product<value_type> > const& products,
@@ -1052,8 +1042,14 @@ DMRGTask<value_type>::build_nsite_operator(std::vector<alps::nsite_product<value
       op1.set_site(p.sites[r]);
       real_t = real_t*op1;
     }
-    if (zero || real_t.size() == 0)
+    if (zero)
       continue;
+    if (real_t.size() == 0) {
+      alps::SiteOperator ident("1",op.sites()[0]);
+      dmtk::BasicOp<value_type > op1 = create_site_operator(simplify_name(ident),ident,site_type(p.sites[0]));
+      op1.set_site(p.sites[0]);
+      real_t = op1;
+    }
     real_t.coef() = products[t].coef;
     this_hami += real_t;
   }
