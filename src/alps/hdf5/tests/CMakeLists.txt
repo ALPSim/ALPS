@@ -26,6 +26,7 @@ foreach(
   hdf5_real_complex_vec
   hdf5_real_complex_matrix
   hdf5_bool
+  hdf5_enum
   hdf5_boost_optional
   hdf5_replace
   hdf5_pair

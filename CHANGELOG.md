@@ -15,6 +15,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 - `dmrg` with `START_SWEEP` started every remaining sweep at `START_DIR` and `START_ITER`; only the first sweep does now.
 - `fulldiag` and `sparsediag` results written with `MEASURE_ENERGY=false` and no custom measurements can be read again: `fulldiag_evaluate` and `convert2xml` stopped with `The group '/spectrum/sectors/0/results' does not exist`, because the reader expected the per-sector results the writer had left out.
+- HDF5 enumerations read as their base type, so a Python `bool` written by h5py (an enum over `int8`) in a `/parameters` group loads as a `bool` parameter. The whole group used to fail with `has a datatype params cannot hold`.
 - Store an empty `std::map` in an HDF5 archive as an empty group, so it reads back as an empty map instead of a missing path. Older readers load such files as empty maps too.
 - Resolve HDF5 attribute paths written as `path@name` (ALPSCore's spelling) and attributes of the root group (`/@name`, or `@name` in the root context). These used to drop the character before `@` or fail; ALPS's `path/@name` spelling names the same object as before.
 - Release HDF5 scalar string buffers after reads, including failed conversions, and owned observables when clearing an `ObservableSet`.
