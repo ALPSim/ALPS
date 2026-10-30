@@ -418,7 +418,7 @@ Use `archive --help` for its options. The SDK libraries do not depend on SQLite.
 
 ## CI coverage
 
-Pull requests and master pushes report an aggregate `CI` check. The [PR workflow](.github/workflows/ci.yml) selects affected areas: static/helper checks, Linux native and editable Python tests, MPI integration, macOS native tests and SDK consumers, native sanitizers, and Linux wheel packaging. It uses binary dependency packages where available and compiler caches to reduce repeated builds.
+Pull requests and master pushes report an aggregate `CI` check. The [PR workflow](.github/workflows/ci.yml) selects affected areas: static/helper checks, Linux native and editable Python tests, MPI integration, macOS native tests and SDK consumers, a Debug build of library and applications with assertions enabled, native sanitizers, and Linux wheel packaging. It uses binary dependency packages where available and compiler caches to reduce repeated builds.
 
 Each area fingerprints its source, tests, build configuration and runner image. A successful matching fingerprint can skip a repeated check; missing history, unknown paths or uncertain parsing cause checks to run. Citation metadata and generated snapshots invalidate all areas. Use the workflow's manual `force` input to run every area regardless of recorded passes. See [change detection](.github/scripts/ci/README.md) for details.
 

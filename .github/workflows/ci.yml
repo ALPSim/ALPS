@@ -31,6 +31,8 @@ jobs:
       mpi_key: ${{ steps.fp.outputs.mpi_key }}
       macos_run: ${{ steps.decide.outputs.macos_run }}
       macos_key: ${{ steps.fp.outputs.macos_key }}
+      debug_run: ${{ steps.decide.outputs.debug_run }}
+      debug_key: ${{ steps.fp.outputs.debug_key }}
       sanitizers_run: ${{ steps.decide.outputs.sanitizers_run }}
       sanitizers_key: ${{ steps.fp.outputs.sanitizers_key }}
       packaging_run: ${{ steps.decide.outputs.packaging_run }}
@@ -79,6 +81,13 @@ jobs:
         path: .ci-passed
         key: pass-macos-${{ steps.fp.outputs.macos_key }}
         lookup-only: true
+    - id: pass_debug
+      if: steps.fp.outputs.debug_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-debug-${{ steps.fp.outputs.debug_key }}
+        lookup-only: true
     - id: pass_sanitizers
       if: steps.fp.outputs.sanitizers_key != ''
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -109,6 +118,9 @@ jobs:
         AFFECTED_MACOS: ${{ steps.fp.outputs.macos_affected }}
         KEY_MACOS: ${{ steps.fp.outputs.macos_key }}
         HIT_MACOS: ${{ steps.pass_macos.outputs.cache-hit }}
+        AFFECTED_DEBUG: ${{ steps.fp.outputs.debug_affected }}
+        KEY_DEBUG: ${{ steps.fp.outputs.debug_key }}
+        HIT_DEBUG: ${{ steps.pass_debug.outputs.cache-hit }}
         AFFECTED_SANITIZERS: ${{ steps.fp.outputs.sanitizers_affected }}
         KEY_SANITIZERS: ${{ steps.fp.outputs.sanitizers_key }}
         HIT_SANITIZERS: ${{ steps.pass_sanitizers.outputs.cache-hit }}
@@ -347,6 +359,78 @@ jobs:
       with:
         path: .ci-passed
         key: pass-macos-${{ needs.changes.outputs.macos_key }}
+  debug:
+    name: Native debug build with assertions
+    needs: changes
+    if: needs.changes.outputs.debug_run == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      CC: gcc
+      CXX: g++
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_DIR: ${{ github.workspace }}/_build/ccache
+      CCACHE_MAXSIZE: 256M
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: ./.github/actions/setup-native
+    - name: Install compiler cache
+      run: sudo apt-get install -y ccache
+    - name: Identify compiler and dependency ABI
+      id: toolchain
+      run: |
+        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
+        echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: cache
+      with:
+        path: _build/ccache
+        key: debug-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{
+          github.run_attempt }}
+        restore-keys: debug-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.key }}-
+    # The other native jobs build Release, where assert() is compiled out.
+    # This one keeps assertions on and builds the applications too, so a
+    # failing assert in dmrg, spinmc or the QMC codes fails CI instead of
+    # silently continuing in the Release binaries.
+    - name: Build and test with assertions enabled
+      run: |
+        cmake --preset debug -B _build/debug \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/debug/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/debug
+        ctest --test-dir _build/debug --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Compiler cache statistics
+      if: always()
+      run: ccache --show-stats --verbose
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: '!cancelled() && steps.cache.outcome == ''success'' && (github.event_name != ''pull_request'' || github.event.pull_request.head.repo.full_name
+        == github.repository)'
+      with:
+        path: _build/ccache
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/debug/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-debug
+        path: |
+          _build/debug/*.xml
+          _build/debug/Testing/Temporary/**
+    - name: Record pass marker
+      if: needs.changes.outputs.debug_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.debug_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.debug_key != ''
+      with:
+        path: .ci-passed
+        key: pass-debug-${{ needs.changes.outputs.debug_key }}
   sanitizers:
     name: Native address and undefined behavior sanitizers
     needs: changes
@@ -435,6 +519,7 @@ jobs:
     - linux
     - mpi
     - macos
+    - debug
     - sanitizers
     - packaging
     runs-on: ubuntu-24.04
