@@ -22,9 +22,11 @@ CONVERT_STYLES = {"text": "QMCXML2text.xsl", "html": "ALPS.xsl"}
 
 def transform(source, stylesheet):
     """Keep filenames as arguments and publish output only after success."""
+    # Preserve xsltproc's stdin sentinel for pipelines using the legacy aliases.
+    source_argument = "-" if source == Path("-") else str(source.resolve(strict=True))
     return subprocess.run(
         ["xsltproc", "--nonet", str(stylesheet.resolve(strict=True)),
-         str(source.resolve(strict=True))],
+         source_argument],
         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
     ).stdout
 

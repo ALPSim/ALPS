@@ -26,6 +26,4 @@ add_subdirectory(parapack)
 add_subdirectory(diagnostics)
 add_subdirectory(xml)
 add_subdirectory(fcidump)
-
-add_subdirectory(result_archive)
-add_subdirectory(launchers)
+add_subdirectory(archive)

@@ -159,9 +159,8 @@ class Vector:public std::vector<T>
 
     Vector<T>& randomize()
     {
-      static long idum = abs((long)this)/0xffff;
       for(int i = 0; i < size(); i++)
-          operator()(i) = quickran(idum);
+          operator()(i) = quickran(random_state());
       return *this;
     }
 

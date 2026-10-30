@@ -18,7 +18,7 @@
 
 alps::scheduler::Task* DMRGFactory::make_task(const alps::ProcessList& w, const boost::filesystem::path& fn, const alps::Parameters& parms) const
 {
-  return parms.value_or_default("COMPLEX",false)  ?
+  return DMRGTask<double>::read_parameters(parms)["COMPLEX"].as<bool>() ?
     static_cast<alps::scheduler::Task*>(new DMRGTask<std::complex<double> >(w,fn)) :
     static_cast<alps::scheduler::Task*>(new DMRGTask<double>(w,fn));
 }

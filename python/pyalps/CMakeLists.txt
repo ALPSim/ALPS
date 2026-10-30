@@ -181,7 +181,6 @@ foreach(component IN ITEMS aleav2 gf accumulators params mc params/iniparser)
   endforeach()
 endforeach()
 
-
 # Only bindings-only builds may fall back to their chosen SDK executables.
 set(_pyalps_sdk_bin "")
 if(NOT PYALPS_BUNDLE_APPLICATIONS)

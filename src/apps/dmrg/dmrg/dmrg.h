@@ -16,6 +16,7 @@
 
 #include "dmtk/dmtk.h"
 #include "mps_export.h"
+#include "checkpoint_cache.h"
 
 #include <alps/model.h>
 #include <alps/lattice.h>
@@ -24,11 +25,17 @@
 #include <alps/numeric/real.hpp>
 #include <alps/utilities/os.hpp>
 #include <alps/scheduler.h>
+#include <alps/params.hpp>
+#include <alps/ngs/make_parameters_from_deprecated.hpp>
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/archive/tmpdir.hpp>
 #include <boost/foreach.hpp>
+
+#include <optional>
+#include <sstream>
+#include <stdexcept>
 
 
 #define DMRG_VERSION "1.0.0"
@@ -56,6 +63,14 @@ public:
   typedef alps::half_integer<short> half_integer_type;
   DMRGTask<value_type>(const alps::ProcessList& , const boost::filesystem::path& );
   DMRGTask<value_type>(const alps::ProcessList& w, const alps::Parameters& p);
+
+  /// Defines the parameters dmrg reads, with their defaults
+  static void define_parameters(alps::params& parameters);
+
+  /// A task's parameters, with the parameters define_parameters defines parsed
+  /** @throws std::invalid_argument naming each of them that does not parse */
+  static alps::params read_parameters(const alps::Parameters& parms);
+
   void dostep();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
 
@@ -68,6 +83,8 @@ public:
 
   // iteration measurements
   std::map<std::string,std::vector<double> > iteration_measurements;
+
+  void checkpoint_iteration(const dmtk::System<value_type >& S);
 
 private:
 
@@ -82,6 +99,7 @@ private:
   
   
   void init();
+  void use_temporary_directory();
   dmtk::BasicOp<value_type > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
   void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &);
   void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
@@ -115,10 +133,17 @@ private:
   int start_dir;
   int start_iter;
 
+  // Failed runs keep their files and a rerun resumes from them
+  dmrg_checkpoint::Cache checkpoint;
+  bool in_sweeps = false;
+
   // SAVE_MPS: final state as tensors [left bond][local state][right bond]
   bool save_mps;
   std::vector<std::vector<value_type> > mps_tensors;
   std::vector<std::vector<std::size_t> > mps_shapes;
+
+  std::optional<std::string> temp_directory;
+  long seed;
 };
 
 
@@ -134,8 +159,22 @@ handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
     task.iteration_measurements["Energy"].push_back(S.energy[0]);
     task.iteration_measurements["Truncation Error"].push_back(S.truncation_error());
     task.iteration_measurements["Entropy"].push_back(S.entropy());
+    task.checkpoint_iteration(S);
   }
   return false;
+}
+
+template<class value_type>
+void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >& S)
+{
+  // warmup and the final sweep are redone after a failure
+  if (!in_sweeps || S.in_warmup() || !checkpoint.active())
+    return;
+  dmrg_checkpoint::Position at = {S.get_sweep(), int(S.get_dir()), int(S.get_iter()), dmtk::random_state(), seed};
+  std::ostringstream note;
+  note << "sweep " << at.sweep << "/" << num_sweeps << ", "
+       << (at.dir == dmtk::LEFT2RIGHT ? "left-to-right" : "right-to-left") << " iteration " << at.iter;
+  checkpoint.commit(dmrg_checkpoint::write_progress(at, note.str(), iteration_measurements));
 }
 
 template<class value_type>
@@ -160,59 +199,100 @@ DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters
 
 
 template<class value_type>
+void DMRGTask<value_type>::define_parameters(alps::params& parameters)
+{
+  parameters.define<bool>("COMPLEX", false, "use complex arithmetic")
+            .define<int>("NUMBER_EIGENVALUES", 1, "number of eigenstates to target")
+            .define<int>("SWEEPS", 4, "number of sweeps")
+            .define<int>("START_SWEEP", 0, "sweep to resume from")
+            .define<int>("START_DIR", 0, "direction to resume in: 0 left to right, 1 right to left")
+            .define<int>("START_ITER", 1, "iteration to resume from")
+            .define<int>("VERBOSE", 0, "print progress")
+            .define<bool>("SAVE_MPS", false, "save the final state as an MPS")
+            .define<int>("NUM_WARMUP_STATES", 20, "states kept in the warmup")
+            .define<long>("SEED", 0, "seed of the random Lanczos start vectors")
+            .define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers fixed by <name>_total");
+  // without them, the number of states alone sets the truncation and the
+  // Lanczos tolerance is DMTK's
+  if (parameters.supplied("TRUNCATION_ERROR"))
+    parameters.define<double>("TRUNCATION_ERROR", "truncation error to aim for, with at most MAXSTATES states");
+  if (parameters.supplied("LANCZOS_TOLERANCE"))
+    parameters.define<double>("LANCZOS_TOLERANCE", "Lanczos tolerance");
+  // define only the one init() reads: STATES before MAXSTATES before NUMSTATES
+  if (parameters.supplied("STATES"))
+    parameters.define<std::string>("STATES", "states kept in each half sweep");
+  else if (parameters.supplied("MAXSTATES"))
+    parameters.define<int>("MAXSTATES", "states kept in the last half sweep, growing linearly to it");
+  else if (parameters.supplied("NUMSTATES"))
+    parameters.define<int>("NUMSTATES", "states kept in each half sweep");
+  if (parameters.supplied("TEMP_DIRECTORY"))
+    parameters.define<std::string>("TEMP_DIRECTORY", "directory for scratch files");
+  // a run given TEMP_DIRECTORY keeps its files there, as before checkpoints
+  parameters.define<bool>("CHECKPOINT", !parameters.supplied("TEMP_DIRECTORY"),
+                          "keep the files of a failed run next to the task files to resume from");
+}
+
+template<class value_type>
+alps::params DMRGTask<value_type>::read_parameters(const alps::Parameters& parms)
+{
+  alps::params parameters = alps::make_parameters_from_deprecated(parms);
+  define_parameters(parameters);
+  std::ostringstream errors;
+  if (parameters.has_missing(errors))
+    boost::throw_exception(std::invalid_argument(errors.str()));
+  return parameters;
+}
+
+template<class value_type>
 void DMRGTask<value_type>::init()
 {
-  num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
+  alps::params const settings = read_parameters(parms);
+  num_eigenvalues = settings["NUMBER_EIGENVALUES"].as<int>();
    
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
   boost::char_separator<char> sep(" ,");
 
   dmtk::QN::init();
   // read number of sweeps
-  num_sweeps = parms.value_or_default("SWEEPS",4);
-  start_sweep = parms.value_or_default("START_SWEEP",0);
-  start_dir = parms.value_or_default("START_DIR",0);
+  num_sweeps = settings["SWEEPS"].as<int>();
+  start_sweep = settings["START_SWEEP"].as<int>();
+  start_dir = settings["START_DIR"].as<int>();
   if(start_dir != 0 && start_dir != 1){
     boost::throw_exception(std::runtime_error("START_DIR can assume the values 0 (left-to-right) or 1 (right-to-left)"));
   }
-  start_iter = parms.value_or_default("START_ITER",1);
-  verbose = parms.value_or_default("VERBOSE",0);
-  save_mps = parms.value_or_default("SAVE_MPS",false);
+  start_iter = settings["START_ITER"].as<int>();
+  verbose = settings["VERBOSE"].as<int>();
+  save_mps = settings["SAVE_MPS"].as<bool>();
+  checkpoint.configure(settings);
 
   // read number of states
-  nwarmup = 20;
-  if (parms.defined("NUM_WARMUP_STATES")) {
-    nwarmup = static_cast<int>(parms["NUM_WARMUP_STATES"]);
-  }
-  error = -1.;
-  if (parms.defined("TRUNCATION_ERROR")) {
-    error = static_cast<double>(parms["TRUNCATION_ERROR"]);
-  }
-  lanczos_tol = -1.;
-  if (parms.defined("LANCZOS_TOLERANCE")) {
-    lanczos_tol = static_cast<double>(parms["LANCZOS_TOLERANCE"]);
-  }
+  nwarmup = settings["NUM_WARMUP_STATES"].as<int>();
+  error = settings.exists("TRUNCATION_ERROR") ? settings["TRUNCATION_ERROR"].as<double>() : -1.;
+  lanczos_tol = settings.exists("LANCZOS_TOLERANCE") ? settings["LANCZOS_TOLERANCE"].as<double>() : -1.;
   maxstates = -1;
-  if (parms.defined("STATES")) {
-    std::string states_string = parms["STATES"];
+  if (settings.exists("STATES")) {
+    std::string states_string = settings["STATES"].as<std::string>();
     tokenizer state_tokens(states_string, sep);
     for (tokenizer::const_iterator it = state_tokens.begin(); it !=state_tokens.end();++it)
       num_states.push_back(boost::lexical_cast<int>(*it));
     if (num_states.size() < 2*num_sweeps)
       boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
   }
-  else if (parms.defined("MAXSTATES")) {
-    maxstates = static_cast<int>(parms["MAXSTATES"]);
+  else if (settings.exists("MAXSTATES")) {
+    maxstates = settings["MAXSTATES"].as<int>();
     for (int i=0; i< 2*num_sweeps; ++i)
       num_states.push_back((i+1)*maxstates/(2*num_sweeps));
   }
-  else if (parms.defined("NUMSTATES")) {
-    maxstates = static_cast<int>(parms["NUMSTATES"]);
+  else if (settings.exists("NUMSTATES")) {
+    maxstates = settings["NUMSTATES"].as<int>();
     for (int i=0; i< 2*num_sweeps; ++i)
       num_states.push_back(maxstates);
   }
   else 
     boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
+  if (settings.exists("TEMP_DIRECTORY"))
+    temp_directory = settings["TEMP_DIRECTORY"].as<std::string>();
+  seed = settings["SEED"].as<long>();
   
   // get all quantum numbers
   std::set<std::string> qns;
@@ -226,8 +306,8 @@ void DMRGTask<value_type>::init()
   std::copy(qns.begin(),qns.end(),std::back_inserter(quantumnumber_names));
   conserved_quantumnumber.resize(quantumnumber_names.size(),false);
   conserved_quantumnumber_value.resize(quantumnumber_names.size());
-  if (parms.defined("CONSERVED_QUANTUMNUMBERS")) {
-    std::string qn_string = parms["CONSERVED_QUANTUMNUMBERS"];
+  std::string qn_string = settings["CONSERVED_QUANTUMNUMBERS"].as<std::string>();
+  if (!qn_string.empty()) {
     tokenizer qn_tokens(qn_string, sep);
     std::vector<std::string> conserved_quantumnumber_names;
     std::copy(qn_tokens.begin(),qn_tokens.end(),std::back_inserter(conserved_quantumnumber_names));
@@ -237,6 +317,7 @@ void DMRGTask<value_type>::init()
         if (j >= quantumnumber_names.size())
           boost::throw_exception(std::runtime_error("Quantum number " + conserved_quantumnumber_names[i] + " is not defined in the model" ));
         conserved_quantumnumber[j] = true;
+        // <name>_total can be an expression in the other parameters
         conserved_quantumnumber_value[j] = alps::evaluate<double>(static_cast<std::string>(parms[conserved_quantumnumber_names[i]+"_total"]),parms);
       }
     }
@@ -253,19 +334,25 @@ std::string simplify_name(const SiteOp &op)
 }
 
 template<class value_type>
-void DMRGTask<value_type>::dostep() 
+void DMRGTask<value_type>::use_temporary_directory()
+{
+  if (temp_directory) {
+    dmtk::tmp_files.set_temp_dir(temp_directory->c_str());
+  } else {
+    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
+  }
+}
+
+template<class value_type>
+void DMRGTask<value_type>::dostep()
 {
   if (finished())
     return;
 
   // Select scratch storage when this task runs; other tasks may have been
   // constructed since init().
-  if (parms.defined("TEMP_DIRECTORY")) {
-    std::string temp_dir = parms["TEMP_DIRECTORY"];
-    dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
-  } else {
-    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
-  }
+  if (!checkpoint.enabled())
+    use_temporary_directory();
 
   dmtk::Lattice l(num_sites(),dmtk::OBC);
   hami = dmtk::Hami<value_type >(l);
@@ -448,9 +535,19 @@ void DMRGTask<value_type>::dostep()
 ///////////////////////////////////////////////////////////////
 // Simulation
 ///////////////////////////////////////////////////////////////
+  // the Lanczos start vectors are random: seed them from the task's SEED
+  dmtk::seed_random(seed);
   hami = hami.reorder_terms();
   if(verbose)
     cout << hami.description() << endl;
+  if (checkpoint.enabled()) {
+    if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION), infilename))
+      use_temporary_directory();
+    else if (temp_directory)
+      std::cout << "ALPS DMRG: TEMP_DIRECTORY is not used while checkpoints are on; set CHECKPOINT=0 to use it" << std::endl;
+  }
+
+  try {
   this->system = dmtk::System<value_type >(hami,l,"ALPS");
   dmtk::System<value_type > &S = this->system;
   S.set_store_products(false);
@@ -471,12 +568,41 @@ void DMRGTask<value_type>::dostep()
     for(int j = 0; j < 2; j++) {
       nstates(j,i) = num_states[i*2+j];
     }
-  S.start(num_sweeps, nstates); 
-  if(start_sweep != 0) {
+  S.start(num_sweeps, nstates);
+  dmrg_checkpoint::Position at;
+  std::string note;
+  in_sweeps = true;
+  if(checkpoint.active() && !checkpoint.record().empty()
+     && dmrg_checkpoint::read_progress(checkpoint.record(), at, note, iteration_measurements)) {
+    // continue after the last committed iteration
+    int sweep_max = S.full_sweep() ? num_sites()-2 : num_sites()-3;
+    int sweep = at.sweep, dir = at.dir, iter = at.iter + 1;
+    if (iter >= sweep_max) {
+      iter = 1;
+      if (dir == dmtk::RIGHT2LEFT) {
+        dir = dmtk::LEFT2RIGHT;
+      } else {
+        dir = dmtk::RIGHT2LEFT;
+        ++sweep;
+      }
+    }
+    std::cout << "ALPS DMRG: resuming from checkpoint after " << note << std::endl;
+    // the results follow the SEED the checkpoint was started with, so the
+    // output lists that one
+    if (at.seed != seed) {
+      std::cout << "ALPS DMRG: the checkpoint was started with SEED=" << at.seed
+                << ", which this run continues with instead of SEED=" << seed << std::endl;
+      seed = at.seed;
+      parms["SEED"] = seed;
+    }
+    dmtk::random_state() = at.random_state;
+    S.resume(sweep, dir, iter);
+  } else if(start_sweep != 0) {
     S.resume(start_sweep, start_dir, start_iter);
   } else {
     S.run(nwarmup);
   }
+  in_sweeps = false;
   if(S.store_products()) S.set_full_sweep(true);
   S.corr += meas_terms;
   S.final_sweep(num_states[num_states.size()-1], dmtk::RIGHT2LEFT, 1, true); 
@@ -493,7 +619,14 @@ void DMRGTask<value_type>::dostep()
   }
   this->average_values["Truncation error"].push_back(S.truncation_error());
   finish();
+  } catch (...) {
+    in_sweeps = false;
+    checkpoint.failed();
+    dmtk::tmp_files.cleanup();
+    throw;
+  }
   dmtk::tmp_files.cleanup();
+  checkpoint.succeeded();
 }
 
 
@@ -626,7 +759,7 @@ DMRGTask<value_type>::extract_mps()
   // two-site wave function of the last step
   char file[255];
   snprintf(file, sizeof(file), "gs_%s_%i_l.dat", "ALPS", n);
-  std::ifstream in(dmtk::tmp_files.get_filename(file), std::ios::in|std::ios::binary);
+  std::ifstream in(dmtk::tmp_files.get_read_filename(file), std::ios::in|std::ios::binary);
   if (!in)
     boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: could not read ") + file));
   dmtk::VectorState<value_type > gs;

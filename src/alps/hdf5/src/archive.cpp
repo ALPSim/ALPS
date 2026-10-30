@@ -164,6 +164,11 @@ namespace alps {
             hid_t check_attribute(hid_t id) { attribute_type unused(id); return unused; }
             hid_t check_space(hid_t id) { space_type unused(id); return unused; }
             hid_t check_type(hid_t id) { type_type unused(id); return unused; }
+            // The type a stored value compares as: an enumeration, such as the
+            // bool h5py writes (an enum over int8), compares as its base type.
+            hid_t value_type(hid_t native_id) {
+                return H5Tget_class(native_id) == H5T_ENUM ? H5Tget_super(native_id) : H5Tcopy(native_id);
+            }
             hid_t check_property(hid_t id) { property_type unused(id); return unused; }
             hid_t check_error(hid_t id) { error_type unused(id); return unused; }
 
@@ -819,14 +824,14 @@ namespace alps {
     
         #define ALPS_NGS_HDF5_READ_SCALAR_DATA_HELPER(U, T)                                                                                                             \
             } else if (detail::check_error(                                                                                                                             \
-                H5Tequal(detail::type_type(H5Tcopy(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
+                H5Tequal(detail::type_type(detail::value_type(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
             ) > 0) {                                                                                                                                                    \
                 U u;                                                                                                                                                    \
                 detail::check_error(H5Dread(data_id, native_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &u));                                                                    \
                 value = cast< T >(u);
         #define ALPS_NGS_HDF5_READ_SCALAR_ATTRIBUTE_HELPER(U, T)                                                                                                        \
             } else if (detail::check_error(                                                                                                                             \
-                H5Tequal(detail::type_type(H5Tcopy(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
+                H5Tequal(detail::type_type(detail::value_type(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
             ) > 0) {                                                                                                                                                    \
                 U u;                                                                                                                                                    \
                 detail::check_error(H5Aread(attribute_id, native_id, &u));                                                                                              \
@@ -891,7 +896,7 @@ namespace alps {
     
         #define ALPS_NGS_HDF5_READ_VECTOR_DATA_HELPER(U, T)                                                                                                             \
             } else if (detail::check_error(                                                                                                                             \
-                H5Tequal(detail::type_type(H5Tcopy(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
+                H5Tequal(detail::type_type(detail::value_type(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
             ) > 0) {                                                                                                                                                    \
                 std::size_t len = std::accumulate(chunk.begin(), chunk.end(), std::size_t(1), std::multiplies<std::size_t>());                                          \
                 boost::scoped_array<U> raw(                                                                                                                             \
@@ -911,7 +916,7 @@ namespace alps {
                 }
         #define ALPS_NGS_HDF5_READ_VECTOR_ATTRIBUTE_HELPER(U, T)                                                                                                        \
             } else if (detail::check_error(                                                                                                                             \
-                H5Tequal(detail::type_type(H5Tcopy(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
+                H5Tequal(detail::type_type(detail::value_type(native_id)), detail::type_type(detail::get_native_type(alps::detail::type_wrapper< U >::type())))                    \
             ) > 0) {                                                                                                                                                    \
                 std::size_t len = std::accumulate(chunk.begin(), chunk.end(), std::size_t(1), std::multiplies<std::size_t>());                                          \
                 boost::scoped_array<U> raw(                                                                                                                             \
@@ -1349,7 +1354,7 @@ namespace alps {
             template<typename T> struct is_datatype_impl_compare {
                 static bool apply(type_type const & native_id) {
                     return check_error(
-                        H5Tequal(type_type(H5Tcopy(native_id)), type_type(get_native_type(typename alps::detail::type_wrapper<T>::type())))
+                        H5Tequal(type_type(value_type(native_id)), type_type(get_native_type(typename alps::detail::type_wrapper<T>::type())))
                     ) > 0;
                 }
             };

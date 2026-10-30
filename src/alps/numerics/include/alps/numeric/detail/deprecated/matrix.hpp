@@ -34,12 +34,17 @@
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 #endif
+// Internal uses stay quiet; downstream uses of the deprecated types still warn.
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 namespace blas{
   //simple BLAS matrix that uses BLAS calls for rank one and matrix vector.
   //std::ostream &operator<<(std::ostream &os, const matrix &M); //forward declaration
    
-    class matrix{
+    class [[deprecated("blas::matrix will be removed in the next ALPS release; use alps::numeric::matrix<double>")]] matrix{
         public:
         matrix(int size=0, double initial_value=0.)
         : values_(size*size, initial_value), size_(size)
@@ -636,4 +641,7 @@ inline complex_dense_matrix mult(const complex_dense_matrix &A, const complex_de
 }
 #endif //UBLAS
  
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif

@@ -14,21 +14,23 @@ Install `pyalps[mpi]` for the mpi4py-backed `pyalps.mpi` interface. Bundled appl
 
 ## Command-line tools
 
-Wheels include commands for the bundled applications, including `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools `parameter2xml`, `printgraph`, `convert2xml`, `convert2text`, `plot2text`, `plot2gp`, `plot2xmgr`, `snap2vtk`, and `maxent`. For example:
+Wheels include commands for the bundled applications, including `spinmc`, `loop`, `worm`, `dmrg`, and `sparsediag`, plus the tutorial tools `parameter2xml`, `printgraph`, `convert2xml`, `alps-xml`, `snap2vtk`, and `maxent`. For example:
 
 ```sh
 parameter2xml simulation.in
 spinmc --write-xml simulation.in.in.xml
-convert2text simulation.in.task1.out.xml > results.txt
+alps-xml convert text simulation.in.task1.out.xml > results.txt
 ```
+
+The wheel's `alps-xml` accepts the same commands as the SDK's (see [XML tools](../../CONTRIBUTING.md#xml-resources-and-tools)), but uses lxml instead of an external `xsltproc`. The older names `convert2text`, `plot2text`, `plot2gp`, and `plot2xmgr` remain as aliases of `alps-xml convert text`, `alps-xml plot text`, `alps-xml plot gnuplot`, and `alps-xml plot grace`.
 
 Download inputs from the [ALPS tutorials](https://alps.comp-phys.org/tutorials/); they are not included in wheels. Set `ALPS_XML_PATH` only to override the bundled XML resources.
 
-For older tutorials, use `python` instead of the removed `alpspython` wrapper and `pyalps.plot` instead of `plot2mpl` or `extractmpl`.
+For older tutorials, use `python` instead of the removed `alpspython` wrapper, and `pyalps.plot` or `alps-xml plot matplotlib` instead of `plot2mpl` or `extractmpl`.
 
 ## Building from source
 
-Requires GIL-enabled CPython 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
+Requires GIL-enabled CPython 3.10+, CMake 3.27+, Ninja, a C++17 compiler, external Boost 1.76+, LP64 BLAS/LAPACK, and HDF5 1.10.5+. Building the SDK with applications also requires Eigen >= 3.3 for MaxEnt; Eigen is not needed to link bindings against an installed SDK. Reuse an installed ALPS C++ SDK, or build one with the `distribution` preset. From the repository root, build the SDK and Python wheel with:
 
 ```sh
 cmake --preset distribution
@@ -58,6 +60,8 @@ In either mode, pass a full executable path to a Python helper to select a diffe
 - Rebuild downstream C++ extensions against the same SDK revision, nanobind internals ABI, and C++ standard library as the wheel. Nanobind is pinned to 2.15.0; its version and internals ABI are recorded in the installed `pyalps/runtime.json`.
 - Legacy HDF5 signed-byte datasets without type metadata are read as booleans. Use a typed reader such as h5py when such a dataset contains integers.
 - `pyalps.mpi` uses mpi4py's protocol, which is incompatible with Boost.MPI serialization. Communicators cannot be used as dictionary keys.
+
+## Versioning
 
 The package version comes from `cmake/ALPS_VERSION.txt`. For local prereleases, set `ALPS_VERSION_PRERELEASE` (for example, `beta.1`); release builds derive it from the Git tag.
 
@@ -91,6 +95,8 @@ target_link_libraries(my_module PRIVATE pyalps::runtime)
 `pyalps.get_cmake_dir()` exposes the same directory to Python tools. The C++ SDK neither installs this package nor discovers Python. The former SDK function `alps_target_link_pyalps` remains available, deprecated, from `include(${ALPS_PYTHON_USE_FILE})`; it requires `find_package(nanobind)` first and links `pyalps::runtime`.
 
 The same target supplies `<pyalps/export_simulation.hpp>` for exporting a derived simulation through nanobind. The historical SDK include `<alps/ngs/detail/export_sim_to_python.hpp>` forwards to this Python-owned header and remains available.
+
+## Native runtime layout
 
 Wheel installation writes `pyalps/runtime.json`. After auditwheel or delocate repair, regenerate it with `python python/pyalps/_build_support/runtime_manifest.py --wheel path/to/pyalps.whl`. Cibuildwheel runs this automatically. The manifest records the final relative library paths; pyalps exposes these as imported CMake targets. On macOS, wheel finalization sets linkable `@rpath` library IDs and refreshes their signatures, so downstream builds need no binary-patching commands.
 

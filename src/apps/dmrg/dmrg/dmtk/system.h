@@ -20,9 +20,11 @@
 #include <iostream>
 #include <iosfwd>
 #include <list>
+#include <stdexcept>
 #include <string>
 #include <iomanip>
 #include <math.h>
+#include <boost/throw_exception.hpp>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -181,7 +183,6 @@ class System
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_START_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_ITER"));
         _signal_id.push_back(std::string("SYSTEM_SIGNAL_MEASURE"));
-        _signal_id.push_back(std::string("SYSTEM_SIGNAL_END_SWEEP"));
     }
     int get_signal_id(std::string signal_id){
          int n = 0;
@@ -192,7 +193,7 @@ class System
            ++n;
          }
          if(iter == _signal_id.end()) {
-            cerr << "ERROR: signal_connect : signal " << signal_id << " not found \n";
+            cerr << "WARNING: unknown signal " << signal_id << "\n";
             return -1;
          }
          return n;
@@ -344,9 +345,12 @@ class System
 
     void resume(size_t resume_sweep, size_t resume_dir, size_t resume_iter)
       {
-        for(int _sweep = resume_sweep; _sweep <= _numsweeps; _sweep++){
+        for(_sweep = resume_sweep; _sweep <= _numsweeps; _sweep++){
           cout << "NEW SWEEP " << _sweep << " " << _sweeps(0,_sweep-1) << " " << _sweeps(1,_sweep-1) << endl;
           sweep(_sweeps(0,_sweep-1),_sweeps(1,_sweep-1),(size_t)resume_dir,resume_iter);
+          // only the first sweep starts part-way
+          resume_dir = RIGHT2LEFT;
+          resume_iter = 1;
         }
       }
 
@@ -392,6 +396,7 @@ class System
     virtual T measure_operator(const BasicOp<T> &top, const VectorState<T> *v, bool &info);
 
     size_t get_iter() const { return iter; }
+    int get_sweep() const { return _sweep; }
     size_t get_dir() const { return dir; }
 
 
@@ -660,10 +665,11 @@ class System
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
 
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
 #ifdef DMTK_DEBUG
         cout << "WRITING GS " << file << endl;
 #endif // DMTK_DEBUG
@@ -682,7 +688,7 @@ class System
           _propagate_state[i].write(outputfile);
         }
         outputfile.close();
-
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -694,8 +700,8 @@ class System
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
 
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
 #ifdef DMTK_DEBUG
@@ -733,13 +739,15 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
         basis.write(outputfile);
         m.write(outputfile);
         outputfile.close();
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -754,8 +762,8 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
         basis.read(inputfile);
@@ -775,12 +783,14 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) 
+      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
+      if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+        tmp_files.write_failed(file);
+      } else{
         b.write(outputfile);
         outputfile.close();
+        if(!outputfile) tmp_files.write_failed(file);
       }
     }
 
@@ -803,8 +813,8 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile) 
+      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
+      if(!inputfile)
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
         b.read(inputfile);
@@ -828,6 +838,8 @@ class System
 
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, size_t signal_id, void *data)
       {
+         if(signal_id >= _signal_id.size())
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal id"));
          Signal<System<T> > signal(handler, this, signal_id, data);
          this->handlers.push_back(signal);
          return *this;
@@ -835,13 +847,14 @@ class System
     System<T>& signal_connect(typename Signal<System<T> >::callback handler, std::string signal_id, void *data)
       {
          int n = this->get_signal_id(signal_id);
-         Signal<System<T> > signal(handler, this, n, data);
-         this->handlers.push_back(signal);
-         return *this;
+         if(n < 0)
+            boost::throw_exception(std::invalid_argument("signal_connect: unknown signal " + signal_id));
+         return this->signal_connect(handler, static_cast<size_t>(n), data);
       }
 
     bool signal_emit(size_t signal_id)
       {
+         if(signal_id >= _signal_id.size()) return true;   // unknown signal: nothing vetoed
          typename std::list<Signal<System<T> > >::reverse_iterator siter;
          for(siter = handlers.rbegin(); siter != handlers.rend(); siter++){
            Signal<System<T> > &signal = *siter;
@@ -854,11 +867,12 @@ class System
     bool signal_emit(std::string signal_id)
       {
          int n = this->get_signal_id(signal_id);
-         if(n >= 0) return this->signal_emit(n);
+         if(n < 0) return true;   // unknown signal: nothing vetoed
+         return this->signal_emit(static_cast<size_t>(n));
       }
     std::string signal_description(size_t signal_id)
       {
-          return this->_signal_id[signal_id];
+          return signal_id < _signal_id.size() ? this->_signal_id[signal_id] : std::string();
       }
     int signal_id(std::string signal_id)
       {

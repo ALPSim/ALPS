@@ -54,6 +54,9 @@ in order.
 - Fermion signs follow the operator order in the term string and the ALPS
   site order (Jordan-Wigner over sites in index order, up before down on a
   site), the same convention as bond terms.
+- N-site terms cannot carry disorder: `random()`, `gaussian_random()`,
+  `normal_random()` and `integer_random()` are refused with an error, also
+  when they enter through a parameter.
 - Terms need not conserve particle number. If a term maps a basis state out of
   the sector set by `CONSERVED_QUANTUMNUMBERS`, the run stops with an error
   instead of dropping the matrix element.

@@ -59,6 +59,7 @@ integer parameter.
 | --- | --- |
 | INI file, command line | ALPSCore's constructors, `alps::params(argc, argv)` and `alps::params(filename)` |
 | ALPS parameter file (`L=10; T=2.25;`) | `alps::make_parameters_from_file(path)`, `<alps/ngs/make_parameters_from_file.hpp>` |
+| `alps::Parameters` | `alps::make_parameters_from_deprecated(parameters)`, `<alps/ngs/make_parameters_from_deprecated.hpp>` |
 | XML job file (`<PARAMETERS>`) | `alps::make_parameters_from_xml(path)`, `<alps/ngs/make_parameters_from_xml.hpp>`; `SEED` is `0` unless the file sets it |
 | HDF5 group | `archive["/parameters"] >> parameters`; see the HDF5 local change below |
 | Python dict | `pyalps.ngs.params(dict)` and the solver bindings; see [Python](#python) |
@@ -71,7 +72,7 @@ and leaves defaults to the code that reads `alps::Parameters`. The NGS
 parameters passed numbers with six significant digits; the text is now passed
 as supplied.
 
-These three adapters, in `adapters/`, are ALPS's own and are compiled into
+These four adapters, in `adapters/`, are ALPS's own and are compiled into
 `ALPS::alps`.
 
 ## Python

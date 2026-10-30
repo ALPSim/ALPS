@@ -170,8 +170,8 @@ private:
 public:
   NSiteOperatorSplitter(const std::vector<SiteBasisDescriptor<I> >& bases,
                         const std::vector<std::string>& sites,
-                        const Parameters& p)
-    : super_type(p), bases_(bases), sites_(sites), ops_(sites.size()),
+                        const Parameters& p, const std::string& term)
+    : super_type(p), bases_(bases), sites_(sites), term_(term), ops_(sites.size()),
       used_(sites.size(), false), odd_(sites.size(), false) {}
 
   bool can_evaluate_function(const std::string& name, const expression::Expression<T>& arg, bool isarg = false) const
@@ -180,6 +180,18 @@ public:
   }
   expression::Expression<T> partial_evaluate_function(const std::string& name,
                                                       const expression::Expression<T>& argument, bool = false) const;
+  // Every function call passes through these overloads.
+  bool can_evaluate_function(const std::string& name, const std::vector<expression::Expression<T> >& args, bool isarg = false) const
+  {
+    refuse_random(name);
+    return super_type::can_evaluate_function(name, args, isarg);
+  }
+  expression::Expression<T> partial_evaluate_function(const std::string& name,
+                                                      const std::vector<expression::Expression<T> >& args, bool isarg = false) const
+  {
+    refuse_random(name);
+    return super_type::partial_evaluate_function(name, args, isarg);
+  }
 
   // the operators of the term on role r, in their original order
   const expression::Term<T>& site_operators(std::size_t r) const { return ops_[r]; }
@@ -195,6 +207,16 @@ public:
   }
 
 private:
+  // One table serves every n-site group of a type, so a random coupling would
+  // be drawn once and shared by all of them. The names are the random
+  // functions of Evaluator (alps/expression/evaluator.h); keep them in sync.
+  void refuse_random(const std::string& name) const
+  {
+    if (name == "random" || name == "gaussian_random" || name == "normal_random" || name == "integer_random")
+      boost::throw_exception(std::runtime_error("n-site term " + term_ + ": " + name + "() is not supported; "
+        "n-site terms cannot carry disorder"));
+  }
+
   int role(const expression::Expression<T>& arg) const
   {
     for (std::size_t r = 0; r < sites_.size(); ++r)
@@ -205,6 +227,7 @@ private:
 
   const std::vector<SiteBasisDescriptor<I> >& bases_;
   const std::vector<std::string>& sites_;
+  std::string term_;
   mutable std::vector<expression::Term<T> > ops_;
   mutable std::vector<bool> used_;
   mutable std::vector<bool> odd_;   // parity of the fermionic operators seen on each role
@@ -345,7 +368,7 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
   // single-site operators already built, by (role, operator string)
   std::map<std::pair<std::size_t, std::string>, int> built;
   for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
-    NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms);
+    NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms, boost::lexical_cast<std::string>(*tit));
     expression::Term<value_type> term(*tit);
     // The splitter replaces each site operator by a sign, so under a power
     // the operator would be applied once and only the sign raised.
