@@ -720,17 +720,16 @@ def test_params_mapping_equality_and_value_ladder():
 def test_params_mapping_mixins_handle_none_getitem():
     """get/pop/setdefault must honour their contracts on params.
 
-    params.__getitem__ returns None for an undefined key rather than raising
-    KeyError, so MutableMapping's mixins -- which are written against the
-    KeyError contract -- silently misbehaved: get() ignored its default,
-    setdefault() returned None and stored nothing, and pop() surfaced the C++
-    "key does not exist" error instead of KeyError or the default.
+    params.__getitem__ raises KeyError for an undefined key, so MutableMapping's
+    get() and setdefault() work as copied. pop() needs a replacement: it reads
+    self._MutableMapping__marker, which a copied method cannot resolve.
     """
     from pyalps import ngs
 
     p = ngs.params({"a": 1})
 
-    assert p["absent"] is None          # the preserved legacy quirk
+    with pytest.raises(KeyError):
+        p["absent"]
     assert p.get("a") == 1
     assert p.get("absent") is None
     assert p.get("absent", 9) == 9

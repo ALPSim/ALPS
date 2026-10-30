@@ -57,7 +57,7 @@ for _mapping_type in (params, observables, results):
         if getattr(_mapping_type, _method, None) is getattr(object, _method, None):
             setattr(_mapping_type, _method, getattr(MutableMapping, _method))
 
-# Two mixin methods cannot simply be copied onto these types.
+# One mixin method cannot simply be copied onto these types.
 #
 # MutableMapping.pop reads `self.__marker`, which name-mangles to
 # self._MutableMapping__marker -- a class attribute of MutableMapping. Under
@@ -66,11 +66,6 @@ for _mapping_type in (params, observables, results):
 # not, so pop() raised AttributeError instead of returning the default or
 # raising KeyError. Supply an implementation that tests membership instead of
 # relying on __getitem__ raising.
-#
-# alps::params compounds this: its __getitem__ returns None for an undefined
-# key rather than raising KeyError (inherited from the Boost.Python module and
-# pinned by python/pyalps/tests/pyparams_test.py), so get() ignored its default and
-# setdefault() returned None while storing nothing.
 _MAPPING_POP_MARKER = object()
 
 
@@ -84,22 +79,8 @@ def _mapping_pop(self, key, default=_MAPPING_POP_MARKER):
     return default
 
 
-def _params_get(self, key, default=None):
-    return self[key] if key in self else default
-
-
-def _params_setdefault(self, key, default=None):
-    if key in self:
-        return self[key]
-    self[key] = default
-    return default
-
-
 for _mapping_type in (params, observables, results):
     _mapping_type.pop = _mapping_pop
-
-params.get = _params_get
-params.setdefault = _params_setdefault
 
 from .cxx.pyngsbase_c import mcbase
 

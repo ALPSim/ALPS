@@ -13,6 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `pyalps.ngs.params[key]` raises `KeyError` for a key that is neither defined nor supplied, as a `dict` does. It returned `None`, so a misspelled key failed later, away from the typo, and `params.get()` ignored its default. Use `key in p` or `p.get(key, default)` to test for a parameter.
 - `dmrg` with `START_SWEEP` started every remaining sweep at `START_DIR` and `START_ITER`; only the first sweep does now.
 - `fulldiag` and `sparsediag` results written with `MEASURE_ENERGY=false` and no custom measurements can be read again: `fulldiag_evaluate` and `convert2xml` stopped with `The group '/spectrum/sectors/0/results' does not exist`, because the reader expected the per-sector results the writer had left out.
 - HDF5 enumerations read as their base type, so a Python `bool` written by h5py (an enum over `int8`) in a `/parameters` group loads as a `bool` parameter. The whole group used to fail with `has a datatype params cannot hold`.
