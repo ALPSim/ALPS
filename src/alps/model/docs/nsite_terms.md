@@ -1,8 +1,8 @@
 # n-site terms
 
 Terms acting on more than two sites. Supported by exact diagonalization
-(`fulldiag`, `sparsediag`). Other applications refuse a model that has
-n-site terms on a lattice that has n-site groups.
+(`fulldiag`, `sparsediag`) and by `dmrg`. Other applications refuse a model
+that has n-site terms on a lattice that has n-site groups.
 
 ## Lattice
 
@@ -83,6 +83,22 @@ N <= Nmax = 2. ... check convergence in Nmax.
 Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
 (fermions, hard-core bosons) and ranges set by another quantum number (`Sz` in
 `-S..S`) are not cutoffs and give no warning.
+
+## DMRG
+
+`dmrg` takes the same input. Each product in the term becomes one DMRG term
+with one operator per site; operators that fall into the same block are
+combined and carried along as block operators, as for bond terms between
+distant sites. `dmrg` refuses a term that changes the total of any quantum
+number, whether or not it is in `CONSERVED_QUANTUMNUMBERS`.
+
+- The DMRG site order is the ALPS site order. n-site groups may span any
+  sites, but terms between distant sites need more states for the same
+  accuracy.
+- Every distinct product is a separate term with its own block operators, so
+  the cost grows with the number of products (for a molecular Hamiltonian,
+  O(N^4) in the number of orbitals).
+- `dmrg` needs at least 4 sites, for any model.
 
 ## Export to FCIDUMP
 

@@ -1,4 +1,4 @@
-# n-body (n-site) terms: walkthrough and benchmarks
+# n-body (n-site) terms: benchmarks
 
 Supporting material for `<NSITE>` / `<NSITETERM>` (syntax:
 [`../nsite_terms.md`](../nsite_terms.md)). Nothing here is built or
@@ -6,15 +6,13 @@ installed; the feature itself is the code under `src/alps/lattice` and
 `src/alps/model`. It is opt-in: inputs without `<NSITE>` and
 `<NSITETERM>` behave exactly as before.
 
-- `ALPS_n_body_terms.pdf`: one 2x2 plaquette with a 4-site quartic term,
-  followed through ALPS step by step (input files, local table, matrix fill,
-  eigenvalues), then the benchmarks and the list of changes.
-- `pdf_source/`: the example input (`lattice.xml`, `model.xml`, `parm`), the
-  program that prints ALPS's basis, table and matrix (`dump_nsite_group.cpp`),
-  its output (`data/`), and `make_pdf.py`, which builds the PDF from them.
 - `benchmarks/`
   - `casci/compare_casci_nsite.py`: molecules (H3+, H4, LiH, H6), full
     (pq|rs), ALPS `fulldiag` vs QDK CASCI vs a dense Jordan-Wigner matrix.
+    `compare_casci_dmrg.py`: the same molecules with ALPS `dmrg`.
+    `compare_casci_mps.py`: the CASCI wave function vs the MPS that `dmrg`
+    writes with `SAVE_MPS=1`, coefficient by coefficient (needs a `dmrg`
+    built with ALPSim/ALPS#216).
     `qdk2alps.py` writes the ALPS input from a QDK Hamiltonian, and
     `qdk_alps_ed.py` registers ALPS as a QDK solver. Needs `qdk-chemistry`.
   - `alps_checks/t1_ladder.py`: ladders with a pair-hopping n-site term vs
@@ -45,6 +43,15 @@ installed; the feature itself is the code under `src/alps/lattice` and
     mapped to qubit Hamiltonians by Jordan-Wigner in Qiskit Nature and
     OpenFermion, agree with ALPS to 3e-13; on the rings, ALPS's ground-state
     energy matches the Bethe ansatz (Lieb-Wu equations) to 1e-13.
+  - `alps_checks/t7_dmrg.py`: n-site terms in `dmrg`: ladders vs
+    `fulldiag`, random 4- and 6-operator fermion terms on scrambled n-site groups
+    vs a dense matrix, Moore-Read, a 2x6 ladder vs `sparsediag`, and the
+    refusal and cutoff warning.
+  - `alps_checks/t8_mps.py`: ground-state wave functions from `dmrg`'s MPS
+    (`SAVE_MPS=1`, needs ALPSim/ALPS#216) vs exact states built in ALPS's
+    local basis (`mpsref.py`): fermions (Hubbard ladders with a pair-hopping
+    term, random 3-body terms), bosons (Moore-Read, Bose-Hubbard ring hop) and
+    spins (S=1/2 ring exchange, S=1 three-site term).
   - `results/`: output of the runs above.
 
 Running: build ALPS with applications (`cmake --preset default

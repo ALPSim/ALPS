@@ -105,6 +105,9 @@ private:
   void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
   void build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
                             std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami);
+  void build_nsite_operator(std::vector<alps::nsite_product<value_type> > const& products,
+                                alps::NSiteOperator const& op, alps::nsite_group const& p, dmtk::Hami<value_type > &this_hami);
+  std::vector<alps::nsite_product<value_type> > split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p);
  
   void save_results(); 
   void extract_mps();
@@ -120,6 +123,8 @@ private:
   dmtk::Hami<value_type > hami;
   dmtk::Lattice lattice;
   std::vector<dmtk::Block<value_type > > site_block;
+  // site operators (by site type and name) whose matrix is zero
+  std::map<std::pair<int,std::string>,bool> zero_site_operator;
   
   int num_eigenvalues;
   int verbose;
@@ -181,7 +186,7 @@ template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
   , alps::graph_helper<>(parms) 
-  , alps::model_helper<>(*this,parms)
+  , alps::model_helper<>(*this,parms,false,true)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
   init();
@@ -191,7 +196,7 @@ template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
   : alps::scheduler::Task(w,p) 
   , alps::graph_helper<>(parms) 
-  , alps::model_helper<>(*this,parms)
+  , alps::model_helper<>(*this,parms,false,true)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
   init();
@@ -425,6 +430,23 @@ void DMRGTask<value_type>::dostep()
   // create bond terms
   for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
     build_bond_operator(bond_term(bond_type(*it)),*it, hami);
+
+  // create n-site terms on the n-site groups. The split depends only on the
+  // group type and the site types, so do it once per combination.
+  typedef std::pair<unsigned int,std::vector<int> > nsite_group_key;
+  std::map<nsite_group_key,std::vector<alps::nsite_product<value_type> > > split_cache;
+  for (std::size_t q = 0; q < nsite_groups().size(); ++q) {
+    alps::nsite_group const& p = nsite_groups()[q];
+    alps::NSiteOperator term = model().nsite_term(p.type);
+    if (term.term().empty())
+      continue;
+    nsite_group_key key(p.type,std::vector<int>());
+    for (std::size_t r = 0; r < p.sites.size(); ++r)
+      key.second.push_back(site_type(p.sites[r]));
+    if (split_cache.find(key) == split_cache.end())
+      split_cache[key] = split_nsite_operator(term, p);
+    build_nsite_operator(split_cache[key], term, p, hami);
+  }
 
 //-------------------------------------------------------------
 
@@ -965,4 +987,70 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
   }
 }
 
+// Split an n-site term into products of site operators (nsiteoperator.h).
+// A term with an odd number of fermion operators is refused (building the
+// local table checks it), and so is a term that changes the total of any
+// quantum number, conserved or not: dmrg gives wrong energies for those.
+template<class value_type>
+std::vector<alps::nsite_product<value_type> >
+DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p)
+{
+  std::vector<alps::SiteBasisDescriptor<short> > bases;
+  for (std::size_t r = 0; r < p.sites.size(); ++r)
+    bases.push_back(basis().site_basis(site_type(p.sites[r])));
+  alps::nsite_matrix<value_type> mat = op.template matrix<value_type>(bases,parms);
+  if (!mat.nonconserved.empty())
+    boost::throw_exception(std::runtime_error("<NSITETERM> on n-site groups of type "
+      + boost::lexical_cast<std::string>(p.type) + " changes the total " + *mat.nonconserved.begin()
+      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag."));
+  return op.template split<value_type>(bases,parms);
+}
 
+// One dmtk term per product of the n-site term: coef * O_0 * O_1 * ... in
+// role order, one site operator per site of the group. dmtk reorders the
+// operators by site with the fermion sign (Hami::reorder_terms). A constant
+// (a product without site operators) is the identity on the first site.
+template<class value_type>
+void
+DMRGTask<value_type>::build_nsite_operator(std::vector<alps::nsite_product<value_type> > const& products,
+                                               alps::NSiteOperator const& op, alps::nsite_group const& p, dmtk::Hami<value_type > &this_hami)
+{
+  for (std::size_t t = 0; t < products.size(); ++t) {
+    dmtk::Term<value_type > real_t;
+    bool zero = false;
+    for (std::size_t r = 0; r < p.sites.size() && !zero; ++r) {
+      if (products[t].ops[r].empty())
+        continue;
+      int type = site_type(p.sites[r]);
+      alps::SiteOperator siteop(products[t].ops[r],op.sites()[r]);
+      std::string name = simplify_name(siteop);
+      std::pair<int,std::string> key(type,name);
+      if (zero_site_operator.find(key) == zero_site_operator.end()) {
+        boost::multi_array<value_type,2> m = alps::get_matrix(value_type(),siteop,site_basis(type),parms,true);
+        bool z = true;
+        for (std::size_t i = 0; i < m.shape()[0] && z; ++i)
+          for (std::size_t j = 0; j < m.shape()[1] && z; ++j)
+            if (std::abs(m[i][j]) > 1.e-10)
+              z = false;
+        zero_site_operator[key] = z;
+      }
+      if (zero_site_operator[key]) {
+        zero = true;
+        break;
+      }
+      dmtk::BasicOp<value_type > op1 = create_site_operator(name,siteop,type);
+      op1.set_site(p.sites[r]);
+      real_t = real_t*op1;
+    }
+    if (zero)
+      continue;
+    if (real_t.size() == 0) {
+      alps::SiteOperator ident("1",op.sites()[0]);
+      dmtk::BasicOp<value_type > op1 = create_site_operator(simplify_name(ident),ident,site_type(p.sites[0]));
+      op1.set_site(p.sites[0]);
+      real_t = op1;
+    }
+    real_t.coef() = products[t].coef;
+    this_hami += real_t;
+  }
+}

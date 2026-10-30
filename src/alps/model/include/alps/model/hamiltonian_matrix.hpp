@@ -316,36 +316,19 @@ nsite_matrix<typename hamiltonian_matrix<M,G>::value_type> hamiltonian_matrix<M,
   return op.template matrix<value_type>(bases,parms);
 }
 
-// A term that changes a quantum number whose range is capped by a parameter
-// (e.g. a boson N with max="Nmax") gives results that depend on that cutoff:
-// entries that would leave the range are dropped. Say so once. Fixed ranges
-// (fermion 0..1) and ranges set by another quantum number (Sz in -S..S) are
-// physical, not a cutoff.
+// Warn once if the term changes a quantum number capped by a cutoff (Nmax).
 template <class M, class G>
 void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const
 {
   if (warned_cutoff_ || mat.nonconserved.empty())
     return;
-  for (std::size_t r=0;r<p.sites.size();++r) {
-    SiteBasisDescriptor<short> b = model_.model().basis().site_basis(graph_.site_type(p.sites[r]));
-    b.set_parameters(parms);
-    for (std::size_t q=0;q<b.size();++q) {
-      if (!mat.nonconserved.count(b[q].name()) || can_evaluate(b[q].max_expression()))
-        continue;
-      bool set_by_quantumnumber=false;
-      for (std::size_t o=0;o<b.size();++o)
-        if (o!=q && b[q].depends_on(b[o].name()))
-          set_by_quantumnumber=true;
-      if (set_by_quantumnumber)
-        continue;
-      std::cerr << "Warning: an <NSITETERM> changes the total " << b[q].name()
-                << ", whose local range is cut off at " << b[q].name() << " <= "
-                << b[q].max_expression() << " = " << b[q].max() << ". Matrix elements "
-                << "that would exceed the cutoff are dropped, so results depend on it; "
-                << "check convergence in " << b[q].max_expression() << ".\n";
-      warned_cutoff_=true;
-      return;
-    }
+  std::vector<SiteBasisDescriptor<short> > bases;
+  for (std::size_t r=0;r<p.sites.size();++r)
+    bases.push_back(model_.model().basis().site_basis(graph_.site_type(p.sites[r])));
+  std::string warning = nsite_cutoff_warning(mat.nonconserved,bases,parms);
+  if (!warning.empty()) {
+    std::cerr << warning;
+    warned_cutoff_=true;
   }
 }
 
