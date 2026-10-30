@@ -14,6 +14,8 @@
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
+#include "evaluated_parameters.hpp"
+
 #include <string>
 
 namespace alps {
@@ -37,10 +39,7 @@ namespace alps {
         par.read_xml(tag, infile, true);
         if (!par.defined("SEED"))
             par["SEED"] = 0;
-        
-        params res;
-        for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it)
-            res.supply(it->key(), it->value());
-        return res;
+
+        return detail::make_parameters_evaluated(par);
     }
 }
