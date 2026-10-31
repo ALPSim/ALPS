@@ -3,13 +3,15 @@ name: Sub-issue PRs
 # Opens a draft PR for each sub-issue of an issue (.github/scripts/subissue_prs.py):
 # - for every issue in "Generate PRs" on the project board, checked on a
 #   schedule because board changes can't trigger a workflow;
+# - at once for one issue when its "Generate PRs for the sub-issues" checkbox
+#   is ticked (the scheduled run adds the box to issues in "Make Subissues");
 # - at once for one issue when it gets the make-prs label;
 # - by hand for one issue number, or for the whole board if left empty.
 on:
   schedule:
     - cron: '*/10 * * * *'
   issues:
-    types: [labeled]
+    types: [labeled, edited]
   workflow_dispatch:
     inputs:
       issue:
@@ -29,7 +31,10 @@ concurrency:
 
 jobs:
   open_prs:
-    if: github.event_name != 'issues' || github.event.label.name == 'make-prs'
+    if: >-
+      github.event_name != 'issues'
+      || (github.event.action == 'labeled' && github.event.label.name == 'make-prs')
+      || (github.event.action == 'edited' && contains(github.event.issue.body, '- [x] Generate PRs for the sub-issues'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -48,7 +53,7 @@ jobs:
       # The label is a one-shot trigger; removing it lets it be added again
       # after more sub-issues are created.
       - name: Remove the make-prs label
-        if: always() && github.event_name == 'issues'
+        if: always() && github.event.action == 'labeled'
         env:
           GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
           GH_REPO: ${{ github.repository }}

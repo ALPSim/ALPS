@@ -10,6 +10,10 @@ every open sub-issue without a linked PR gets
 The parent gets one comment listing each sub-issue's PRs, kept up to date, so
 clicking its card shows every PR it branched into.
 
+Issues in "Make Subissues" get a "Generate PRs for the sub-issues" checkbox in
+their description; ticking it runs this for that issue at once, and the box is
+unticked again afterwards.
+
 Running it again does nothing for sub-issues that already have a PR or branch.
 At most MAX_PRS PRs are opened per run. With DRY_RUN=1 it only prints what it
 would do.
@@ -20,8 +24,10 @@ import subprocess
 
 ORG, PROJECT = "ALPSim", 5
 OWNER, REPO = "ALPSim", "ALPS"
-# The "Generate PRs" Status option, by ID so renaming the column doesn't break this.
-STATUS = "1d217230"
+# Status options, by ID so renaming the columns doesn't break this.
+STATUS = "1d217230"  # Generated PRs
+MAKE_SUBISSUES = "47fc9ee4"
+BOX = "Generate PRs for the sub-issues"
 ISSUE = int(os.environ.get("ISSUE") or 0)
 MAX_PRS = 10
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
@@ -41,7 +47,7 @@ query($org: String!, $number: Int!, $after: String) {
           owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
           content {
             ... on Issue {
-              number state
+              number state body
               repository { nameWithOwner }
               subIssues(first: 50) {
                 nodes {
@@ -148,11 +154,29 @@ def list_prs(parent, prs):
         gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{old['id']}", "--input", "-", body={"body": body})
 
 
+def set_box(issue, ticked):
+    """Put the checkbox in the issue's description, ticked or not."""
+    body = (issue["body"] or "").replace("\r\n", "\n")
+    want = f"- [{'x' if ticked else ' '}] {BOX}"
+    lines = body.split("\n")
+    new = "\n".join(want if line.strip() in (f"- [ ] {BOX}", f"- [x] {BOX}") else line for line in lines)
+    if want not in new:
+        new = f"{new.rstrip()}\n\n{want}" if new.strip() else want
+    if new == body:
+        return
+    print(f"  {'ticking' if ticked else 'unticking' if BOX in body else 'adding'} the checkbox on #{issue['number']}")
+    if not DRY_RUN:
+        gh("api", "-X", "PATCH", f"repos/{OWNER}/{REPO}/issues/{issue['number']}", "--input", "-", body={"body": new})
+
+
 def main():
     opened = 0
     for project, items in project_items():
         for item in items:
             issue = item["content"] or {}
+            if not ISSUE and (item["status"] or {}).get("optionId") == MAKE_SUBISSUES and issue.get("state") == "OPEN" \
+                    and issue["repository"]["nameWithOwner"] == f"{OWNER}/{REPO}" and BOX not in (issue["body"] or ""):
+                set_box(issue, False)
             wanted = issue.get("number") == ISSUE if ISSUE else (item["status"] or {}).get("optionId") == STATUS
             if not wanted or issue.get("state") != "OPEN" or issue["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}":
                 continue
@@ -172,6 +196,8 @@ def main():
                 if numbers:
                     prs.append((sub["number"], numbers))
             list_prs(issue["number"], prs)
+            if ISSUE:
+                set_box(issue, False)
 
 
 if __name__ == "__main__":
