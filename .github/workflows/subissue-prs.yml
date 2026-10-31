@@ -1,7 +1,7 @@
 name: Sub-issue PRs
 
 # Opens a draft PR for each sub-issue of an issue (.github/scripts/subissue_prs.py):
-# - for every issue in "Ready for PR" on the project board, checked on a
+# - for every issue in "Generate PRs" on the project board, checked on a
 #   schedule because board changes can't trigger a workflow;
 # - at once for one issue when it gets the make-prs label;
 # - by hand for one issue number, or for the whole board if left empty.
@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       issue:
-        description: Parent issue number (empty for every issue in Ready for PR)
+        description: Parent issue number (empty for every issue in Generate PRs)
         type: string
         default: ''
       dry_run:

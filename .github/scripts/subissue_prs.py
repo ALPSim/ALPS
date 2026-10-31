@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Open a draft PR for every sub-issue of an issue in "Ready for PR".
+"""Open a draft PR for every sub-issue of an issue in "Generate PRs".
 
 For each ALPSim/ALPS issue on the project board (github.com/orgs/ALPSim/projects/5)
-whose Status is "Ready for PR", or only the issue numbered ISSUE if that is set,
+whose Status is "Generate PRs", or only the issue numbered ISSUE if that is set,
 every open sub-issue without a linked PR gets
 - a branch issue-<number>, linked to the sub-issue, holding one empty commit,
 - a draft PR from that branch whose body closes the sub-issue,
-- a card on the board in "Ready for PR" with the parent's Owner.
+- a card on the board in "Generate PRs" with the parent's Owner.
 
 Running it again does nothing for sub-issues that already have a PR or branch.
 At most MAX_PRS PRs are opened per run. With DRY_RUN=1 it only prints what it
@@ -18,7 +18,8 @@ import subprocess
 
 ORG, PROJECT = "ALPSim", 5
 OWNER, REPO = "ALPSim", "ALPS"
-STATUS = "Ready for PR"
+# The "Generate PRs" Status option, by ID so renaming the column doesn't break this.
+STATUS = "1d217230"
 ISSUE = int(os.environ.get("ISSUE") or 0)
 MAX_PRS = 10
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
@@ -33,7 +34,7 @@ query($org: String!, $number: Int!, $after: String) {
       items(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes {
-          status: fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+          status: fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { optionId } }
           owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
           content {
             ... on Issue {
@@ -81,7 +82,7 @@ def project_items():
 
 
 def option_id(field, name):
-    return next((o["id"] for o in field["options"] if o["name"] == name), None)
+    return next((o["id"] for o in field["options"] if o["name"] == name), None) if name else None
 
 
 def open_pr(project, sub, parent, owner):
@@ -116,12 +117,12 @@ def open_pr(project, sub, parent, owner):
     item = graphql("""mutation($project: ID!, $content: ID!) {
         addProjectV2ItemById(input: {projectId: $project, contentId: $content}) { item { id } } }""",
                    project=project["id"], content=pr["node_id"])["addProjectV2ItemById"]["item"]["id"]
-    for field, value in ((project["status"], STATUS), (project["owner"], owner)):
-        if value and option_id(field, value):
+    for field, option in ((project["status"], STATUS), (project["owner"], option_id(project["owner"], owner))):
+        if option:
             graphql("""mutation($project: ID!, $item: ID!, $field: ID!, $option: String!) {
                 updateProjectV2ItemFieldValue(input: {projectId: $project, itemId: $item, fieldId: $field,
                   value: {singleSelectOptionId: $option}}) { projectV2Item { id } } }""",
-                    project=project["id"], item=item, field=field["id"], option=option_id(field, value))
+                    project=project["id"], item=item, field=field["id"], option=option)
     print(f"  opened {pr['html_url']} for #{sub['number']}")
 
 
@@ -130,7 +131,7 @@ def main():
     for project, items in project_items():
         for item in items:
             issue = item["content"] or {}
-            wanted = issue.get("number") == ISSUE if ISSUE else (item["status"] or {}).get("name") == STATUS
+            wanted = issue.get("number") == ISSUE if ISSUE else (item["status"] or {}).get("optionId") == STATUS
             if not wanted or issue.get("state") != "OPEN" or issue["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}":
                 continue
             owner = (item["owner"] or {}).get("name")
