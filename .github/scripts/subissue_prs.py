@@ -7,6 +7,8 @@ every open sub-issue without a linked PR gets
 - a branch issue-<number>, linked to the sub-issue, holding one empty commit,
 - a draft PR from that branch whose body closes the sub-issue,
 - a card on the board in "Generate PRs" with the parent's Owner.
+The parent gets one comment listing each sub-issue's PRs, kept up to date, so
+clicking its card shows every PR it branched into.
 
 Running it again does nothing for sub-issues that already have a PR or branch.
 At most MAX_PRS PRs are opened per run. With DRY_RUN=1 it only prints what it
@@ -23,6 +25,7 @@ STATUS = "1d217230"
 ISSUE = int(os.environ.get("ISSUE") or 0)
 MAX_PRS = 10
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
+MARKER = "<!-- subissue-prs -->"
 
 ITEMS = """
 query($org: String!, $number: Int!, $after: String) {
@@ -45,7 +48,7 @@ query($org: String!, $number: Int!, $after: String) {
                   id number title state
                   repository { nameWithOwner }
                   assignees(first: 10) { nodes { login } }
-                  closedByPullRequestsReferences(first: 1, includeClosedPrs: true) { totalCount }
+                  closedByPullRequestsReferences(first: 10, includeClosedPrs: true) { nodes { number } }
                   linkedBranches(first: 1) { totalCount }
                 }
               }
@@ -90,7 +93,7 @@ def open_pr(project, sub, parent, owner):
     branch = f"issue-{sub['number']}"
     if DRY_RUN:
         print(f"  would open draft PR {branch} for #{sub['number']} {sub['title']!r}")
-        return
+        return None
 
     # A PR needs at least one commit the base branch lacks, so the branch
     # starts with an empty commit on top of the default branch.
@@ -124,6 +127,25 @@ def open_pr(project, sub, parent, owner):
                   value: {singleSelectOptionId: $option}}) { projectV2Item { id } } }""",
                     project=project["id"], item=item, field=field["id"], option=option)
     print(f"  opened {pr['html_url']} for #{sub['number']}")
+    return pr["number"]
+
+
+def list_prs(parent, prs):
+    """Write or update the parent's comment that lists its sub-issues' PRs."""
+    if not prs:
+        return
+    body = "\n".join([MARKER, "**PRs for the sub-issues**", ""]
+                     + [f"- #{sub} → {', '.join(f'#{n}' for n in numbers)}" for sub, numbers in prs])
+    if DRY_RUN:
+        print(f"  would list on #{parent}: " + "; ".join(f"#{sub} → {numbers}" for sub, numbers in prs))
+        return
+    repo = f"{OWNER}/{REPO}"
+    comments = gh("api", "--paginate", "--slurp", f"repos/{repo}/issues/{parent}/comments")
+    old = next((c for page in comments for c in page if c["body"].startswith(MARKER)), None)
+    if old is None:
+        gh("api", f"repos/{repo}/issues/{parent}/comments", "--input", "-", body={"body": body})
+    elif old["body"] != body:
+        gh("api", "-X", "PATCH", f"repos/{repo}/issues/comments/{old['id']}", "--input", "-", body={"body": body})
 
 
 def main():
@@ -136,17 +158,20 @@ def main():
                 continue
             owner = (item["owner"] or {}).get("name")
             print(f"#{issue['number']} ({owner or 'no owner'})")
+            prs = []
             for sub in issue["subIssues"]["nodes"]:
-                if sub["state"] != "OPEN" or sub["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}":
-                    continue
-                if sub["closedByPullRequestsReferences"]["totalCount"] or sub["linkedBranches"]["totalCount"]:
-                    print(f"  #{sub['number']} already has a PR or branch")
-                    continue
-                if opened == MAX_PRS:
-                    print(f"  stopping at {MAX_PRS} PRs; the next run opens the rest")
-                    return
-                open_pr(project, sub, issue["number"], owner)
-                opened += 1
+                numbers = [pr["number"] for pr in sub["closedByPullRequestsReferences"]["nodes"]]
+                if sub["state"] != "OPEN" or sub["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}" \
+                        or numbers or sub["linkedBranches"]["totalCount"]:
+                    pass
+                elif opened == MAX_PRS:
+                    print(f"  #{sub['number']} waits for the next run ({MAX_PRS} PRs per run)")
+                else:
+                    numbers = [n for n in [open_pr(project, sub, issue["number"], owner)] if n]
+                    opened += 1
+                if numbers:
+                    prs.append((sub["number"], numbers))
+            list_prs(issue["number"], prs)
 
 
 if __name__ == "__main__":
