@@ -7,7 +7,10 @@ number PR if that is set:
 - if its Status is "Generated PRs", every requested or past reviewer without a
   card gets a draft card titled like the PR, in "PRs ready for review", under
   their own Owner name strip (added to the Owner field if missing), showing the
-  PR owner's icon and the same Issue value.
+  PR owner's icon and the same Issue value;
+- its Reviews field shows one light per reviewer, in name order, and each
+  reviewer's card shows their own: 🟢 approved, 🔴 changes requested,
+  🟡 waiting or only commented.
 
 Running it again only adds what is missing. With DRY_RUN=1 it only prints what
 it would do.
@@ -32,12 +35,14 @@ query($org: String!, $number: Int!, $after: String) {
       status: field(name: "Status") { ... on ProjectV2SingleSelectField { id } }
       owner: field(name: "Owner") { ... on ProjectV2SingleSelectField { id options { id name color description } } }
       issue: field(name: "Issue") { ... on ProjectV2Field { id } }
+      reviews: field(name: "Reviews") { ... on ProjectV2Field { id } }
       items(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes {
           id
           status: fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { optionId } }
           issue: fieldValueByName(name: "Issue") { ... on ProjectV2ItemFieldTextValue { text } }
+          reviews: fieldValueByName(name: "Reviews") { ... on ProjectV2ItemFieldTextValue { text } }
           content {
             __typename
             ... on DraftIssue { body }
@@ -48,7 +53,7 @@ query($org: String!, $number: Int!, $after: String) {
               assignees(first: 10) { nodes { id login } }
               closingIssuesReferences(first: 10) { nodes { number } }
               reviewRequests(first: 20) { nodes { requestedReviewer { ... on User { login } } } }
-              latestReviews(first: 20) { nodes { author { login } } }
+              latestReviews(first: 20) { nodes { state author { login } } }
             }
           }
         }
@@ -80,8 +85,19 @@ def load_board():
         after = page["items"]["pageInfo"]["endCursor"]
 
 
+# A re-requested reviewer is waiting again whatever they said before.
+LIGHTS = {"APPROVED": "🟢", "CHANGES_REQUESTED": "🔴"}
+WAITING = "🟡"
+
+
 def marker(pr, login):
     return f"<!-- review-card {OWNER}/{REPO}#{pr} @{login} -->"
+
+
+def set_text(project, item, field, value):
+    """Set a text field on a card unless it already holds value."""
+    if (item[field] or {}).get("text") != value and not DRY_RUN:
+        set_field(project, item["id"], project[field]["id"], {"text": value})
 
 
 def set_field(project, item, field, value):
@@ -111,7 +127,7 @@ def owner_option(project, login):
 
 def main():
     project, items = load_board()
-    cards = {(item["content"] or {}).get("body", "").split("\n", 1)[0] for item in items
+    cards = {(item["content"] or {}).get("body", "").split("\n", 1)[0]: item for item in items
              if (item["content"] or {}).get("__typename") == "DraftIssue"}
     for item in items:
         pr = item["content"] or {}
@@ -120,19 +136,25 @@ def main():
             continue
         issue = ", ".join(f"#{i['number']}" for i in pr["closingIssuesReferences"]["nodes"]) or "NA"
         print(f"#{pr['number']} Issue: {issue}")
-        if (item["issue"] or {}).get("text") != issue and not DRY_RUN:
-            set_field(project, item["id"], project["issue"]["id"], {"text": issue})
+        set_text(project, item, "issue", issue)
         if pr["state"] != "OPEN" or (item["status"] or {}).get("optionId") != GENERATED:
             continue
 
         author = (pr["author"] or {}).get("login")
-        reviewers = [r["requestedReviewer"]["login"] for r in pr["reviewRequests"]["nodes"] if r["requestedReviewer"]]
-        reviewers += [r["author"]["login"] for r in pr["latestReviews"]["nodes"] if r["author"]]
+        lights = {r["author"]["login"]: LIGHTS.get(r["state"], WAITING)
+                  for r in pr["latestReviews"]["nodes"] if r["author"]}
+        lights.update({r["requestedReviewer"]["login"]: WAITING
+                       for r in pr["reviewRequests"]["nodes"] if r["requestedReviewer"]})
+        lights.pop(author, None)
+        reviewers = sorted(lights, key=str.lower)
+        print(f"  Reviews: " + " ".join(f"{lights[r]} {r}" for r in reviewers))
+        set_text(project, item, "reviews", "".join(lights[r] for r in reviewers))
         # The card shows the PR owner's icon, so its assignee is the PR's.
         owner_ids = [a["id"] for a in pr["assignees"]["nodes"] if a["login"] == author] \
             or [a["id"] for a in pr["assignees"]["nodes"]][:1]
-        for login in dict.fromkeys(r for r in reviewers if r != author):
+        for login in reviewers:
             if marker(pr["number"], login) in cards:
+                set_text(project, cards[marker(pr["number"], login)], "reviews", lights[login])
                 continue
             print(f"  card for reviewer {login}")
             if DRY_RUN:
@@ -145,7 +167,7 @@ def main():
             set_field(project, draft, project["status"]["id"], {"singleSelectOptionId": READY_FOR_REVIEW})
             set_field(project, draft, project["owner"]["id"], {"singleSelectOptionId": option})
             set_field(project, draft, project["issue"]["id"], {"text": issue})
-            cards.add(marker(pr["number"], login))
+            set_field(project, draft, project["reviews"]["id"], {"text": lights[login]})
 
 
 if __name__ == "__main__":
