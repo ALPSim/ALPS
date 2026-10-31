@@ -1,0 +1,56 @@
+name: Sub-issue PRs
+
+# Opens a draft PR for each sub-issue of an issue (.github/scripts/subissue_prs.py):
+# - for every issue in "Ready for PR" on the project board, checked on a
+#   schedule because board changes can't trigger a workflow;
+# - at once for one issue when it gets the make-prs label;
+# - by hand for one issue number, or for the whole board if left empty.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Parent issue number (empty for every issue in Ready for PR)
+        type: string
+        default: ''
+      dry_run:
+        description: Only print what would be opened
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: subissue-prs
+
+jobs:
+  open_prs:
+    if: github.event_name != 'issues' || github.event.label.name == 'make-prs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # GITHUB_TOKEN can't read the org project or open PRs here, so this
+      # uses a token with Contents, Issues and Pull requests write on this
+      # repo and Projects write on the org.
+      - name: Open draft PRs for sub-issues
+        env:
+          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          ISSUE: ${{ github.event.issue.number || inputs.issue }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python .github/scripts/subissue_prs.py
+      # The label is a one-shot trigger; removing it lets it be added again
+      # after more sub-issues are created.
+      - name: Remove the make-prs label
+        if: always() && github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue edit "$ISSUE_NUMBER" --remove-label make-prs

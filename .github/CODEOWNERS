@@ -1,0 +1,9 @@
+# Reviewers requested automatically when a pull request changes these paths.
+# The owners follow the per-method assignees in workflows/issue-triage.yml.
+/src/apps/diag/        @vws100
+/src/apps/qmc/sse/     @wistaria
+/src/apps/qmc/sse2/    @wistaria
+/src/apps/qmc/sse4/    @wistaria
+/src/apps/qmc/worms/   @LodePollet
+/src/apps/dmrg/        @afeiguin
+/src/apps/dmft/        @egull
