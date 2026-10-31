@@ -1,0 +1,26 @@
+name: Close parent issue
+
+# Closes an issue once all its sub-issues are closed, so a split issue closes
+# when the PRs for its sub-issues have merged (.github/scripts/close_parent.py).
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  close_parent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Same token as subissue-prs.yml, so closing a parent also runs this
+      # workflow for its own parent (GITHUB_TOKEN events don't trigger workflows).
+      - name: Close the parent if every sub-issue is closed
+        env:
+          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: python .github/scripts/close_parent.py

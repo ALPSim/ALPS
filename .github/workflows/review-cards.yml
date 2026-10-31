@@ -1,0 +1,49 @@
+name: Review cards
+
+# Keeps a PR's Issue field on the project board up to date and, when a reviewer
+# is requested on a PR in "Generated PRs", gives them a copy of its card under
+# their own name, and keeps the review lights on both cards current
+# (.github/scripts/review_cards.py).
+#
+# pull_request_target so PRs from forks get the token too; it runs the script
+# from the base branch and never checks out the PR's code. Reviews on fork PRs
+# get no secrets, so the schedule catches those.
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, ready_for_review, review_requested, review_request_removed]
+  pull_request_review:
+    types: [submitted, dismissed]
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: PR number (empty for every PR on the board)
+        type: string
+        default: ''
+      dry_run:
+        description: Only print what would change
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: review-cards
+
+jobs:
+  cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Same token as subissue-prs.yml: GITHUB_TOKEN can't write the org project.
+      - name: Update the PR's cards
+        env:
+          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          PR: ${{ github.event.pull_request.number || inputs.pr }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python .github/scripts/review_cards.py
