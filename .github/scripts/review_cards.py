@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Give each reviewer of a PR in "Generated PRs" a copy of its card.
+"""Put every open PR on the board under its author, and give each reviewer a
+copy of its card.
 
-For each PR on the project board (github.com/orgs/ALPSim/projects/5), or only PR
-number PR if that is set:
+Every open PR in the repository, or only PR number PR if that is set, is added
+to the project board (github.com/orgs/ALPSim/projects/5) if it isn't there yet,
+gets Status "Generated PRs", and gets its author as Owner unless it already has
+an owner other than Bucket. Then, for each PR on the board:
 - its Issue field is set to the issue numbers it closes, or NA if none;
-- if its Status is "Generated PRs", every requested or past reviewer without a
+- if it is open, every requested or past reviewer without a
   card gets a draft card titled like the PR, in "PRs ready for review", under
   their own Owner name strip (added to the Owner field if missing), showing the
   PR owner's icon and the same Issue value;
@@ -27,6 +30,29 @@ READY_FOR_REVIEW = "099ec7f0"
 PR = int(os.environ.get("PR") or 0)
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
 
+CARD = """
+fragment card on ProjectV2Item {
+    id
+    status: fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { optionId } }
+    owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+    issue: fieldValueByName(name: "Issue") { ... on ProjectV2ItemFieldTextValue { text } }
+    reviews: fieldValueByName(name: "Reviews") { ... on ProjectV2ItemFieldTextValue { text } }
+    content {
+      __typename
+      ... on DraftIssue { body }
+      ... on PullRequest {
+        id number title url state
+        repository { nameWithOwner }
+        author { login }
+        assignees(first: 10) { nodes { id login } }
+        closingIssuesReferences(first: 10) { nodes { number } }
+        reviewRequests(first: 20) { nodes { requestedReviewer { ... on User { login } } } }
+        latestReviews(first: 20) { nodes { state author { login } } }
+      }
+    }
+}
+"""
+
 ITEMS = """
 query($org: String!, $number: Int!, $after: String) {
   organization(login: $org) {
@@ -38,30 +64,12 @@ query($org: String!, $number: Int!, $after: String) {
       reviews: field(name: "Reviews") { ... on ProjectV2Field { id } }
       items(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
-        nodes {
-          id
-          status: fieldValueByName(name: "Status") { ... on ProjectV2ItemFieldSingleSelectValue { optionId } }
-          issue: fieldValueByName(name: "Issue") { ... on ProjectV2ItemFieldTextValue { text } }
-          reviews: fieldValueByName(name: "Reviews") { ... on ProjectV2ItemFieldTextValue { text } }
-          content {
-            __typename
-            ... on DraftIssue { body }
-            ... on PullRequest {
-              number title url state
-              repository { nameWithOwner }
-              author { login }
-              assignees(first: 10) { nodes { id login } }
-              closingIssuesReferences(first: 10) { nodes { number } }
-              reviewRequests(first: 20) { nodes { requestedReviewer { ... on User { login } } } }
-              latestReviews(first: 20) { nodes { state author { login } } }
-            }
-          }
-        }
+        nodes { ...card }
       }
     }
   }
 }
-"""
+""" + CARD
 
 
 def gh(*args, body=None):
@@ -125,10 +133,59 @@ def owner_option(project, login):
     return next(o["id"] for o in field["options"] if o["name"] == login)
 
 
+OPEN_PRS = """
+query($owner: String!, $repo: String!, $after: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequests(states: OPEN, first: 100, after: $after) {
+      pageInfo { hasNextPage endCursor }
+      nodes { id number }
+    }
+  }
+}
+"""
+
+
+def add_open_prs(project, items):
+    """Add the open PRs that aren't on the board yet, and return their cards.
+
+    The board's item list lags behind for a minute or so, so new cards are
+    fetched by ID instead."""
+    on_board = {(item["content"] or {}).get("id") for item in items}
+    added, after = [], None
+    while True:
+        page = graphql(OPEN_PRS, owner=OWNER, repo=REPO, after=after)["repository"]["pullRequests"]
+        for pr in page["nodes"]:
+            if pr["id"] in on_board or (PR and pr["number"] != PR):
+                continue
+            print(f"#{pr['number']} added to the board")
+            if not DRY_RUN:
+                item = graphql("""mutation($project: ID!, $pr: ID!) {
+                    addProjectV2ItemById(input: {projectId: $project, contentId: $pr}) { item { id } } }""",
+                               project=project["id"], pr=pr["id"])["addProjectV2ItemById"]["item"]["id"]
+                added.append(graphql("query($id: ID!) { node(id: $id) { ...card } }" + CARD, id=item)["node"])
+        if not page["pageInfo"]["hasNextPage"]:
+            return added
+        after = page["pageInfo"]["endCursor"]
+
+
 def main():
     project, items = load_board()
-    cards = {(item["content"] or {}).get("body", "").split("\n", 1)[0]: item for item in items
-             if (item["content"] or {}).get("__typename") == "DraftIssue"}
+    items += add_open_prs(project, items)
+    # A card made by a run a minute earlier can be missing from the item list
+    # and get made twice; keep the first of each and remove the rest.
+    cards = {}
+    for item in items:
+        if (item["content"] or {}).get("__typename") != "DraftIssue":
+            continue
+        key = item["content"]["body"].split("\n", 1)[0]
+        if key.startswith("<!-- review-card ") and key in cards:
+            print(f"removing duplicate card {key}")
+            if not DRY_RUN:
+                graphql("""mutation($project: ID!, $item: ID!) {
+                    deleteProjectV2Item(input: {projectId: $project, itemId: $item}) { deletedItemId } }""",
+                        project=project["id"], item=item["id"])
+            continue
+        cards[key] = item
     for item in items:
         pr = item["content"] or {}
         if pr.get("__typename") != "PullRequest" or pr["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}" \
@@ -137,10 +194,20 @@ def main():
         issue = ", ".join(f"#{i['number']}" for i in pr["closingIssuesReferences"]["nodes"]) or "NA"
         print(f"#{pr['number']} Issue: {issue}")
         set_text(project, item, "issue", issue)
-        if pr["state"] != "OPEN" or (item["status"] or {}).get("optionId") != GENERATED:
+        if pr["state"] != "OPEN":
             continue
 
+        # An open PR always sits in "Generated PRs", under its author's name.
         author = (pr["author"] or {}).get("login")
+        if (item["status"] or {}).get("optionId") != GENERATED:
+            print(f"  Status: Generated PRs")
+            if not DRY_RUN:
+                set_field(project, item["id"], project["status"]["id"], {"singleSelectOptionId": GENERATED})
+        if author and (item["owner"] or {}).get("name") in (None, "Bucket"):
+            print(f"  Owner: {author}")
+            if not DRY_RUN:
+                set_field(project, item["id"], project["owner"]["id"], {"singleSelectOptionId": owner_option(project, author)})
+
         lights = {r["author"]["login"]: LIGHTS.get(r["state"], WAITING)
                   for r in pr["latestReviews"]["nodes"] if r["author"]}
         lights.update({r["requestedReviewer"]["login"]: WAITING

@@ -1,9 +1,9 @@
-name: Review cards
+name: PR cards
 
-# Keeps a PR's Issue field on the project board up to date and, when a reviewer
-# is requested on a PR in "Generated PRs", gives them a copy of its card under
-# their own name, and keeps the review lights on both cards current
-# (.github/scripts/review_cards.py).
+# Puts every open PR on the project board in "Generated PRs" under its author,
+# keeps its Issue field up to date and, when a reviewer is requested, gives them
+# a copy of its card under their own name, and keeps the review lights on both
+# cards current (.github/scripts/review_cards.py).
 #
 # pull_request_target so PRs from forks get the token too; it runs the script
 # from the base branch and never checks out the PR's code. Reviews on fork PRs
@@ -29,8 +29,9 @@ on:
 permissions:
   contents: read
 
+# One queue per PR, so a run for one PR never replaces the pending run of another.
 concurrency:
-  group: review-cards
+  group: review-cards-${{ github.event.pull_request.number || inputs.pr || 'all' }}
 
 jobs:
   cards:
