@@ -46,10 +46,9 @@ library code (`ALPS::params`) uses it too. Its publication pointer has been remo
 
 Not yet moved: `alps/ngs/{config,hash,mutex,sleep,thread_exceptions}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
-`alps/stringvalue.h`, and the type traits ALPSCore lacks. `alps/ngs/boost_mpi.hpp`
-stays where it is: ALPSCore's `alps/utilities/boost_mpi.hpp` is a different API.
-It is the one installed header that still needs Boost.MPI. ALPS no longer
-links Boost.MPI, so code that includes it links `Boost::mpi` itself.
+`alps/stringvalue.h`, and the type traits ALPSCore lacks.
+`alps/ngs/boost_mpi.hpp`, Boost.MPI `reduce` overloads that nothing used, was
+removed with Boost.MPI.
 
 [`ALPS::gf`](../gf/README.md) installs four of ALPSCore's `alps/type_traits/`
 headers. Only GF uses them, so by rule 1 they live with it.

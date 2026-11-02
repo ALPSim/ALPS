@@ -59,7 +59,6 @@ target_sources(alps_utilities PUBLIC
     include/alps/cctype.h
     include/alps/factory.h
     include/alps/lambda.hpp
-    include/alps/ngs/boost_mpi.hpp
     include/alps/ngs/config.hpp
     include/alps/ngs/hash.hpp
     include/alps/ngs/mutex.hpp
