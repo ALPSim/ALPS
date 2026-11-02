@@ -22,6 +22,8 @@ jobs:
           GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
           ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
+          # $issue and $item are GraphQL variables, not shell ones.
+          # shellcheck disable=SC2016
           # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
           item=$(gh api graphql -f query='mutation($issue: ID!) {
               addProjectV2ItemById(input: {projectId: "PVT_kwDOClreF84BpeQ0", contentId: $issue}) { item { id } } }' \
