@@ -1,0 +1,31 @@
+name: New issues to Bucket
+
+# Puts every new issue on the project board with Owner "Bucket", so it lands
+# in the Bucket column of Task Overview. The board's own workflows can only set
+# Status, not Owner.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  bucket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Same token as subissue-prs.yml: GITHUB_TOKEN can't write the org project.
+      - name: Add the issue to the board in Bucket
+        env:
+          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
+        run: |
+          # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
+          item=$(gh api graphql -f query='mutation($issue: ID!) {
+              addProjectV2ItemById(input: {projectId: "PVT_kwDOClreF84BpeQ0", contentId: $issue}) { item { id } } }' \
+            -f issue="$ISSUE_ID" --jq .data.addProjectV2ItemById.item.id)
+          gh api graphql -f query='mutation($item: ID!) {
+              updateProjectV2ItemFieldValue(input: {projectId: "PVT_kwDOClreF84BpeQ0", itemId: $item,
+                fieldId: "PVTSSF_lADOClreF84BpeQ0zhn8nwk", value: {singleSelectOptionId: "478ea68c"}}) {
+                projectV2Item { id } } }' -f item="$item"
