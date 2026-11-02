@@ -67,7 +67,8 @@ template <class Key, class T, class Compare, class Allocator>
 inline alps::ODump& operator << (alps::ODump& dump,
                                    const std::multimap<Key,T,Compare,Allocator>& x)
 {
-  return alps::detail::saveContainer(dump,x);
+  alps::detail::saveContainer(dump,x);
+  return dump;
 }          
 
 } // end namespace alps
