@@ -8,7 +8,7 @@ gets Status "Generated PRs", and gets its author as Owner unless it already has
 an owner other than Bucket. Then, for each PR on the board:
 - its Issue field is set to the issue numbers it closes, or NA if none;
 - if it is open, every requested or past reviewer without a
-  card gets a draft card titled like the PR, in "PRs ready for review", under
+  card gets a draft card titled like the PR with its number in front, in "PRs ready for review", under
   their own Owner name strip (added to the Owner field if missing), showing the
   PR owner's icon and the same Issue value;
 - its Reviews field shows one light per reviewer, in name order, and each
@@ -39,7 +39,7 @@ fragment card on ProjectV2Item {
     reviews: fieldValueByName(name: "Reviews") { ... on ProjectV2ItemFieldTextValue { text } }
     content {
       __typename
-      ... on DraftIssue { body }
+      ... on DraftIssue { id title body }
       ... on PullRequest {
         id number title url state
         repository { nameWithOwner }
@@ -219,9 +219,18 @@ def main():
         # The card shows the PR owner's icon, so its assignee is the PR's.
         owner_ids = [a["id"] for a in pr["assignees"]["nodes"] if a["login"] == author] \
             or [a["id"] for a in pr["assignees"]["nodes"]][:1]
+        # A draft card can't show the PR's number in its header, so the title starts with it.
+        title = f"{REPO} #{pr['number']} {pr['title']}"
         for login in reviewers:
             if marker(pr["number"], login) in cards:
-                set_text(project, cards[marker(pr["number"], login)], "reviews", lights[login])
+                card = cards[marker(pr["number"], login)]
+                set_text(project, card, "reviews", lights[login])
+                if card["content"]["title"] != title:
+                    print(f"  title of {login}'s card: {title}")
+                    if not DRY_RUN:
+                        graphql("""mutation($draft: ID!, $title: String!) {
+                            updateProjectV2DraftIssue(input: {draftIssueId: $draft, title: $title}) { draftIssue { id } } }""",
+                                draft=card["content"]["id"], title=title)
                 continue
             print(f"  card for reviewer {login}")
             if DRY_RUN:
@@ -229,7 +238,7 @@ def main():
             option = owner_option(project, login)
             draft = graphql("""mutation($project: ID!, $title: String!, $body: String!, $assignees: [ID!]) {
                 addProjectV2DraftIssue(input: {projectId: $project, title: $title, body: $body, assigneeIds: $assignees}) {
-                  projectItem { id } } }""", project=project["id"], title=pr["title"], assignees=owner_ids,
+                  projectItem { id } } }""", project=project["id"], title=title, assignees=owner_ids,
                             body=f"{marker(pr['number'], login)}\nReview {pr['url']}")["addProjectV2DraftIssue"]["projectItem"]["id"]
             set_field(project, draft, project["status"]["id"], {"singleSelectOptionId": READY_FOR_REVIEW})
             set_field(project, draft, project["owner"]["id"], {"singleSelectOptionId": option})
