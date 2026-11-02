@@ -41,10 +41,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      # Same token as subissue-prs.yml: GITHUB_TOKEN can't write the org project.
+      # Same token as issue-to-bucket.yml: GITHUB_TOKEN can't write the org project.
       - name: Update the PR's cards
         env:
-          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
           PR: ${{ github.event.pull_request.number || inputs.pr }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
         run: python .github/scripts/review_cards.py

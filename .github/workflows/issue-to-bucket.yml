@@ -15,10 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # Same token as subissue-prs.yml: GITHUB_TOKEN can't write the org project.
+      # GITHUB_TOKEN can't write the org project, so this uses a token with
+      # Projects write on the org and read access to this repo.
       - name: Add the issue to the board in Bucket
         env:
-          GH_TOKEN: ${{ secrets.SUBISSUE_PR_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
           ISSUE_ID: ${{ github.event.issue.node_id }}
         run: |
           # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
