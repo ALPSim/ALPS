@@ -20,14 +20,9 @@ jobs:
       - name: Add the issue to the board in Bucket
         env:
           GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
-          ISSUE_ID: ${{ github.event.issue.node_id }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
         run: |
-          # shellcheck disable=SC2016 # $issue and $item are GraphQL variables, not shell ones.
+          item=$(gh project item-add 5 --owner ALPSim --url "$ISSUE_URL" --format json --jq .id)
           # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
-          item=$(gh api graphql -f query='mutation($issue: ID!) {
-              addProjectV2ItemById(input: {projectId: "PVT_kwDOClreF84BpeQ0", contentId: $issue}) { item { id } } }' \
-            -f issue="$ISSUE_ID" --jq .data.addProjectV2ItemById.item.id)
-          gh api graphql -f query='mutation($item: ID!) {
-              updateProjectV2ItemFieldValue(input: {projectId: "PVT_kwDOClreF84BpeQ0", itemId: $item,
-                fieldId: "PVTSSF_lADOClreF84BpeQ0zhn8nwk", value: {singleSelectOptionId: "478ea68c"}}) {
-                projectV2Item { id } } }' -f item="$item"
+          gh project item-edit --id "$item" --project-id PVT_kwDOClreF84BpeQ0 \
+            --field-id PVTSSF_lADOClreF84BpeQ0zhn8nwk --single-select-option-id 478ea68c
