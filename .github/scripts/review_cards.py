@@ -7,13 +7,16 @@ to the project board (github.com/orgs/ALPSim/projects/5) if it isn't there yet,
 gets Status "Generated PRs", and gets its author as Owner unless it already has
 an owner other than Bucket. Then, for each PR on the board:
 - its Issue field is set to the issue numbers it closes, or NA if none;
-- if it is open, every requested or past reviewer without a
-  card gets a draft card titled like the PR with its number in front, in "PRs ready for review", under
+- while it is open, every requested or past reviewer gets a draft card titled
+  "ALPS #<PR> <title>" in the last column ("PR review assignments"), under
   their own Owner name strip (added to the Owner field if missing), showing the
-  PR owner's icon and the same Issue value;
+  PR author's icon, the same Issue value and the PR's state;
 - its Reviews field shows one light per reviewer, in name order, and each
   reviewer's card shows their own: 🟢 approved, 🔴 changes requested,
-  🟡 waiting or only commented.
+  🟡 waiting or only commented;
+- once it is merged or closed, or a reviewer is removed before reviewing, those
+  reviewer cards are removed. The PR's own card goes to Done through the
+  board's built-in workflows.
 
 Running it again only adds what is missing. With DRY_RUN=1 it only prints what
 it would do.
@@ -44,8 +47,7 @@ fragment card on ProjectV2Item {
       ... on PullRequest {
         id number title url state isDraft
         repository { nameWithOwner }
-        author { login }
-        assignees(first: 10) { nodes { id login } }
+        author { login ... on User { id } }
         closingIssuesReferences(first: 10) { nodes { number } }
         reviewRequests(first: 20) { nodes { requestedReviewer { ... on User { login } } } }
         latestReviews(first: 20) { nodes { state author { login } } }
@@ -170,6 +172,27 @@ def add_open_prs(project, items):
         after = page["pageInfo"]["endCursor"]
 
 
+def add_card(project, title, body, author_id):
+    """Add a draft card showing the PR author's icon, or none if they can't be assigned."""
+    query = """mutation($project: ID!, $title: String!, $body: String!, $assignees: [ID!]) {
+        addProjectV2DraftIssue(input: {projectId: $project, title: $title, body: $body, assigneeIds: $assignees}) {
+          projectItem { id } } }"""
+    try:
+        data = graphql(query, project=project["id"], title=title, body=body, assignees=[author_id] if author_id else [])
+    except subprocess.CalledProcessError:
+        # Someone from outside the org, for instance.
+        data = graphql(query, project=project["id"], title=title, body=body, assignees=[])
+    return data["addProjectV2DraftIssue"]["projectItem"]["id"]
+
+
+def remove(project, card, why):
+    print(f"  removing {why}")
+    if not DRY_RUN:
+        graphql("""mutation($project: ID!, $item: ID!) {
+            deleteProjectV2Item(input: {projectId: $project, itemId: $item}) { deletedItemId } }""",
+                project=project["id"], item=card["id"])
+
+
 def pr_state(pr):
     return {"MERGED": "Merged", "CLOSED": "Closed"}.get(pr["state"]) or ("Draft PR" if pr["isDraft"] else "Open")
 
@@ -185,11 +208,7 @@ def main():
             continue
         key = item["content"]["body"].split("\n", 1)[0]
         if key.startswith("<!-- review-card ") and key in cards:
-            print(f"removing duplicate card {key}")
-            if not DRY_RUN:
-                graphql("""mutation($project: ID!, $item: ID!) {
-                    deleteProjectV2Item(input: {projectId: $project, itemId: $item}) { deletedItemId } }""",
-                        project=project["id"], item=item["id"])
+            remove(project, item, f"duplicate card {key}")
             continue
         cards[key] = item
     seen = set()
@@ -201,13 +220,13 @@ def main():
         issue = ", ".join(f"#{i['number']}" for i in pr["closingIssuesReferences"]["nodes"]) or "NA"
         print(f"#{pr['number']} Issue: {issue}")
         set_text(project, item, "issue", issue)
-        # The reviewers' cards can't show the PR's own state icon, so they spell it out.
-        state = pr_state(pr)
         seen.add(pr["number"])
-        for key, card in cards.items():
-            if key.startswith(f"<!-- review-card {OWNER}/{REPO}#{pr['number']} @"):
-                set_text(project, card, "prstate", state)
+        mine = {key: card for key, card in cards.items()
+                if key.startswith(f"<!-- review-card {OWNER}/{REPO}#{pr['number']} @")}
+        # A merged or closed PR leaves no cards in the reviewers' column.
         if pr["state"] != "OPEN":
+            for key, card in mine.items():
+                remove(project, card, f"{key} (PR {pr['state'].lower()})")
             continue
 
         # An open PR always sits in "Generated PRs", under its author's name.
@@ -223,21 +242,27 @@ def main():
 
         lights = {r["author"]["login"]: LIGHTS.get(r["state"], WAITING)
                   for r in pr["latestReviews"]["nodes"] if r["author"]}
+        # Teams have no login and no name strip, so they get no card.
         lights.update({r["requestedReviewer"]["login"]: WAITING
-                       for r in pr["reviewRequests"]["nodes"] if r["requestedReviewer"]})
+                       for r in pr["reviewRequests"]["nodes"] if (r["requestedReviewer"] or {}).get("login")})
         lights.pop(author, None)
         reviewers = sorted(lights, key=str.lower)
         print(f"  Reviews: " + " ".join(f"{lights[r]} {r}" for r in reviewers))
         set_text(project, item, "reviews", "".join(lights[r] for r in reviewers))
-        # The card shows the PR owner's icon, so its assignee is the PR's.
-        owner_ids = [a["id"] for a in pr["assignees"]["nodes"] if a["login"] == author] \
-            or [a["id"] for a in pr["assignees"]["nodes"]][:1]
+        # A reviewer removed before reviewing loses their card.
+        for login in {key.rsplit("@", 1)[1][:-4] for key in mine} - set(reviewers):
+            remove(project, mine[marker(pr["number"], login)], f"{login}'s card (no longer a reviewer)")
+        # The card shows the PR author's icon, so its assignee is the author.
+        author_id = (pr["author"] or {}).get("id")
         # A draft card can't show the PR's number in its header, so the title starts with it.
         title = f"{REPO} #{pr['number']} {pr['title']}"
+        # The reviewers' cards can't show the PR's own state icon, so they spell it out.
+        state = pr_state(pr)
         for login in reviewers:
             if marker(pr["number"], login) in cards:
                 card = cards[marker(pr["number"], login)]
                 set_text(project, card, "reviews", lights[login])
+                set_text(project, card, "prstate", state)
                 if card["content"]["title"] != title:
                     print(f"  title of {login}'s card: {title}")
                     if not DRY_RUN:
@@ -249,17 +274,14 @@ def main():
             if DRY_RUN:
                 continue
             option = owner_option(project, login)
-            draft = graphql("""mutation($project: ID!, $title: String!, $body: String!, $assignees: [ID!]) {
-                addProjectV2DraftIssue(input: {projectId: $project, title: $title, body: $body, assigneeIds: $assignees}) {
-                  projectItem { id } } }""", project=project["id"], title=title, assignees=owner_ids,
-                            body=f"{marker(pr['number'], login)}\nReview {pr['url']}")["addProjectV2DraftIssue"]["projectItem"]["id"]
+            draft = add_card(project, title, f"{marker(pr['number'], login)}\nReview {pr['url']}", author_id)
             set_field(project, draft, project["status"]["id"], {"singleSelectOptionId": READY_FOR_REVIEW})
             set_field(project, draft, project["owner"]["id"], {"singleSelectOptionId": option})
             set_field(project, draft, project["issue"]["id"], {"text": issue})
             set_field(project, draft, project["reviews"]["id"], {"text": lights[login]})
             set_field(project, draft, project["prstate"]["id"], {"text": state})
 
-    # Reviewer cards whose PR was taken off the board still show how it ended.
+    # Reviewer cards whose PR was taken off the board go once it is merged or closed.
     prefix = f"<!-- review-card {OWNER}/{REPO}#"
     for key, card in cards.items():
         if not key.startswith(prefix):
@@ -268,9 +290,10 @@ def main():
         if number in seen or (PR and number != PR):
             continue
         pr = graphql("""query($o: String!, $r: String!, $n: Int!) {
-            repository(owner: $o, name: $r) { pullRequest(number: $n) { state isDraft } } }""",
+            repository(owner: $o, name: $r) { pullRequest(number: $n) { state } } }""",
                      o=OWNER, r=REPO, n=number)["repository"]["pullRequest"]
-        set_text(project, card, "prstate", pr_state(pr))
+        if pr["state"] != "OPEN":
+            remove(project, card, f"{key} (PR {pr['state'].lower()})")
 
 
 if __name__ == "__main__":
