@@ -3,6 +3,7 @@
 #include <alps/input/ctint.hpp>
 #include <alps/input/dmft.hpp>
 #include <alps/input/hirschfye.hpp>
+#include <alps/input/hybridization.hpp>
 #include <alps/parameter_input.hpp>
 #include <gtest/gtest.h>
 #include <sstream>
@@ -236,5 +237,67 @@ TEST(CtintInput, InfileIsRequiredUnlessAtomic) {
     alps::input::ctint_parameters const p = ctint(sizes + "ATOMIC = 1\n");
     EXPECT_TRUE(p.atomic);
     EXPECT_EQ(p.infile, "");
+}
+
+// CT-HYB parameters as the solver gets them: supplied text, then defined.
+alps::input::hybridization_parameters cthyb(std::string const & supplied) {
+    std::istringstream in(supplied);
+    alps::params parameters;
+    for (alps::Parameter const & p : alps::read_parameter_text(in))
+        parameters.supply(p.key(), p.value().c_str());
+    alps::input::define_hybridization_parameters(parameters);
+    std::ostringstream missing;
+    if (parameters.has_missing(missing))
+        throw std::invalid_argument(missing.str());
+    return alps::input::read_hybridization_parameters(parameters);
+}
+
+std::string const cthyb_required =
+    "SWEEPS = 1000; THERMALIZATION = 10; MAX_TIME = 60; N_MEAS = 100; BETA = 4;"
+    " N_TAU = 50; N_ORBITALS = 2; DELTA = \"delta.dat\"\n";
+
+TEST(HybridizationInput, Defaults) {
+    alps::input::hybridization_parameters const p = cthyb(cthyb_required + "U = 3\n");
+    EXPECT_EQ(p.output_period, 100000);
+    EXPECT_EQ(p.n_histogram_orders, 50);
+    EXPECT_TRUE(p.measure_time);
+    EXPECT_FALSE(p.measure_freq);
+    EXPECT_TRUE(p.accurate_covariance);
+    EXPECT_EQ(p.basepath, "");
+    EXPECT_EQ(p.mu, 0.);
+    EXPECT_EQ(p.J, 0.);
+    EXPECT_EQ(p.U, 3.);
+    EXPECT_EQ(p.U_prime, 3.);
+    EXPECT_FALSE(p.u_ignored);
+    EXPECT_FALSE(p.mu_ignored);
+}
+
+TEST(HybridizationInput, UPrimeDefaultsToUMinusTwoJ) {
+    EXPECT_EQ(cthyb(cthyb_required + "U = 3; J = 0.5\n").U_prime, 2.);
+    EXPECT_EQ(cthyb(cthyb_required + "U = 3; J = 0.5; U' = 1.75\n").U_prime, 1.75);
+}
+
+TEST(HybridizationInput, UMatrixReplacesU) {
+    EXPECT_THROW(cthyb(cthyb_required), std::invalid_argument);
+    alps::input::hybridization_parameters const p = cthyb(cthyb_required + "U_MATRIX = \"u.dat\"\n");
+    EXPECT_EQ(p.u_matrix, "u.dat");
+    EXPECT_FALSE(p.u_ignored);
+    EXPECT_TRUE(cthyb(cthyb_required + "U_MATRIX = \"u.dat\"; U = 3\n").u_ignored);
+    EXPECT_TRUE(cthyb(cthyb_required + "U = 3; MU_VECTOR = \"mu.dat\"; MU = 1\n").mu_ignored);
+    EXPECT_FALSE(cthyb(cthyb_required + "U = 3; MU = 1\n").mu_ignored);
+}
+
+TEST(HybridizationInput, MeasurementsNeedTheirSizes) {
+    std::string const base = cthyb_required + "U = 3\n";
+    EXPECT_THROW(cthyb(base + "N_TAU = 0\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "MEASURE_freq = 1\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "MEASURE_legendre = 1; N_MATSUBARA = 10\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "MEASURE_nnt = 1\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "MEASURE_nnw = 1\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "MEASURE_g2w = 1; N_W = 2; N_w2 = 3\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "COMPUTE_VERTEX = 1; MEASURE_g2w = 1; N_W = 2; N_w2 = 4\n"), std::invalid_argument);
+    EXPECT_THROW(cthyb(base + "COMPUTE_VERTEX = 1; MEASURE_freq = 1; N_MATSUBARA = 2; MEASURE_g2w = 1; N_W = 2; N_w2 = 4\n"),
+                 std::invalid_argument);
+    EXPECT_NO_THROW(cthyb(base + "COMPUTE_VERTEX = 1; MEASURE_freq = 1; N_MATSUBARA = 3; MEASURE_g2w = 1; N_W = 2; N_w2 = 4\n"));
 }
 }

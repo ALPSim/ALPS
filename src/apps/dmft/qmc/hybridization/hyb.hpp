@@ -16,6 +16,7 @@
 
 #include <alps/mc/api.hpp>
 #include <alps/mc/mcbase.hpp>
+#include <alps/input/hybridization.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/utilities/signal.hpp>
 #include "green_function.h"
@@ -40,8 +41,7 @@ public:
   //constructor
   hybridization(const alps::params &parms, int crank);
   static void define_parameters(alps::params &parms); //define the parameters the solver reads, with their defaults
-  void sanity_check(const alps::params &parms); //check whether parameters make sense
-  void show_info(const alps::params &parms, int crank);
+  void show_info(const alps::input::hybridization_parameters &input, int crank);
   //Monte Carlo update and measurements functions
   void measure();
   void update();
@@ -50,6 +50,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 
 private:
+  hybridization(const alps::params &parms, int crank, const alps::input::hybridization_parameters &input);
   bool VERBOSE;
   int crank;
   int csize;
