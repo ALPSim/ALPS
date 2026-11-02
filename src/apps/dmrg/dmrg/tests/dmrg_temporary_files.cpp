@@ -14,13 +14,19 @@
 
 namespace fs = std::filesystem;
 
-TEST(DmrgScratchFiles, LifetimesAndCleanup)
+namespace {
+std::string random_name(std::string name)
 {
-  std::string name = "alps-dmrg-";
   std::mt19937 engine(std::random_device{}());
   for (int i = 0; i < 8; ++i)
     name += "0123456789abcdef"[std::uniform_int_distribution<int>(0, 15)(engine)];
-  const fs::path root = fs::temp_directory_path() / name;
+  return name;
+}
+}
+
+TEST(DmrgScratchFiles, LifetimesAndCleanup)
+{
+  const fs::path root = fs::temp_directory_path() / random_name("alps-dmrg-");
   fs::create_directories(root / "first");
   fs::create_directories(root / "second");
   const fs::path original_directory = fs::current_path();
@@ -116,7 +122,7 @@ std::string slurp(const fs::path& p)
 
 TEST(DmrgScratchFiles, CheckpointEntryCommits)
 {
-  const fs::path entry = fs::temp_directory_path() / fs::unique_path("alps-dmrg-entry-%%%%-%%%%");
+  const fs::path entry = fs::temp_directory_path() / random_name("alps-dmrg-entry-");
   fs::create_directories(entry);
   struct cleanup {
     fs::path directory;
