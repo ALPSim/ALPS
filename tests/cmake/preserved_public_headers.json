@@ -960,6 +960,7 @@
     "alps/ngs/scheduler/proto/mpisim.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/mpisim_ulfm.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/tcpserver.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/ulfm.hpp": "fault-tolerance helpers on pre-release Open MPI functions that no released MPI provides; nothing used them after the NGS scheduler prototype was removed",
     "alps/check_schedule.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/check_schedule.hpp> replaces",
     "alps/mcbase.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mcbase.hpp> replaces",
     "alps/mcmpiadapter.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mpiadapter.hpp> replaces",
