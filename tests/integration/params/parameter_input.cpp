@@ -21,6 +21,16 @@
 
 namespace {
 
+// Values read from a file are supplied as text; a program defines each key
+// with its type before reading it, as here.
+template <typename T>
+T typed(alps::params parameters, std::string const & key) {
+    parameters.define<T>(key, "");
+    if (!parameters.ok())
+        throw std::runtime_error("cannot read " + key + " as the requested type");
+    return parameters[key].template as<T>();
+}
+
 using path = std::filesystem::path;
 using value_map = std::map<std::string, std::string>;
 
@@ -229,16 +239,16 @@ TEST(ParameterInputText, TypedReaderEvaluatesLikeHdf5) {
     alps::params from_text = alps::read_params_file(text.string());
     alps::params from_hdf5 = alps::read_params_file((dir.path() / "parm.h5").string());
     for (char const * key : {"U", "L", "N"})
-        EXPECT_EQ(from_text[key].cast<int>(), from_hdf5[key].cast<int>()) << key;
+        EXPECT_EQ(typed<int>(from_text, key), typed<int>(from_hdf5, key)) << key;
     for (char const * key : {"MU", "THIRD"})
-        EXPECT_EQ(from_text[key].cast<double>(), from_hdf5[key].cast<double>()) << key;
+        EXPECT_EQ(typed<double>(from_text, key), typed<double>(from_hdf5, key)) << key;
     for (char const * key : {"SOLVER", "SHIFT", "EMPTY"})
-        EXPECT_EQ(from_text[key].cast<std::string>(), from_hdf5[key].cast<std::string>()) << key;
+        EXPECT_EQ(typed<std::string>(from_text, key), typed<std::string>(from_hdf5, key)) << key;
 
-    EXPECT_EQ(from_text["MU"].cast<double>(), 1.5);
-    EXPECT_EQ(from_text["N"].cast<int>(), 16);
-    EXPECT_EQ(from_text["THIRD"].cast<double>(), 1. / 3.);
-    EXPECT_EQ(from_text["SHIFT"].cast<std::string>(), "U/2+JH");
+    EXPECT_EQ(typed<double>(from_text, "MU"), 1.5);
+    EXPECT_EQ(typed<int>(from_text, "N"), 16);
+    EXPECT_EQ(typed<double>(from_text, "THIRD"), 1. / 3.);
+    EXPECT_EQ(typed<std::string>(from_text, "SHIFT"), "U/2+JH");
 }
 
 // Input can come from a pipe, e.g. dmft <(generate-parameters).
@@ -252,7 +262,7 @@ TEST(ParameterInputText, ReadsFromPipe) {
             EXPECT_EQ(values(alps::read_parameter_file(fifo.string())),
                       (value_map{{"L", "4"}, {"SOLVER", "hybridization"}}));
         } else {
-            EXPECT_EQ(alps::read_params_file(fifo.string())["L"].cast<int>(), 4);
+            EXPECT_EQ(typed<int>(alps::read_params_file(fifo.string()), "L"), 4);
         }
         writer.join();
     }
@@ -263,10 +273,10 @@ TEST(ParameterInputText, TypedReaderConvertsOnRequest) {
     write_text(dir.path() / "parm",
                "L = 16; t = 0.707106781186547; TOLERANCE = 1e-3; SOLVER = \"Hirsch-Fye\"\n");
     alps::params parameters = alps::read_params_file((dir.path() / "parm").string());
-    EXPECT_EQ(parameters["L"].cast<int>(), 16);
-    EXPECT_EQ(parameters["t"].cast<double>(), 0.707106781186547);
-    EXPECT_EQ(parameters["TOLERANCE"].cast<double>(), 1e-3);
-    EXPECT_EQ(parameters["SOLVER"].cast<std::string>(), "Hirsch-Fye");
+    EXPECT_EQ(typed<int>(parameters, "L"), 16);
+    EXPECT_EQ(typed<double>(parameters, "t"), 0.707106781186547);
+    EXPECT_EQ(typed<double>(parameters, "TOLERANCE"), 1e-3);
+    EXPECT_EQ(typed<std::string>(parameters, "SOLVER"), "Hirsch-Fye");
 }
 
 // --------------------------------------------------------------------------
@@ -286,14 +296,14 @@ TEST(ParameterInputHdf5, TypedReaderKeepsStoredTypes) {
         ar["/parameters/WEIGHTS"] << std::vector<double>{0.25, 0.75};
     }
     alps::params parameters = alps::read_params_file(file.string());
-    EXPECT_EQ(parameters.size(), 7u);
-    EXPECT_EQ(parameters["L"].cast<int>(), 16);
-    EXPECT_EQ(parameters["NEGATIVE"].cast<int>(), -3);
-    EXPECT_EQ(parameters["t"].cast<double>(), 0.707106781186547);
-    EXPECT_EQ(parameters["TOLERANCE"].cast<double>(), 1e-3);
-    EXPECT_EQ(parameters["SOLVER"].cast<std::string>(), "Hirsch-Fye");
-    EXPECT_EQ(parameters["U_MATRIX"].cast<std::string>(), "u-matrix.dat");
-    EXPECT_EQ(parameters["WEIGHTS"].cast<std::vector<double>>(), (std::vector<double>{0.25, 0.75}));
+    EXPECT_EQ(parameters.supplied_text().size(), 7u);
+    EXPECT_EQ(typed<int>(parameters, "L"), 16);
+    EXPECT_EQ(typed<int>(parameters, "NEGATIVE"), -3);
+    EXPECT_EQ(typed<double>(parameters, "t"), 0.707106781186547);
+    EXPECT_EQ(typed<double>(parameters, "TOLERANCE"), 1e-3);
+    EXPECT_EQ(typed<std::string>(parameters, "SOLVER"), "Hirsch-Fye");
+    EXPECT_EQ(typed<std::string>(parameters, "U_MATRIX"), "u-matrix.dat");
+    EXPECT_EQ(typed<std::vector<double>>(parameters, "WEIGHTS"), (std::vector<double>{0.25, 0.75}));
 }
 
 TEST(ParameterInputHdf5, LegacyReaderKeepsScalarValues) {
@@ -326,8 +336,8 @@ TEST(ParameterInputHdf5, ReadsOnlyTheParametersGroup) {
     }
     EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"L", "4"}}));
     alps::params parameters = alps::read_params_file(file.string());
-    EXPECT_EQ(parameters.size(), 1u);
-    EXPECT_EQ(parameters["L"].cast<int>(), 4);
+    EXPECT_EQ(parameters.supplied_text().size(), 1u);
+    EXPECT_EQ(typed<int>(parameters, "L"), 4);
 }
 
 // Legacy Parameters hold text, so vectors arrive as the text read_vector reads.
@@ -357,9 +367,9 @@ TEST(ParameterInputHdf5, KeysWithSlashesRoundTrip) {
         make_parameters({{"MEASURE_LOCAL[a/b]", "Sz"}, {"T[x&y]", "1"}, {"L", "4"}}));
     EXPECT_EQ(values(alps::read_parameter_file(file.string())),
               (value_map{{"MEASURE_LOCAL[a/b]", "Sz"}, {"T[x&y]", "1"}, {"L", "4"}}));
-    alps::params typed = alps::read_params_file(file.string());
-    EXPECT_EQ(typed["MEASURE_LOCAL[a/b]"].cast<std::string>(), "Sz");
-    EXPECT_EQ(typed["T[x&y]"].cast<int>(), 1);
+    alps::params parameters = alps::read_params_file(file.string());
+    EXPECT_EQ(typed<std::string>(parameters, "MEASURE_LOCAL[a/b]"), "Sz");
+    EXPECT_EQ(typed<int>(parameters, "T[x&y]"), 1);
     alps::hdf5::archive ar(file.string(), "r");
     EXPECT_EQ(ar.list_children("/parameters").size(), 3u);
 }
@@ -373,7 +383,7 @@ TEST(ParameterInputHdf5, ReadsRawAmpersandNames) {
         ar["/parameters/A&B"] << 2;
     }
     EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"A&B", "2"}}));
-    EXPECT_EQ(alps::read_params_file(file.string())["A&B"].cast<int>(), 2);
+    EXPECT_EQ(typed<int>(alps::read_params_file(file.string()), "A&B"), 2);
 }
 
 TEST(ParameterInputHdf5, EmptyParametersGroupHasNoParameters) {
@@ -384,7 +394,7 @@ TEST(ParameterInputHdf5, EmptyParametersGroupHasNoParameters) {
         ar.create_group("/parameters");
     }
     EXPECT_EQ(alps::read_parameter_file(file.string()).size(), 0u);
-    EXPECT_EQ(alps::read_params_file(file.string()).size(), 0u);
+    EXPECT_EQ(alps::read_params_file(file.string()).supplied_text().size(), 0u);
 }
 
 TEST(ParameterInputHdf5, RejectsFileWithoutParametersGroup) {
@@ -408,7 +418,7 @@ TEST(ParameterInputHdf5, RecognizedWhateverTheName) {
             ar["/parameters/L"] << 16;
         }
         EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"L", "16"}})) << name;
-        EXPECT_EQ(alps::read_params_file(file.string())["L"].cast<int>(), 16) << name;
+        EXPECT_EQ(typed<int>(alps::read_params_file(file.string()), "L"), 16) << name;
     }
 }
 
@@ -429,7 +439,7 @@ TEST(ParameterInputHdf5, RecognizedWithUserBlock) {
         }
         ASSERT_NE(read_text(file).substr(0, 4), "\211HDF");
         EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"L", "16"}})) << block;
-        EXPECT_EQ(alps::read_params_file(file.string())["L"].cast<int>(), 16) << block;
+        EXPECT_EQ(typed<int>(alps::read_params_file(file.string()), "L"), 16) << block;
     }
 }
 
@@ -525,14 +535,14 @@ TEST(ParameterInputWrite, Hdf5StoresNumbersWithTheirType) {
             EXPECT_TRUE(ar.is_datatype<double>(std::string("/parameters/") + key)) << key;
     }
     alps::params parameters = alps::read_params_file(file.string());
-    EXPECT_EQ(parameters["L"].cast<int>(), 16);
-    EXPECT_EQ(parameters["NEGATIVE"].cast<int>(), -3);
-    EXPECT_EQ(parameters["BIG"].cast<int>(), -250);
-    EXPECT_EQ(parameters["N"].cast<int>(), 32);
-    EXPECT_EQ(parameters["t"].cast<double>(), 0.707106781186547);
-    EXPECT_EQ(parameters["TOLERANCE"].cast<double>(), 1e-3);
-    EXPECT_EQ(parameters["THIRD"].cast<double>(), 1. / 3.);
-    EXPECT_EQ(parameters["MU"].cast<double>(), 1.5);
+    EXPECT_EQ(typed<int>(parameters, "L"), 16);
+    EXPECT_EQ(typed<int>(parameters, "NEGATIVE"), -3);
+    EXPECT_EQ(typed<int>(parameters, "BIG"), -250);
+    EXPECT_EQ(typed<int>(parameters, "N"), 32);
+    EXPECT_EQ(typed<double>(parameters, "t"), 0.707106781186547);
+    EXPECT_EQ(typed<double>(parameters, "TOLERANCE"), 1e-3);
+    EXPECT_EQ(typed<double>(parameters, "THIRD"), 1. / 3.);
+    EXPECT_EQ(typed<double>(parameters, "MU"), 1.5);
 }
 
 // dmft writes its parameters into the results file next to the input.
@@ -565,7 +575,7 @@ TEST(ParameterInputWrite, ExistingHdf5StaysHdf5WhateverTheName) {
     }
     alps::write_parameter_file(file.string(), make_parameters({{"L", "8"}}));
     EXPECT_EQ(read_text(file).substr(0, 4), "\211HDF");
-    EXPECT_EQ(alps::read_params_file(file.string())["L"].cast<int>(), 8);
+    EXPECT_EQ(typed<int>(alps::read_params_file(file.string()), "L"), 8);
 }
 
 // An existing text file is never replaced by HDF5, whatever its name.
@@ -583,7 +593,7 @@ TEST(ParameterInputWrite, Hdf5RewriteDropsRemovedParameters) {
     alps::write_parameter_file(file.string(), make_parameters({{"L", "4"}, {"OLD", "1"}}));
     alps::write_parameter_file(file.string(), make_parameters({{"L", "8"}}));
     EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"L", "8"}}));
-    EXPECT_EQ(alps::read_params_file(file.string()).size(), 1u);
+    EXPECT_EQ(alps::read_params_file(file.string()).supplied_text().size(), 1u);
 }
 
 // Values from XML or HDF5 input may hold characters the text grammar
@@ -633,13 +643,13 @@ TEST(ParameterInputPipeline, TextToHdf5ToTypedSolverInput) {
     EXPECT_EQ(values(alps::read_parameter_file(input.string())), values(parameters));
 
     alps::params solver = alps::read_params_file(input.string() + ".h5");
-    EXPECT_EQ(solver["SOLVER"].cast<std::string>(), "hybridization");
-    EXPECT_EQ(solver["U_MATRIX"].cast<std::string>(), "u-matrix.dat");
-    EXPECT_EQ(solver["BASENAME"].cast<std::string>(), input.string());
-    EXPECT_EQ(solver["BETA"].cast<int>(), 6);
-    EXPECT_EQ(solver["t"].cast<double>(), 0.707106781186547);
-    EXPECT_EQ(solver["MU"].cast<double>(), 1.5);
-    EXPECT_EQ(solver["NMATSUBARA"].cast<int>(), 250);
+    EXPECT_EQ(typed<std::string>(solver, "SOLVER"), "hybridization");
+    EXPECT_EQ(typed<std::string>(solver, "U_MATRIX"), "u-matrix.dat");
+    EXPECT_EQ(typed<std::string>(solver, "BASENAME"), input.string());
+    EXPECT_EQ(typed<int>(solver, "BETA"), 6);
+    EXPECT_EQ(typed<double>(solver, "t"), 0.707106781186547);
+    EXPECT_EQ(typed<double>(solver, "MU"), 1.5);
+    EXPECT_EQ(typed<int>(solver, "NMATSUBARA"), 250);
 }
 
 // --------------------------------------------------------------------------
