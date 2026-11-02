@@ -37,11 +37,12 @@ fragment card on ProjectV2Item {
     owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
     issue: fieldValueByName(name: "Issue") { ... on ProjectV2ItemFieldTextValue { text } }
     reviews: fieldValueByName(name: "Reviews") { ... on ProjectV2ItemFieldTextValue { text } }
+    prstate: fieldValueByName(name: "PR state") { ... on ProjectV2ItemFieldTextValue { text } }
     content {
       __typename
       ... on DraftIssue { id title body }
       ... on PullRequest {
-        id number title url state
+        id number title url state isDraft
         repository { nameWithOwner }
         author { login }
         assignees(first: 10) { nodes { id login } }
@@ -62,6 +63,7 @@ query($org: String!, $number: Int!, $after: String) {
       owner: field(name: "Owner") { ... on ProjectV2SingleSelectField { id options { id name color description } } }
       issue: field(name: "Issue") { ... on ProjectV2Field { id } }
       reviews: field(name: "Reviews") { ... on ProjectV2Field { id } }
+      prstate: field(name: "PR state") { ... on ProjectV2Field { id } }
       items(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes { ...card }
@@ -168,6 +170,10 @@ def add_open_prs(project, items):
         after = page["pageInfo"]["endCursor"]
 
 
+def pr_state(pr):
+    return {"MERGED": "Merged", "CLOSED": "Closed"}.get(pr["state"]) or ("Draft PR" if pr["isDraft"] else "Open")
+
+
 def main():
     project, items = load_board()
     items += add_open_prs(project, items)
@@ -186,6 +192,7 @@ def main():
                         project=project["id"], item=item["id"])
             continue
         cards[key] = item
+    seen = set()
     for item in items:
         pr = item["content"] or {}
         if pr.get("__typename") != "PullRequest" or pr["repository"]["nameWithOwner"] != f"{OWNER}/{REPO}" \
@@ -194,6 +201,12 @@ def main():
         issue = ", ".join(f"#{i['number']}" for i in pr["closingIssuesReferences"]["nodes"]) or "NA"
         print(f"#{pr['number']} Issue: {issue}")
         set_text(project, item, "issue", issue)
+        # The reviewers' cards can't show the PR's own state icon, so they spell it out.
+        state = pr_state(pr)
+        seen.add(pr["number"])
+        for key, card in cards.items():
+            if key.startswith(f"<!-- review-card {OWNER}/{REPO}#{pr['number']} @"):
+                set_text(project, card, "prstate", state)
         if pr["state"] != "OPEN":
             continue
 
@@ -244,6 +257,20 @@ def main():
             set_field(project, draft, project["owner"]["id"], {"singleSelectOptionId": option})
             set_field(project, draft, project["issue"]["id"], {"text": issue})
             set_field(project, draft, project["reviews"]["id"], {"text": lights[login]})
+            set_field(project, draft, project["prstate"]["id"], {"text": state})
+
+    # Reviewer cards whose PR was taken off the board still show how it ended.
+    prefix = f"<!-- review-card {OWNER}/{REPO}#"
+    for key, card in cards.items():
+        if not key.startswith(prefix):
+            continue
+        number = int(key[len(prefix):].split(" ", 1)[0])
+        if number in seen or (PR and number != PR):
+            continue
+        pr = graphql("""query($o: String!, $r: String!, $n: Int!) {
+            repository(owner: $o, name: $r) { pullRequest(number: $n) { state isDraft } } }""",
+                     o=OWNER, r=REPO, n=number)["repository"]["pullRequest"]
+        set_text(project, card, "prstate", pr_state(pr))
 
 
 if __name__ == "__main__":
