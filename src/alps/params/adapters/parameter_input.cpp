@@ -10,6 +10,7 @@
 #include <boost/throw_exception.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <stdexcept>
 
 namespace alps {
@@ -17,8 +18,11 @@ namespace alps {
     namespace {
 
         // The HDF5 signature sits at offset 0, or at 512, 1024, 2048, ...
-        // when the file has a user block.
+        // when the file has a user block. Only regular files are inspected,
+        // so a pipe is never read before it is parsed.
         bool is_hdf5_file(boost::filesystem::path const & filename) {
+            if (!boost::filesystem::is_regular_file(filename))
+                return false;
             static char const signature[8] = {'\211', 'H', 'D', 'F', '\r', '\n', '\032', '\n'};
             boost::filesystem::ifstream in(filename, std::ios::binary);
             for (std::streamoff offset = 0; in; offset = offset ? 2 * offset : 512) {
@@ -31,24 +35,41 @@ namespace alps {
         }
 
         void require_readable(boost::filesystem::path const & filename) {
-            if (!boost::filesystem::is_regular_file(filename))
+            if (!boost::filesystem::exists(filename) || boost::filesystem::is_directory(filename))
                 boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
+        }
+
+        Parameters read_text(boost::filesystem::path const & filename) {
+            boost::filesystem::ifstream in(filename);
+            if (!in.is_open())
+                boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
+            Parameters parameters;
+            in >> parameters;
+            return parameters;
+        }
+
+        // The text grammar reads printable characters only, inside quotes
+        // that the value itself does not contain.
+        void require_text_representable(Parameters const & parameters, boost::filesystem::path const & filename) {
+            for (Parameter const & p : parameters) {
+                std::string const value = p.value().c_str();
+                bool const printable = std::all_of(value.begin(), value.end(),
+                    [](unsigned char c) { return std::isprint(c); });
+                if (!printable || (value.find('"') != std::string::npos && value.find('\'') != std::string::npos))
+                    boost::throw_exception(std::runtime_error("Parameter " + p.key()
+                        + " cannot be written as parameter text to " + filename.string()));
+            }
         }
 
     }
 
     Parameters read_parameter_file(boost::filesystem::path const & filename) {
         require_readable(filename);
+        if (!is_hdf5_file(filename))
+            return read_text(filename);
         Parameters parameters;
-        if (is_hdf5_file(filename)) {
-            hdf5::archive ar(filename, "r");
-            ar["/parameters"] >> parameters;
-        } else {
-            boost::filesystem::ifstream in(filename);
-            if (!in.is_open())
-                boost::throw_exception(std::runtime_error("Cannot open parameter file: " + filename.string()));
-            in >> parameters;
-        }
+        hdf5::archive ar(filename, "r");
+        ar["/parameters"] >> parameters;
         return parameters;
     }
 
@@ -63,10 +84,16 @@ namespace alps {
     }
 
     void write_parameter_file(boost::filesystem::path const & filename, Parameters const & parameters) {
-        if (filename.extension() == ".h5" || is_hdf5_file(filename)) {
+        // An existing file keeps its format; a new one is HDF5 if named .h5.
+        bool const hdf5 = boost::filesystem::exists(filename) ? is_hdf5_file(filename)
+                                                               : filename.extension() == ".h5";
+        if (hdf5) {
             hdf5::archive ar(filename, "a");
+            if (ar.is_group("/parameters"))
+                ar.delete_group("/parameters");
             ar << make_pvp("/parameters", parameters);
         } else {
+            require_text_representable(parameters, filename);
             boost::filesystem::ofstream out(filename);
             if (!out.is_open())
                 boost::throw_exception(std::runtime_error("Cannot write parameter file: " + filename.string()));

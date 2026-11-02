@@ -7,12 +7,14 @@
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <hdf5.h>
+#include <sys/stat.h>
 #include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -210,6 +212,48 @@ TEST(ParameterInputText, TextNamedH5IsReadAsText) {
     alps::testing::TemporaryDirectory dir;
     write_text(dir.path() / "parm.h5", "L = 4\n");
     EXPECT_EQ(values(read_text_file(dir.path() / "parm.h5")), (value_map{{"L", "4"}}));
+}
+
+// A solver reading text gets the same typed values it would get from the
+// HDF5 file dmft writes for it.
+TEST(ParameterInputText, TypedReaderEvaluatesLikeHdf5) {
+    alps::testing::TemporaryDirectory dir;
+    auto const text = dir.path() / "parm";
+    write_text(text,
+               "U = 3; MU = U/2; L = 8; N = 2*L; THIRD = 1/3\n"
+               "SOLVER = \"Hirsch-Fye\"; SHIFT = \"U/2+JH\"; EMPTY = \"\"\n");
+    alps::write_parameter_file((dir.path() / "parm.h5").string(), read_text_file(text));
+
+    alps::params from_text = alps::read_params_file(text.string());
+    alps::params from_hdf5 = alps::read_params_file((dir.path() / "parm.h5").string());
+    for (char const * key : {"U", "L", "N"})
+        EXPECT_EQ(from_text[key].cast<int>(), from_hdf5[key].cast<int>()) << key;
+    for (char const * key : {"MU", "THIRD"})
+        EXPECT_EQ(from_text[key].cast<double>(), from_hdf5[key].cast<double>()) << key;
+    for (char const * key : {"SOLVER", "SHIFT", "EMPTY"})
+        EXPECT_EQ(from_text[key].cast<std::string>(), from_hdf5[key].cast<std::string>()) << key;
+
+    EXPECT_EQ(from_text["MU"].cast<double>(), 1.5);
+    EXPECT_EQ(from_text["N"].cast<int>(), 16);
+    EXPECT_EQ(from_text["THIRD"].cast<double>(), 1. / 3.);
+    EXPECT_EQ(from_text["SHIFT"].cast<std::string>(), "U/2+JH");
+}
+
+// Input can come from a pipe, e.g. dmft <(generate-parameters).
+TEST(ParameterInputText, ReadsFromPipe) {
+    alps::testing::TemporaryDirectory dir;
+    auto const fifo = dir.path() / "parm.fifo";
+    ASSERT_EQ(mkfifo(fifo.c_str(), 0600), 0);
+    for (int reader = 0; reader < 2; ++reader) {
+        std::thread writer([&] { std::ofstream(fifo) << "L = 4; SOLVER = hybridization\n"; });
+        if (reader == 0) {
+            EXPECT_EQ(values(alps::read_parameter_file(fifo.string())),
+                      (value_map{{"L", "4"}, {"SOLVER", "hybridization"}}));
+        } else {
+            EXPECT_EQ(alps::read_params_file(fifo.string())["L"].cast<int>(), 4);
+        }
+        writer.join();
+    }
 }
 
 TEST(ParameterInputText, TypedReaderConvertsOnRequest) {
@@ -474,6 +518,42 @@ TEST(ParameterInputWrite, ExistingHdf5StaysHdf5WhateverTheName) {
     alps::write_parameter_file(file.string(), make_parameters({{"L", "8"}}));
     EXPECT_EQ(read_text(file).substr(0, 4), "\211HDF");
     EXPECT_EQ(alps::read_params_file(file.string())["L"].cast<int>(), 8);
+}
+
+// An existing text file is never replaced by HDF5, whatever its name.
+TEST(ParameterInputWrite, ExistingTextStaysTextWhateverTheName) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm.h5";
+    write_text(file, "L = 4\n");
+    alps::write_parameter_file(file.string(), make_parameters({{"L", "8"}}));
+    EXPECT_EQ(read_text(file), "L = 8;\n");
+}
+
+TEST(ParameterInputWrite, Hdf5RewriteDropsRemovedParameters) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm.h5";
+    alps::write_parameter_file(file.string(), make_parameters({{"L", "4"}, {"OLD", "1"}}));
+    alps::write_parameter_file(file.string(), make_parameters({{"L", "8"}}));
+    EXPECT_EQ(values(alps::read_parameter_file(file.string())), (value_map{{"L", "8"}}));
+    EXPECT_EQ(alps::read_params_file(file.string()).size(), 1u);
+}
+
+// Values from XML or HDF5 input may hold characters the text grammar
+// cannot read; writing them fails before the existing file is touched.
+TEST(ParameterInputWrite, TextRefusesValuesItCannotReadBack) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm";
+    for (std::string const value : {"line1\nline2", "a\tb", "it's \"quoted\""}) {
+        write_text(file, "L = 4\n");
+        alps::Parameters parameters = make_parameters({{"L", "8"}, {"BAD", value}});
+        try {
+            alps::write_parameter_file(file.string(), parameters);
+            ADD_FAILURE() << "expected an exception for " << value;
+        } catch (std::runtime_error const & error) {
+            EXPECT_NE(std::string(error.what()).find("BAD"), std::string::npos) << error.what();
+        }
+        EXPECT_EQ(read_text(file), "L = 4\n") << value;
+    }
 }
 
 TEST(ParameterInputWrite, NewFileFormatFollowsTheName) {

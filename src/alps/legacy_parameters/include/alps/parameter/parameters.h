@@ -34,6 +34,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <variant>
 
 #include <alps/hdf5.hpp>
 
@@ -227,6 +228,10 @@ public:
 
   void save(hdf5::archive &) const;
   void load(hdf5::archive &);
+
+  /// the value with which a parameter is stored: an int or double if it
+  /// evaluates to a number, otherwise the text as written
+  std::variant<int, double, std::string> typed_value(const key_type& k) const;
 
 private:
   list_type list_;

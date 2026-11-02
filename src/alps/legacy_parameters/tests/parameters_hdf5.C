@@ -121,3 +121,23 @@ HUGE = -1e300
     EXPECT_EQ(stored, entry.second);
   }
 }
+
+TEST(LegacyParametersHdf5, TypedValueMatchesStoredType) {
+  std::istringstream input(R"PARAMS(L = 8
+N = 2*L
+MU = U/2
+U = 3
+SOLVER = "Hirsch-Fye"
+SHIFT = "U/2+JH"
+EMPTY = ""
+SEED = 4294967295
+)PARAMS");
+  const alps::Parameters parameters(input);
+  EXPECT_EQ(std::get<int>(parameters.typed_value("N")), 16);
+  EXPECT_EQ(std::get<int>(parameters.typed_value("U")), 3);
+  EXPECT_EQ(std::get<double>(parameters.typed_value("MU")), 1.5);
+  EXPECT_EQ(std::get<double>(parameters.typed_value("SEED")), 4294967295.);
+  EXPECT_EQ(std::get<std::string>(parameters.typed_value("SOLVER")), "Hirsch-Fye");
+  EXPECT_EQ(std::get<std::string>(parameters.typed_value("SHIFT")), "U/2+JH");
+  EXPECT_EQ(std::get<std::string>(parameters.typed_value("EMPTY")), "");
+}

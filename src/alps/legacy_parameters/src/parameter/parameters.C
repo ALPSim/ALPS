@@ -124,29 +124,30 @@ void Parameters::replace_envvar() {
   BOOST_FOREACH(Parameter& p, list_) p.replace_envvar();
 }
 
-void Parameters::save(hdf5::archive & ar) const {
-    expression::ParameterEvaluator<double> eval(*this,false);
-    for (const_iterator it = begin(); it != end(); ++it) {
-        // Values that evaluate to a number are stored as numbers; names,
-        // paths and symbolic expressions are stored exactly as written.
-        std::string const text = boost::lexical_cast<std::string>(it->value());
-        if (text.find_first_not_of(" \t") != std::string::npos) {
-            try {
-                expression::Expression<double> expr(it->value());
-                if (expr.can_evaluate(eval)) {
-                    double value = expr.value(eval);
-                    if (std::abs(value) <= std::numeric_limits<int>::max()
-                        && numeric::is_zero(value - static_cast<double>(static_cast<int>(value))))
-                        ar << make_pvp(it->key(), static_cast<int>(value+ (value > 0 ? 0.25 : -0.25)));
-                    else
-                        ar << make_pvp(it->key(), value);
-                    continue;
-                }
-            } catch(...) {
+std::variant<int, double, std::string> Parameters::typed_value(const key_type& k) const {
+    // Values that evaluate to a number become numbers; names, paths and
+    // symbolic expressions stay exactly as written.
+    std::string const text = boost::lexical_cast<std::string>(operator[](k));
+    if (text.find_first_not_of(" \t") != std::string::npos) {
+        try {
+            expression::ParameterEvaluator<double> eval(*this,false);
+            expression::Expression<double> expr(text);
+            if (expr.can_evaluate(eval)) {
+                double value = expr.value(eval);
+                if (std::abs(value) <= std::numeric_limits<int>::max()
+                    && numeric::is_zero(value - static_cast<double>(static_cast<int>(value))))
+                    return static_cast<int>(value+ (value > 0 ? 0.25 : -0.25));
+                return value;
             }
+        } catch(...) {
         }
-        ar << make_pvp(it->key(), text);
     }
+    return text;
+}
+
+void Parameters::save(hdf5::archive & ar) const {
+    for (const_iterator it = begin(); it != end(); ++it)
+        std::visit([&](auto const& value) { ar << make_pvp(it->key(), value); }, typed_value(it->key()));
 }
 void Parameters::load(hdf5::archive & ar) {
   std::vector<std::string> list = ar.list_children(ar.get_context());
