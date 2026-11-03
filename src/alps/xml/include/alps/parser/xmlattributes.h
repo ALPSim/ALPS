@@ -32,22 +32,9 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace alps {
-
-namespace detail {
-// True for path classes such as boost::filesystem::path, detected by their
-// members so that this header needs no Boost.Filesystem include.
-template<class T, class = void>
-struct is_path_like : std::false_type {};
-template<class T>
-struct is_path_like<T, std::void_t<
-    decltype(std::declval<const T&>().parent_path()),
-    decltype(std::declval<const T&>().filename()),
-    decltype(std::declval<const T&>().string())> > : std::true_type {};
-} // end namespace detail
 
 class ALPS_XML_DECL XMLAttribute
 {
@@ -76,9 +63,6 @@ private:
     if constexpr (std::is_same_v<T, std::filesystem::path>) {
       return v.string();
     } else {
-      static_assert(!detail::is_path_like<T>::value,
-        "XML attribute: ALPS expects std::filesystem::path or std::string for "
-        "file paths. Pass path.string() instead of a boost::filesystem::path.");
       return boost::lexical_cast<std::string, T>(v);
     }
   }
