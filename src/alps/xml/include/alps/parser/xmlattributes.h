@@ -27,12 +27,27 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstddef>
+#include <filesystem>
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace alps {
+
+namespace detail {
+// True for path classes such as boost::filesystem::path, detected by their
+// members so that this header needs no Boost.Filesystem include.
+template<class T, class = void>
+struct is_path_like : std::false_type {};
+template<class T>
+struct is_path_like<T, std::void_t<
+    decltype(std::declval<const T&>().parent_path()),
+    decltype(std::declval<const T&>().filename()),
+    decltype(std::declval<const T&>().string())> > : std::true_type {};
+} // end namespace detail
 
 class ALPS_XML_DECL XMLAttribute
 {
@@ -47,7 +62,7 @@ public:
   XMLAttribute(const key_type& k, const char * v) : key_(k), value_(v) {}
   template<class T>
   XMLAttribute(const key_type& k, const T& v)
-    : key_(k), value_(boost::lexical_cast<std::string, T>(v)) {}
+    : key_(k), value_(to_value(v)) {}
 
   key_type& key() { return key_; }
   const key_type& key() const { return key_; }
@@ -55,6 +70,19 @@ public:
   const value_type& value() const { return value_; }
 
 private:
+  // A path's operator<< quotes it, so a path is written as path.string().
+  template<class T>
+  static value_type to_value(const T& v) {
+    if constexpr (std::is_same_v<T, std::filesystem::path>) {
+      return v.string();
+    } else {
+      static_assert(!detail::is_path_like<T>::value,
+        "XML attribute: ALPS expects std::filesystem::path or std::string for "
+        "file paths. Pass path.string() instead of a boost::filesystem::path.");
+      return boost::lexical_cast<std::string, T>(v);
+    }
+  }
+
   key_type key_;
   value_type value_;
 };
