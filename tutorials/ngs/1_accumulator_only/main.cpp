@@ -17,10 +17,10 @@
 #include <alps/utilities/signal.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 
-#include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 
+#include <chrono>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -28,17 +28,17 @@
 struct stop_callback {
     stop_callback(std::size_t timelimit)
         : limit(timelimit)
-        , start(boost::chrono::high_resolution_clock::now())
+        , start(std::chrono::steady_clock::now())
     {}
 
     bool operator()() {
         return !signals.empty() 
-            || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
+            || (limit.count() > 0 && std::chrono::steady_clock::now() > start + limit);
     }
 
-    boost::chrono::duration<std::size_t> limit;
+    std::chrono::seconds limit;
     alps::signal signals;
-    boost::chrono::high_resolution_clock::time_point start;
+    std::chrono::steady_clock::time_point start;
 };
 
 int main(int argc, char *argv[]) {

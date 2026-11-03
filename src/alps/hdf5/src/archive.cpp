@@ -20,8 +20,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/type_traits/remove_cv.hpp>
-#include <boost/type_traits/remove_reference.hpp>
 
 #include <hdf5.h>
 
@@ -1069,7 +1067,7 @@ namespace alps {
                             , H5P_DEFAULT                                                                                                                               \
                         );                                                                                                                                              \
                     }                                                                                                                                                   \
-                    detail::native_ptr_converter<boost::remove_cv<boost::remove_reference<T>::type>::type> converter(1);                                                \
+                    detail::native_ptr_converter<alps::detail::remove_cvr<T>::type> converter(1);                                                \
                     detail::check_error(H5Dwrite(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, converter.apply(&value)));                                            \
                     detail::check_data(data_id);                                                                                                                        \
                 } else {                                                                                                                                                \
@@ -1103,7 +1101,7 @@ namespace alps {
                             , H5P_DEFAULT                                                                                                                               \
                             , H5P_DEFAULT                                                                                                                               \
                         );                                                                                                                                              \
-                    detail::native_ptr_converter<boost::remove_cv<boost::remove_reference<T>::type>::type> converter(1);                                                \
+                    detail::native_ptr_converter<alps::detail::remove_cvr<T>::type> converter(1);                                                \
                     detail::check_error(H5Awrite(data_id, type_id, converter.apply(&value)));                                                                           \
                     detail::attribute_type attr_id(data_id);                                                                                                            \
                     if (is_group(detail::attribute_owner(path)))                                                                                           \
