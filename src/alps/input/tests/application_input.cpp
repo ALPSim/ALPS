@@ -300,4 +300,18 @@ TEST(HybridizationInput, MeasurementsNeedTheirSizes) {
                  std::invalid_argument);
     EXPECT_NO_THROW(cthyb(base + "COMPUTE_VERTEX = 1; MEASURE_freq = 1; N_MATSUBARA = 3; MEASURE_g2w = 1; N_W = 2; N_w2 = 4\n"));
 }
+
+TEST(HybridizationInput, NegativeCountsAreRejected) {
+    std::string const sizes = " BETA = 4; DELTA = \"delta.dat\"; U = 3\n";
+    std::string const counts[] = {"SWEEPS", "THERMALIZATION", "N_MEAS", "N_TAU", "N_ORBITALS"};
+    for (std::string const & negative : counts) {
+        std::string supplied = "MAX_TIME = 60;" + sizes;
+        for (std::string const & key : counts)
+            supplied += key + (key == negative ? " = -1\n" : " = 10\n");
+        EXPECT_THROW(cthyb(supplied), alps::params_ns::exception::value_mismatch) << negative;
+    }
+    std::string const base = cthyb_required + "U = 3\n";
+    EXPECT_THROW(cthyb(base + "N_MATSUBARA = -1\n"), alps::params_ns::exception::value_mismatch);
+    EXPECT_THROW(cthyb(base + "NUM_BINS = -1\n"), alps::params_ns::exception::value_mismatch);
+}
 }

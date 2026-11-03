@@ -25,7 +25,7 @@ namespace alps { namespace input {
             if (p.compute_vertex) {
                 if (!p.measure_freq) throw std::invalid_argument("frequency measurement is required for computing the vertex, please set MEASURE_freq=1");
                 if (!(p.measure_g2w || p.measure_h2w)) throw std::invalid_argument("at least one two-particle quantity is required for computing the vertex, set MEASURE_g2w=1 or MEASURE_h2w=1");
-                if (p.n_matsubara < (p.n_w2 / 2 + p.n_W - 1)) throw std::invalid_argument("for computing the vertex, N_MATSUBARA must be at least N_w2/2+N_W-1");
+                if (p.n_matsubara + 1 < p.n_w2 / 2 + p.n_W) throw std::invalid_argument("for computing the vertex, N_MATSUBARA must be at least N_w2/2+N_W-1");
             }
         }
 
@@ -90,14 +90,14 @@ namespace alps { namespace input {
 
     hybridization_parameters read_hybridization_parameters(params const & parms) {
         hybridization_parameters p;
-        p.sweeps = parms["SWEEPS"].as<long>();
-        p.thermalization = parms["THERMALIZATION"].as<long>();
+        p.sweeps = parms["SWEEPS"].as<std::uint64_t>();
+        p.thermalization = parms["THERMALIZATION"].as<std::uint64_t>();
         p.max_time = parms["MAX_TIME"].as<long>();
-        p.n_meas = parms["N_MEAS"].as<int>();
+        p.n_meas = parms["N_MEAS"].as<std::size_t>();
         p.output_period = parms["OUTPUT_PERIOD"].as<int>();
-        p.n_histogram_orders = parms["N_HISTOGRAM_ORDERS"].as<int>();
+        p.n_histogram_orders = parms["N_HISTOGRAM_ORDERS"].as<std::size_t>();
         p.timeseries = parms["TIMESERIES"].as<bool>();
-        p.num_bins = parms["NUM_BINS"].as<int>();
+        p.num_bins = parms["NUM_BINS"].as<std::size_t>();
         p.verbose = parms["VERBOSE"].as<bool>();
         p.spinflip = parms["SPINFLIP"].as<bool>();
         p.globalflip = parms["GLOBALFLIP"].as<bool>();
@@ -112,11 +112,11 @@ namespace alps { namespace input {
         p.measure_sector_statistics = parms["MEASURE_sector_statistics"].as<bool>();
         p.compute_vertex = parms["COMPUTE_VERTEX"].as<bool>();
         p.accurate_covariance = parms["ACCURATE_COVARIANCE"].as<bool>();
-        p.n_matsubara = parms["N_MATSUBARA"].as<int>();
-        p.n_legendre = parms["N_LEGENDRE"].as<int>();
-        p.n_nn = parms["N_nn"].as<int>();
-        p.n_W = parms["N_W"].as<int>();
-        p.n_w2 = parms["N_w2"].as<int>();
+        p.n_matsubara = parms["N_MATSUBARA"].as<std::size_t>();
+        p.n_legendre = parms["N_LEGENDRE"].as<std::size_t>();
+        p.n_nn = parms["N_nn"].as<std::size_t>();
+        p.n_W = parms["N_W"].as<std::size_t>();
+        p.n_w2 = parms["N_w2"].as<std::size_t>();
         p.basepath = parms["BASEPATH"].as<std::string>();
         p.text_output = parms["TEXT_OUTPUT"].as<bool>();
         p.delta_in_hdf5 = parms["DELTA_IN_HDF5"].as<bool>();
@@ -128,8 +128,8 @@ namespace alps { namespace input {
         p.ret_int_k = parms["RET_INT_K"].as<std::string>();
         p.k_in_hdf5 = parms["K_IN_HDF5"].as<bool>();
         p.beta = parms["BETA"].as<double>();
-        p.n_tau = parms["N_TAU"].as<int>();
-        p.n_orbitals = parms["N_ORBITALS"].as<int>();
+        p.n_tau = parms["N_TAU"].as<std::size_t>();
+        p.n_orbitals = parms["N_ORBITALS"].as<std::size_t>();
         p.delta = parms["DELTA"].as<std::string>();
         p.mu = parms["MU"].as<double>();
         p.J = parms["J"].as<double>();

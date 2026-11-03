@@ -6,6 +6,8 @@
 #include <alps/params.hpp>
 #include <alps/config.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
 namespace alps { namespace input {
@@ -15,16 +17,18 @@ namespace alps { namespace input {
     ALPS_DECL void define_hybridization_parameters(params & parameters);
 
     // The values of the parameters define_hybridization_parameters defined.
+    // Sweep counts and sizes are unsigned, so a negative value is rejected
+    // when it is read.
     struct hybridization_parameters {
         // simulation
-        long sweeps;                       // SWEEPS after thermalization
-        long thermalization;               // THERMALIZATION sweeps
+        std::uint64_t sweeps;              // SWEEPS after thermalization
+        std::uint64_t thermalization;      // THERMALIZATION sweeps
         long max_time;                     // MAX_TIME in seconds
-        int n_meas;                        // N_MEAS: updates between measurements
+        std::size_t n_meas;                // N_MEAS: updates between measurements
         int output_period;                 // OUTPUT_PERIOD, default 100000 sweeps
-        int n_histogram_orders;            // N_HISTOGRAM_ORDERS, default 50
+        std::size_t n_histogram_orders;    // N_HISTOGRAM_ORDERS, default 50
         bool timeseries;                   // TIMESERIES, default false: fixed instead of detailed binning
-        int num_bins;                      // NUM_BINS, default 0
+        std::size_t num_bins;              // NUM_BINS, default 0
         bool verbose;                      // VERBOSE, default false
         // updates
         bool spinflip;                     // SPINFLIP, default false
@@ -41,11 +45,11 @@ namespace alps { namespace input {
         bool measure_sector_statistics;    // MEASURE_sector_statistics, default false
         bool compute_vertex;               // COMPUTE_VERTEX, default false
         bool accurate_covariance;          // ACCURATE_COVARIANCE, default true
-        int n_matsubara;                   // N_MATSUBARA, default 0
-        int n_legendre;                    // N_LEGENDRE, default 0
-        int n_nn;                          // N_nn, default 0
-        int n_W;                           // N_W: bosonic frequencies, default 0
-        int n_w2;                          // N_w2: fermionic frequencies of two-particle functions, default 0
+        std::size_t n_matsubara;           // N_MATSUBARA, default 0
+        std::size_t n_legendre;            // N_LEGENDRE, default 0
+        std::size_t n_nn;                  // N_nn, default 0
+        std::size_t n_W;                   // N_W: bosonic frequencies, default 0
+        std::size_t n_w2;                  // N_w2: fermionic frequencies of two-particle functions, default 0
         // input and output
         std::string basepath;              // BASEPATH, default ""
         bool text_output;                  // TEXT_OUTPUT, default false
@@ -59,8 +63,8 @@ namespace alps { namespace input {
         bool k_in_hdf5;                    // K_IN_HDF5, default false
         // physics
         double beta;                       // BETA
-        int n_tau;                         // N_TAU
-        int n_orbitals;                    // N_ORBITALS
+        std::size_t n_tau;                 // N_TAU
+        std::size_t n_orbitals;            // N_ORBITALS
         std::string delta;                 // DELTA: file with the hybridization function
         double mu;                         // MU, default 0
         double J;                          // J, default 0
@@ -73,6 +77,7 @@ namespace alps { namespace input {
     // Reads parameters on which define_hybridization_parameters has been
     // called, and checks the ones that depend on each other.
     // @throws std::invalid_argument for a measurement without its sizes
+    // @throws alps::params_ns::exception::value_mismatch for a negative count or size
     ALPS_DECL hybridization_parameters read_hybridization_parameters(params const & parameters);
 
 } }
