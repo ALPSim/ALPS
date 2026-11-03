@@ -248,6 +248,7 @@
     "alps/ngs/sleep.hpp",
     "alps/ngs/stacktrace.hpp",
     "alps/ngs/stringify.hpp",
+    "alps/ngs/thread_exceptions.hpp",
     "alps/ngs/ulfm.hpp",
     "alps/numeric/abs2.hpp",
     "alps/numeric/accumulate_if.hpp",
