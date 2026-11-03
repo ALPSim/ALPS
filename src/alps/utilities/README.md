@@ -44,7 +44,7 @@ means it was moved as it was, and the note says what modernization remains.
 `alps::testing::is_near`, is installed with these headers as in ALPSCore, where
 library code (`ALPS::params`) uses it too. Its publication pointer has been removed.
 
-Not yet moved: `alps/ngs/{config,hash,mutex,sleep,thread_exceptions}.hpp`, the
+Not yet moved: `alps/ngs/{config,hash,mutex,sleep}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
 `alps/stringvalue.h`, and the type traits ALPSCore lacks.
 `alps/ngs/boost_mpi.hpp`, Boost.MPI `reduce` overloads that nothing used, was

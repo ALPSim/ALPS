@@ -19,7 +19,6 @@
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
-#include <boost/chrono.hpp>
 #include <filesystem>
 
 #include <string>

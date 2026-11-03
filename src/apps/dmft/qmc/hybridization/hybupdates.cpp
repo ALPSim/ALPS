@@ -58,8 +58,6 @@ void hybridization::update(){
   }//N_meas
 
   if(VERBOSE && sweeps%output_period==0 && crank==0) {
-    //  if(VERBOSE && crank==0 && boost::chrono::steady_clock::now() - lasttime > delay) {
-    //    lasttime = boost::chrono::steady_clock::now();
     int tot_acc=0,cur_prec = std::cout.precision();
     for (int i=0;i<nacc.size();i++) tot_acc += nacc[i];
     std::cout << std::endl << "|------ Simulation details (master only) after " << sweeps << " sweeps ------|" << std::endl;
