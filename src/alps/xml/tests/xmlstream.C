@@ -17,6 +17,7 @@
 #include <alps/parser/xmlstream.h>
 
 #include <cstdlib>
+#include <filesystem>
 #include <stdexcept>
 
 TEST(XmlSerialization, Xmlstream) {
@@ -33,6 +34,7 @@ TEST(XmlSerialization, Xmlstream) {
 
     oxs << alps::start_tag("tag0")
         << alps::attribute("name0", 1)
+        << alps::attribute("file", std::filesystem::path("dir/job.xml"))
 
         << "this is a text"
 
