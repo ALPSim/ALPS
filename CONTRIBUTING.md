@@ -269,9 +269,10 @@ request review.
 
 2. Open a pull request against the `master` branch of `ALPSim/ALPS`.
 
-3. Fill in the pull request template: what the change does and why, what a
-   result was validated against, what breaks if the change is wrong, and how to
-   revert it. The template asks only for what a reviewer cannot see in the diff.
+3. Fill in the pull request template: what the change does and why, which
+   commit you built and what the tests reported, what a result was validated
+   against, and what breaks if the change is wrong. The template asks only for
+   what a reviewer cannot see in the diff.
 
 4. Ensure CI passes (build + tests on Linux and macOS).
 
@@ -465,12 +466,13 @@ use `skip-existing` to hide a version mismatch.
 ## Review process
 
 [REVIEW.md](REVIEW.md) lists what reviewers look for in this repository and how
-findings are reported. Reviewer time is the scarcest resource ALPS has, so how
-much review a change needs depends on what it touches:
+findings are reported. The [maintainers table](https://alps.comp-phys.org/govern/maintainers/)
+on the ALPS website says who maintains each part of the code and who the core
+maintainers are. Reviewer time is the scarcest resource ALPS has, so how much
+review a change needs depends on what it touches:
 
 - **Changes that cannot alter results** (documentation, tutorials, `CHANGELOG.md`, CI helper scripts, test-only changes, packaging metadata) need green CI and one approval from anyone with write access.
-- **Code changes** need one approval from a **maintainer** of the affected simulation code or library. Other reviewers are welcome to comment, but their silence does not block the merge.
-- Changes to numerical results, on-disk formats, the scheduler and MPI layer, release and workflow files are reviewed by the maintainer and a **core maintainer**.
+- **Everything else** needs green CI and two approvals, at least one from a core maintainer. The maintainer of the affected code is requested as a reviewer and their comments are addressed; if they have not responded within two weeks, their silence does not block the merge.
 - A pull request with no reviewer activity for **six weeks** may be merged by a core maintainer if CI is green and no objections were raised.
 - Controversial changes can be escalated to the [Governing Council](https://alps.comp-phys.org/govern/).
 
