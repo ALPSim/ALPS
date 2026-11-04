@@ -11,6 +11,7 @@
 *
 *****************************************************************************/
 #include <alps/parapack/clone_info.h>
+#include <alps/input/parapack.hpp>
 #include <alps/parapack/util.h>
 
 #include <alps/utilities/os.hpp>
@@ -237,10 +238,11 @@ void clone_info::init(Parameters const& params, std::string const& dump) {
     dumpfiles_.push_back(f);
   }
 
-  if (params.defined("SEED")) {
-    seed_t baseseed = static_cast<seed_t>(params["SEED"]);
-    if (params.defined("DISORDER_SEED")) {
-      disorder_seed_ = static_cast<seed_t>(params["DISORDER_SEED"]);
+  input::parapack_clone_seeds const seeds = input::read_parapack_clone_seeds(params);
+  if (seeds.seed) {
+    seed_t baseseed = *seeds.seed;
+    if (seeds.disorder_seed) {
+      disorder_seed_ = *seeds.disorder_seed;
     } else {
       disorder_seed_ = baseseed ^ hash(clone_id_ * (np + 1) + 1);
     }
