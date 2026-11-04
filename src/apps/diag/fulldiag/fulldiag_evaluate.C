@@ -78,7 +78,7 @@ try {
   if (alps::cli_is_master()) alps::print_copyright(std::cout, "fulldiag");
 
   while (i<argc) {
-    boost::filesystem::path p(argv[i]);
+    std::filesystem::path p(argv[i]);
     std::string name=argv[i];
     name.erase(name.rfind(".out.xml"),8);
     alps::ProcessList nowhere;

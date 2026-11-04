@@ -18,9 +18,9 @@
 #define _INDEX_H_
 
 #include "archive_sqlite.hpp"
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class Index {
         SQLite &mDB;

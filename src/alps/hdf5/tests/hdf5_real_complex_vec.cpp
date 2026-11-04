@@ -19,7 +19,7 @@
 #include <alps/hdf5/complex.hpp>
 #include <alps/utilities/vectorio.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <complex>

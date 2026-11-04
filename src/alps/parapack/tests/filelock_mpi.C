@@ -28,7 +28,7 @@ TEST(ParallelFileLock, ExcludesOtherRanksAndReleasesOnScopeExit) {
   alps::testing::TemporaryDirectory directory;
   std::string filename = (directory.path() / "shared-checkpoint").string();
   boost::mpi::broadcast(world, filename, 0);
-  const boost::filesystem::path path(filename);
+  const std::filesystem::path path(filename);
   for (int owner = 0; owner < world.size(); ++owner) {
     SCOPED_TRACE("owner=" + std::to_string(owner));
     auto lock = std::make_unique<alps::filelock>(path);
@@ -68,7 +68,7 @@ TEST(ParallelFileLock, BlockingLockRetriesUntilOwnerReleases) {
   alps::testing::TemporaryDirectory directory;
   std::string filename = (directory.path() / "contended-checkpoint").string();
   boost::mpi::broadcast(world, filename, 0);
-  alps::filelock lock{boost::filesystem::path(filename)};
+  alps::filelock lock{std::filesystem::path(filename)};
   if (world.rank() == 0)
     EXPECT_NO_THROW(lock.lock(0));
   world.barrier();

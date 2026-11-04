@@ -21,7 +21,8 @@
 #include <alps/alea.h>
 #include <alps/numeric/double2int.hpp>
 #include <alps/osiris.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
+#include <alps/utilities/fs/absolute.hpp>
 
 namespace alps {
 
@@ -178,8 +179,8 @@ public:
   }
   void load_weight(Parameters const& params) {
     range_t load_range;
-    std::vector<boost::filesystem::path> dumpfiles = weight_dumpfiles(params);
-    BOOST_FOREACH(boost::filesystem::path const& path, dumpfiles) {
+    std::vector<std::filesystem::path> dumpfiles = weight_dumpfiles(params);
+    BOOST_FOREACH(std::filesystem::path const& path, dumpfiles) {
       IXDRFileDump dp(path);
       range_t r;
       std::valarray<double> logg;
@@ -250,27 +251,27 @@ public:
     dp >> walk_range_ >> measure_range_ >> weight_ >> last_direction_ >> direction_ >> penalty_;
   }
 
-  static boost::filesystem::path observable_dumpfile(Parameters const& params) {
-      boost::filesystem::path basedir = absolute(boost::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
-    boost::filesystem::path dumpfile;
+  static std::filesystem::path observable_dumpfile(Parameters const& params) {
+      std::filesystem::path basedir = absolute(std::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
+    std::filesystem::path dumpfile;
     if (params.defined("OBSERVABLE_DUMP_FILE"))
-      dumpfile = absolute(boost::filesystem::path(static_cast<std::string>(params["OBSERVABLE_DUMP_FILE"])), basedir);
+      dumpfile = alps::fs::absolute(std::filesystem::path(static_cast<std::string>(params["OBSERVABLE_DUMP_FILE"])), basedir);
     else
-      dumpfile = absolute(boost::filesystem::path(static_cast<std::string>(params["BASE_NAME"]) + ".observable"), basedir);
+      dumpfile = alps::fs::absolute(std::filesystem::path(static_cast<std::string>(params["BASE_NAME"]) + ".observable"), basedir);
     return dumpfile;
   }
 
-  static std::vector<boost::filesystem::path> weight_dumpfiles(Parameters const& params) {
-    boost::filesystem::path basedir = absolute(boost::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
+  static std::vector<std::filesystem::path> weight_dumpfiles(Parameters const& params) {
+    std::filesystem::path basedir = absolute(std::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
     std::vector<std::string> files;
     if (params.defined("WEIGHT_DUMP_FILE")) {
       read_vector_resize(params["WEIGHT_DUMP_FILE"], files);
     } else {
       files.push_back(params["BASE_NAME"] + ".weight");
     }
-    std::vector<boost::filesystem::path> dumpfiles;
+    std::vector<std::filesystem::path> dumpfiles;
     BOOST_FOREACH(std::string const& f, files) {
-      dumpfiles.push_back(absolute(boost::filesystem::path(f), basedir));
+      dumpfiles.push_back(alps::fs::absolute(std::filesystem::path(f), basedir));
     }
     return dumpfiles;
   }

@@ -18,8 +18,7 @@
 #include <alps/parapack/parallel_factory.h>
 #include <alps/parapack/task.h>
 #include <iostream>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/timer.hpp>
 
 namespace mpi = boost::mpi;
@@ -63,7 +62,7 @@ int main(int argc, char **argv) {
     alps::clone_proxy_mpi proxy(world);
 
     for (int i = 0; i < 2; ++i) {
-      proxy.start(tid, cid, procs, params, boost::filesystem::initial_path(), base, (i == 0));
+      proxy.start(tid, cid, procs, params, std::filesystem::current_path(), base, (i == 0));
       bool running = true;
       double breakpoint = (i == 0) ? 0.3 : 1.0;
 
@@ -107,7 +106,7 @@ int main(int argc, char **argv) {
           alps::oxstream oxs(std::cerr);
           oxs << info;
           BOOST_FOREACH(std::string const& file, info.checkpoints())
-            boost::filesystem::remove(boost::filesystem::path(file));
+            std::filesystem::remove(std::filesystem::path(file));
           break;
         }
         if (running) {

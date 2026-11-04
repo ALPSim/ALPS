@@ -18,12 +18,6 @@
 #cmakedefine ALPS_NGS_OPENMPI_ULFM
 
 //
-// use boost filesystem version 2 (nessesary from boost 1.46 upwards)
-//
-#define BOOST_FILESYSTEM_VERSION 3
-#define BOOST_FILESYSTEM_DEPRECATED
-
-//
 // Libraries
 //
 

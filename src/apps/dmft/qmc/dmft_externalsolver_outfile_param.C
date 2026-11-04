@@ -29,7 +29,7 @@
 #include <alps/hdf5.hpp>
 
 #include <cstdio>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <stdexcept>
 #include <string>
 
@@ -38,9 +38,9 @@ TEST(DmftRegression, externalsolver_outfile_param) {
   const std::string tmpbase = (temporary.path() / "solver").string();
   const std::string infile  = tmpbase + ".in.h5";
   const std::string outfile = tmpbase + ".out.h5";
-  boost::system::error_code ec;
-  boost::filesystem::remove(infile, ec);
-  boost::filesystem::remove(outfile, ec);
+  std::error_code ec;
+  std::filesystem::remove(infile, ec);
+  std::filesystem::remove(outfile, ec);
 
   alps::Parameters parms;
   parms["TMPNAME"] = tmpbase;   // makes infile/outfile deterministic
@@ -55,16 +55,16 @@ TEST(DmftRegression, externalsolver_outfile_param) {
   // A solver path that does not exist -> std::system returns non-zero ->
   // call() throws after writing (but before deleting) the input archive.
   ExternalSolver solver(
-      boost::filesystem::path("alps_nonexistent_solver_outfile_param_lock"));
+      std::filesystem::path("alps_nonexistent_solver_outfile_param_lock"));
   EXPECT_THROW(solver.solve(G0, parms), std::exception);
-  ASSERT_TRUE(boost::filesystem::exists(infile));
+  ASSERT_TRUE(std::filesystem::exists(infile));
 
   alps::Parameters written;
   {
     alps::hdf5::archive ar(infile, "r");
     ar >> alps::make_pvp("/parameters", written);
   }
-  boost::filesystem::remove(infile, ec);
+  std::filesystem::remove(infile, ec);
 
   const std::string got = written["OUTFILE"];
   EXPECT_EQ(got, outfile);

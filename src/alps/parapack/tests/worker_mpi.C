@@ -16,8 +16,7 @@
 #include <parapack/parallel_factory.h>
 #include <parapack/util.h>
 #include <iostream>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/timer.hpp>
 
 namespace mpi = boost::mpi;
@@ -42,7 +41,7 @@ int main(int argc, char **argv) {
     world.recv(0, 0, p);
   }
 
-  boost::filesystem::path dumpfile = "worker.dump." + alps::id2string(world.rank());
+  std::filesystem::path dumpfile = "worker.dump." + alps::id2string(world.rank());
 
   std::vector<alps::ObservableSet> obs;
   boost::shared_ptr<alps::parapack::abstract_worker> worker;
@@ -104,5 +103,5 @@ int main(int argc, char **argv) {
   if (world.rank() == 0)
     BOOST_FOREACH(alps::ObservableSet& m, obs) std::cout << m;
 
-  boost::filesystem::remove(dumpfile);
+  std::filesystem::remove(dumpfile);
 }

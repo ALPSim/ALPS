@@ -12,7 +12,8 @@
 *****************************************************************************/
 
 #include <alps/parapack/parapack.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
+#include <alps/utilities/fs/absolute.hpp>
 
 int main(int argc, char** argv) {
   try {
@@ -24,10 +25,10 @@ int main(int argc, char** argv) {
   alps::oxstream os(std::cout);
   os << alps::header("UTF-8");
 
-  boost::filesystem::path file(argv[1]);
-  if (!boost::filesystem::is_regular_file(file))
+  std::filesystem::path file(argv[1]);
+  if (!std::filesystem::is_regular_file(file))
     throw std::runtime_error("Cannot open master XML file");
-  boost::filesystem::path basedir = file.parent_path();
+  std::filesystem::path basedir = file.parent_path();
   std::string file_in_str, file_out_str;
 
   if (alps::parapack::load_filename(file, file_in_str, file_out_str) != 1)
@@ -37,8 +38,8 @@ int main(int argc, char** argv) {
   std::vector<version_t> versions;
   alps::parapack::load_version(file, versions);
 
-  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str), basedir);
-  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str), basedir);
+  std::filesystem::path file_in = alps::fs::absolute(std::filesystem::path(file_in_str), basedir);
+  std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str), basedir);
   std::string simname;
   std::vector<alps::task> tasks;
 

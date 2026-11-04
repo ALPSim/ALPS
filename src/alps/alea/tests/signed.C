@@ -19,7 +19,7 @@
 #include <alps/alea.h>
 #include <alps/parameter.h> 
 #include <alps/osiris/xdrdump.h> 
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/random.hpp> 
 
 TEST(AleaXml, signed)
@@ -67,12 +67,12 @@ TEST(AleaXml, signed)
 
   // SAVE and LOAD
   {
-    alps::OXDRFileDump dump(boost::filesystem::path("Observableset.dump"));
+    alps::OXDRFileDump dump(std::filesystem::path("Observableset.dump"));
     dump << measurement;
   }
   measurement.clear();
   {
-    alps::IXDRFileDump dump(boost::filesystem::path("Observableset.dump"));
+    alps::IXDRFileDump dump(std::filesystem::path("Observableset.dump"));
     dump >> measurement;
   }
 
@@ -83,19 +83,19 @@ TEST(AleaXml, signed)
 
   // SAVE and LOAD
   {
-    alps::OXDRFileDump dump(boost::filesystem::path("Observableset.dump"));
+    alps::OXDRFileDump dump(std::filesystem::path("Observableset.dump"));
     dump << measurement;
   }
   measurement.clear();
   {
-    alps::IXDRFileDump dump(boost::filesystem::path("Observableset.dump"));
+    alps::IXDRFileDump dump(std::filesystem::path("Observableset.dump"));
     dump >> measurement;
   }
 
   alps::oxstream oxs;
   measurement.write_xml(oxs);
 
-  boost::filesystem::remove(boost::filesystem::path("Observableset.dump"));
+  std::filesystem::remove(std::filesystem::path("Observableset.dump"));
 
   // test for signed observable with custom sign name
   measurement.clear();

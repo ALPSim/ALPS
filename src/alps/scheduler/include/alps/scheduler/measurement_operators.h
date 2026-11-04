@@ -84,7 +84,7 @@ public:
   EigenvectorMeasurements(LatticeModel const&);
   virtual ~EigenvectorMeasurements() {}
 
-  void write_xml_one_vector(oxstream& out, const boost::filesystem::path&, std::size_t j) const;
+  void write_xml_one_vector(oxstream& out, const std::filesystem::path&, std::size_t j) const;
   XMLTag handle_tag(std::istream& infile, const XMLTag& intag);
   
   virtual void save(hdf5::archive &) const;
@@ -212,7 +212,7 @@ void EigenvectorMeasurements<ValueType>::load(alps::hdf5::archive & ar)
 
 template <class ValueType>
 void EigenvectorMeasurements<ValueType>::write_xml_one_vector(
-    oxstream& out, const boost::filesystem::path&, std::size_t j) const
+    oxstream& out, const std::filesystem::path&, std::size_t j) const
 {
   using alps::numeric::real;
 

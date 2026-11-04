@@ -15,7 +15,7 @@
 #define ALPS_NGS_MAKE_PARAMETERS_FROM_FILE_HPP
 
 #include <alps/params.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <alps/parameter.h>
 #include <alps/config.h>
@@ -28,7 +28,7 @@ namespace alps {
         values as their text. A file with one `{ }` block is read as that
         block with the keys set before it.
         @throws std::runtime_error for a file with more than one block */
-    ALPS_DECL params make_parameters_from_file(boost::filesystem::path const & filename);
+    ALPS_DECL params make_parameters_from_file(std::filesystem::path const & filename);
 
 }
 

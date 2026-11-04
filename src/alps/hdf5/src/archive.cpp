@@ -18,7 +18,7 @@
 #include <alps/utilities/stacktrace.hpp>
 
 #include <boost/scoped_array.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/noncopyable.hpp>
 
 #include <hdf5.h>
@@ -309,9 +309,9 @@ namespace alps {
                             if (replace_ && large_)
                                 throw archive_error("the combination 'wl' is not allowd!" + ALPS_STACKTRACE);
                             if (replace_)
-                                for (std::size_t i = 0; boost::filesystem::exists(filename_ + (suffix_ = ".tmp." + cast<std::string>(i))); ++i);
-                            if (write_ && replace_ && boost::filesystem::exists(filename_))
-                                boost::filesystem::copy_file(filename_, filename_ + suffix_);
+                                for (std::size_t i = 0; std::filesystem::exists(filename_ + (suffix_ = ".tmp." + cast<std::string>(i))); ++i);
+                            if (write_ && replace_ && std::filesystem::exists(filename_))
+                                std::filesystem::copy_file(filename_, filename_ + suffix_);
                             if (large_) {
                                 {
                                     char filename0[4096], filename1[4096];
@@ -338,7 +338,7 @@ namespace alps {
                                     detail::check_error(file_id_);
                             } else {
                                 if (!write_) {
-                                    if (!boost::filesystem::exists(filename_ + suffix_))
+                                    if (!std::filesystem::exists(filename_ + suffix_))
                                         throw archive_not_found("file does not exist: " + filename_ + suffix_ + ALPS_STACKTRACE);
                                     if (detail::check_error(H5Fis_hdf5((filename_ + suffix_).c_str())) == 0)
                                         throw archive_error("no valid hdf5 file: " + filename_ + suffix_ + ALPS_STACKTRACE);
@@ -389,9 +389,9 @@ namespace alps {
                                           << error().invoke(file_id_)
                                           << std::endl;
                             if (replace_) {
-                                if (boost::filesystem::exists(filename_))
-                                    boost::filesystem::remove(filename_);
-                                boost::filesystem::rename(filename_ + suffix_, filename_);
+                                if (std::filesystem::exists(filename_))
+                                    std::filesystem::remove(filename_);
+                                std::filesystem::rename(filename_ + suffix_, filename_);
                             }
                         } catch (std::exception & ex) {
                             if (abort) {
@@ -443,13 +443,13 @@ namespace alps {
             , context_(NULL)
         {}
 
-        archive::archive(boost::filesystem::path const & filename, std::string mode)
+        archive::archive(std::filesystem::path const & filename, std::string mode)
             : context_(NULL)
         {
             open(filename, mode);
         }
 
-        void archive::open(boost::filesystem::path const & filename, std::string const & mode) {
+        void archive::open(std::filesystem::path const & filename, std::string const & mode) {
             if (context_ != NULL)
                 throw archive_opened("the archive '" + filename.string() + "' is already opened" + ALPS_STACKTRACE);
             // Unknown letters used to be ignored (validation from ALPSCore
@@ -493,8 +493,8 @@ namespace alps {
                 std::string filename = it->second.first->filename_;
                 it->second.first->replace_ = false;
                 delete it->second.first;
-                if (replace && boost::filesystem::exists(filename))
-                    boost::filesystem::remove(filename);
+                if (replace && std::filesystem::exists(filename))
+                    std::filesystem::remove(filename);
             }
             ref_cnt_.clear();
         }

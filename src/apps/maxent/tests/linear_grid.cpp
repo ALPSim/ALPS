@@ -15,7 +15,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/params.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <algorithm>
 #include <cmath>
@@ -106,7 +106,7 @@ TEST(MaxEnt, LinearGridAndStopCallbacks) {
     int callbacks = 0;
     ASSERT_TRUE((!sim.run([&]() { ++callbacks; return true; }))) << "initial stop request ignored";
     ASSERT_TRUE((callbacks == 1)) << "initial stop callback count changed";
-    ASSERT_TRUE((!boost::filesystem::exists(out_h5))) << "stopped run created scientific output";
+    ASSERT_TRUE((!std::filesystem::exists(out_h5))) << "stopped run created scientific output";
 
     bool propagated = false;
     try {

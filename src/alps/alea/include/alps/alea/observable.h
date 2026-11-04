@@ -35,7 +35,7 @@
 
 #include <alps/hdf5.hpp>
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/type_traits.hpp>
 #include <complex>
 #include <vector>
@@ -109,7 +109,7 @@ class ALPS_DECL Observable {
   virtual void output(std::ostream&) const;
 
   /** output the result */
-  virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
+  virtual void write_xml(oxstream& oxs, const std::filesystem::path& fn_hdf5=std::filesystem::path()) const;
 
 #ifndef ALPS_WITHOUT_OSIRIS
   /// return a version ID uniquely identifying the class

@@ -20,7 +20,7 @@
 #include <alps/hdf5/vector.hpp>
 
 #include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <string>

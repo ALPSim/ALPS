@@ -5,7 +5,6 @@
 
 
 #include <alps/utilities/temporary_filename.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <cerrno>
 #include <cstdio>
 #include <stdexcept>
@@ -13,6 +12,8 @@
 #ifndef _WIN32
 #include <cstdlib>
 #include <unistd.h>
+#else
+#include <random>
 #endif
 
 namespace alps {
@@ -30,8 +31,13 @@ std::string temporary_filename(std::string prefix) {
 #else
     // C11 exclusive creation reserves the name, unlike mktemp. Close the
     // stream here: callers own the file, not an otherwise leaked descriptor.
+    std::random_device seed;
+    std::mt19937 engine(seed());
+    std::uniform_int_distribution<int> digit(0, 15);
     for (int attempt = 0; attempt < 128; ++attempt) {
-        auto name = prefix + boost::filesystem::unique_path("%%%%%%%%%%%%").string();
+        std::string name = prefix;
+        for (int i = 0; i < 12; ++i)
+            name += "0123456789abcdef"[digit(engine)];
         if (auto* file = std::fopen(name.c_str(), "wbx")) {
             if (std::fclose(file) != 0)
                 throw std::system_error(errno, std::generic_category(), "close temporary file");

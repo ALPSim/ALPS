@@ -17,8 +17,7 @@
 
 #include <alps/scheduler/convert.h>
 #include <alps/parser/xslt_path.h>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <stdexcept>
 #include <iostream>
 #include <set>
@@ -35,14 +34,14 @@ try {
     std::exit(-1);
   }
 
-  std::set<boost::filesystem::path> paths;
+  std::set<std::filesystem::path> paths;
   
   for (int i=1;i<argc;++i) {
     std::string inname=argv[i];
     if (inname.size() >= 2 && inname.substr(0, 2) == "./") 
       inname.erase(0, 2);
     alps::convert2xml(inname);
-    boost::filesystem::path dir = boost::filesystem::path(inname).remove_filename();
+    std::filesystem::path dir = std::filesystem::path(inname).remove_filename();
     if (paths.find(dir)==paths.end()) {
       alps::copy_stylesheet(dir);
       paths.insert(dir);

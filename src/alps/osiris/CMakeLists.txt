@@ -12,7 +12,7 @@ add_library(alps_osiris
   "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_float.c"
   "${PROJECT_SOURCE_DIR}/third_party/xdr/src/xdr_stdio.c")
 target_compile_features(alps_osiris PRIVATE c_std_11)
-target_link_libraries(alps_osiris PUBLIC ALPS::configuration Boost::serialization Boost::filesystem)
+target_link_libraries(alps_osiris PUBLIC ALPS::configuration Boost::serialization)
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps_osiris PUBLIC MPI::MPI_CXX)
 endif()

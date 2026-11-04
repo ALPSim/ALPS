@@ -18,7 +18,7 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <complex>
@@ -28,8 +28,8 @@ using namespace std;
 TEST(Hdf5, Vecveccplx)
 {
     alps::testing::TemporaryDirectory temporary;
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "vvcplx.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvcplx.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "vvcplx.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "vvcplx.h5").string()));
     {
       vector< vector< complex<double> > > v;
       for( int i = 0; i < 3; ++i )
@@ -40,5 +40,5 @@ TEST(Hdf5, Vecveccplx)
       ar["v"] >> restored;
       EXPECT_EQ(restored, v);
     }
-    boost::filesystem::remove(boost::filesystem::path((temporary.path() / "vvcplx.h5").string()));
+    std::filesystem::remove(std::filesystem::path((temporary.path() / "vvcplx.h5").string()));
 }

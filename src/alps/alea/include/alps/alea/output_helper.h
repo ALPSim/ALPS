@@ -21,7 +21,7 @@
 
 #include <alps/config.h>
 #include <alps/xml.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/mpl/bool.hpp>
 #include <iostream>
 
@@ -42,7 +42,7 @@ struct output_helper<boost::mpl::true_>
     b.output_scalar(out);
   }
 
-  template <class X> static void write_xml(const X& b, oxstream& oxs, const boost::filesystem::path& fn_hdf5)
+  template <class X> static void write_xml(const X& b, oxstream& oxs, const std::filesystem::path& fn_hdf5)
   {
     b.write_xml_scalar(oxs, fn_hdf5);
   }
@@ -65,7 +65,7 @@ struct output_helper<boost::mpl::false_>
     b.output_vector(out);
   }
 
-  template <class T> static void write_xml(const T& b, oxstream& oxs, const boost::filesystem::path& fn_hdf5)
+  template <class T> static void write_xml(const T& b, oxstream& oxs, const std::filesystem::path& fn_hdf5)
   {
     b.write_xml_vector(oxs, fn_hdf5);
   }

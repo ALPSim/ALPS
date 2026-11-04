@@ -14,7 +14,7 @@
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <alps/hdf5/archive.hpp>
 #include <alps/parameter.h>
 
@@ -23,8 +23,8 @@ using namespace std;
 TEST(Hdf5LegacyParameters, OverwriteChangesValuesAndTypes)
 {
     alps::testing::TemporaryDirectory temporary;
-    if (boost::filesystem::exists((temporary.path() / "parms.h5").string()) && boost::filesystem::is_regular_file((temporary.path() / "parms.h5").string()))
-        boost::filesystem::remove((temporary.path() / "parms.h5").string());
+    if (std::filesystem::exists((temporary.path() / "parms.h5").string()) && std::filesystem::is_regular_file((temporary.path() / "parms.h5").string()))
+        std::filesystem::remove((temporary.path() / "parms.h5").string());
 
     alps::Parameters p, p2;
     p["a"] = 10;

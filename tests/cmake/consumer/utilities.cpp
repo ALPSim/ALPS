@@ -9,7 +9,7 @@
 #include <alps/utilities/cast.hpp>
 #include <alps/utilities/short_print.hpp>
 #include <alps/ngs/sleep.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <sstream>
 #include <functional>
 #include <stdexcept>
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     if (stat(temporary.c_str(), &status) != 0 || (status.st_mode & 0777) != 0600)
         throw std::runtime_error("Utility temporary file is not private to its owner");
 #endif
-    if (!boost::filesystem::remove(temporary))
+    if (!std::filesystem::remove(temporary))
         throw std::runtime_error("Utility temporary file was not created");
     alps::sleep(0);
     (void)alps::vmusage();

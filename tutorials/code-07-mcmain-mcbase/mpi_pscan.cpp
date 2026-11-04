@@ -22,7 +22,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <string>
 #include <iostream>
@@ -76,9 +76,9 @@ int main(int argc, char *argv[]) {
 
             alps::parameters_type<ising_sim>::type parameters;
             if (comm_local.rank() > 0);
-            else if (boost::filesystem::path(infile).extension().string() == ".xml")
+            else if (std::filesystem::path(infile).extension().string() == ".xml")
                 parameters = alps::make_parameters_from_xml(infile);
-            else if (boost::filesystem::path(infile).extension().string() == ".h5")
+            else if (std::filesystem::path(infile).extension().string() == ".h5")
                 alps::hdf5::archive(infile)["/parameters"] >> parameters;
             else
                 parameters = alps::make_parameters_from_file(infile);

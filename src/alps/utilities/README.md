@@ -9,8 +9,7 @@ A header belongs in `alps/utilities/` only if
 1. more than one module uses it; otherwise it lives with its user,
 2. nothing is planned to replace it; otherwise it stays with the legacy code, and
 3. Boost idioms with a standard equivalent were replaced when it moved, without
-   changing public signatures. Signature changes, such as
-   `boost::filesystem::path` to `std::filesystem::path`, are later work.
+   changing public signatures, except that paths are `std::filesystem::path`.
 
 Status *current* means the header needs no planned changes. *Carried over*
 means it was moved as it was, and the note says what modernization remains.
@@ -34,7 +33,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `deprecated.hpp` | `ALPS_DEPRECATED` | current; copied from ALPSCore, and defines the macro only if ALPS's `<alps/export.h>` has not |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
-| `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
+| `os.hpp` | Host, user and directory queries | carried over |
 | `vmusage.hpp` | Process memory usage | carried over; Linux `/proc` only |
 | `vectorio.hpp` | Reading and writing whitespace-separated vectors | carried over; Boost stream idioms |
 | `encode.hpp` | HDF5 name escaping | carried over; Boost Software License notice, `boost::lexical_cast` |

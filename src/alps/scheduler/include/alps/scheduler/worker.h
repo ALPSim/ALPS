@@ -23,7 +23,7 @@
 #include <alps/parameter.h>
 #include <alps/random.h>
 #include <boost/smart_ptr.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <alps/osiris/process.h>
 #include <alps/osiris/dump.h>
 #include <cmath>
@@ -78,8 +78,8 @@ public:
   virtual void save(hdf5::archive &) const {};
   virtual void load(hdf5::archive &) {};
 
-  virtual void save_to_file(const boost::filesystem::path&,const boost::filesystem::path&) const=0;
-  virtual void load_from_file(const boost::filesystem::path&,const boost::filesystem::path&)=0;
+  virtual void save_to_file(const std::filesystem::path&,const std::filesystem::path&) const=0;
+  virtual void load_from_file(const std::filesystem::path&,const std::filesystem::path&)=0;
   virtual void set_parameters(const Parameters& parms)=0;
   virtual TaskInfo get_info() const = 0;
   virtual double work_done() const =0;
@@ -111,9 +111,9 @@ public:
   virtual void save(hdf5::archive &) const;
   virtual void load(hdf5::archive &);
 
-  virtual void write_xml(const boost::filesystem::path& name) const;
-  void save_to_file(const boost::filesystem::path&,const boost::filesystem::path&) const;
-  void load_from_file(const boost::filesystem::path&,const boost::filesystem::path&);
+  virtual void write_xml(const std::filesystem::path& name) const;
+  void save_to_file(const std::filesystem::path&,const std::filesystem::path&) const;
+  void load_from_file(const std::filesystem::path&,const std::filesystem::path&);
   // creates a new information object containing information about this run
   TaskInfo get_info() const;
   void start_worker();
@@ -178,8 +178,8 @@ public:
   void set_parameters(const Parameters& parms);
 
   // save function also saves actual object
-  void save_to_file(const boost::filesystem::path&,const boost::filesystem::path&) const;
-  void load_from_file(const boost::filesystem::path&,const boost::filesystem::path&);
+  void save_to_file(const std::filesystem::path&,const std::filesystem::path&) const;
+  void load_from_file(const std::filesystem::path&,const std::filesystem::path&);
   void start_worker();
   virtual void halt_worker();
   

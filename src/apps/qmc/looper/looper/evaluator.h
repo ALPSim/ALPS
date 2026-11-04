@@ -27,7 +27,7 @@ public:
   virtual void pre_evaluate(alps::ObservableSet& m, alps::Parameters const&,
     alps::ObservableSet const& m_in) const = 0;
   virtual void evaluate(alps::scheduler::MCSimulation&, alps::Parameters const&,
-    boost::filesystem::path const&) const = 0;
+    std::filesystem::path const&) const = 0;
   virtual void evaluate(alps::ObservableSet& m, alps::Parameters const&,
     alps::ObservableSet const& m_in) const = 0;
   virtual void evaluate(alps::ObservableSet&) const {};

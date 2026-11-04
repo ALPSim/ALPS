@@ -25,10 +25,10 @@
 #include <stdexcept>
 #include <iostream>
 #include <ctime>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <sqlite3.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 class SQLite {
     sqlite3 *mDB;

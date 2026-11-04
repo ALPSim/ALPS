@@ -33,7 +33,7 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
@@ -77,9 +77,9 @@ int main(int argc, char** argv)
       alps::print_copyright(std::cout, "dmft");
     }
     // set working directory
-    boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
+    std::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
     if (!p.parent_path().empty())
-      boost::filesystem::current_path(p.parent_path());
+      std::filesystem::current_path(p.parent_path());
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
@@ -105,8 +105,8 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(p));
           F_selfconsistency_loop(parms, *solver_ptr, transform);
         } else {
-            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
+            /*std::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
+          solver_ptr.reset(new ExternalSolver(/*std::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       }

@@ -46,7 +46,7 @@ typedef alps::SimpleRealVectorObservable vec_obs_t;
 class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
 {
 public:
-  HirschFyeSim(const alps::ProcessList& w, const boost::filesystem::path& p) 
+  HirschFyeSim(const alps::ProcessList& w, const std::filesystem::path& p) 
   : alps::scheduler::MCSimulation(w,p)
   { 
   }
