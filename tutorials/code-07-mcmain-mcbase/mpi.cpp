@@ -20,7 +20,6 @@
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
-#include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
 

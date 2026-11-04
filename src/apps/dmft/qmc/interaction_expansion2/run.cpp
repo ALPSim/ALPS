@@ -62,7 +62,8 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
     parms.has_unused(std::cerr);
   }
   //run the simulation
-  s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+  const boost::posix_time::ptime deadline = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"]);
+  s.run([deadline] { return stop_requested(deadline); });
 #ifdef ALPS_HAVE_MPI
   //a rank that is still thermalizing has no measurements. collect_results
   //throws if only some ranks have them, but if none has, only rank 0 fails

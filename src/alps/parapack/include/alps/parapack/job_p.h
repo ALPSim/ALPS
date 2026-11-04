@@ -22,7 +22,7 @@
 #undef toupper
 
 #include <boost/filesystem/operations.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <vector>
 
 namespace alps {
@@ -95,7 +95,7 @@ public:
         boost::throw_exception(std::runtime_error("missing <INPUT> tag in <TASK> tag"));
       if (task_.file_out_str_.empty())
         task_.file_out_str_ = task_.file_in_str_;
-      task_.base_ = regex_replace(task_.file_out_str_, boost::regex("\\.out\\.xml$"), "");
+      task_.base_ = std::regex_replace(task_.file_out_str_, std::regex("\\.out\\.xml$"), "");
     }
   }
 
