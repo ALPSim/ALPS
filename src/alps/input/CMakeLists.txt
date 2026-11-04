@@ -3,6 +3,7 @@
 target_sources(alps PRIVATE
   ctint.cpp
   hybridization.cpp
+  looper.cpp
   parapack.cpp)
 
 target_sources(alps_headers INTERFACE
@@ -10,6 +11,7 @@ target_sources(alps_headers INTERFACE
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES include/alps/input/ctint.hpp
         include/alps/input/hybridization.hpp
+        include/alps/input/looper.hpp
         include/alps/input/parapack.hpp)
 
 if(ALPS_BUILD_TESTING)

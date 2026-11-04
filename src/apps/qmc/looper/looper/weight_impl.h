@@ -48,9 +48,9 @@ struct site_weight_helper {
   //   offset = |Hx|/2
 
   site_weight_helper() : sign(1), offset(0) { v.assign(0); }
-  site_weight_helper(const site_parameter& p, alps::Parameters const& params) { init(p, params); }
+  site_weight_helper(const site_parameter& p, alps::input::looper_weight_parameters const& params) { init(p, params); }
 
-  void init(const site_parameter& p, alps::Parameters const& /* params */) {
+  void init(const site_parameter& p, alps::input::looper_weight_parameters const& /* params */) {
     sign = (p.hx >= 0 ? 1 : -1);
     v[0] = std::abs(p.hx) / 2;
     offset = v[0];
@@ -121,21 +121,21 @@ struct xxz_bond_weight_helper {
   //      same as ii-2)
 
   xxz_bond_weight_helper() : sign(1), offset(0) { v.assign(0); }
-  xxz_bond_weight_helper(const site_parameter& p, alps::Parameters const& params) {
+  xxz_bond_weight_helper(const site_parameter& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
-  xxz_bond_weight_helper(const bond_parameter_xxz& p, alps::Parameters const& params) {
+  xxz_bond_weight_helper(const bond_parameter_xxz& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
-  xxz_bond_weight_helper(const bond_parameter_xyz& p, alps::Parameters const& params) {
+  xxz_bond_weight_helper(const bond_parameter_xyz& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
 
-  void init(const bond_parameter_xxz& p, alps::Parameters const& params) {
+  void init(const bond_parameter_xxz& p, alps::input::looper_weight_parameters const& params) {
     sign = (p.jxy <= 0 ? 1 : -1);
     double jxy = std::abs(p.jxy);
     double jz = p.jz;
-    double a = crop_01(params.value_or_default("FORCE_SCATTER", 0.));
+    double a = crop_01(params.force_scatter.value_or(0.));
     if (alps::numeric::is_nonzero<1>(jxy + std::abs(jz))) {
       if (jxy - jz > 2 * a * jxy) {
         // standard solutions
@@ -155,12 +155,12 @@ struct xxz_bond_weight_helper {
     }
     offset = weight()/2;
   }
-  void init(const bond_parameter_xyz& p, alps::Parameters const& params) {
+  void init(const bond_parameter_xyz& p, alps::input::looper_weight_parameters const& params) {
     if (!alps::numeric::is_equal<>(p.jx, p.jy))
       boost::throw_exception(std::runtime_error("not an XXZ model"));
     init(bond_parameter_xxz(p.c, p.jx, p.jz), params);
   }
-  void init(const site_parameter& p, alps::Parameters const& params) {
+  void init(const site_parameter& p, alps::input::looper_weight_parameters const& params) {
     bond_parameter_xyz bp(0, 0, 0, 2 * p.d);
     init(bp, params);
   }
@@ -238,25 +238,25 @@ struct xyz_bond_weight_helper {
   //      same as ii-2)
 
   xyz_bond_weight_helper() : sign(1), offset(0) { v.assign(0); }
-  xyz_bond_weight_helper(const site_parameter& p, alps::Parameters const& params) {
+  xyz_bond_weight_helper(const site_parameter& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
-  xyz_bond_weight_helper(const bond_parameter_xxz& p, alps::Parameters const& params) {
+  xyz_bond_weight_helper(const bond_parameter_xxz& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
-  xyz_bond_weight_helper(const bond_parameter_xyz& p, alps::Parameters const& params) {
+  xyz_bond_weight_helper(const bond_parameter_xyz& p, alps::input::looper_weight_parameters const& params) {
     init(p, params);
   }
 
-  void init(const bond_parameter_xyz& p, alps::Parameters const& params) {
+  void init(const bond_parameter_xyz& p, alps::input::looper_weight_parameters const& params) {
     if ((p.jx + p.jy) * (p.jx - p.jy) < 0)
       boost::throw_exception(std::runtime_error("(Jx+Jy) and (Jx-Jy) may not have opposite signs"));
     sign = ((p.jx + p.jy) <= 0 ? 1 : -1);
     double jp = std::abs((p.jx + p.jy)) / 2;
     double jm = std::abs((p.jx - p.jy)) / 2;
     double jz = p.jz;
-    double a = crop_01(params.value_or_default("FORCE_SCATTER", 0.));
-    double r = crop_01(params.value_or_default("SCATTERING_RATIO", 0.5));
+    double a = crop_01(params.force_scatter.value_or(0.));
+    double r = crop_01(params.scattering_ratio);
     if (alps::numeric::is_nonzero<1>(jp + std::abs(jz))) {
       if (jp - jz - (1-2*r) * jm > 2 * a * jp) {
         // standard solutions
@@ -282,10 +282,10 @@ struct xyz_bond_weight_helper {
     }
     offset = weight()/2;
   }
-  void init(const bond_parameter_xxz& p, alps::Parameters const& params) {
+  void init(const bond_parameter_xxz& p, alps::input::looper_weight_parameters const& params) {
     init(bond_parameter_xyz(p.c, p.jxy, p.jxy, p.jz), params);
   }
-  void init(const site_parameter& p, alps::Parameters const& params) {
+  void init(const site_parameter& p, alps::input::looper_weight_parameters const& params) {
     bond_parameter_xyz bp(0, 0, 0, 2 * p.d);
     init(bp, params);
   }
@@ -329,12 +329,12 @@ public:
   BOOST_STATIC_CONSTANT(int, num_bond_graphs = bond_t::num_graphs);
 
   template<class M, class LAT>
-  weight_helper(M const& m, const LAT& lat, alps::Parameters const& params) {
+  weight_helper(M const& m, const LAT& lat, alps::input::looper_weight_parameters const& params) {
     init(m, lat, params);
   }
 
   template<class M, class LAT>
-  void init(M const& m, const LAT& lat, alps::Parameters const& params) {
+  void init(M const& m, const LAT& lat, alps::input::looper_weight_parameters const& params) {
     weight_ = 0;
     site_weights_.clear();
     bond_weights_.clear();

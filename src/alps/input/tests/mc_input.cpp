@@ -1,5 +1,6 @@
 // Copyright (C) 2026 by the ALPS collaboration
 // SPDX-License-Identifier: MIT
+#include <alps/input/looper.hpp>
 #include <alps/input/parapack.hpp>
 #include <alps/parameter_input.hpp>
 #include <gtest/gtest.h>
@@ -143,6 +144,43 @@ TEST(ParapackInput, TemperatureScanAndWangLandau) {
     alps::input::wanglandau_weight_dump const weights =
         alps::input::read_wanglandau_weight_dump(text("DIR_NAME = \".\"\nWEIGHT_DUMP_FILE = \"a.w b.w\""));
     EXPECT_EQ(weights.files, (std::vector<std::string>{"a.w", "b.w"}));
+}
+
+TEST(LooperInput, TemperatureAndAnnealing) {
+    EXPECT_FALSE(alps::input::read_looper_temperature_parameters(text("")).temperature);
+    EXPECT_EQ(*alps::input::read_looper_temperature_parameters(text("BETA = 4")).temperature, 0.25);
+    EXPECT_EQ(*alps::input::read_looper_temperature_parameters(text("T = 0.5\nBETA = 4")).temperature, 0.5);
+    alps::input::looper_temperature_parameters const annealed = alps::input::read_looper_temperature_parameters(
+        text("T = 0.1\nT_DURATION_0 = 100\nT_START_0 = 2\nBETA_DURATION_1 = 50\nBETA_START_1 = 2\nT_START_2 = 1"));
+    EXPECT_EQ(*annealed.temperature, 0.1);
+    ASSERT_EQ(annealed.annealing.size(), 2u);
+    EXPECT_EQ(annealed.annealing[0], std::make_pair(100, 2.));
+    EXPECT_EQ(annealed.annealing[1], std::make_pair(50, 0.5));
+}
+
+TEST(LooperInput, EstimatorsWeightsAndModel) {
+    EXPECT_FALSE(alps::input::read_looper_worker_parameters(text("")).disable_improved_estimator);
+    EXPECT_TRUE(alps::input::read_looper_worker_parameters(text("DISABLE_IMPROVED_ESTIMATOR = 0")).disable_improved_estimator);
+
+    alps::input::looper_correlation_parameters const c =
+        alps::input::read_looper_correlation_parameters(text("MEASURE[Green Function] = 1"));
+    EXPECT_FALSE(c.measure_correlations);
+    EXPECT_TRUE(c.measure_green_function);
+    EXPECT_FALSE(c.measure_structure_factor);
+    EXPECT_FALSE(alps::input::read_looper_initial_site(text("")));
+    EXPECT_EQ(*alps::input::read_looper_initial_site(text("INITIAL_SITE = 3")), 3);
+
+    alps::input::looper_weight_parameters const w = alps::input::read_looper_weight_parameters(text(""));
+    EXPECT_FALSE(w.force_scatter);
+    EXPECT_EQ(w.scattering_ratio, 0.5);
+    EXPECT_EQ(*alps::input::read_looper_weight_parameters(text("FORCE_SCATTER = 0.2")).force_scatter, 0.2);
+
+    alps::input::looper_model_parameters const m =
+        alps::input::read_looper_model_parameters(text("USE_BOND_INDICES_AS_TYPES = 1\nLOOPER_DEBUG[MODEL OUTPUT] = \"cerr\""));
+    EXPECT_EQ(m.disorder_seed, 0u);
+    EXPECT_FALSE(m.use_site_indices_as_types);
+    EXPECT_TRUE(m.use_bond_indices_as_types);
+    EXPECT_EQ(*m.debug_model_output, "cerr");
 }
 
 }

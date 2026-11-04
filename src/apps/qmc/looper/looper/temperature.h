@@ -12,7 +12,7 @@
 #ifndef LOOPER_TEMPERATURE_H
 #define LOOPER_TEMPERATURE_H
 
-#include <alps/expression.h>
+#include <alps/input/looper.hpp>
 #include <boost/next_prior.hpp>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
@@ -23,45 +23,22 @@ class temperature {
 public:
   temperature(alps::Parameters const& p) { init(p); }
 
-  void init(alps::Parameters const& p) {
+  void init(alps::Parameters const& p) { init(alps::input::read_looper_temperature_parameters(p)); }
+
+  void init(alps::input::looper_temperature_parameters const& p) {
     seq_.clear();
     final_ = -1;
 
-    if (p.defined("T")) {
-      final_ = alps::evaluate("T", p);
-    } else if (p.defined("TEMPERATURE")) {
-      final_ = alps::evaluate("TEMPERATURE", p);
-    } else if (p.defined("BETA")) {
-      final_ = 1 / alps::evaluate("BETA", p);
-    } else if (p.defined("INVERSE_TEMPERATURE")) {
-      final_ = 1 / alps::evaluate("INVERSE_TEMPERATURE", p);
-    } else {
+    if (!p.temperature) {
       seq_.push_back(std::make_pair(1, final_));
       return;
     }
+    final_ = *p.temperature;
 
     int s_prev = 1;
-    for (int i = 0;; ++i) {
-      int td = -1;
-      double ts = -1;
-      std::string ns = boost::lexical_cast<std::string>(i);
-      if (p.defined("T_DURATION_" + ns) && p.defined("T_START_" + ns)) {
-        td = static_cast<int>(alps::evaluate("T_DURATION_" + ns, p));
-        ts = alps::evaluate("T_START_" + ns, p);
-      } else if (p.defined("TEMPERATURE_DURATION_" + ns) && p.defined("TEMPERATURE_START_" + ns)) {
-        td = static_cast<int>(alps::evaluate("TEMPERATURE_DURATION_" + ns, p));
-        ts = alps::evaluate("TEMPERATURE_START_" + ns, p);
-      } else if (p.defined("BETA_DURATION_" + ns) && p.defined("BETA_START_" + ns)) {
-        td = static_cast<int>(alps::evaluate("BETA_DURATION_" + ns, p));
-        ts = 1 / alps::evaluate("BETA_START_" + ns, p);
-      } else if (p.defined("INVERSE_TEMPERATURE_DURATION_" + ns) &&
-                 p.defined("INVERSE_TEMPERATURE_START_" + ns)) {
-        td = static_cast<int>(alps::evaluate("INVERSE_TEMPERATURE_DURATION_" + ns, p));
-        ts = 1 / alps::evaluate("INVERSE_TEMPERATURE_START_" + ns, p);
-      }
-      if (td <= 0 || ts <= 0) break;
-      seq_.push_back(std::make_pair(s_prev, ts));
-      s_prev += td;
+    for (std::size_t i = 0; i < p.annealing.size(); ++i) {
+      seq_.push_back(std::make_pair(s_prev, p.annealing[i].second));
+      s_prev += p.annealing[i].first;
     }
     seq_.push_back(std::make_pair(s_prev, final_));
   }

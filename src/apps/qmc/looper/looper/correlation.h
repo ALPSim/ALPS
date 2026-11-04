@@ -13,6 +13,7 @@
 #define LOOPER_CORRELATION_H
 
 #include "measurement.h"
+#include <alps/input/looper.hpp>
 #include <boost/optional.hpp>
 
 // workaround for SuSE 11.4, which defines macro TIME in pyconfig.h
@@ -55,12 +56,11 @@ struct correlation {
 
     void initialize(alps::Parameters const& params, lattice_t const& lat,
       bool /* is_signed */, bool use_improved_estimator) {
-      measure_correlation =
-        params.value_or_default("MEASURE[Correlations]", false);
-      measure_green_function =
-        params.value_or_default("MEASURE[Green Function]", false);
-      measure_structure_factor =
-        params.value_or_default("MEASURE[Structure Factor]", false);
+      alps::input::looper_correlation_parameters const measure =
+        alps::input::read_looper_correlation_parameters(params);
+      measure_correlation = measure.measure_correlations;
+      measure_green_function = measure.measure_green_function;
+      measure_structure_factor = measure.measure_structure_factor;
       bipartite = is_bipartite(lat);
       improved = use_improved_estimator;
 
@@ -76,8 +76,8 @@ struct correlation {
 
       if (measure_correlation || measure_green_function) {
         gauge = alps::get_or_default(gauge_t(), lat.vg(), 0);
-        if (params.defined("INITIAL_SITE"))
-          origin = static_cast<int>(params["INITIAL_SITE"]);
+        if (std::optional<int> const site = alps::input::read_looper_initial_site(params))
+          origin = *site;
 
         distance_label = distance_labels(lat, origin);
         if (!origin) {

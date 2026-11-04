@@ -14,6 +14,8 @@
 
 #include <alps/expression.h>
 #include <alps/osiris.h>
+#include <alps/input/looper.hpp>
+#include <alps/input/parapack.hpp>
 #include <alps/parapack/integer_range.h>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
@@ -25,11 +27,9 @@ public:
   typedef alps::integer_range<unsigned int> range_type;
 
   mc_steps() : mcs_(0), sweep_("[0:]"), therm_(0) {}
-  mc_steps(alps::Parameters const& p) : mcs_(0),
-    sweep_(p.value_or_default("SWEEPS", "[65536:]"), p),
-    therm_(p.defined("THERMALIZATION") ? static_cast<int>(alps::evaluate("THERMALIZATION", p)) :
-      (sweep_.min BOOST_PREVENT_MACRO_SUBSTITUTION () >> 3)) {
-  }
+  mc_steps(alps::Parameters const& p) : mc_steps(alps::input::read_mc_steps_parameters(p)) {}
+  explicit mc_steps(alps::input::mc_steps_parameters const& p) : mcs_(0),
+    sweep_(p.sweeps), therm_(p.thermalization) {}
 
   void set_thermalization(int c) { therm_ = c; }
   void set_sweeps(unsigned int c) { sweep_ = range_type(c); }
@@ -82,13 +82,12 @@ public:
   wl_steps() : mcs_(0), stage_(0) {}
   template<class T>
   wl_steps(alps::Parameters const& p, alps::integer_range<T> const& exp_range)
-    : mcs_(0), stage_(0),
-      multicanonical_(!p.defined("DISABLE_MULTICANONICAL_MEASUREMENT")),
-      zhou_bhatt_(!p.defined("DISABLE_ZHOU_BHATT")),
-      block_(zhou_bhatt_ ? exp_range.size() : static_cast<int>(
-        p.value_or_default("BLOCK_SWEEPS", 65536))),
-      sweep_(p.value_or_default("SWEEPS", 65536)),
-      iteration_(p.value_or_default("WANG_LANDAU_ITERATIONS", 16)) {
+    : wl_steps(alps::input::read_looper_wanglandau_parameters(p), exp_range) {}
+  template<class T>
+  wl_steps(alps::input::looper_wanglandau_parameters const& p, alps::integer_range<T> const& exp_range)
+    : mcs_(0), stage_(0), multicanonical_(p.multicanonical), zhou_bhatt_(p.zhou_bhatt),
+      block_(zhou_bhatt_ ? exp_range.size() : p.block_sweeps),
+      sweep_(p.sweeps), iteration_(p.iterations) {
   }
 
   wl_steps& operator++() { ++mcs_; return *this; }
