@@ -4,7 +4,8 @@ target_sources(alps PRIVATE
   ctint.cpp
   hybridization.cpp
   looper.cpp
-  parapack.cpp)
+  parapack.cpp
+  simplemc.cpp)
 
 target_sources(alps_headers INTERFACE
   FILE_SET input_headers TYPE HEADERS
@@ -12,7 +13,8 @@ target_sources(alps_headers INTERFACE
   FILES include/alps/input/ctint.hpp
         include/alps/input/hybridization.hpp
         include/alps/input/looper.hpp
-        include/alps/input/parapack.hpp)
+        include/alps/input/parapack.hpp
+        include/alps/input/simplemc.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 #include <alps/input/looper.hpp>
 #include <alps/input/parapack.hpp>
+#include <alps/input/simplemc.hpp>
 #include <alps/parameter_input.hpp>
 #include <gtest/gtest.h>
 #include <cmath>
@@ -181,6 +182,19 @@ TEST(LooperInput, EstimatorsWeightsAndModel) {
     EXPECT_FALSE(m.use_site_indices_as_types);
     EXPECT_TRUE(m.use_bond_indices_as_types);
     EXPECT_EQ(*m.debug_model_output, "cerr");
+}
+
+TEST(SimplemcInput, CouplingsPerBondType) {
+    alps::input::simplemc_parameters const p = alps::input::read_simplemc_parameters(
+        text("T = 2\nJ = 0.5\nJ1 = -1\nBASE_NAME = \"task1\"\nCLONE_ID = 2"), 3);
+    EXPECT_EQ(p.beta, 0.5);
+    EXPECT_EQ(p.field, 0.);
+    EXPECT_EQ(p.couplings, (std::vector<double>{0.5, -1., 0.5}));
+    EXPECT_EQ(p.snapshot_interval, 0);
+    EXPECT_EQ(p.base_name, "task1");
+    EXPECT_EQ(p.clone_id, 2);
+    EXPECT_EQ(alps::input::read_simplemc_parameters(text("BASE_NAME = \"a\"\nCLONE_ID = 1"), 1).couplings,
+              (std::vector<double>{1.}));
 }
 
 }
