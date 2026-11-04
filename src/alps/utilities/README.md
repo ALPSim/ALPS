@@ -46,8 +46,9 @@ library code (`ALPS::params`) uses it too. Its publication pointer has been remo
 
 Not yet moved: `alps/ngs/{config,hash,mutex,sleep}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
-`alps/stringvalue.h`, and the type traits ALPSCore lacks. `alps/ngs/boost_mpi.hpp`
-stays where it is: ALPSCore's `alps/utilities/boost_mpi.hpp` is a different API.
+`alps/stringvalue.h`, and the type traits ALPSCore lacks.
+`alps/ngs/boost_mpi.hpp`, Boost.MPI `reduce` overloads that nothing used, was
+removed with Boost.MPI.
 
 [`ALPS::gf`](../gf/README.md) installs four of ALPSCore's `alps/type_traits/`
 headers. Only GF uses them, so by rule 1 they live with it.
@@ -60,9 +61,11 @@ while `ALPS_LEGACY_API` is on.
 `mpi.hpp` is copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969`
 (`utilities/include/alps/utilities/mpi.hpp`) with the macro adaptation marked by
-comments: ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
+comments. ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
 `ALPS_MPI_EXCEPTION_CATCH` and undefined at the end of the header, so it no
 longer leaks into every file that includes it, directly or through ALEA v2.
+`communicator` also has an explicit `operator bool`, false for `MPI_COMM_NULL`,
+as Boost.MPI's has; parapack tests the communicators it splits off this way.
 Its notice refers to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
 [`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT).

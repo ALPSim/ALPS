@@ -303,7 +303,7 @@ evaluator_factory::make_creator(Parameters const& params) const {
 //
 
 parallel_worker_factory::worker_pointer_type
-parallel_worker_factory::make_worker(boost::mpi::communicator const& comm,
+parallel_worker_factory::make_worker(alps::mpi::communicator const& comm,
   Parameters const& params) {
   return instance()->make_creator(params)->create(comm, params);
 }

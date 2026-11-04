@@ -233,7 +233,7 @@ private:
 class abstract_parallel_worker_creator {
 public:
   virtual ~abstract_parallel_worker_creator() {}
-  virtual boost::shared_ptr<abstract_worker> create(boost::mpi::communicator const& comm,
+  virtual boost::shared_ptr<abstract_worker> create(alps::mpi::communicator const& comm,
     const Parameters& params) const = 0;
 };
 
@@ -242,7 +242,7 @@ class parallel_worker_creator : public abstract_parallel_worker_creator {
 public:
   typedef WORKER worker_type;
   virtual ~parallel_worker_creator() {}
-  boost::shared_ptr<abstract_worker> create(boost::mpi::communicator const& comm,
+  boost::shared_ptr<abstract_worker> create(alps::mpi::communicator const& comm,
     Parameters const& params) const {
     return boost::shared_ptr<abstract_worker>(new worker_type(comm, params));
   }
@@ -262,7 +262,7 @@ private:
   typedef std::map<std::string, creator_pointer_type> creator_map_type;
 
 public:
-  static worker_pointer_type make_worker(boost::mpi::communicator const& comm,
+  static worker_pointer_type make_worker(alps::mpi::communicator const& comm,
     Parameters const& params);
 
   template<typename WORKER>

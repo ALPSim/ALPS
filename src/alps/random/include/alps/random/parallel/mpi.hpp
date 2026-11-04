@@ -24,13 +24,12 @@
 #ifndef ALPS_RANDOM_PARALLEL_MPI_HPP
 #define ALPS_RANDOM_PARALLEL_MPI_HPP
 
-#include <boost/mpi/collectives.hpp>
-#include <boost/mpi/communicator.hpp>
+#include <alps/utilities/mpi.hpp>
 #include <alps/random/parallel/seed.hpp>
 
-/// @file This header provides convenience seeding functions for applications based on the candidate 
-/// Boost.MPI library. The @c num and @c total parameters are obtained from a 
-/// @c boost::parallel::mpi::communicator MPI communicator.
+/// @file This header provides convenience seeding functions for MPI applications.
+/// The @c num and @c total parameters are obtained from an
+/// @c alps::mpi::communicator MPI communicator.
 
 namespace alps { namespace random { namespace parallel {
   
@@ -41,7 +40,7 @@ namespace alps { namespace random { namespace parallel {
   template <class PRNG>
   void seed(
           PRNG& prng
-        , boost::mpi::communicator const& c
+        , alps::mpi::communicator const& c
       )
   {
     seed(prng, c.rank(), c.size());
@@ -53,7 +52,7 @@ namespace alps { namespace random { namespace parallel {
   template <class PRNG, class SeedType>
   void seed(
           PRNG& prng
-        , boost::mpi::communicator const& c
+        , alps::mpi::communicator const& c
         , SeedType const& s
       )
   {
@@ -66,7 +65,7 @@ namespace alps { namespace random { namespace parallel {
   template <class PRNG, class Iterator>
   void seed(
           PRNG& prng
-        , boost::mpi::communicator const& c
+        , alps::mpi::communicator const& c
         , Iterator& first
         , Iterator const& last
       )
@@ -80,12 +79,12 @@ namespace alps { namespace random { namespace parallel {
   template <class PRNG, class SeedType>
   void broadcast_seed(
           PRNG& prng
-        , boost::mpi::communicator const& c
+        , alps::mpi::communicator const& c
         , int root
         , SeedType s
       )
   {
-    boost::mpi::broadcast(c,s,root);
+    alps::mpi::broadcast(c,s,root);
     seed(prng, c.rank(), c.size(), s);
   }
 

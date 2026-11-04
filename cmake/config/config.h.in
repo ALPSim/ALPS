@@ -15,7 +15,6 @@
 #ifndef ALPS_CONFIG_H
 #define ALPS_CONFIG_H
 
-#cmakedefine ALPS_NGS_OPENMPI_ULFM
 
 //
 // Libraries
@@ -30,8 +29,6 @@
 // Define to 1 if you have the HDF5 library with parallel(MPI) support
 #cmakedefine ALPS_HAVE_HDF5_PARALLEL
 
-// Define to 1 if you have the Boost.MPI library
-#cmakedefine ALPS_HAVE_BOOST_MPI
 
 //
 // BLAS and LAPACK

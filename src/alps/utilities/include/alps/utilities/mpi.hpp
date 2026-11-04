@@ -183,6 +183,15 @@ namespace alps {
             operator MPI_Comm() const {
                 return *comm_ptr_;
             }
+
+            // ALPS local change: as with Boost.MPI's communicator, true unless
+            // this is MPI_COMM_NULL (for example after an MPI_UNDEFINED split).
+            // Without it, `if (comm)` would convert through MPI_Comm, which is
+            // never null on Open MPI. See src/alps/utilities/README.md.
+            /// Returns true unless this communicator is `MPI_COMM_NULL`
+            explicit operator bool() const {
+                return *comm_ptr_ != MPI_COMM_NULL;
+            }
         };
 
 

@@ -179,10 +179,10 @@ namespace alps {
 class ALPS_DECL clone_info_mpi : public clone_info {
 public:
   // interprocess communication is required
-  clone_info_mpi(boost::mpi::communicator const& comm, cid_t cid, Parameters const& params,
+  clone_info_mpi(alps::mpi::communicator const& comm, cid_t cid, Parameters const& params,
     std::string const& base);
 private:
-  boost::mpi::communicator comm_;
+  alps::mpi::communicator comm_;
   virtual unsigned int num_processes() const;
   virtual unsigned int process_id() const;
   virtual void set_hosts(std::vector<std::string>& hosts, bool& is_master);

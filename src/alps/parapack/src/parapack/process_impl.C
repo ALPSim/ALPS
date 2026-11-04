@@ -27,8 +27,8 @@ namespace alps {
 // process_helper_mpi
 //
 
-process_helper_mpi::process_helper_mpi(boost::mpi::communicator const& comm, int np) :
-  ctrl_(comm, boost::mpi::comm_duplicate), np_(np), halt_stage_(0), num_halted_(0) {
+process_helper_mpi::process_helper_mpi(alps::mpi::communicator const& comm, int np) :
+  ctrl_(comm, alps::mpi::comm_duplicate), np_(np), halt_stage_(0), num_halted_(0) {
 
   int ng = comm.size() / np_;
 
@@ -45,7 +45,7 @@ process_helper_mpi::process_helper_mpi(boost::mpi::communicator const& comm, int
     for (int i = 0; i < comm.size(); ++i)
       colors[i] = (i > 0 && i <= comm.size() - (comm.size() % np_)) ?
         ((i - 1) / np_) : MPI_UNDEFINED;
-  work_ = comm.split(colors[comm.rank()]);
+  work_ = mpi::split(comm, colors[comm.rank()]);
 
   if (comm.rank() == 0) {
     status_.resize(ng, Free);
@@ -56,7 +56,7 @@ process_helper_mpi::process_helper_mpi(boost::mpi::communicator const& comm, int
     for (int g = 0; g < ng; ++g) free_.push_back(g);
   }
 
-  head_ = comm.split((work_ && work_.rank() == 0) ? 1 : MPI_UNDEFINED);
+  head_ = mpi::split(comm, (work_ && work_.rank() == 0) ? 1 : MPI_UNDEFINED);
 }
 
 process_helper_mpi::~process_helper_mpi() {
@@ -113,21 +113,21 @@ bool process_helper_mpi::check_halted() {
     if (halt_stage_ == 1) {
       if (num_allocated() == 0) {
         num_halted_ = 1; // myself
-        for (int p = 1; p < ctrl_.size(); ++p) ctrl_.send(p, mcmp_tag::scheduler_halt);
+        for (int p = 1; p < ctrl_.size(); ++p) mpi::send(ctrl_, p, mcmp_tag::scheduler_halt);
         halt_stage_ = 2;
       }
     }
     if (halt_stage_ == 2) {
-      while (ctrl_.iprobe(boost::mpi::any_source, mcmp_tag::scheduler_halt)) {
-        ctrl_.recv(boost::mpi::any_source, mcmp_tag::scheduler_halt);
+      while (mpi::iprobe(ctrl_, mpi::any_source, mcmp_tag::scheduler_halt)) {
+        mpi::recv(ctrl_, mpi::any_source, mcmp_tag::scheduler_halt);
         ++num_halted_;
       }
       if (num_halted_ == ctrl_.size()) halt_stage_ = 3;
     }
   } else {
-    if (halt_stage_ != 3 && ctrl_.iprobe(0, mcmp_tag::scheduler_halt)) {
-      ctrl_.recv(0, mcmp_tag::scheduler_halt);
-      ctrl_.send(0, mcmp_tag::scheduler_halt);
+    if (halt_stage_ != 3 && mpi::iprobe(ctrl_, 0, mcmp_tag::scheduler_halt)) {
+      mpi::recv(ctrl_, 0, mcmp_tag::scheduler_halt);
+      mpi::send(ctrl_, 0, mcmp_tag::scheduler_halt);
       halt_stage_ = 3;
     }
   }

@@ -18,16 +18,17 @@
 #include <sys/stat.h>
 #endif
 #ifdef ALPS_HAVE_MPI
-#include <alps/ngs/boost_mpi.hpp>
+#include <alps/utilities/mpi.hpp>
 #endif
 
 int main(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
-    boost::mpi::environment environment(argc, argv);
-    boost::mpi::communicator world;
-    std::vector<int> local{1, 2}, total;
-    boost::mpi::reduce(world, local, total, std::plus<int>(), 0);
-    if (world.rank() == 0 && total != std::vector<int>{world.size(), 2 * world.size()})
+    alps::mpi::environment environment(argc, argv);
+    alps::mpi::communicator world;
+    const int local[2] = {1, 2};
+    int total[2];
+    alps::mpi::all_reduce(world, local, 2, total, std::plus<int>());
+    if (total[0] != world.size() || total[1] != 2 * world.size())
         throw std::runtime_error("Utility MPI reduction failed");
 #endif
     std::ostringstream banner;

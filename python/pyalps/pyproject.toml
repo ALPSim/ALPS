@@ -104,7 +104,7 @@ before-all = [
   "python -m pip install 'cmake>=3.27' 'ninja>=1.12'",
   "cd {project}",
   "ccache --zero-stats",
-  "if command -v dnf >/dev/null 2>&1; then ALPS_BOOST_MPI=OFF python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install; fi",
+  "if command -v dnf >/dev/null 2>&1; then python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install; fi",
   "cmake --preset distribution",
   "cmake --build --preset distribution -j4",
   "ccache --show-stats || true",
