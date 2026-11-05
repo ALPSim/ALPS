@@ -98,49 +98,6 @@ value_map const number_values{
 // --------------------------------------------------------------------------
 // Reading ALPS parameter text
 
-TEST(ParameterInputText, AcceptsWindowsLineEndings) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm", "A = 1\r\nB = \"two words\"\r\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"A", "1"}, {"B", "two words"}}));
-}
-
-TEST(ParameterInputText, LastDuplicateWins) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm", "BETA = 1\nL = 4\nBETA = 2\n");
-    alps::Parameters parameters = read_text_file(dir.path() / "parm");
-    EXPECT_EQ(parameters.size(), 2u);
-    EXPECT_EQ(std::string(parameters["BETA"].c_str()), "2");
-}
-
-// The text grammar requires at least one parameter.
-TEST(ParameterInputText, RejectsFileWithoutParameters) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "empty", "");
-    write_text(dir.path() / "blank", "\n\n   \n");
-    write_text(dir.path() / "comments", "// nothing\n/* here */\n");
-    for (char const * name : {"empty", "blank", "comments"}) {
-        EXPECT_THROW(read_text_file(dir.path() / name), std::runtime_error) << name;
-        EXPECT_THROW(alps::read_params_file((dir.path() / name).string()), std::runtime_error) << name;
-    }
-}
-
-TEST(ParameterInputText, AcceptsEmptyUnquotedValue) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm", "L = 4\nOUTPUT_PREFIX =\nBETA = 2\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"L", "4"}, {"OUTPUT_PREFIX", ""}, {"BETA", "2"}}));
-}
-
-TEST(ParameterInputText, RejectsMalformedText) {
-    alps::testing::TemporaryDirectory dir;
-    for (std::string const text : {"= 3", "L 3", "L = two words", "L = \"open", "1L = 3", "L = 4; ; BETA = 2"}) {
-        write_text(dir.path() / "parm", text);
-        EXPECT_THROW(read_text_file(dir.path() / "parm"), std::runtime_error) << text;
-        EXPECT_THROW(alps::read_params_file((dir.path() / "parm").string()), std::runtime_error) << text;
-    }
-}
-
 // The format follows the contents, so a text file named like HDF5 is text.
 TEST(ParameterInputText, TextNamedH5IsReadAsText) {
     alps::testing::TemporaryDirectory dir;

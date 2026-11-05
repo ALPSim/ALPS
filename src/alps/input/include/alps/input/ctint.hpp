@@ -17,9 +17,9 @@ namespace alps { namespace input {
 
     // The values of the parameters define_ctint_parameters defined.
     struct ctint_parameters {
-        unsigned int max_order;                  // MAX_ORDER, default 2048
-        unsigned int flavors;                    // FLAVORS, else N_ORBITALS (default 2)
-        unsigned int sites;                      // SITES, default 1
+        unsigned int max_order;                  // MAX_ORDER
+        unsigned int flavors;                    // FLAVORS, else N_ORBITALS
+        unsigned int sites;                      // SITES
         unsigned int n_matsubara;                // N_MATSUBARA, or its older name NMATSUBARA
         unsigned int n_matsubara_measurements;   // NMATSUBARA_MEASUREMENTS, else n_matsubara
         unsigned int n_tau;                      // N_TAU, or its older name N
@@ -30,14 +30,14 @@ namespace alps { namespace input {
         double beta;                             // BETA
         double U;                                // U: on-site interaction
         double alpha;                            // ALPHA: shift of the auxiliary field
-        unsigned int recalc_period;              // RECALC_PERIOD, default 5000
-        unsigned int measurement_period;         // MEASUREMENT_PERIOD, else N_MEAS (default 200)
+        unsigned int recalc_period;              // RECALC_PERIOD
+        unsigned int measurement_period;         // MEASUREMENT_PERIOD, else N_MEAS
         unsigned int convergence_check_period;   // CONVERGENCE_CHECK_PERIOD, else RECALC_PERIOD
-        double almost_zero;                      // ALMOSTZERO, default 1e-16
-        bool histogram_measurement;              // HISTOGRAM_MEASUREMENT, default false
-        bool atomic;                             // ATOMIC, default false: start from the atomic limit
-        bool dmft_framework;                     // DMFT_FRAMEWORK, default false: G0 in INFILE as dmft writes it
-        unsigned int tau_discretization_for_exp; // TAU_DISCRETIZATION_FOR_EXP, default 0: exp(i omega tau) on the fly
+        double almost_zero;                      // ALMOSTZERO
+        bool histogram_measurement;              // HISTOGRAM_MEASUREMENT
+        bool atomic;                             // ATOMIC: start from the atomic limit
+        bool dmft_framework;                     // DMFT_FRAMEWORK: G0 in INFILE as dmft writes it
+        unsigned int tau_discretization_for_exp; // TAU_DISCRETIZATION_FOR_EXP; 0: exp(i omega tau) on the fly
         std::string infile;                      // INFILE with G0; empty if ATOMIC and not given
     };
 
