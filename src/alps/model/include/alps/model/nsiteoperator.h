@@ -466,9 +466,9 @@ std::vector<nsite_product<T> > NSiteOperator::split(const std::vector<SiteBasisD
     if (!numeric::is_nonzero(prod.coef))
       continue;
     for (std::size_t r = 0; r < n; ++r)
-      prod.ops.push_back(splitter.used(r) ? boost::lexical_cast<std::string>(splitter.site_operators(r)) : std::string());
+      prod.ops.push_back(splitter.used(r) ? expression_text(splitter.site_operators(r)) : std::string());
     prod.odd = splitter.odd();
-    prod.text = boost::lexical_cast<std::string>(*tit);
+    prod.text = expression_text(*tit);
     products.push_back(prod);
   }
   return products;

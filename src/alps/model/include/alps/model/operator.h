@@ -26,7 +26,7 @@
 
 namespace alps {
 
-// An expression, term or factor as it prints, for error messages.
+// An expression, term or factor as it prints.
 template <class X>
 std::string expression_text(const X& x)
 {
