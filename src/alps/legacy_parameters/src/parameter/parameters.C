@@ -21,6 +21,8 @@
 #include <iostream>
 #include <limits>
 #include <streambuf>
+#include <string>
+#include <variant>
 
 #include <alps/expression.h>
 
@@ -126,13 +128,15 @@ void Parameters::replace_envvar() {
   BOOST_FOREACH(Parameter& p, list_) p.replace_envvar();
 }
 
-std::variant<int, double, std::string> Parameters::typed_value(const key_type& k) const {
-    // Values that evaluate to a number become numbers; names, paths and
-    // symbolic expressions stay exactly as written.
-    std::string const text = boost::lexical_cast<std::string>(operator[](k));
+namespace {
+
+// Values that evaluate to a number become numbers; names, paths and
+// symbolic expressions stay exactly as written.
+std::variant<int, double, std::string> typed_value(const Parameters& parameters, const std::string& key) {
+    std::string const text = boost::lexical_cast<std::string>(parameters[key]);
     if (text.find_first_not_of(" \t") != std::string::npos) {
         try {
-            expression::ParameterEvaluator<double> eval(*this,false);
+            expression::ParameterEvaluator<double> eval(parameters,false);
             expression::Expression<double> expr(text);
             if (expr.can_evaluate(eval)) {
                 double value = expr.value(eval);
@@ -147,11 +151,13 @@ std::variant<int, double, std::string> Parameters::typed_value(const key_type& k
     return text;
 }
 
+}
+
 void Parameters::save(hdf5::archive & ar) const {
     // keys such as MEASURE_LOCAL[a/b] must not become nested groups
     for (const_iterator it = begin(); it != end(); ++it)
         std::visit([&](auto const& value) { ar << make_pvp(ar.encode_segment(it->key()), value); },
-                   typed_value(it->key()));
+                   typed_value(*this, it->key()));
 }
 void Parameters::load(hdf5::archive & ar) {
   std::vector<std::string> list = ar.list_children(ar.get_context());

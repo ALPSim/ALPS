@@ -29,11 +29,6 @@ void convert_params(const std::string& inname, const std::string& basename,
                     const alps::Parameters& params_add)
 {
   alps::ParameterList list = alps::read_parameter_list(inname);
-  if (list.size() == 0) {
-    std::cerr << "Warning: no parameter set is found.  No XML files will be generated.\n";
-    return;
-  }
-
   BOOST_FOREACH(alps::Parameters& params, list) {
     BOOST_FOREACH(alps::Parameter const& padd, params_add) {
       std::string key = padd.key();

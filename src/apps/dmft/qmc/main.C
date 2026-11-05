@@ -74,11 +74,14 @@ int main(int argc, char** argv)
     }
     // set working directory
     std::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
-    if (!p.parent_path().empty()) {
+    if (!p.parent_path().empty())
       std::filesystem::current_path(p.parent_path());
-      // all files are now relative to the input's directory
-      parms["BASENAME"]=p.filename().string();
-    }
+    // all files are now relative to the input's directory
+    const std::string input = p.filename().string();
+    // results go to BASENAME.h5, which is the input itself for parm.h5
+    if (p.extension() == ".h5")
+      p.replace_extension();
+    parms["BASENAME"]=p.filename().string();
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
     //perform selfconsistency loop in...
@@ -174,8 +177,9 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    alps::write_parameter_file(basename, parms);
-    alps::write_parameter_file(basename+".h5", parms);
+    alps::write_parameter_file(input, parms);
+    if (basename+".h5" != input)
+      alps::write_parameter_file(basename+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

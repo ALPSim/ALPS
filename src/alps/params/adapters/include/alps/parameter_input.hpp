@@ -17,8 +17,9 @@ namespace alps {
     // functions; the file format is chosen here and nowhere else.
     //
     // A file is read as HDF5 (parameters in the /parameters group) when it
-    // carries the HDF5 signature, from its <PARAMETERS> element when its name
-    // ends in ".xml", and as ALPS parameter text otherwise.
+    // carries the HDF5 signature, and as ALPS parameter text otherwise.
+    // read_parameter_file and read_parameter_list also read the <PARAMETERS>
+    // element of a file whose name ends in ".xml"; read_params_file does not.
     // Typed text values are read by make_parameters_from_file: expressions
     // such as U/2 are evaluated, other values stay text.
     //
