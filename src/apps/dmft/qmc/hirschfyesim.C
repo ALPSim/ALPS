@@ -302,7 +302,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   int N=parms["N"];
   //double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
-  int n_site=parms["SITES"];
+  int n_site=parms.value_or_default("SITES", 1);
 
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies

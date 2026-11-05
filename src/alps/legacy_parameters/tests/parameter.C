@@ -76,4 +76,5 @@ INSTANTIATE_TEST_SUITE_P(
                       Written{"up,down", "\"up,down\""}, Written{"a;b", "\"a;b\""},
                       Written{"x=y", "\"x=y\""}, Written{"a[1]", "\"a[1]\""},
                       Written{"${HOME}", "\"${HOME}\""}, Written{"", "\"\""},
-                      Written{"say \"hi\"", "'say \"hi\"'"}));
+                      Written{"say \"hi\"", "'say \"hi\"'"}, Written{"'abc'", "\"'abc'\""},
+                      Written{"\"abc\"", "'\"abc\"'"}));

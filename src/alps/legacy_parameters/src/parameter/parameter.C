@@ -107,9 +107,10 @@ namespace alps {
 
 namespace {
 
-// The characters ParameterParser accepts in an unquoted value.
+// The characters ParameterParser accepts in an unquoted value. A leading
+// quote would be read as the start of a quoted value.
 bool needs_quotes(std::string const& s) {
-  if (s.empty()) return true;
+  if (s.empty() || s[0] == '\'' || s[0] == '"') return true;
   for (unsigned char c : s)
     if (!(std::isalnum(c) || c == '#' || (c >= '\'' && c <= '+') ||
           (c >= '-' && c <= '/') || c == '^' || c == '_'))
