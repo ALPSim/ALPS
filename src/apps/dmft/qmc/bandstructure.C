@@ -110,18 +110,17 @@ std::complex<double> Bandstructure::HilbertIntegral_AFM(const std::complex<doubl
 }
 
 void Bandstructure::set_parms(alps::Parameters& parms) const {
-  const alps::input::dmft_band_moments user = alps::input::read_band_moments(parms, epssq_.size());
   for (unsigned int f=0; f<epssq_.size(); ++f) {
-    if (user.eps[f]) {
-      double value_by_user=*user.eps[f];
+    if (parms.defined("EPS_"+boost::lexical_cast<std::string>(f))) {
+      double value_by_user=static_cast<double>(parms["EPS_"+boost::lexical_cast<std::string>(f)]);
       if (std::abs(value_by_user-eps_[f])/(std::abs(value_by_user)+std::abs(eps_[f]))>1e-3 && std::abs(value_by_user-eps_[f])>1e-10) {
         std::cout<<"WARNING: Bandstructure: inconsistency in parameter 'EPS_"<<f<<"': value set by user = "<<value_by_user<<"; value expected/computed by program = "<<eps_[f]<<std::endl;
       }
     } else {
       parms["EPS_"+boost::lexical_cast<std::string>(f)] = eps_[f];
     }
-    if (user.epssq[f]) {
-      double value_by_user=*user.epssq[f];
+    if (parms.defined("EPSSQ_"+boost::lexical_cast<std::string>(f))) {
+      double value_by_user=static_cast<double>(parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]);
       if (std::abs(value_by_user-epssq_[f])/(std::abs(value_by_user)+std::abs(epssq_[f]))>1e-3 && std::abs(value_by_user-epssq_[f])>1e-10) {
         std::cout<<"WARNING: Bandstructure: inconsistency in parameter 'EPSSQ_"<<f<<"': value set by user = "<<value_by_user<<"; value expected/computed by program = "<<epssq_[f]<<std::endl;
       }
@@ -195,19 +194,18 @@ private:
 
 DOSBandstructure::DOSBandstructure(const alps::Parameters& parms, bool verbose)
   : Bandstructure(parms),
-    dos_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors)/2),
-    dos_min_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors)/2),
-    dos_step_(static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors)/2)
+    dos_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))/2),
+    dos_min_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))/2),
+    dos_step_(static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))/2)
 {
-  const std::string dosfile = alps::input::read_dmft_bandstructure(parms).dosfile;
-  std::ifstream dos_file(dosfile.c_str());
+  std::ifstream dos_file(parms["DOSFILE"].c_str());
   if(!dos_file.good()) {
-    std::cerr<<"ERROR: DOSBandstructure: problem to read DOSFILE = " << dosfile << std::endl;
+    std::cerr<<"ERROR: DOSBandstructure: problem to read DOSFILE = " << parms["DOSFILE"] << std::endl;
     throw std::runtime_error("DOSFILE is not good!");
   }
-  unsigned n_bands = static_cast<unsigned>(alps::input::read_dmft_sizes(parms).flavors)/2;
+  unsigned n_bands = static_cast<unsigned>(parms.value_or_default("FLAVORS", 2))/2;
   double eps, d;
-  if (verbose) std::cout<<"BANDSTRUCTURE:"<<std::endl<<"Using density of states loaded from: "<<dosfile<<std::endl;
+  if (verbose) std::cout<<"BANDSTRUCTURE:"<<std::endl<<"Using density of states loaded from: "<<parms["DOSFILE"]<<std::endl;
   std::vector<std::vector<double> > e_(n_bands);
   if (verbose) std::cout<<"(Note: Assuming equidistant energy intervals.)"<<std::endl;
   if (verbose && n_bands>1) std::cout<<"(Note: Assuming the same number of bins for all bands.)"<<std::endl;
@@ -310,14 +308,13 @@ std::complex<double> HexagonalLatticeBandstructure::HilbertIntegral_AFM(const st
 
 
 boost::shared_ptr<Bandstructure> BandstructureFactory(const alps::Parameters& parms, bool verbose) {
-  const alps::input::dmft_bandstructure kind = alps::input::read_dmft_bandstructure(parms).kind;
-  if (kind == alps::input::dmft_bandstructure::dos) {
+  if (parms.defined("DOSFILE")) {
     boost::shared_ptr<Bandstructure> bandstruct(new DOSBandstructure(parms,verbose));
     return bandstruct;
-  } else if (kind == alps::input::dmft_bandstructure::hexagonal) {
+  } else if (parms.defined("TWODBS") && parms["TWODBS"]=="hexagonal") {
     boost::shared_ptr<Bandstructure> bandstruct(new HexagonalLatticeBandstructure(parms,verbose));
     return bandstruct;
-  } else if (kind == alps::input::dmft_bandstructure::square) {
+  } else if (parms.defined("TWODBS")) {
     boost::shared_ptr<Bandstructure> bandstruct(new SquareLatticeBandstructure(parms,verbose));
     return bandstruct;
   } else {

@@ -24,7 +24,6 @@
 #include "hilberttransformer.h"
 #include "interaction_expansion_choice.h"
 
-#include <alps/input/dmft.hpp>
 #include <alps/parameter.h>
 #include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
@@ -81,15 +80,14 @@ int main(int argc, char** argv)
       parms["BASENAME"]=p.filename().string();
     }
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
-    const alps::input::dmft_run_parameters input = alps::input::read_dmft_run_parameters(parms);
 
     //perform selfconsistency loop in...
-    if(!input.cluster_loop) {
-      if(!input.omega_loop){
+    if(!parms.defined("CLUSTER_LOOP")) {
+      if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
         // Hirsch-Fye and CT-INT, built in or external, read G0 in Matsubara
         // frequencies only.
-        const std::string solver = input.solver;
+        const std::string solver = parms["SOLVER"];
         const std::string program = boost::filesystem::path(solver).filename().string();
         if (solver=="Hirsch-Fye" || solver=="Interaction Expansion"
             || program=="hirschfye" || program=="interaction")
@@ -97,23 +95,23 @@ int main(int argc, char** argv)
                                       + " needs the Matsubara loop; set OMEGA_LOOP = 1");
         SemicircleHilbertTransformer transform(parms);
         boost::shared_ptr<ImpuritySolver> solver_ptr;
-        if (solver=="Hybridization") {
+        if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-        } else if (solver=="hybridization" || input.sc_write_delta) {
-          std::string p(solver);
+        } else if (parms["SOLVER"]=="hybridization" || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
+          std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
           parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
           solver_ptr.reset(new ExternalSolver(p));
           F_selfconsistency_loop(parms, *solver_ptr, transform);
         } else {
-            /*boost::filesystem::path*/ std::string p(solver/**/);
+            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
           solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       }
       else {
         //perform self consistency loop in Matsubara frequency omega
-        if (input.antiferromagnet && input.symmetrization) { 
+        if (parms.value_or_default("ANTIFERROMAGNET",false) && parms.value_or_default("SYMMETRIZATION",false)) { 
           std::cerr<<"ERROR: incompatible parameters: ANTIFERROMAGNET==1 (true)  and  SYMMETRIZATION==1 (true)"<<std::endl
                    <<"  for simulation in PM phase set: SYMMETRIZATION=1, ANTIFERROMAGNET=0."<<std::endl
                    <<"  for simulation in FM phase set: SYMMETRIZATION=0, ANTIFERROMAGNET=0."<<std::endl
@@ -125,7 +123,7 @@ int main(int argc, char** argv)
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd;
 
         boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
-        if (input.semicircle_hilbert) {
+        if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
           transform_ptr.reset(new SemicircleFSHilbertTransformer(parms));
         } else {
           transform_ptr.reset(new GeneralFSHilbertTransformer(parms));
@@ -136,8 +134,10 @@ int main(int argc, char** argv)
         // every other SOLVER value is handed to the external/hybridization
         // path. No solver is constructed-then-discarded.
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
-        if (input.solver=="Interaction Expansion") {
-          switch (select_interaction_expansion(input.sizes.flavors, input.sizes.sites)) {
+        if (parms["SOLVER"]=="Interaction Expansion") {
+          const int flavors = static_cast<int>(parms.value_or_default("FLAVORS", 2));
+          const int sites   = static_cast<int>(parms.value_or_default("SITES", 1));
+          switch (select_interaction_expansion(flavors, sites)) {
             case interaction_expansion_choice::single_site_hubbard:
               std::cout<<"using single site Hubbard solver"<<std::endl;
               solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,parms,argc,argv));
@@ -152,20 +152,20 @@ int main(int argc, char** argv)
           }
           if (alps::cli_is_master()) alps::print_citations(std::cout, "interaction");
         }
-        else if (input.solver=="Hirsch-Fye") {
+        else if (parms["SOLVER"]=="Hirsch-Fye") {
           std::cout<<"solving Hirsch Fye"<<std::endl;
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
           solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
           // Built-in solvers print no notice of their own; external solvers do.
           if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
         }
-        else if (input.solver=="Hybridization") {
+        else if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
         }
         else {
-          std::string p(input.solver);
+          std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
-          if(input.solver=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+          if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
           solver_ptr.reset(new ExternalSolver(p));
         }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);

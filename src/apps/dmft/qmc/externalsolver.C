@@ -28,7 +28,6 @@
 #include <fstream>
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
-#include <alps/input/dmft.hpp>
 #include <alps/parameter_input.hpp>
 #include "alps/utilities/vectorio.hpp"
 #include "alps/utilities/temporary_filename.hpp"
@@ -45,11 +44,10 @@ ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape);
 
 void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& solver_input) {
-  const alps::input::dmft_hybridization_handoff input = alps::input::read_dmft_hybridization_handoff(p);
-  double mu=input.mu;
+  double mu=p["MU"];
   U_matrix U(p);
-  double h = input.h;
-  unsigned n_orbital=input.flavors;
+  double h = static_cast<double>(p.value_or_default("H",0.));
+  unsigned n_orbital=static_cast<unsigned>(p["FLAVORS"]);
   
   //changed convention in the hybridization solvers:
   p["N_MATSUBARA"]=p["NMATSUBARA"];
@@ -76,17 +74,15 @@ void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& s
 ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms) 
 {
   alps::Parameters p(parms);
-  const alps::input::dmft_external_solver_parameters input =
-    alps::input::read_dmft_external_solver(parms, alps::input::dmft_loop::imaginary_time);
-  unsigned int n_tau=input.n_tau;
-  unsigned int n_site     =input.sizes.sites;
-  unsigned int n_orbital  =input.sizes.flavors;
+  unsigned int n_tau=(unsigned int)parms["N"];
+  unsigned int n_site     =(unsigned int)parms.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)parms.value_or_default("FLAVORS", 2);
   //   BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile; 
-  if(input.tmpname){
-    infile=*input.tmpname+std::string(".in.h5");
-    outfile=*input.tmpname+std::string(".out.h5");
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
   } else{
     infile= alps::temporary_filename("alps_external_solver_in_");
     outfile= alps::temporary_filename("alps_external_solver_out_");
@@ -97,13 +93,13 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   // write input file
   {
     alps::hdf5::archive solver_input(infile, "a");
-    if(input.sc_write_delta){
+    if(parms.value_or_default("SC_WRITE_DELTA", false)){
       //write \Delta(\tau)
       //note: G0 is the full G
       
       SemicircleBandstructure bethe_parm(parms);  // to get the second moment(s) of the band structure
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);
-      bool AFM=input.antiferromagnet;
+      bool AFM=parms.value_or_default("ANTIFERROMAGNET",false);
       for (int f = 0; f < n_orbital; ++f) {
         int f_=AFM?(f%2==0?f+1:f-1):f;
         for (int i = 0; i <= n_tau; ++i) {
@@ -111,7 +107,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
         }
       }
       Delta_itime.write_hdf5(solver_input, "/Delta");
-      std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, input.beta, diagonal);
+      std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, static_cast<double>(p["BETA"]), diagonal);
       
       prepare_parms_for_hybridization(p,solver_input);
     } else {
@@ -135,17 +131,15 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
 MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara_green_function_t& G0_omega, const alps::Parameters &parms)
 {
   alps::Parameters p(parms);
-  const alps::input::dmft_external_solver_parameters input =
-    alps::input::read_dmft_external_solver(parms, alps::input::dmft_loop::matsubara);
-  unsigned int n_matsubara=input.n_matsubara;
-  unsigned int n_tau=input.n_tau;
-  unsigned int n_site     =input.sizes.sites;
-  unsigned int n_orbital  =input.sizes.flavors;
+  unsigned int n_matsubara=(unsigned int)parms["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)parms["N"];
+  unsigned int n_site     =(unsigned int)parms.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)parms.value_or_default("FLAVORS", 2);
   std::string infile;
   std::string outfile;
-  if(input.tmpname){
-    infile=*input.tmpname+std::string(".in.h5");
-    outfile=*input.tmpname+std::string(".out.h5");
+  if(parms.defined("TMPNAME")){
+    infile=parms["TMPNAME"]+std::string(".in.h5");
+    outfile=parms["TMPNAME"]+std::string(".out.h5");
   } else{
     infile= alps::temporary_filename("alps_external_solver_in_");
     outfile= alps::temporary_filename("alps_external_solver_out_");
@@ -154,12 +148,12 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   p["OUTFILE"]=outfile;
   {
     alps::hdf5::archive solver_input(infile, "a");
-    if(input.sc_write_delta){
+    if(parms.value_or_default("SC_WRITE_DELTA", false)){
       //write Delta(i\omega_n) along with \Delta(\tau)
       
-      double beta=input.beta;
-      double mu=input.mu;
-      double h = input.h;
+      double beta=p["BETA"];
+      double mu=p["MU"];
+      double h = static_cast<double>(parms.value_or_default("H",0.));
       FFunctionFourierTransformer Fourier(parms);
       matsubara_green_function_t Delta_matsubara(n_matsubara, 1, n_orbital);
       itime_green_function_t Delta_itime(n_tau+1, 1, n_orbital);

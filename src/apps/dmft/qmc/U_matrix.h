@@ -19,22 +19,19 @@
 #define U_MATRIX_H
 #include "types.h"
 #include "alps/parameter.h"
-#include <alps/input/dmft.hpp>
 
 class U_matrix{
 public:
-  U_matrix(const alps::Parameters &parms) : U_matrix(alps::input::read_dmft_interaction(parms)) {}
-
-  U_matrix(const alps::input::dmft_interaction_parameters &input) :
-    ns_(input.sizes.sites),
-    nf_(input.sizes.flavors),
+  U_matrix(const alps::Parameters &parms) :
+    ns_(parms.value_or_default("SITES", 1)),
+    nf_(parms.value_or_default("FLAVORS", 2)),
       n_nonzero_(0), mu_shift_(0)
   {
     val_ = new double[nf_*nf_];
     for(unsigned i=0; i<nf_*nf_; ++i) 
       val_[i]=0; //default: non-interacting.
-    if(input.u_matrix){
-      std::string ufilename(*input.u_matrix);
+    if(parms.defined("U_MATRIX")){
+      std::string ufilename(parms["U_MATRIX"]);
       std::ifstream u_file(ufilename.c_str());
       assert(u_file.is_open());
       int i;
@@ -45,16 +42,18 @@ public:
       }
     } else if (nf_==1) {
       //special case: only 1 orbital
-      operator()(0,0)=input.U;
+      operator()(0,0)=(double)(parms["U"]);
     }else if (nf_==2) {
       //your ordinary two site problem
-      double U=input.U;
+      assert(parms.defined("U"));
+      double U=(double)(parms["U"]);
       operator()(0,0)=0; operator()(1,1)=0;
       operator()(0,1)=U; operator()(1,0)=U;
     } else {
-      double U=input.U;
-      double J=input.J;
-      double Uprime = input.Uprime;
+      assert(parms.defined("U") && parms.defined("J"));     
+      double U=(double)(parms["U"]);
+      double J=(double)(parms["J"]);
+      double Uprime = parms.value_or_default("U'", U-2*J);
       assemble(U, Uprime, J);
     }
     for (unsigned i=0; i<nf_*nf_; ++i)
