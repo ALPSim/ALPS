@@ -19,6 +19,7 @@
 #include "types.h"
 #include <alps/config.h>
 #include <alps/osiris.h>
+#include <alps/input/parapack.hpp>
 #include <alps/parameter.h>
 #include <alps/random/buffered_rng.h>
 
@@ -27,7 +28,7 @@ namespace alps {
 class ALPS_DECL rng_helper {
 public:
   rng_helper(const Parameters& p);
-  void init(const Parameters& p);
+  void init(input::parapack_rng_parameters const& p);
   void load(IDump& dp);
   void save(ODump& dp) const;
   typedef buffered_rng_base engine_type;

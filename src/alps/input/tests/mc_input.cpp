@@ -30,6 +30,8 @@ TEST(ParapackInput, StepsDefaultThermalizationToAnEighthOfTheSweeps) {
     EXPECT_EQ(p.sweeps.max(), 1000u);
     EXPECT_EQ(p.thermalization, 125u);
     EXPECT_EQ(alps::input::read_mc_steps_parameters(text("SWEEPS = \"[100:200]\"")).sweeps.max(), 200u);
+    EXPECT_EQ(alps::input::read_mc_steps_parameters(text("THERMALIZATION = 0")).thermalization, 0u);
+    EXPECT_THROW(alps::input::read_mc_steps_parameters(text("THERMALIZATION = -1")), std::invalid_argument);
 }
 
 TEST(ParapackInput, AlgorithmFallsBackToWorker) {
@@ -49,15 +51,19 @@ TEST(ParapackInput, AlgorithmFallsBackToWorker) {
 }
 
 TEST(ParapackInput, TaskAndSeeds) {
-    alps::input::parapack_task_parameters const task = alps::input::read_parapack_task_parameters(text(""));
-    EXPECT_EQ(task.num_clones.min(), 1u);
-    EXPECT_EQ(task.num_clones.max(), 1u);
-    EXPECT_FALSE(task.evaluate_only_finished_clones);
-    EXPECT_TRUE(alps::input::read_parapack_task_parameters(text("EVALUATE_ONLY_FINISHED_CLONES = 1"))
-        .evaluate_only_finished_clones);
-    EXPECT_EQ(alps::input::read_parapack_task_parameters(text("N = 4\nNUM_CLONES = N")).num_clones.max(), 4u);
+    EXPECT_EQ(alps::input::read_parapack_num_clones(text("")).min(), 1u);
+    EXPECT_EQ(alps::input::read_parapack_num_clones(text("")).max(), 1u);
+    EXPECT_EQ(alps::input::read_parapack_num_clones(text("N = 4\nNUM_CLONES = N")).max(), 4u);
+    // the clone count is read without EVALUATE_ONLY_FINISHED_CLONES, which only the evaluation needs
+    EXPECT_EQ(alps::input::read_parapack_num_clones(text("NUM_CLONES = 2\nEVALUATE_ONLY_FINISHED_CLONES = \"x\"")).max(), 2u);
+    EXPECT_FALSE(alps::input::read_evaluate_only_finished_clones(text("")));
+    EXPECT_TRUE(alps::input::read_evaluate_only_finished_clones(text("EVALUATE_ONLY_FINISHED_CLONES = 1")));
 
     EXPECT_FALSE(alps::input::read_parapack_clone_seeds(text("DISORDER_SEED = 5")).disorder_seed);
+    // a seeded run: clone_info derives the disorder seed from SEED
+    alps::input::parapack_clone_seeds const seed_only = alps::input::read_parapack_clone_seeds(text("SEED = 7"));
+    EXPECT_EQ(*seed_only.seed, 7u);
+    EXPECT_FALSE(seed_only.disorder_seed);
     alps::input::parapack_clone_seeds const seeds =
         alps::input::read_parapack_clone_seeds(text("SEED = 7\nDISORDER_SEED = 5"));
     EXPECT_EQ(*seeds.seed, 7u);
@@ -118,6 +124,10 @@ TEST(ParapackInput, ExchangeOptimizationDefaultsFollowItsType) {
                  std::runtime_error);
     EXPECT_THROW(alps::input::read_exchange_parameters(text("OPTIMIZE_TEMPERATURE = 1\nNUM_CLONES = 2")),
                  std::logic_error);
+    // NUM_CLONES is evaluated with the other parameters, as the task reads it
+    EXPECT_NO_THROW(alps::input::read_exchange_parameters(text("N = 1\nNUM_CLONES = N\nOPTIMIZE_TEMPERATURE = 1")));
+    EXPECT_THROW(alps::input::read_exchange_parameters(text("N = 2\nNUM_CLONES = N\nOPTIMIZE_TEMPERATURE = 1")),
+                 std::logic_error);
     // without exchange the optimization keys are not read
     EXPECT_NO_THROW(alps::input::read_exchange_parameters(
         text("NO_EXCHANGE = 1\nOPTIMIZE_TEMPERATURE = 1\nOPTIMIZATION_TYPE = \"other\"")));
@@ -131,6 +141,9 @@ TEST(ParapackInput, TemperatureScanAndWangLandau) {
     EXPECT_EQ(scan.initial_temperature, 2.);
     EXPECT_EQ(scan.diff_temperature, -0.5);
     EXPECT_FALSE(scan.initial_thermalization);
+    EXPECT_THROW(alps::input::read_temperature_scan_parameters(
+        text("NUM_TEMPERATURES = 3\nINITIAL_TEMPERATURE = 2\nDIFF_TEMPERATURE = -0.5\nINITIAL_THERMALIZATION = -5")),
+        std::invalid_argument);
 
     alps::input::wanglandau_parameters const wl = alps::input::read_wanglandau_parameters(text(""));
     EXPECT_EQ(wl.check_interval, 16384u);

@@ -15,12 +15,12 @@
 #define PARAPACK_EXCHANGE_H
 
 #include "integer_range.h"
-#include "montecarlo.h"
 #include "mc_worker.h"
 #include "parapack.h"
 #include "permutation.h"
 #include "process.h"
 #include <alps/expression.h>
+#include <alps/input/parapack.hpp>
 #include <alps/osiris.h>
 
 #include <boost/lexical_cast.hpp>
@@ -354,7 +354,9 @@ class exchange_steps {
 public:
   typedef integer_range<unsigned int> range_type;
 
-  enum opttype_t { rate, population };
+  typedef input::exchange_parameters::optimization opttype_t;
+  static constexpr opttype_t rate = input::exchange_parameters::rate;
+  static constexpr opttype_t population = input::exchange_parameters::population;
 
   exchange_steps(alps::Parameters const& p) : exchange_steps(input::read_exchange_parameters(p)) {}
   explicit exchange_steps(input::exchange_parameters const& p) : mcs_(0), stage_(0), count_(0),
@@ -362,7 +364,7 @@ public:
     sweep_(p.steps.sweeps), therm_(p.steps.thermalization), optstep_(0), iteration_(0) {
 
     if (exchange_ && optimize_) {
-      opttype_ = (p.optimization_type == input::exchange_parameters::rate) ? rate : population;
+      opttype_ = p.optimization_type;
       factor_ = p.block_sweep_factor;
       iteration_ = p.optimization_iterations + 1;
       int m = p.initial_block_sweeps;

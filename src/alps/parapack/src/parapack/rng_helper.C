@@ -16,7 +16,8 @@
 namespace alps {
 
 rng_helper::rng_helper(const Parameters& p) {
-  std::string const rng = input::read_parapack_rng_parameters(p).rng;
+  input::parapack_rng_parameters const params = input::read_parapack_rng_parameters(p);
+  std::string const& rng = params.rng;
 #ifdef ALPS_ENABLE_OPENMP
   int nr = max_threads();
   engines_.resize(nr);
@@ -33,13 +34,12 @@ rng_helper::rng_helper(const Parameters& p) {
   engines_[0].reset(rng_factory.create(rng));
   generators_[0].reset(new generator_type(*engines_[0], boost::uniform_real<>()));
 #endif
-  init(p);
+  init(params);
 }
 
-void rng_helper::init(const Parameters& p) {
-  input::parapack_rng_parameters const rng = input::read_parapack_rng_parameters(p);
-  seed = rng.worker_seed;
-  disorder_seed = rng.disorder_seed;
+void rng_helper::init(input::parapack_rng_parameters const& p) {
+  seed = p.worker_seed;
+  disorder_seed = p.disorder_seed;
   alps::pseudo_des inigen(seed);
   for (unsigned int r = 0; r < engines_.size(); ++r) {
     engines_[r]->seed(inigen);

@@ -17,7 +17,7 @@ namespace alps { namespace input {
     // The Monte Carlo steps of a parapack worker.
     struct mc_steps_parameters {
         integer_range<unsigned int> sweeps;      // SWEEPS, default [65536:]
-        unsigned int thermalization;             // THERMALIZATION, default min(SWEEPS)/8
+        unsigned int thermalization;             // THERMALIZATION, at least 0; default min(SWEEPS)/8
     };
 
     ALPS_DECL mc_steps_parameters read_mc_steps_parameters(Parameters const & parameters);
@@ -31,13 +31,12 @@ namespace alps { namespace input {
 
     ALPS_DECL parapack_algorithm_parameters read_parapack_algorithm_parameters(Parameters const & parameters);
 
-    // What a parapack task reads.
-    struct parapack_task_parameters {
-        integer_range<std::uint32_t> num_clones; // NUM_CLONES, default 1
-        bool evaluate_only_finished_clones;      // EVALUATE_ONLY_FINISHED_CLONES, default false
-    };
+    // NUM_CLONES, default 1: the range of clones a task runs.
+    ALPS_DECL integer_range<std::uint32_t> read_parapack_num_clones(Parameters const & parameters);
 
-    ALPS_DECL parapack_task_parameters read_parapack_task_parameters(Parameters const & parameters);
+    // EVALUATE_ONLY_FINISHED_CLONES, default false: leave running and
+    // suspended clones out of the evaluation.
+    ALPS_DECL bool read_evaluate_only_finished_clones(Parameters const & parameters);
 
     // The seeds a clone derives its worker and disorder seeds from.
     struct parapack_clone_seeds {
@@ -100,7 +99,7 @@ namespace alps { namespace input {
         int num_temperatures;                    // NUM_TEMPERATURES
         double initial_temperature;              // INITIAL_TEMPERATURE
         double diff_temperature;                 // DIFF_TEMPERATURE
-        std::optional<int> initial_thermalization; // INITIAL_THERMALIZATION: thermalization at the first temperature
+        std::optional<int> initial_thermalization; // INITIAL_THERMALIZATION, at least 0: thermalization at the first temperature
     };
 
     ALPS_DECL temperature_scan_parameters read_temperature_scan_parameters(Parameters const & parameters);

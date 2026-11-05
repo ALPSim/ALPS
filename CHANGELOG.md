@@ -48,6 +48,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Run `SOLVER = interaction` from `dmft`; the solver previously looked for a standalone-format G0 and stopped. Run the built-in `SOLVER = Hirsch-Fye` in the Matsubara loop (`OMEGA_LOOP = 1`), where it previously was handed to the shell as an external program. With `OMEGA_LOOP = 0`, Hirsch-Fye and interaction-expansion solvers, which read G0 only in Matsubara frequencies, are rejected with a message instead of failing during the first iteration.
 - Run the built-in Hirsch-Fye solver without `SITES`, which defaults to 1. It previously ran its first solver call and then stopped with "parameter SITES not defined".
 - Report `p2h5` input with `{ }` blocks, which it cannot store as one parameter set, by pointing to `parameter2hdf5`, and report parse errors and a missing output name with exit code 1 instead of aborting on an uncaught exception.
+- Evaluate `NUM_CLONES` with the other parameters in the replica exchange workers, as the task does. `N = 1`, `NUM_CLONES = N` with `OPTIMIZE_TEMPERATURE = 1` loaded and then failed in every exchange worker with `Cannot evaluate N`.
+- Reject a negative `THERMALIZATION` or `INITIAL_THERMALIZATION` in parapack applications such as `loop` and `simplemc`. `THERMALIZATION = -1` used to become 4294967295 sweeps, so a `simplemc` run never thermalized, and `loop` stopped with the misleading "longer annealing steps than thermalization".
 
 ### Changed
 

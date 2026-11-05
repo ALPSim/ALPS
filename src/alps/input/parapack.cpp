@@ -12,11 +12,24 @@
 
 namespace alps { namespace input {
 
+    namespace {
+
+        // A step count given as an expression; a negative count would wrap
+        // around to billions of steps.
+        unsigned int non_negative_count(std::string const & name, Parameters const & p) {
+            int const count = static_cast<int>(alps::evaluate(name, p));
+            if (count < 0)
+                boost::throw_exception(std::invalid_argument(name + " must not be negative"));
+            return static_cast<unsigned int>(count);
+        }
+
+    }
+
     mc_steps_parameters read_mc_steps_parameters(Parameters const & p) {
         mc_steps_parameters result;
         result.sweeps = integer_range<unsigned int>(p.value_or_default("SWEEPS", "[65536:]"), p);
         result.thermalization = p.defined("THERMALIZATION")
-            ? static_cast<int>(alps::evaluate("THERMALIZATION", p))
+            ? non_negative_count("THERMALIZATION", p)
             : (result.sweeps.min BOOST_PREVENT_MACRO_SUBSTITUTION () >> 3);
         return result;
     }
@@ -35,12 +48,13 @@ namespace alps { namespace input {
         return result;
     }
 
-    parapack_task_parameters read_parapack_task_parameters(Parameters const & p) {
-        parapack_task_parameters result;
-        result.num_clones = integer_range<std::uint32_t>(p.value_or_default("NUM_CLONES", "1"), p);
-        result.evaluate_only_finished_clones = p.defined("EVALUATE_ONLY_FINISHED_CLONES") &&
+    integer_range<std::uint32_t> read_parapack_num_clones(Parameters const & p) {
+        return integer_range<std::uint32_t>(p.value_or_default("NUM_CLONES", "1"), p);
+    }
+
+    bool read_evaluate_only_finished_clones(Parameters const & p) {
+        return p.defined("EVALUATE_ONLY_FINISHED_CLONES") &&
             static_cast<bool>(alps::evaluate("EVALUATE_ONLY_FINISHED_CLONES", p));
-        return result;
     }
 
     parapack_clone_seeds read_parapack_clone_seeds(Parameters const & p) {
@@ -125,7 +139,7 @@ namespace alps { namespace input {
                     std::runtime_error("unknown OPIMIZATION_TYPE: " + p["OPTIMIZATION_TYPE"]));
             }
             if (p.defined("NUM_CLONES") &&
-                integer_range<std::uint32_t>(p["NUM_CLONES"]).max BOOST_PREVENT_MACRO_SUBSTITUTION () > 1)
+                read_parapack_num_clones(p).max BOOST_PREVENT_MACRO_SUBSTITUTION () > 1)
                 boost::throw_exception(std::logic_error("temperature optimization and multipile clones"
                                                         " are exclusive"));
             if (result.optimization_type == exchange_parameters::rate) {
@@ -153,7 +167,7 @@ namespace alps { namespace input {
         result.initial_temperature = evaluate("INITIAL_TEMPERATURE", p);
         result.diff_temperature = evaluate("DIFF_TEMPERATURE", p);
         if (p.defined("INITIAL_THERMALIZATION"))
-            result.initial_thermalization = static_cast<int>(evaluate("INITIAL_THERMALIZATION", p));
+            result.initial_thermalization = static_cast<int>(non_negative_count("INITIAL_THERMALIZATION", p));
         return result;
     }
 

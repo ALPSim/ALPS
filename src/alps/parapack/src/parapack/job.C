@@ -98,7 +98,7 @@ void task::load() {
     parser.parse(file_out);
   }
 
-  num_clones_ = input::read_parapack_task_parameters(params_).num_clones;
+  num_clones_ = input::read_parapack_num_clones(params_);
   clone_status_.clear();
   clone_master_.clear();
   running_.clear();
@@ -288,7 +288,7 @@ void task::check_parameter(alps::parapack::option const& opt) {
     }
 
     if (changed) {
-      num_clones_ = input::read_parapack_task_parameters(params_).num_clones;
+      num_clones_ = input::read_parapack_num_clones(params_);
       progress_ = calc_progress();
       boost::tie(weight_, dump_weight_) = calc_weight();
       status_ = calc_status();
@@ -335,7 +335,7 @@ void task::evaluate(alps::parapack::option const& opt) {
 
   // bool same_weight = params_.defined("EVALUATE_CLONES_WITH_SAME_WEIGHT") &&
   //   static_cast<bool>(alps::evaluate("EVALUATE_CLONES_WITH_SAME_WEIGHT", params_));
-  bool only_finished = input::read_parapack_task_parameters(params_).evaluate_only_finished_clones;
+  bool only_finished = input::read_evaluate_only_finished_clones(params_);
 
   obs_.clear();
   std::vector<cid_t> clones;
