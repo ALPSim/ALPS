@@ -211,6 +211,12 @@ private:
 };*/
 
 
+// The bare Green's function of an ATOMIC run: -1/2 at every imaginary time,
+// 1/(i omega_n) on the Matsubara frequencies. The simulation starts from it
+// and the evaluation uses it, instead of the G0 in INFILE.
+void atomic_bare_green(itime_green_function_t &bare_green_itime,
+                       matsubara_green_function_t &bare_green_matsubara, double beta);
+
 
 class InteractionExpansion: public alps::mcbase
 {
