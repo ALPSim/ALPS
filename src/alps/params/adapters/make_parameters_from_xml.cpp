@@ -20,9 +20,9 @@
 
 namespace alps {
 
-    ALPS_DECL params make_parameters_from_xml(boost::filesystem::path const & arg) {
+    ALPS_DECL params make_parameters_from_xml(std::filesystem::path const & arg) {
         Parameters par;
-        boost::filesystem::ifstream infile(arg.string());
+        std::ifstream infile(arg.string());
 
         // read outermost tag (e.g. <SIMULATION>)
         XMLTag tag = parse_tag(infile, true);

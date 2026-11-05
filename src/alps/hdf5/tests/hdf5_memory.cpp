@@ -18,7 +18,7 @@
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <iostream>
 using namespace std;
@@ -26,8 +26,8 @@ using namespace std;
 TEST(Hdf5, Memory)
 {
     alps::testing::TemporaryDirectory temporary;
-    if (boost::filesystem::exists(boost::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string())))
-        boost::filesystem::remove(boost::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string()));
+    if (std::filesystem::exists(std::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string())))
+        std::filesystem::remove(std::filesystem::path((temporary.path() / "test_hdf5_memory.h5").string()));
     {
         alps::hdf5::archive oa((temporary.path() / "test_hdf5_memory.h5").string(), "w");
         std::vector<std::complex<double> > foo(3);

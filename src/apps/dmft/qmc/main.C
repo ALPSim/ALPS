@@ -34,7 +34,7 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
@@ -73,9 +73,9 @@ int main(int argc, char** argv)
       alps::print_copyright(std::cout, "dmft");
     }
     // set working directory
-    boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
+    std::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
     if (!p.parent_path().empty()) {
-      boost::filesystem::current_path(p.parent_path());
+      std::filesystem::current_path(p.parent_path());
       // all files are now relative to the input's directory
       parms["BASENAME"]=p.filename().string();
     }
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
         // Hirsch-Fye and CT-INT, built in or external, read G0 in Matsubara
         // frequencies only.
         const std::string solver = parms["SOLVER"];
-        const std::string program = boost::filesystem::path(solver).filename().string();
+        const std::string program = std::filesystem::path(solver).filename().string();
         if (solver=="Hirsch-Fye" || solver=="Interaction Expansion"
             || program=="hirschfye" || program=="interaction")
           throw std::invalid_argument("SOLVER = " + solver
@@ -104,8 +104,8 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(p));
           F_selfconsistency_loop(parms, *solver_ptr, transform);
         } else {
-            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
+            /*std::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
+          solver_ptr.reset(new ExternalSolver(/*std::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       }

@@ -8,7 +8,7 @@
 
 namespace alps_test {
 inline void expect_halted(alps::process_helper_mpi &process,
-                          const boost::mpi::communicator &world) {
+                          const alps::mpi::communicator &world) {
   process.halt();
   const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
   bool halted = false;

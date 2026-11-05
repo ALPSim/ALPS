@@ -78,7 +78,8 @@ void alps::solvers::cthyb(alps::params const& input, std::string const& output_f
     parms.has_unused(std::cerr);
   }
   //run the simulation
-  s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)hyb.max_time)));
+  const boost::posix_time::ptime deadline = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)hyb.max_time);
+  s.run([deadline] { return stop_requested(deadline); });
 
   //on the master: collect MC results and store them in file, then postprocess
   if (global_mpi_rank==0){

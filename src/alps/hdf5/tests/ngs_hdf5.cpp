@@ -19,7 +19,7 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/hdf5/complex.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <iostream>
 
@@ -29,8 +29,8 @@ TEST(Hdf5, NgsHdf5) {
     alps::testing::TemporaryDirectory temporary;
 
     std::string const filename = (temporary.path() / "ngs.h5").string();
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    if (std::filesystem::exists(std::filesystem::path(filename)))
+        std::filesystem::remove(std::filesystem::path(filename));
     {
         hdf5::archive ar(filename, "a");
         ar << make_pvp("/to/to", 3.14159);
@@ -89,6 +89,6 @@ TEST(Hdf5, NgsHdf5) {
         hdf5::archive ar(filename, "r");
         EXPECT_TRUE(ar.is_datatype<double>("/to/to"));
     }
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    std::filesystem::remove(std::filesystem::path(filename));
 
 }

@@ -4,7 +4,7 @@
 #include <alps/ngs/make_parameters_from_deprecated.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <stdexcept>
@@ -14,7 +14,7 @@ void require(bool condition) {
 }
 
 int main() {
-    const boost::filesystem::path text("legacy-params-contract.parm");
+    const std::filesystem::path text("legacy-params-contract.parm");
     {
         std::ofstream output(text.string());
         output << "// Existing ALPS parameter grammar\n"
@@ -47,9 +47,9 @@ int main() {
     try { (void)alps::make_parameters_from_file(text); }
     catch (const std::runtime_error&) { caught = true; }
     require(caught);
-    boost::filesystem::remove(text);
+    std::filesystem::remove(text);
 
-    const boost::filesystem::path xml("legacy-params-contract.xml");
+    const std::filesystem::path xml("legacy-params-contract.xml");
     for (bool explicit_seed : {false, true}) {
         {
             std::ofstream output(xml.string());
@@ -63,5 +63,5 @@ int main() {
         require(from_xml.ok() && from_xml["L"].as<int>() == 12);
         require(from_xml["SEED"].as<int>() == (explicit_seed ? 23 : 0));
     }
-    boost::filesystem::remove(xml);
+    std::filesystem::remove(xml);
 }

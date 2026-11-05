@@ -23,7 +23,7 @@
 #include <alps/ngs/config.hpp>
 #include <alps/utilities/stacktrace.hpp>
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <string>
 #include <complex>
@@ -235,15 +235,15 @@ namespace alps {
         }
     };
     
-    template<typename T> struct cast_hook<boost::filesystem::path, T> {
-        static inline boost::filesystem::path apply(T const & arg) {
-            return boost::filesystem::path(cast<std::string>(arg));
+    template<typename T> struct cast_hook<std::filesystem::path, T> {
+        static inline std::filesystem::path apply(T const & arg) {
+            return std::filesystem::path(cast<std::string>(arg));
         }
     };
 
-    template<typename T> struct cast_hook<boost::filesystem::path, std::complex<T> > {
-        static inline boost::filesystem::path apply(std::complex<T> const & arg) {
-            return boost::filesystem::path(cast<std::string>(arg));
+    template<typename T> struct cast_hook<std::filesystem::path, std::complex<T> > {
+        static inline std::filesystem::path apply(std::complex<T> const & arg) {
+            return std::filesystem::path(cast<std::string>(arg));
         }
     };
 

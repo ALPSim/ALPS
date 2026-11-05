@@ -15,7 +15,7 @@
 #include <alps/osiris/xdrdump.h> 
 #include <alps/hdf5.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/random.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
@@ -30,10 +30,10 @@ int main() {
   
   std::string const xdr_filename = "dumpbench.dump";
   std::string const hdf5_filename = "dumpbench.h5";
-  if (boost::filesystem::exists(boost::filesystem::path(xdr_filename)))
-    boost::filesystem::remove(boost::filesystem::path(xdr_filename));
-  if (boost::filesystem::exists(boost::filesystem::path(hdf5_filename)))
-    boost::filesystem::remove(boost::filesystem::path(hdf5_filename));
+  if (std::filesystem::exists(std::filesystem::path(xdr_filename)))
+    std::filesystem::remove(std::filesystem::path(xdr_filename));
+  if (std::filesystem::exists(std::filesystem::path(hdf5_filename)))
+    std::filesystem::remove(std::filesystem::path(hdf5_filename));
 
   alps::ObservableSet measurement;
   {
@@ -80,7 +80,7 @@ int main() {
 
   {
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
-    alps::OXDRFileDump dump=alps::OXDRFileDump(boost::filesystem::path(xdr_filename));
+    alps::OXDRFileDump dump=alps::OXDRFileDump(std::filesystem::path(xdr_filename));
     for (int c = 0; c < count; ++c) {
       dump << measurement;
     }
@@ -102,7 +102,7 @@ int main() {
   measurement.clear();
   {
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
-    alps::IXDRFileDump dump=alps::IXDRFileDump(boost::filesystem::path(xdr_filename));
+    alps::IXDRFileDump dump=alps::IXDRFileDump(std::filesystem::path(xdr_filename));
     for (int c = 0; c < count; ++c) {
       dump >> measurement;
     }
@@ -110,20 +110,20 @@ int main() {
     std::cerr << "Reading from XDR                 : " << 0.001 * (stop - start).total_milliseconds() << " sec\n";
   }
 
-  boost::filesystem::remove(boost::filesystem::path(hdf5_filename));
-  boost::filesystem::remove(boost::filesystem::path(xdr_filename));
+  std::filesystem::remove(std::filesystem::path(hdf5_filename));
+  std::filesystem::remove(std::filesystem::path(xdr_filename));
 
   {
     std::vector<double> data(size);
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
-    alps::OXDRFileDump dump=alps::OXDRFileDump(boost::filesystem::path(xdr_filename));
+    alps::OXDRFileDump dump=alps::OXDRFileDump(std::filesystem::path(xdr_filename));
     for (int c = 0; c < count; ++c) {
       dump << data;
     }
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::local_time();
     std::cerr << "Writing Vector to XDR            : " << 0.001 * (stop - start).total_milliseconds() << " sec\n";
   }
-  boost::filesystem::remove(boost::filesystem::path(xdr_filename));
+  std::filesystem::remove(std::filesystem::path(xdr_filename));
 
   {
 	using namespace alps;
@@ -159,7 +159,7 @@ int main() {
     std::cerr << "Reading Vector from HDF5 Archive : " << 0.001 * (stop - start).total_milliseconds() << " sec\n";
   }
 
-  boost::filesystem::remove(boost::filesystem::path(hdf5_filename));
+  std::filesystem::remove(std::filesystem::path(hdf5_filename));
   {
 	std::vector<double> data(size);
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::local_time();
@@ -179,6 +179,6 @@ int main() {
     boost::posix_time::ptime stop = boost::posix_time::microsec_clock::local_time();
     std::cerr << "Writing Vector to HDF5 Native    : " << 0.001 * (stop - start).total_milliseconds() << " sec\n";
   }
-  boost::filesystem::remove(boost::filesystem::path(hdf5_filename));
+  std::filesystem::remove(std::filesystem::path(hdf5_filename));
   return 0;
 }

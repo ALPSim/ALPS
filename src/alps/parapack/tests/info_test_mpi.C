@@ -12,14 +12,13 @@
 *****************************************************************************/
 
 #include <alps/parapack/clone_info.h>
-#include <boost/mpi.hpp>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <string>
 #include <vector>
 
 TEST(ParallelCloneInfo, KeepsRankSpecificSeedsCheckpointsAndMasterPhases) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   alps::Parameters params;
   params["SEED"] = 29832;
@@ -31,8 +30,8 @@ TEST(ParallelCloneInfo, KeepsRankSpecificSeedsCheckpointsAndMasterPhases) {
   EXPECT_EQ(info.worker_seed(), same.worker_seed());
   EXPECT_NE(info.worker_seed(), other.worker_seed());
   std::vector<alps::seed_t> workers, disorder;
-  boost::mpi::all_gather(world, info.worker_seed(), workers);
-  boost::mpi::all_gather(world, info.disorder_seed(), disorder);
+  alps::mpi::all_gather(world, info.worker_seed(), workers);
+  alps::mpi::all_gather(world, info.disorder_seed(), disorder);
   std::sort(workers.begin(), workers.end());
   EXPECT_EQ(std::adjacent_find(workers.begin(), workers.end()), workers.end());
   EXPECT_TRUE(std::all_of(disorder.begin(), disorder.end(),

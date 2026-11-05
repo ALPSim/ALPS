@@ -50,7 +50,7 @@ public:
       : PARENT(opt,p)
   { 
     std::cerr << "\nFittingScheduler is being constructed\n"; 
-    checkpoint_filename = boost::filesystem::absolute(
+    checkpoint_filename = std::filesystem::absolute(
                std::string(sim_file_name) + ".checkpoint");
 
     alps::Parameters sim_param = alps::read_parameter_file(sim_file_name);
@@ -75,7 +75,7 @@ public:
     exp_percent_set = theFitter->get_exp_percent_plot_set();
 
     loaded_from_checkpoint = false;
-    if (boost::filesystem::exists(checkpoint_filename)) {
+    if (std::filesystem::exists(checkpoint_filename)) {
       // read from checkpoint file
       std::ifstream in(checkpoint_filename.filename().string().c_str());
       theFitter->initialize(in);
@@ -205,7 +205,7 @@ public:
 
 protected:
   AbstractFitter* theFitter;
-  boost::filesystem::path checkpoint_filename;
+  std::filesystem::path checkpoint_filename;
   bool loaded_from_checkpoint;
 
   bool make_results_plots, show_results_plots;
@@ -222,9 +222,9 @@ protected:
    * Make a checkpoint, mainly by calling the function of the fitter.
    */
   virtual void checkpoint() {
-    bool make_backup=boost::filesystem::exists(checkpoint_filename);
-    boost::filesystem::path fname = checkpoint_filename;
-    boost::filesystem::path dir = checkpoint_filename.parent_path();
+    bool make_backup=std::filesystem::exists(checkpoint_filename);
+    std::filesystem::path fname = checkpoint_filename;
+    std::filesystem::path dir = checkpoint_filename.parent_path();
                                                                                 
     if (make_backup)
       fname=dir/(fname.filename().string()+".bak");
@@ -234,8 +234,8 @@ protected:
     theFitter->write_to_xml(out);
                                                                                 
     if (make_backup) {
-      boost::filesystem::remove(checkpoint_filename);
-      boost::filesystem::rename(fname,checkpoint_filename);
+      std::filesystem::remove(checkpoint_filename);
+      std::filesystem::rename(fname,checkpoint_filename);
     }
     // checkpoint the tasks, as it is done in the parent class
     PARENT::checkpoint();

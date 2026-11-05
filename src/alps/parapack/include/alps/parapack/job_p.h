@@ -21,18 +21,18 @@
 #undef tolower
 #undef toupper
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/regex.hpp>
+#include <filesystem>
+#include <regex>
 #include <vector>
 
 namespace alps {
 
 struct job_xml_writer {
-  job_xml_writer(boost::filesystem::path const& file, std::string const& simulation_name,
+  job_xml_writer(std::filesystem::path const& file, std::string const& simulation_name,
     std::string const& file_in_str, std::string const& file_out_str,
     std::string const& alps_version_str, std::string const& application_version_str,
     std::vector<task> const& tasks, bool make_backup) {
-    boost::filesystem::path file_bak(file.parent_path() / (file.filename().string() + ".bak"));
+    std::filesystem::path file_bak(file.parent_path() / (file.filename().string() + ".bak"));
     if (make_backup && exists(file)) rename(file, file_bak);
     oxstream os(file);
     os << header("UTF-8")
@@ -95,7 +95,7 @@ public:
         boost::throw_exception(std::runtime_error("missing <INPUT> tag in <TASK> tag"));
       if (task_.file_out_str_.empty())
         task_.file_out_str_ = task_.file_in_str_;
-      task_.base_ = regex_replace(task_.file_out_str_, boost::regex("\\.out\\.xml$"), "");
+      task_.base_ = std::regex_replace(task_.file_out_str_, std::regex("\\.out\\.xml$"), "");
     }
   }
 
@@ -192,7 +192,7 @@ private:
 class job_tasks_xml_handler : public CompositeXMLHandler {
 public:
   job_tasks_xml_handler(std::string& simname, std::vector<task>& tasks,
-    boost::filesystem::path const& basedir) :
+    std::filesystem::path const& basedir) :
     CompositeXMLHandler("JOB"), simname_(simname), tasks_(tasks), basedir_(basedir), tid_(0),
     task_(), task_handler_(task_) {
     add_handler(task_handler_);
@@ -228,7 +228,7 @@ protected:
 private:
   std::string& simname_;
   std::vector<task>& tasks_;
-  boost::filesystem::path basedir_;
+  std::filesystem::path basedir_;
   tid_t tid_;
   task task_;
   job_task_xml_handler task_handler_;

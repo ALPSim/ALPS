@@ -14,12 +14,12 @@
 #ifndef ALPS_NGS_MUTEX_HPP
 #define ALPS_NGS_MUTEX_HPP
 
-#include <alps/ngs/thread_exceptions.hpp>
-
 #include <boost/shared_ptr.hpp>
 
+#include <stdexcept>
+
 #ifndef ALPS_NGS_SINGLE_THREAD
-    #include <boost/thread/mutex.hpp>
+    #include <mutex>
 #endif
 
 namespace alps {
@@ -52,7 +52,7 @@ namespace alps {
 
                 void lock() {
                     if (has_lock)
-                        throw boost::lock_error();
+                        throw std::logic_error("mutex already locked");
                     has_lock = true;
                 }
 
@@ -67,7 +67,7 @@ namespace alps {
 
                 void unlock() {
                     if (!has_lock)
-                        throw boost::lock_error();
+                        throw std::logic_error("mutex not locked");
                     has_lock = false;
                 }
 
@@ -116,7 +116,7 @@ namespace alps {
     typedef detail::mutex_derived<detail::noop_mutex> noop_lockable;
     
     #ifndef ALPS_NGS_SINGLE_THREAD
-        typedef detail::mutex_derived<boost::mutex> native_lockable;
+        typedef detail::mutex_derived<std::mutex> native_lockable;
     #endif
 }
 

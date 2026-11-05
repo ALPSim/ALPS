@@ -43,8 +43,6 @@ hyb_config(input)
   nprop.assign(7,0.);
   sweep_count=0;
   output_period=input.output_period;
-  //lasttime = boost::chrono::steady_clock::now();
-  //delay = boost::chrono::seconds(input.output_period|600);
   
   update_type.clear();
   update_type.push_back("change zero state   ");

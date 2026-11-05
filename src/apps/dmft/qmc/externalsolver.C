@@ -21,6 +21,7 @@
 #include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "externalsolver.h"
+#include <alps/utilities/fs/absolute.hpp>
 #include "fouriertransform.h"
 #include "U_matrix.h"
 #include "bandstructure.h"
@@ -35,8 +36,8 @@
 #include "alps/numeric/isinf.hpp"
 #include <alps/utilities/os.hpp>
 
-ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
-: exe_(boost::filesystem::absolute(executable,alps::bin_directory()))
+ExternalSolver::ExternalSolver(const std::filesystem::path& executable)
+: exe_(alps::fs::absolute(executable,alps::bin_directory()))
 {
 }
 
@@ -124,7 +125,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     alps::hdf5::archive ar(outfile, "r");
     g.read_hdf5(ar, "/G_tau");
   }
-  boost::filesystem::remove(outfile);
+  std::filesystem::remove(outfile);
   return g;
 }
 
@@ -218,7 +219,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       }
     }
   }
-  boost::filesystem::remove(outfile);
+  std::filesystem::remove(outfile);
   return std::make_pair(G_omega, G_tau);
 }
 
@@ -235,8 +236,8 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
   
-  boost::filesystem::remove(infile);
+  std::filesystem::remove(infile);
   
-  if (!boost::filesystem::exists(outfile))
+  if (!std::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }

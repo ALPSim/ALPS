@@ -858,7 +858,7 @@ public:
   static std::string version() { return walker_type::version(); }
   static void print_copyright(std::ostream& out) { walker_type::print_copyright(out); }
 
-  parallel_exchange_worker(boost::mpi::communicator const& comm, alps::Parameters const& params)
+  parallel_exchange_worker(alps::mpi::communicator const& comm, alps::Parameters const& params)
     : super_type(params), comm_(comm), init_(params), beta_(params), mcs_(params),
       num_returnee_(0) {
 
@@ -983,13 +983,13 @@ public:
       if (comm_.rank() == 0) {
         std::copy(wp_local_.begin(), wp_local_.begin() + nrep_local_, wp_.begin());
         for (int p = 1; p < nreps_.size(); ++p)
-          comm_.recv(p, 0, &wp_[offsets_[p]], nreps_[p]);
+          alps::mpi::recv(comm_, p, 0, &wp_[offsets_[p]], nreps_[p]);
         for (int w = 0; w < nrep; ++w) {
           int p = tid_[w];
           weight_parameters_[p] += wp_[w];
         }
       } else {
-        comm_.send(0, 0, &wp_local_[0], nrep_local_);
+        alps::mpi::send(comm_, 0, 0, &wp_local_[0], nrep_local_);
       }
 
       if (comm_.rank() == 0) {
@@ -1168,10 +1168,10 @@ public:
       if (next_stage) mcs_.next_stage();
       if (comm_.rank() == 0) {
         for (int p = 1; p < nreps_.size(); ++p)
-          comm_.send(p, 0, &tid_[offsets_[p]], nreps_[p]);
+          alps::mpi::send(comm_, p, 0, &tid_[offsets_[p]], nreps_[p]);
         std::copy(tid_.begin(), tid_.begin() + nrep_local_, tid_local_.begin());
       } else {
-        comm_.recv(0, 0, &tid_local_[0], nrep_local_);
+        alps::mpi::recv(comm_, 0, 0, &tid_local_[0], nrep_local_);
       }
     }
   }
@@ -1209,7 +1209,7 @@ protected:
   }
 
 private:
-  boost::mpi::communicator comm_;
+  alps::mpi::communicator comm_;
 
   int nrep_local_;           // number of walkers (replicas) on this process
   int offset_local_;         // first (global) id of walker on this process

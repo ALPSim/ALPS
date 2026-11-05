@@ -14,7 +14,7 @@
 /* $Id: parameters.C 2853 2008-06-17 13:59:59Z wistaria $ */
 
 #include <alps/parameter/parameters.h>
-#include <boost/mpi.hpp>
+#include <alps/parapack/mpi.h>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
@@ -22,17 +22,17 @@
 #include <vector>
 
 TEST(ParallelLegacyParameters, PreservesKeysValuesExpressionsAndOrder) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   std::istringstream input("L=10; M=1; T=0.1; beta=\"1/T\";");
   const alps::Parameters original(input);
   alps::Parameters restored;
   if (world.rank() == 0) {
-    world.send(1, 0, original);
-    world.recv(world.size() - 1, 0, restored);
+    alps::mpi::send(world, 1, 0, original);
+    alps::mpi::recv(world, world.size() - 1, 0, restored);
   } else {
-    world.recv(world.rank() - 1, 0, restored);
-    world.send((world.rank() + 1) % world.size(), 0, restored);
+    alps::mpi::recv(world, world.rank() - 1, 0, restored);
+    alps::mpi::send(world, (world.rank() + 1) % world.size(), 0, restored);
   }
   const std::vector<std::pair<std::string, std::string>> expected{
       {"L", "10"}, {"M", "1"}, {"T", "0.1"}, {"beta", "1/T"}};

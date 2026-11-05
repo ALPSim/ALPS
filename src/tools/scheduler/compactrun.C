@@ -15,7 +15,7 @@
 
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/xdrdump.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 int main(int argc, char** argv)
 {
@@ -30,11 +30,11 @@ try {
   std::string inname=argv[1];
   std::string outname = argv[argc-1];
   
-  boost::filesystem::path inpath(inname);
-  boost::filesystem::path outpath(outname);
+  std::filesystem::path inpath(inname);
+  std::filesystem::path outpath(outname);
   
-  bool make_backup = boost::filesystem::exists(outpath);
-  boost::filesystem::path writepath = (make_backup ? outpath.parent_path()/(outpath.filename().string()+".bak") : outpath);
+  bool make_backup = std::filesystem::exists(outpath);
+  std::filesystem::path writepath = (make_backup ? outpath.parent_path()/(outpath.filename().string()+".bak") : outpath);
   
   std::cout << "Compacting run file " << inname << " to " <<  outname
             <<std::endl;
@@ -48,8 +48,8 @@ try {
   }
 
   if (make_backup) {
-    boost::filesystem::remove(outpath);
-    boost::filesystem::rename(writepath,outpath);
+    std::filesystem::remove(outpath);
+    std::filesystem::rename(writepath,outpath);
   }
 
 #ifndef BOOST_NO_EXCEPTIONS

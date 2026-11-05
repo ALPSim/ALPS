@@ -22,7 +22,7 @@
 
 #include <alps/config.h>
 #include <alps/xml_export.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <cstdlib>
 #include <string>
 
@@ -55,7 +55,7 @@ extern ALPS_XML_DECL std::string search_xml_library_path(const std::string& file
 /// This function copies the ALPS.xsl stylesheet to the specified directory.
 /// The function does not overwrite an already existing file with the name ALPS.xsl
 
-extern ALPS_XML_DECL void copy_stylesheet(boost::filesystem::path const& dir);
+extern ALPS_XML_DECL void copy_stylesheet(std::filesystem::path const& dir);
 
 } // end namespace alps
 

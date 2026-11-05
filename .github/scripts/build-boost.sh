@@ -11,12 +11,9 @@ case "$compiler" in
   *) toolset=gcc ;;
 esac
 cd "$source_dir"
-libraries=filesystem,serialization,program_options,regex,thread,date_time,chrono
-if [[ "${ALPS_BOOST_MPI:-ON}" == ON ]]; then libraries+=,mpi; fi
 ./bootstrap.sh --with-toolset="$toolset" \
-  --with-libraries="$libraries"
+  --with-libraries=serialization,program_options
 printf 'using %s : alps : "%s" ;\n' "$toolset" "$compiler" > alps-user-config.jam
-if [[ "${ALPS_BOOST_MPI:-ON}" == ON ]]; then printf 'using mpi ;\n' >> alps-user-config.jam; fi
 ./b2 --user-config=alps-user-config.jam "toolset=$toolset-alps" \
   variant=release link=shared runtime-link=shared threading=multi cxxstd=17 \
   "-j${CMAKE_BUILD_PARALLEL_LEVEL:-2}" "--prefix=$prefix" install

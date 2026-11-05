@@ -17,7 +17,8 @@
 #include <alps/parser/xmlparser.h>
 #include <alps/parser/parser.h>
 
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
+#include <fstream>
 #include <fstream>
 #include <istream>
 #include <string>
@@ -80,8 +81,8 @@ void XMLParser::parse(const std::string& file) {
   std::ifstream is(file.c_str());
   parse(is);
 }
-void XMLParser::parse(const boost::filesystem::path& file) {
-  boost::filesystem::ifstream is(file);
+void XMLParser::parse(const std::filesystem::path& file) {
+  std::ifstream is(file);
   parse(is);
 }
 

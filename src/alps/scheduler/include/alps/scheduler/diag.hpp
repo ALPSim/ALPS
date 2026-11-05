@@ -52,7 +52,7 @@ public:
   // those parameters already read by read_parameters, as the factories do for
   // a new run; without them the task reads an existing output, as
   // fulldiag_evaluate and convert2xml do
-  DiagTask (const ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false,
+  DiagTask (const ProcessList& where , const std::filesystem::path& p,bool delay_construct=false,
             void (*define_parameters)(alps::params&) = &DiagTask::define_parameters,
             const alps::params* settings = 0);
 
@@ -74,7 +74,7 @@ public:
   
 
 protected:
-  void write_xml_body(oxstream&, const boost::filesystem::path&,bool) const;
+  void write_xml_body(oxstream&, const std::filesystem::path&,bool) const;
   void handle_tag(std::istream& infile, const XMLTag& tag); 
 
   std::vector<mag_vector_type> eigenvalues_;
@@ -107,7 +107,7 @@ private:
 };
 
 template <class T, class G>
-DiagTask<T,G>::DiagTask(const ProcessList& where , const boost::filesystem::path& p, bool delay_construct,
+DiagTask<T,G>::DiagTask(const ProcessList& where , const std::filesystem::path& p, bool delay_construct,
                         void (*define_parameters)(alps::params&), const alps::params* settings)
     : scheduler::Task(where,p)
     , graph_helper<G>(this->get_parameters())
@@ -263,7 +263,7 @@ void DiagTask<T,G>::save(hdf5::archive & ar) const {
 
 
 template <class T, class G>
-void DiagTask<T,G>::write_xml_body(oxstream& out, const boost::filesystem::path& name,bool writeallxml) const
+void DiagTask<T,G>::write_xml_body(oxstream& out, const std::filesystem::path& name,bool writeallxml) const
 {
   if (writeallxml) {
     for (unsigned i=0;i<eigenvalues_.size();++i) {

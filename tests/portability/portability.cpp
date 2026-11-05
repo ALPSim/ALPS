@@ -10,7 +10,7 @@
 #include <alps/parser/parser.h>
 #include <alps/random/parallel/lcg64.hpp>
 #include <alps/random/rngfactory.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/random/mersenne_twister.hpp>
 #include <array>
 #include <chrono>
@@ -27,7 +27,7 @@ namespace {
 struct temporary_file {
     std::string path = alps::temporary_filename(
         (alps::temp_directory_path() / "alps-portability-").string());
-    ~temporary_file() { boost::system::error_code ec; boost::filesystem::remove(path, ec); }
+    ~temporary_file() { std::error_code ec; std::filesystem::remove(path, ec); }
 };
 }
 
@@ -46,7 +46,7 @@ TEST(Portability, RuntimeAndWireContracts) {
     ASSERT_TRUE((alps::precision(-std::numeric_limits<double>::infinity(), 6) == "-inf")) << "XML must preserve infinity sign";
     temporary_file first, second;
     ASSERT_TRUE((first.path != second.path)) << "temporary names must be distinct";
-    ASSERT_TRUE((boost::filesystem::is_regular_file(first.path))) << "temporary_filename must reserve a file";
+    ASSERT_TRUE((std::filesystem::is_regular_file(first.path))) << "temporary_filename must reserve a file";
     alps::filelock owner(first.path, true, 0);
     alps::filelock competitor(first.path);
     ASSERT_TRUE((competitor.locked())) << "a second owner must see the lock";

@@ -938,6 +938,7 @@
     "boost/numeric/bindings/views.hpp"
   ],
   "retired": {
+    "alps/ngs/thread_exceptions.hpp": "re-exported Boost.Thread's exception types for <alps/ngs/mutex.hpp>, which now throws std::logic_error; ALPS no longer uses Boost.Thread",
     "alps/utility/factory.hpp": "did not compile in 3.0.0 (a syntax error in factory::register_type), so no consumer could use it",
     "alps/ngs/detail/paramiterator.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
     "alps/ngs/detail/paramproxy.hpp": "internal header of the NGS parameters, which ALPSCore's parameters in <alps/params.hpp> replace",
@@ -960,6 +961,8 @@
     "alps/ngs/scheduler/proto/mpisim.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/mpisim_ulfm.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
     "alps/ngs/scheduler/proto/tcpserver.hpp": "header-only prototype of an NGS Monte Carlo scheduler on the NGS parameters and mcbase; nothing used it",
+    "alps/ngs/boost_mpi.hpp": "Boost.MPI reduce overloads for vectors and multi-arrays; nothing used them, and ALPS no longer uses Boost.MPI",
+    "alps/ngs/ulfm.hpp": "fault-tolerance helpers on pre-release Open MPI functions that no released MPI provides; nothing used them after the NGS scheduler prototype was removed",
     "alps/check_schedule.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/check_schedule.hpp> replaces",
     "alps/mcbase.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mcbase.hpp> replaces",
     "alps/mcmpiadapter.hpp": "the NGS Monte Carlo simulation base, which ALPSCore's in <alps/mc/mpiadapter.hpp> replaces",

@@ -186,7 +186,7 @@ private:
 {
 public:
 
-  InteractionExpansionSim(const alps::ProcessList &w, const boost::filesystem::path &p) : alps::scheduler::MCSimulation(w,p) {}
+  InteractionExpansionSim(const alps::ProcessList &w, const std::filesystem::path &p) : alps::scheduler::MCSimulation(w,p) {}
   
   InteractionExpansionSim(const alps::ProcessList &w, const alps::Parameters &p) : alps::scheduler::MCSimulation(w,p) {p_=p;}
   

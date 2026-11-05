@@ -22,7 +22,7 @@
 #include <alps/ngs/numeric.hpp>
 
 #include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -54,8 +54,8 @@ class ising_sim {
         results_type collect_results() const;
         results_type collect_results(result_names_type const & names) const;
 
-        void save(boost::filesystem::path const & filename) const;
-        void load(boost::filesystem::path const & filename);
+        void save(std::filesystem::path const & filename) const;
+        void load(std::filesystem::path const & filename);
         void save(alps::hdf5::archive & ar) const;
         void load(alps::hdf5::archive & ar);
 

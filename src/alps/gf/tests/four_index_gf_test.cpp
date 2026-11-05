@@ -108,7 +108,7 @@ TEST_F(FourIndexGFTest,saveload)
     EXPECT_EQ(3, gf2(g::matsubara_index(4),g::momentum_index(3), g::momentum_index(2), g::index(1)).imag());
     
     
-    //boost::filesystem::remove("g5.h5");
+    //std::filesystem::remove("g5.h5");
 }
 
 TEST_F(FourIndexGFTest,saveloadstream)
@@ -134,7 +134,7 @@ TEST_F(FourIndexGFTest,saveloadstream)
     EXPECT_EQ(3, gf2(g::matsubara_index(4),g::momentum_index(3), g::momentum_index(2), g::index(1)).imag());
     
     
-    //boost::filesystem::remove("gf_stream.h5");
+    //std::filesystem::remove("gf_stream.h5");
 }
 
 

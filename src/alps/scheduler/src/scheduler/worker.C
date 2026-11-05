@@ -22,7 +22,7 @@
 #include <alps/osiris/mpdump.h>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 #include <cmath>
 #include <cstdio>
@@ -211,15 +211,15 @@ void Worker::run()
 }
 
 
-void Worker::write_xml(const boost::filesystem::path&) const
+void Worker::write_xml(const std::filesystem::path&) const
 {
   boost::throw_exception(std::runtime_error("XML output not implemented for the worker"));
 }
 
-void Worker::load_from_file(const boost::filesystem::path& fn,const boost::filesystem::path& hdf5path)
+void Worker::load_from_file(const std::filesystem::path& fn,const std::filesystem::path& hdf5path)
 {
 #ifdef ALPS_HAVE_HDF5
-  if (boost::filesystem::exists(hdf5path)) {
+  if (std::filesystem::exists(hdf5path)) {
       hdf5::archive ar(hdf5path.string());
       ar["/"] >> *this;
   }
@@ -228,25 +228,25 @@ void Worker::load_from_file(const boost::filesystem::path& fn,const boost::files
   load_worker(dump);
 }
 
-void Worker::save_to_file(const boost::filesystem::path& fnpath, const boost::filesystem::path& hdf5path) const
+void Worker::save_to_file(const std::filesystem::path& fnpath, const std::filesystem::path& hdf5path) const
 {
-  boost::filesystem::path bakpath=fnpath.parent_path()/(fnpath.filename().string()+".bak");
-  bool backup=boost::filesystem::exists(fnpath);
+  std::filesystem::path bakpath=fnpath.parent_path()/(fnpath.filename().string()+".bak");
+  bool backup=std::filesystem::exists(fnpath);
   
 #ifdef ALPS_HAVE_HDF5
-  boost::filesystem::path hdf5bakpath =  fnpath.parent_path()/(hdf5path.filename().string()+".bak");
-  backup =  backup || boost::filesystem::exists(fnpath);
+  std::filesystem::path hdf5bakpath =  fnpath.parent_path()/(hdf5path.filename().string()+".bak");
+  backup =  backup || std::filesystem::exists(fnpath);
   {
-    boost::filesystem::path p = backup ? hdf5bakpath : hdf5path;
-    if (boost::filesystem::exists(p))
-      boost::filesystem::remove(p);
+    std::filesystem::path p = backup ? hdf5bakpath : hdf5path;
+    if (std::filesystem::exists(p))
+      std::filesystem::remove(p);
     hdf5::archive worker_ar(p.string(), "a");
     worker_ar["/"] << *this;
   } // close file
   if (backup) {
-    if (boost::filesystem::exists(hdf5path))
-      boost::filesystem::remove(hdf5path);
-    boost::filesystem::rename(hdf5bakpath,hdf5path);
+    if (std::filesystem::exists(hdf5path))
+      std::filesystem::remove(hdf5path);
+    std::filesystem::rename(hdf5bakpath,hdf5path);
   }
 #endif
 
@@ -255,9 +255,9 @@ void Worker::save_to_file(const boost::filesystem::path& fnpath, const boost::fi
     save_worker(dump);
   } // close file
   if (backup) {
-    if (boost::filesystem::exists(fnpath))
-      boost::filesystem::remove(fnpath);
-    boost::filesystem::rename(bakpath,fnpath);
+    if (std::filesystem::exists(fnpath))
+      std::filesystem::remove(fnpath);
+    std::filesystem::rename(bakpath,fnpath);
   }
 }
 
@@ -281,13 +281,13 @@ bool Worker::handle_message(const Process& master,int32_t tag) {
     case MCMP_load_run_from_file:
       message.receive(master,MCMP_load_run_from_file);
       message >> name1 >> name2;
-      load_from_file(boost::filesystem::path(name1),boost::filesystem::path(name2));
+      load_from_file(std::filesystem::path(name1),std::filesystem::path(name2));
       break;
           
     case MCMP_save_run_to_file:
       message.receive(master,MCMP_save_run_to_file);
       message >> file_name1 >> file_name2;
-      save_to_file(boost::filesystem::path(file_name1),boost::filesystem::path(file_name2));
+      save_to_file(std::filesystem::path(file_name1),std::filesystem::path(file_name2));
       return true;
 
     case MCMP_get_run_work:

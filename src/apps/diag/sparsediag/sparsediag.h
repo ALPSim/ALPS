@@ -19,7 +19,6 @@
 #include <ietl/vectorspace.h>
 #include <ietl/lanczos.h>
 #include <boost/random.hpp>
-#include <boost/regex.hpp> 
 #include <complex>
 
 template <class T>
@@ -39,7 +38,7 @@ public:
   typedef typename super_type::operator_matrix_type operator_matrix_type;
   
   // settings, if given, are the parameters already read by read_parameters
-  SparseDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,
+  SparseDiagMatrix (const alps::ProcessList& where , const std::filesystem::path& p,
                     const alps::params* settings = 0);
   /// Defines the parameters sparsediag reads, with their defaults
   static void define_parameters(alps::params& parameters);
@@ -47,7 +46,7 @@ public:
   /** @throws std::invalid_argument naming each of them that does not parse */
   static alps::params read_parameters(const alps::Parameters& parms);
   void do_subspace();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&, bool) const;
+  void write_xml_body(alps::oxstream&, const std::filesystem::path&, bool) const;
   void print_eigenvectors(std::ostream& os) const;
   void append_eigenvectors(std::vector<value_type>& v) const;
 private:
@@ -57,7 +56,7 @@ private:
 };
 
 template <class T>
-SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p,
+SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const std::filesystem::path& p,
                                       const alps::params* settings)
  : super_type(where,p,true,&SparseDiagMatrix::define_parameters,settings)
 { 
@@ -85,7 +84,7 @@ alps::params SparseDiagMatrix<T>::read_parameters(const alps::Parameters& parms)
 
 
 template <class T>
-void SparseDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
+void SparseDiagMatrix<T>::write_xml_body(alps::oxstream& out, const std::filesystem::path& p, bool writeallxml) const
 {
   if (writeallxml) {   
       // Get minimum energy (over all sectors)

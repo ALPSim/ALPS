@@ -33,7 +33,7 @@
 #include <cmath>
 #include <complex>
 #include <cstdio>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -77,7 +77,7 @@ TEST(DmftRegression, hilberttransformer_afm_multiband_numeric) {
 
   const matsubara_green_function_t out = transform(G_omega, G0_omega, mu, h, beta);
 
-  boost::filesystem::remove(dosfile);
+  std::filesystem::remove(dosfile);
 
   double max_asym   = 0.0;  // |pair(2,3) - pair(0,1)|
   double max_change = 0.0;  // how far pair(0,1) moved from its input

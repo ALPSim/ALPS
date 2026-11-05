@@ -35,7 +35,7 @@
 #include <alps/alea.h>
 
 #include <boost/functional.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/serialization/split_member.hpp>
 #include <map>
 
@@ -206,14 +206,14 @@ virtual void load(hdf5::archive &);
   /// compact the observables to save space, discarding e.g. time series information
   void compact() {} // deprecated
 
-  void write_xml(oxstream& oxs, const boost::filesystem::path& =boost::filesystem::path()) const;
+  void write_xml(oxstream& oxs, const std::filesystem::path& =std::filesystem::path()) const;
   void write_xml_with_id(oxstream& oxs, int id,
-    const boost::filesystem::path& = boost::filesystem::path()) const;
+    const std::filesystem::path& = std::filesystem::path()) const;
 
   void read_xml(std::istream& infile, const XMLTag& tag);
 
-  void write_hdf5(boost::filesystem::path const &, std::size_t realization=0, std::size_t clone=0) const;
-  void read_hdf5(boost::filesystem::path const &, std::size_t realization=0, std::size_t clone=0);
+  void write_hdf5(std::filesystem::path const &, std::size_t realization=0, std::size_t clone=0) const;
+  void read_hdf5(std::filesystem::path const &, std::size_t realization=0, std::size_t clone=0);
 
   void clear();
 

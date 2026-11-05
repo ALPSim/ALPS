@@ -24,19 +24,19 @@ Worker* Factory::make_worker(const ProcessList&,const Parameters&,int) const
   return 0;
 }
 
-Task* Factory::make_task(const ProcessList& w,const boost::filesystem::path& fn) const
+Task* Factory::make_task(const ProcessList& w,const std::filesystem::path& fn) const
 {
   alps::Parameters parms;
   { // scope to close file
-    boost::filesystem::ifstream infile(fn);
+    std::ifstream infile(fn);
     parms.extract_from_xml(infile);
   }
   return make_task(w,fn,parms);
 }
 
-Task* Factory::make_task(const ProcessList&,const boost::filesystem::path&,const Parameters&) const
+Task* Factory::make_task(const ProcessList&,const std::filesystem::path&,const Parameters&) const
 {
-  boost::throw_exception(std::logic_error("Factory::make_task(const ProcessList&,const boost::filesystem::path&,const Parameters&) needs to be implemented"));
+  boost::throw_exception(std::logic_error("Factory::make_task(const ProcessList&,const std::filesystem::path&,const Parameters&) needs to be implemented"));
   return 0;
 }
 

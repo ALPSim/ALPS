@@ -13,7 +13,7 @@
 
 #include <alps/hdf5/archive.hpp>
  
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <string>
 #include <iostream>
@@ -50,8 +50,8 @@ int main() {
 
     std::string const filename = "example_enum_as_class.h5";
 
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    if (std::filesystem::exists(std::filesystem::path(filename)))
+        std::filesystem::remove(std::filesystem::path(filename));
 
     enum_type read, write = PLUS;
 
@@ -65,7 +65,7 @@ int main() {
         ar >> alps::make_pvp("/enum", read);
     }
 
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    std::filesystem::remove(std::filesystem::path(filename));
 
     bool match = (read == write);
     std::cout << (match ? "SUCCESS" : "FAILURE") << std::endl;

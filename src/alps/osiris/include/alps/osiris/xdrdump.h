@@ -20,7 +20,7 @@
 #include <alps/config.h>
 #include <alps/osiris_export.h>
 #include <alps/osiris/dump.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/cstdint.hpp>
 #include <cstdio>
 #include <string>
@@ -135,7 +135,7 @@ class ALPS_OSIRIS_DECL OXDRFileDump: public OXDRDump
 public:
   /// open a new dump file with the given name
   // OXDRFileDump(const std::string& n);
-  OXDRFileDump(const boost::filesystem::path& name, bool append=false);
+  OXDRFileDump(const std::filesystem::path& name, bool append=false);
   virtual ~OXDRFileDump();
 
   void flush();
@@ -157,7 +157,7 @@ public:
   /** open a file.
       @throws std::runtime_error if the file could not be openend. */
   // IXDRFileDump(const std::string& name);
-  IXDRFileDump(const boost::filesystem::path& name);
+  IXDRFileDump(const std::filesystem::path& name);
   bool couldOpen() { return valid_;}
 
   virtual ~IXDRFileDump();

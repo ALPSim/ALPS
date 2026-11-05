@@ -17,7 +17,7 @@
 #include <alps/parameter.h>
 #include <alps/parameter_input.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <exception>
 #include <iostream>
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
             std::cerr << "p2h5: " << error.what() << std::endl;
         return 1;
     }
-    if (boost::filesystem::exists(boost::filesystem::path(argv[1])))
-        boost::filesystem::remove(boost::filesystem::path(argv[1]));
+    if (std::filesystem::exists(std::filesystem::path(argv[1])))
+        std::filesystem::remove(std::filesystem::path(argv[1]));
     alps::hdf5::archive ar(argv[1], "w");
     ar["/parameters"] << parms;
 }

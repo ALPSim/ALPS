@@ -74,7 +74,7 @@ Build and install the C++ SDK with CMake, then build the Python package against 
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
 - For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
 - Eigen ≥ 3.3 for the applications, which need it for MaxEnt. Library-only builds (`ALPS_BUILD_APPLICATIONS=OFF`) can do without it; they then leave out the components copied from ALPSCore that need it, such as [ALEA v2](src/alps/aleav2/README.md).
-- Optional: MPI and Boost.MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
+- Optional: MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions.
 
@@ -301,7 +301,7 @@ Add exported headers to the owning target's CMake `HEADERS` file set. Public `<a
 | `ALPS_BUILD_TESTING` | `ON` | Build and register native ALPS tests, independently of a parent's `BUILD_TESTING` |
 | `ALPS_BUILD_APPLICATIONS` | `ON` | Build simulation applications, solver libraries and command-line tools |
 | `BUILD_SHARED_LIBS` | `ON` when unset | Shared libraries; required for Python bindings |
-| `ALPS_ENABLE_MPI` | `OFF` | Enable MPI; requires matching MPI and Boost.MPI installations |
+| `ALPS_ENABLE_MPI` | `OFF` | Enable MPI; requires an MPI installation |
 | `ALPS_ENABLE_OPENMP` | `OFF` | Enable OpenMP, including worker scheduling |
 | `ALPS_BUILD_EXTENSIVE_TESTS` | `OFF` | Add expensive graph and HDF5 type-matrix tests when testing is enabled |
 
@@ -325,7 +325,7 @@ cmake --install _build/mpi-openmp
 export ALPS_DIR="$PWD/_build/mpi-openmp/install/share/alps"
 ```
 
-MPI presets require MPI and a matching Boost.MPI installation; OpenMP presets
+MPI presets require an MPI installation; OpenMP presets
 require compiler/runtime support for OpenMP. These options enable capabilities
 in supported applications. Choose MPI ranks and OpenMP threads when running
 the application; `--parallel` above controls compilation jobs only.

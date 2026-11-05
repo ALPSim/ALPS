@@ -9,8 +9,7 @@ A header belongs in `alps/utilities/` only if
 1. more than one module uses it; otherwise it lives with its user,
 2. nothing is planned to replace it; otherwise it stays with the legacy code, and
 3. Boost idioms with a standard equivalent were replaced when it moved, without
-   changing public signatures. Signature changes, such as
-   `boost::filesystem::path` to `std::filesystem::path`, are later work.
+   changing public signatures, except that paths are `std::filesystem::path`.
 
 Status *current* means the header needs no planned changes. *Carried over*
 means it was moved as it was, and the note says what modernization remains.
@@ -34,7 +33,7 @@ means it was moved as it was, and the note says what modernization remains.
 | `deprecated.hpp` | `ALPS_DEPRECATED` | current; copied from ALPSCore, and defines the macro only if ALPS's `<alps/export.h>` has not |
 | `copyright.hpp` | Program banners, version and license text | current |
 | `citations.hpp` | Citation notices from the generated catalog | current |
-| `os.hpp` | Host, user and directory queries | carried over; returns `boost::filesystem::path` |
+| `os.hpp` | Host, user and directory queries | carried over |
 | `vmusage.hpp` | Process memory usage | carried over; Linux `/proc` only |
 | `vectorio.hpp` | Reading and writing whitespace-separated vectors | carried over; Boost stream idioms |
 | `encode.hpp` | HDF5 name escaping | carried over; Boost Software License notice, `boost::lexical_cast` |
@@ -45,10 +44,11 @@ means it was moved as it was, and the note says what modernization remains.
 `alps::testing::is_near`, is installed with these headers as in ALPSCore, where
 library code (`ALPS::params`) uses it too. Its publication pointer has been removed.
 
-Not yet moved: `alps/ngs/{config,hash,mutex,sleep,thread_exceptions}.hpp`, the
+Not yet moved: `alps/ngs/{config,hash,mutex,sleep}.hpp`, the
 top-level `alps/cctype.h`, `alps/factory.h`, `alps/lambda.hpp` and
-`alps/stringvalue.h`, and the type traits ALPSCore lacks. `alps/ngs/boost_mpi.hpp`
-stays where it is: ALPSCore's `alps/utilities/boost_mpi.hpp` is a different API.
+`alps/stringvalue.h`, and the type traits ALPSCore lacks.
+`alps/ngs/boost_mpi.hpp`, Boost.MPI `reduce` overloads that nothing used, was
+removed with Boost.MPI.
 
 [`ALPS::gf`](../gf/README.md) installs four of ALPSCore's `alps/type_traits/`
 headers. Only GF uses them, so by rule 1 they live with it.
@@ -61,9 +61,11 @@ while `ALPS_LEGACY_API` is on.
 `mpi.hpp` is copied from ALPSCore commit
 `7146b9e1f017938a94e5dae35d88467cc5ba7969`
 (`utilities/include/alps/utilities/mpi.hpp`) with the macro adaptation marked by
-comments: ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
+comments. ALPSCore's unprefixed macro `EXCEPTION_CATCH` is renamed
 `ALPS_MPI_EXCEPTION_CATCH` and undefined at the end of the header, so it no
 longer leaks into every file that includes it, directly or through ALEA v2.
+`communicator` also has an explicit `operator bool`, false for `MPI_COMM_NULL`,
+as Boost.MPI's has; parapack tests the communicators it splits off this way.
 Its notice refers to ALPSCore's top-level
 [`COPYRIGHT.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/COPYRIGHT.TXT),
 [`LICENSE.TXT`](https://github.com/ALPSCore/ALPSCore/blob/7146b9e1f017938a94e5dae35d88467cc5ba7969/LICENSE.TXT).

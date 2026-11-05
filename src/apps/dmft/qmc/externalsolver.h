@@ -23,8 +23,7 @@
 /// @sa ExternalSolver
 
 #include "solver.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem
@@ -42,7 +41,7 @@ class ExternalSolver
 {
 public:
     /// @param executable the path to the executable
-    ExternalSolver(const boost::filesystem::path& executable) ;
+    ExternalSolver(const std::filesystem::path& executable) ;
   
     ImpuritySolver::result_type solve(
               const itime_green_function_t& G0
@@ -56,7 +55,7 @@ public:
     void call(std::string const& infile, std::string const& outfile);
       
     ///path to the solver executable
-    boost::filesystem::path exe_;
+    std::filesystem::path exe_;
 };
 
 
