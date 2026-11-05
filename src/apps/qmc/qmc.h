@@ -615,7 +615,7 @@ bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     std::valarray<double> strv(str.size());
     for (int i=0;i<str.size();++i)
       strv[i]=str[i]*sign/this->num_sites();
-    this->measurements[x.first] << str;
+    this->measurements[x.first] << strv;
   }
 
   if(measure_structure_factor_) {
