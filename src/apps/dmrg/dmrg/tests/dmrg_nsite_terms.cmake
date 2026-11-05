@@ -51,6 +51,19 @@ string(REPLACE "</MODELS>" [=[
     + C
   </NSITETERM>
 </HAMILTONIAN>
+<HAMILTONIAN name="squared ladder">
+  <PARAMETER name="t" default="1"/><PARAMETER name="U" default="0"/><PARAMETER name="W" default="0"/>
+  <BASIS ref="fermion"/>
+  <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
+  <BONDTERM source="i" target="j">
+    -t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cdag_down(j)*c_down(i))
+  </BONDTERM>
+  <NSITETERM sites="i j k l">W*(cdag_up(i)*c_up(l) + cdag_up(l)*c_up(i) + n_down(j)*n(k))^2</NSITETERM>
+</HAMILTONIAN>
+<HAMILTONIAN name="divided ladder">
+  <BASIS ref="fermion"/>
+  <NSITETERM sites="i j k l">n(j)/n(i)</NSITETERM>
+</HAMILTONIAN>
 <HAMILTONIAN name="spin flip ladder">
   <PARAMETER name="K" default="0"/>
   <BASIS ref="spin"/>
@@ -115,4 +128,49 @@ execute_process(COMMAND "${dmrg}" --write-xml refused.in.xml
   WORKING_DIRECTORY "${test_dir}" RESULT_VARIABLE status OUTPUT_VARIABLE out ERROR_VARIABLE err)
 if(status EQUAL 0 OR NOT "${out}${err}" MATCHES "changes the total Sz")
   message(FATAL_ERROR "dmrg did not refuse an n-site term that changes Sz:\n${out}${err}")
+endif()
+
+# A power of site operators is expanded into the product, as in ED. fulldiag
+# of the term written out, W*X*X: -4.031852504667
+file(WRITE "${test_dir}/squared" [=[
+LATTICE_LIBRARY="lattices.xml"
+MODEL_LIBRARY="models.xml"
+LATTICE="plaquette ladder"
+MODEL="squared ladder"
+CONSERVED_QUANTUMNUMBERS="Nup,Ndown"
+U=8
+W=0.6
+SWEEPS=4
+MAXSTATES=200
+NUMBER_EIGENVALUES=1
+{ L=3; Nup_total=2; Ndown_total=2; }
+]=])
+execute_process(COMMAND "${parameter2xml}" squared
+  WORKING_DIRECTORY "${test_dir}" COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${dmrg}" --write-xml squared.in.xml
+  WORKING_DIRECTORY "${test_dir}" OUTPUT_QUIET COMMAND_ERROR_IS_FATAL ANY)
+file(READ "${test_dir}/squared.task1.out.xml" result)
+string(REGEX MATCH "<SCALAR_AVERAGE name=\"Energy\"><MEAN>([^<]+)</MEAN>" found "${result}")
+string(FIND "${CMAKE_MATCH_1}" "-4.03185" at)
+if(NOT found OR NOT at EQUAL 0)
+  message(FATAL_ERROR "Squared term: E0 = ${CMAKE_MATCH_1}, expected -4.03185...")
+endif()
+
+# Dividing by a site operator is refused
+file(WRITE "${test_dir}/divided" [=[
+LATTICE_LIBRARY="lattices.xml"
+MODEL_LIBRARY="models.xml"
+LATTICE="plaquette ladder"
+MODEL="divided ladder"
+CONSERVED_QUANTUMNUMBERS="Nup,Ndown"
+SWEEPS=2
+MAXSTATES=50
+{ L=3; Nup_total=2; Ndown_total=2; }
+]=])
+execute_process(COMMAND "${parameter2xml}" divided
+  WORKING_DIRECTORY "${test_dir}" COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${dmrg}" --write-xml divided.in.xml
+  WORKING_DIRECTORY "${test_dir}" RESULT_VARIABLE status OUTPUT_VARIABLE out ERROR_VARIABLE err)
+if(status EQUAL 0 OR NOT "${out}${err}" MATCHES "Cannot divide by a site operator")
+  message(FATAL_ERROR "dmrg did not refuse a division by a site operator:\n${out}${err}")
 endif()

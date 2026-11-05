@@ -19,8 +19,36 @@
 
 #include <alps/expression.h>
 #include <alps/parameter.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/throw_exception.hpp>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace alps {
+
+// Throws if a site operator on one of the given sites stands in a denominator,
+// e.g. 1/Sz(i). The operator evaluators apply such an operator as if it were in
+// the numerator, and simplify() drops the division (1/Sz(i) becomes Sz(i)), so
+// call this before the term is evaluated or simplified.
+template <class T>
+void refuse_operator_in_denominator(const expression::Expression<T>& term, const std::vector<std::string>& sites)
+{
+  for (typename expression::Expression<T>::term_iterator t = term.terms().first; t != term.terms().second; ++t)
+    for (typename expression::Term<T>::factor_iterator f = t->factors().first; f != t->factors().second; ++f) {
+      bool on_site = false;
+      for (std::size_t s = 0; s < sites.size(); ++s)
+        on_site = on_site || f->depends_on(sites[s]);
+      if (!on_site)
+        continue;
+      if (f->is_inverse())
+        boost::throw_exception(std::runtime_error("Cannot divide by a site operator: "
+          + boost::lexical_cast<std::string>(*t) + " divides by " + boost::lexical_cast<std::string>(*f)));
+      // look inside parentheses, also under a power: K*(Sz(j)/Sz(i)), (1/Sz(i))^2
+      if (const expression::Expression<T>* inner = dynamic_cast<const expression::Expression<T>*>(f->evaluatable()))
+        refuse_operator_in_denominator(*inner, sites);
+    }
+}
 
 template <class T=std::complex<double> >
 class OperatorEvaluator : public expression::ParameterEvaluator<T>

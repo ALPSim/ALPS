@@ -60,6 +60,7 @@ void alps::SiteOperator::substitute_operators(const ModelLibrary& m, const Param
   std::vector<std::string> s(1,site());
   OperatorSubstitution<std::complex<double> > subs(m,p,s);
   Expression e(term());
+  refuse_operator_in_denominator(e, s);
   e.partial_evaluate(subs);
   e.simplify();
   // Full precision: lexical_cast prints 6 significant digits, which truncated
