@@ -33,7 +33,7 @@ namespace alps { namespace input {
 
     // What the SSE and path-integral workers read.
     struct looper_worker_parameters {
-        bool disable_improved_estimator;         // DISABLE_IMPROVED_ESTIMATOR is set, whatever its value
+        bool disable_improved_estimator;         // DISABLE_IMPROVED_ESTIMATOR, default false
     };
 
     ALPS_DECL looper_worker_parameters read_looper_worker_parameters(Parameters const & parameters);
@@ -72,17 +72,6 @@ namespace alps { namespace input {
     };
 
     ALPS_DECL looper_model_parameters read_looper_model_parameters(Parameters const & parameters);
-
-    // The Wang-Landau steps of wl_steps.
-    struct looper_wanglandau_parameters {
-        bool multicanonical;                     // not DISABLE_MULTICANONICAL_MEASUREMENT
-        bool zhou_bhatt;                         // not DISABLE_ZHOU_BHATT
-        int block_sweeps;                        // BLOCK_SWEEPS, default 65536; without Zhou-Bhatt only
-        int sweeps;                              // SWEEPS, default 65536
-        int iterations;                          // WANG_LANDAU_ITERATIONS, default 16
-    };
-
-    ALPS_DECL looper_wanglandau_parameters read_looper_wanglandau_parameters(Parameters const & parameters);
 
 } }
 

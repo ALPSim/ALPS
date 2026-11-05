@@ -174,7 +174,8 @@ TEST(LooperInput, TemperatureAndAnnealing) {
 
 TEST(LooperInput, EstimatorsWeightsAndModel) {
     EXPECT_FALSE(alps::input::read_looper_worker_parameters(text("")).disable_improved_estimator);
-    EXPECT_TRUE(alps::input::read_looper_worker_parameters(text("DISABLE_IMPROVED_ESTIMATOR = 0")).disable_improved_estimator);
+    EXPECT_FALSE(alps::input::read_looper_worker_parameters(text("DISABLE_IMPROVED_ESTIMATOR = 0")).disable_improved_estimator);
+    EXPECT_TRUE(alps::input::read_looper_worker_parameters(text("DISABLE_IMPROVED_ESTIMATOR = 1")).disable_improved_estimator);
 
     alps::input::looper_correlation_parameters const c =
         alps::input::read_looper_correlation_parameters(text("MEASURE[Green Function] = 1"));

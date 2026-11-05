@@ -46,7 +46,7 @@ namespace alps { namespace input {
 
     looper_worker_parameters read_looper_worker_parameters(Parameters const & p) {
         looper_worker_parameters result;
-        result.disable_improved_estimator = p.defined("DISABLE_IMPROVED_ESTIMATOR");
+        result.disable_improved_estimator = p.value_or_default("DISABLE_IMPROVED_ESTIMATOR", false);
         return result;
     }
 
@@ -79,16 +79,6 @@ namespace alps { namespace input {
         result.use_bond_indices_as_types = p.value_or_default("USE_BOND_INDICES_AS_TYPES", false);
         if (p.defined("LOOPER_DEBUG[MODEL OUTPUT]"))
             result.debug_model_output = static_cast<std::string>(p["LOOPER_DEBUG[MODEL OUTPUT]"]);
-        return result;
-    }
-
-    looper_wanglandau_parameters read_looper_wanglandau_parameters(Parameters const & p) {
-        looper_wanglandau_parameters result;
-        result.multicanonical = !p.defined("DISABLE_MULTICANONICAL_MEASUREMENT");
-        result.zhou_bhatt = !p.defined("DISABLE_ZHOU_BHATT");
-        result.block_sweeps = result.zhou_bhatt ? 0 : static_cast<int>(p.value_or_default("BLOCK_SWEEPS", 65536));
-        result.sweeps = p.value_or_default("SWEEPS", 65536);
-        result.iterations = p.value_or_default("WANG_LANDAU_ITERATIONS", 16);
         return result;
     }
 
