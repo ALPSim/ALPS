@@ -19,13 +19,21 @@
 
 #include <alps/expression.h>
 #include <alps/parameter.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/throw_exception.hpp>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 namespace alps {
+
+// An expression, term or factor as it prints, for error messages.
+template <class X>
+std::string expression_text(const X& x)
+{
+  std::ostringstream out;
+  out << x;
+  return out.str();
+}
 
 // Throws if a site operator on one of the given sites stands in a denominator,
 // e.g. 1/Sz(i). The operator evaluators apply such an operator as if it were in
@@ -42,8 +50,8 @@ void refuse_operator_in_denominator(const expression::Expression<T>& term, const
       if (!on_site)
         continue;
       if (f->is_inverse())
-        boost::throw_exception(std::runtime_error("Cannot divide by a site operator: "
-          + boost::lexical_cast<std::string>(*t) + " divides by " + boost::lexical_cast<std::string>(*f)));
+        throw std::runtime_error("Cannot divide by a site operator: "
+          + expression_text(*t) + " divides by " + expression_text(*f));
       // look inside parentheses, also under a power: K*(Sz(j)/Sz(i)), (1/Sz(i))^2
       if (const expression::Expression<T>* inner = dynamic_cast<const expression::Expression<T>*>(f->evaluatable()))
         refuse_operator_in_denominator(*inner, sites);

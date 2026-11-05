@@ -397,9 +397,9 @@ expression::Expression<T> expand_site_powers(const expression::Expression<T>& ex
       if (exponent.can_evaluate(eval, true))
         k = expression::evaluate_helper<T>::real(exponent.value(eval, true));
       if (k < 0. || k != std::floor(k))
-        boost::throw_exception(std::runtime_error("n-site term " + boost::lexical_cast<std::string>(term)
-          + ": the power " + boost::lexical_cast<std::string>(*found) + " of a site operator needs an exponent "
-          "that is a nonnegative integer"));
+        throw std::runtime_error("n-site term " + expression_text(term)
+          + ": the power " + expression_text(*found) + " of a site operator needs an exponent "
+          "that is a nonnegative integer");
       for (factor_iterator f = term.factors().first; f != term.factors().second; ++f) {
         if (f != found)
           rewritten *= *f;
@@ -447,8 +447,8 @@ std::vector<nsite_product<T> > NSiteOperator::split(const std::vector<SiteBasisD
       if (!f->unit_power())
         for (std::size_t r = 0; r < n; ++r)
           if (f->depends_on(sites()[r]))
-            boost::throw_exception(std::runtime_error("n-site term: the power " + boost::lexical_cast<std::string>(*f)
-              + " of a site operator could not be expanded; write the product out, e.g. n(i)*n(i) for n(i)^2"));
+            throw std::runtime_error("n-site term: the power " + expression_text(*f)
+              + " of a site operator could not be expanded; write the product out, e.g. n(i)*n(i) for n(i)^2");
 
   std::vector<nsite_product<T> > products;
   for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
