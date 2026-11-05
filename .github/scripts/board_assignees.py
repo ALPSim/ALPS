@@ -45,17 +45,17 @@ query($org: String!, $number: Int!, $after: String) {
 
 
 def gh(*args, token, body=None):
-    out = subprocess.run(["gh", *args], input=None if body is None else json.dumps(body),
-                         capture_output=True, text=True, check=True,
-                         env={**os.environ, "GH_TOKEN": token}).stdout
-    return json.loads(out) if out.strip() else None
+    """gh's output; `gh issue edit` prints the issue's URL, not JSON."""
+    return subprocess.run(["gh", *args], input=None if body is None else json.dumps(body),
+                          capture_output=True, text=True, check=True,
+                          env={**os.environ, "GH_TOKEN": token}).stdout
 
 
 def load_board():
     names, items, after = None, [], None
     while True:
-        page = gh("api", "graphql", "--input", "-", token=os.environ["BOARD_TOKEN"],
-                  body={"query": ITEMS, "variables": {"org": ORG, "number": PROJECT, "after": after}})
+        page = json.loads(gh("api", "graphql", "--input", "-", token=os.environ["BOARD_TOKEN"],
+                             body={"query": ITEMS, "variables": {"org": ORG, "number": PROJECT, "after": after}}))
         project = page["data"]["organization"]["projectV2"]
         names = names or [o["name"] for o in project["owner"]["options"]]
         items += project["items"]["nodes"]
