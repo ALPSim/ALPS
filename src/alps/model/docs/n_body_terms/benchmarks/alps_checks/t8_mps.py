@@ -14,8 +14,6 @@ Fermions, bosons and spins, each with an n-site term:
 - Bose-Hubbard ladder with a 4-site ring hop, Nmax = 2.
 - Spin-1/2 ladder with 4-spin ring exchange.
 - Spin-1 chain with a 3-site (S_i.S_j)(S_j.S_k) term.
-
-Molecules against the QDK CASCI wave function: ../casci/compare_casci_mps.py.
 """
 import os
 import sys

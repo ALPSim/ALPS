@@ -9,10 +9,6 @@ installed; the feature itself is the code under `src/alps/lattice` and
 - `benchmarks/`
   - `casci/compare_casci_nsite.py`: molecules (H3+, H4, LiH, H6), full
     (pq|rs), ALPS `fulldiag` vs QDK CASCI vs a dense Jordan-Wigner matrix.
-    `compare_casci_dmrg.py`: the same molecules with ALPS `dmrg`.
-    `compare_casci_mps.py`: the CASCI wave function vs the MPS that `dmrg`
-    writes with `SAVE_MPS=1`, coefficient by coefficient (needs a `dmrg`
-    built with ALPSim/ALPS#216).
     `qdk2alps.py` writes the ALPS input from a QDK Hamiltonian, and
     `qdk_alps_ed.py` registers ALPS as a QDK solver. Needs `qdk-chemistry`.
   - `alps_checks/t1_ladder.py`: ladders with a pair-hopping n-site term vs
