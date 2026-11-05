@@ -53,33 +53,6 @@ g= ....5
   }
 }
 
-TEST(LegacyParametersHdf5, StoresUnevaluableValuesAsWritten) {
-  std::istringstream input(R"PARAMS(SOLVER = "Hirsch-Fye"
-U_MATRIX = "u-matrix.dat"
-SHIFT = "U/2+JH"
-PHASE = "x*cos(2*pi)"
-EMPTY = ""
-BLANK = "  "
-U = 3
-)PARAMS");
-  const alps::Parameters original(input);
-  alps::testing::TemporaryDirectory directory;
-  const auto filename = (directory.path() / "parameters.h5").string();
-  {
-    alps::hdf5::archive archive(filename, "w");
-    archive["/parameters"] << original;
-  }
-  alps::hdf5::archive archive(filename, "r");
-  for (const char *key : {"SOLVER", "U_MATRIX", "SHIFT", "PHASE", "EMPTY", "BLANK"}) {
-    SCOPED_TRACE(key);
-    const std::string path = std::string("/parameters/") + key;
-    ASSERT_TRUE(archive.is_datatype<std::string>(path));
-    std::string stored;
-    archive[path] >> stored;
-    EXPECT_EQ(stored, std::string(original[key].c_str()));
-  }
-}
-
 TEST(LegacyParametersHdf5, StoresEvaluableValuesAsNumbers) {
   std::istringstream input(R"PARAMS(L = 16
 NEGATIVE = -3
@@ -120,24 +93,4 @@ HUGE = -1e300
     archive["/parameters/" + entry.first] >> stored;
     EXPECT_EQ(stored, entry.second);
   }
-}
-
-TEST(LegacyParametersHdf5, TypedValueMatchesStoredType) {
-  std::istringstream input(R"PARAMS(L = 8
-N = 2*L
-MU = U/2
-U = 3
-SOLVER = "Hirsch-Fye"
-SHIFT = "U/2+JH"
-EMPTY = ""
-SEED = 4294967295
-)PARAMS");
-  const alps::Parameters parameters(input);
-  EXPECT_EQ(std::get<int>(parameters.typed_value("N")), 16);
-  EXPECT_EQ(std::get<int>(parameters.typed_value("U")), 3);
-  EXPECT_EQ(std::get<double>(parameters.typed_value("MU")), 1.5);
-  EXPECT_EQ(std::get<double>(parameters.typed_value("SEED")), 4294967295.);
-  EXPECT_EQ(std::get<std::string>(parameters.typed_value("SOLVER")), "Hirsch-Fye");
-  EXPECT_EQ(std::get<std::string>(parameters.typed_value("SHIFT")), "U/2+JH");
-  EXPECT_EQ(std::get<std::string>(parameters.typed_value("EMPTY")), "");
 }

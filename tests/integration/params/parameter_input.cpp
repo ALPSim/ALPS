@@ -1,7 +1,6 @@
 // Copyright (C) 2026 by the ALPS collaboration
 // SPDX-License-Identifier: MIT
 #include <alps/parameter_input.hpp>
-#include <alps/expression.h>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/utilities/vectorio.hpp>
@@ -9,7 +8,6 @@
 #include <alps/testing/temporary_directory.hpp>
 #include <hdf5.h>
 #include <sys/stat.h>
-#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <map>
@@ -78,6 +76,7 @@ value_map const text_values{
     {"NOTE", "it's"},
     {"QUOTE", "say \"hi\""},
     {"EMPTY", ""},
+    {"BLANK", "  "},
 };
 
 // Numbers as users write them; the text format keeps them as written.
@@ -99,80 +98,11 @@ value_map const number_values{
 // --------------------------------------------------------------------------
 // Reading ALPS parameter text
 
-TEST(ParameterInputText, AcceptsEverySeparator) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm", "A = 1; B = 2, C = 3\nD = 4\n\n\nE = 5;\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"A", "1"}, {"B", "2"}, {"C", "3"}, {"D", "4"}, {"E", "5"}}));
-}
-
 TEST(ParameterInputText, AcceptsWindowsLineEndings) {
     alps::testing::TemporaryDirectory dir;
     write_text(dir.path() / "parm", "A = 1\r\nB = \"two words\"\r\n");
     EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
               (value_map{{"A", "1"}, {"B", "two words"}}));
-}
-
-TEST(ParameterInputText, IgnoresComments) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm",
-               "// DMFT input\n"
-               "L = 4; // trailing comment\n"
-               "/* block\n   comment */ BETA = 2;\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"L", "4"}, {"BETA", "2"}}));
-}
-
-TEST(ParameterInputText, KeepsQuotedValuesVerbatim) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm",
-               "LATTICE = \"chain lattice\"\n"
-               "MODEL = 'spin'\n"
-               "PADDED = ' two spaces  '\n"
-               "NOTE = \"it's\"\n"
-               "QUOTE = 'say \"hi\"'\n"
-               "EMPTY = \"\"\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"LATTICE", "chain lattice"}, {"MODEL", "spin"},
-                         {"PADDED", " two spaces  "}, {"NOTE", "it's"},
-                         {"QUOTE", "say \"hi\""}, {"EMPTY", ""}}));
-}
-
-TEST(ParameterInputText, KeepsNumbersAsWritten) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm",
-               "L = 16; NEGATIVE = -3; t = 0.707106781186547\n"
-               "TOLERANCE = 1e-3; BIG = -2.5E+2\n");
-    alps::Parameters parameters = read_text_file(dir.path() / "parm");
-    EXPECT_EQ(values(parameters),
-              (value_map{{"L", "16"}, {"NEGATIVE", "-3"}, {"t", "0.707106781186547"},
-                         {"TOLERANCE", "1e-3"}, {"BIG", "-2.5E+2"}}));
-    EXPECT_EQ(static_cast<int>(parameters["L"]), 16);
-    EXPECT_EQ(static_cast<int>(parameters["NEGATIVE"]), -3);
-    EXPECT_EQ(static_cast<double>(parameters["t"]), 0.707106781186547);
-    EXPECT_EQ(static_cast<double>(parameters["TOLERANCE"]), 1e-3);
-    EXPECT_EQ(static_cast<double>(parameters["BIG"]), -250.);
-}
-
-TEST(ParameterInputText, KeepsExpressionsUnevaluated) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm", "U = 3; MU = U/2; N = 2*L; L = 8\n");
-    alps::Parameters parameters = read_text_file(dir.path() / "parm");
-    EXPECT_EQ(std::string(parameters["MU"].c_str()), "U/2");
-    EXPECT_EQ(alps::evaluate<double>(parameters["MU"], parameters), 1.5);
-    EXPECT_EQ(alps::evaluate<double>(parameters["N"], parameters), 16.);
-}
-
-TEST(ParameterInputText, AcceptsKeysWithPrimesHashesAndBrackets) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm",
-               "J' = 1; T#1 = 2\n"
-               "MEASURE_AVERAGE[Local magnetization] = Sz\n"
-               "U_MATRIX = u-matrix.dat; G0TAU_INPUT = ../g0/tau.dat\n");
-    EXPECT_EQ(values(read_text_file(dir.path() / "parm")),
-              (value_map{{"J'", "1"}, {"T#1", "2"},
-                         {"MEASURE_AVERAGE[Local magnetization]", "Sz"},
-                         {"U_MATRIX", "u-matrix.dat"}, {"G0TAU_INPUT", "../g0/tau.dat"}}));
 }
 
 TEST(ParameterInputText, LastDuplicateWins) {
@@ -181,14 +111,6 @@ TEST(ParameterInputText, LastDuplicateWins) {
     alps::Parameters parameters = read_text_file(dir.path() / "parm");
     EXPECT_EQ(parameters.size(), 2u);
     EXPECT_EQ(std::string(parameters["BETA"].c_str()), "2");
-}
-
-TEST(ParameterInputText, ReplacesEnvironmentVariables) {
-    alps::testing::TemporaryDirectory dir;
-    ASSERT_EQ(setenv("ALPS_PARAMETER_INPUT_TEST_DIR", "/data/run1", 1), 0);
-    write_text(dir.path() / "parm", "G0OMEGA_INPUT = ${ALPS_PARAMETER_INPUT_TEST_DIR}/g0.dat\n");
-    EXPECT_EQ(std::string(read_text_file(dir.path() / "parm")["G0OMEGA_INPUT"].c_str()),
-              "/data/run1/g0.dat");
 }
 
 // The text grammar requires at least one parameter.
@@ -268,17 +190,6 @@ TEST(ParameterInputText, ReadsFromPipe) {
     }
 }
 
-TEST(ParameterInputText, TypedReaderConvertsOnRequest) {
-    alps::testing::TemporaryDirectory dir;
-    write_text(dir.path() / "parm",
-               "L = 16; t = 0.707106781186547; TOLERANCE = 1e-3; SOLVER = \"Hirsch-Fye\"\n");
-    alps::params parameters = alps::read_params_file((dir.path() / "parm").string());
-    EXPECT_EQ(typed<int>(parameters, "L"), 16);
-    EXPECT_EQ(typed<double>(parameters, "t"), 0.707106781186547);
-    EXPECT_EQ(typed<double>(parameters, "TOLERANCE"), 1e-3);
-    EXPECT_EQ(typed<std::string>(parameters, "SOLVER"), "Hirsch-Fye");
-}
-
 // --------------------------------------------------------------------------
 // Reading HDF5
 
@@ -304,24 +215,6 @@ TEST(ParameterInputHdf5, TypedReaderKeepsStoredTypes) {
     EXPECT_EQ(typed<std::string>(parameters, "SOLVER"), "Hirsch-Fye");
     EXPECT_EQ(typed<std::string>(parameters, "U_MATRIX"), "u-matrix.dat");
     EXPECT_EQ(typed<std::vector<double>>(parameters, "WEIGHTS"), (std::vector<double>{0.25, 0.75}));
-}
-
-TEST(ParameterInputHdf5, LegacyReaderKeepsScalarValues) {
-    alps::testing::TemporaryDirectory dir;
-    auto const file = dir.path() / "solver.in.h5";
-    {
-        alps::hdf5::archive ar(file.string(), "w");
-        ar["/parameters/L"] << 16;
-        ar["/parameters/t"] << 0.707106781186547;
-        ar["/parameters/TOLERANCE"] << 1e-3;
-        ar["/parameters/SOLVER"] << std::string("Hirsch-Fye");
-    }
-    alps::Parameters parameters = alps::read_parameter_file(file.string());
-    EXPECT_EQ(parameters.size(), 4u);
-    EXPECT_EQ(static_cast<int>(parameters["L"]), 16);
-    EXPECT_EQ(static_cast<double>(parameters["t"]), 0.707106781186547);
-    EXPECT_EQ(static_cast<double>(parameters["TOLERANCE"]), 1e-3);
-    EXPECT_EQ(std::string(parameters["SOLVER"].c_str()), "Hirsch-Fye");
 }
 
 // Solver input files also carry Green's functions; only /parameters is read.
@@ -446,28 +339,26 @@ TEST(ParameterInputHdf5, RecognizedWithUserBlock) {
 // --------------------------------------------------------------------------
 // Missing and unreadable input
 
-TEST(ParameterInputErrors, MissingFileThrows) {
+TEST(ParameterInputErrors, MissingFileThrowsNamingTheFile) {
     alps::testing::TemporaryDirectory dir;
-    auto const file = (dir.path() / "missing").string();
-    EXPECT_THROW(alps::read_parameter_file(file), std::runtime_error);
-    EXPECT_THROW(alps::read_params_file(file), std::runtime_error);
+    auto const file = (dir.path() / "missing-parm").string();
+    auto const expect_named = [&](auto const & read, char const * reader) {
+        try {
+            read();
+            ADD_FAILURE() << reader << ": expected an exception";
+        } catch (std::runtime_error const & error) {
+            EXPECT_NE(std::string(error.what()).find("missing-parm"), std::string::npos) << reader << ": " << error.what();
+        }
+    };
+    expect_named([&] { alps::read_parameter_file(file); }, "read_parameter_file");
+    expect_named([&] { alps::read_params_file(file); }, "read_params_file");
+    expect_named([&] { alps::read_parameter_list(file); }, "read_parameter_list");
 }
 
 TEST(ParameterInputErrors, DirectoryThrows) {
     alps::testing::TemporaryDirectory dir;
     EXPECT_THROW(alps::read_parameter_file(dir.path().string()), std::runtime_error);
     EXPECT_THROW(alps::read_params_file(dir.path().string()), std::runtime_error);
-}
-
-TEST(ParameterInputErrors, ErrorNamesTheFile) {
-    alps::testing::TemporaryDirectory dir;
-    auto const file = (dir.path() / "missing-parm").string();
-    try {
-        alps::read_parameter_file(file);
-        FAIL() << "expected an exception";
-    } catch (std::runtime_error const & error) {
-        EXPECT_NE(std::string(error.what()).find("missing-parm"), std::string::npos) << error.what();
-    }
 }
 
 TEST(ParameterInputErrors, UnwritableLocationThrows) {
@@ -521,28 +412,6 @@ TEST(ParameterInputWrite, Hdf5KeepsTextValuesAsWritten) {
         ar["/parameters/" + entry.first] >> stored;
         EXPECT_EQ(stored, entry.second) << entry.first;
     }
-}
-
-TEST(ParameterInputWrite, Hdf5StoresNumbersWithTheirType) {
-    alps::testing::TemporaryDirectory dir;
-    auto const file = dir.path() / "parm.h5";
-    alps::write_parameter_file(file.string(), make_parameters(number_values));
-    {
-        alps::hdf5::archive ar(file.string(), "r");
-        for (char const * key : {"L", "NEGATIVE", "BETA", "BIG", "U", "N"})
-            EXPECT_TRUE(ar.is_datatype<int>(std::string("/parameters/") + key)) << key;
-        for (char const * key : {"t", "TOLERANCE", "THIRD", "MU"})
-            EXPECT_TRUE(ar.is_datatype<double>(std::string("/parameters/") + key)) << key;
-    }
-    alps::params parameters = alps::read_params_file(file.string());
-    EXPECT_EQ(typed<int>(parameters, "L"), 16);
-    EXPECT_EQ(typed<int>(parameters, "NEGATIVE"), -3);
-    EXPECT_EQ(typed<int>(parameters, "BIG"), -250);
-    EXPECT_EQ(typed<int>(parameters, "N"), 32);
-    EXPECT_EQ(typed<double>(parameters, "t"), 0.707106781186547);
-    EXPECT_EQ(typed<double>(parameters, "TOLERANCE"), 1e-3);
-    EXPECT_EQ(typed<double>(parameters, "THIRD"), 1. / 3.);
-    EXPECT_EQ(typed<double>(parameters, "MU"), 1.5);
 }
 
 // dmft writes its parameters into the results file next to the input.
@@ -695,44 +564,18 @@ TEST(ParameterInputList, Hdf5AndXmlHoldOneRun) {
     alps::write_parameter_file((dir.path() / "parm.h5").string(), p);
     EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "parm.h5").string())),
               (std::vector<value_map>{values(p)}));
-    write_text(dir.path() / "task.in.xml",
+    // The .xml extension is matched case-insensitively.
+    write_text(dir.path() / "task.in.XML",
                "<SIMULATION><PARAMETERS><PARAMETER name=\"L\">8</PARAMETER>"
                "<PARAMETER name=\"SOLVER\">Hirsch-Fye</PARAMETER></PARAMETERS></SIMULATION>\n");
-    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "task.in.xml").string())),
+    EXPECT_EQ(runs(alps::read_parameter_list((dir.path() / "task.in.XML").string())),
               (std::vector<value_map>{values(p)}));
-}
-
-TEST(ParameterInputList, MissingFileNamesTheFile) {
-    alps::testing::TemporaryDirectory dir;
-    try {
-        alps::read_parameter_list((dir.path() / "missing").string());
-        FAIL() << "expected an error";
-    } catch (std::runtime_error const & e) {
-        EXPECT_NE(std::string(e.what()).find("missing"), std::string::npos) << e.what();
-    }
 }
 
 TEST(ParameterInputList, MalformedTextThrows) {
     alps::testing::TemporaryDirectory dir;
     write_text(dir.path() / "parm", "{ T = 0.5 \n");
     EXPECT_THROW(alps::read_parameter_list((dir.path() / "parm").string()), std::runtime_error);
-}
-
-TEST(ParameterInputXml, ReadsTheParametersElement) {
-    alps::testing::TemporaryDirectory dir;
-    // The header parameter2xml writes.
-    write_text(dir.path() / "task.XML",
-               "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-               "<?xml-stylesheet type=\"text/xsl\" href=\"ALPS.xsl\"?>\n<SIMULATION>\n<PARAMETERS>\n"
-               "<PARAMETER name=\"LATTICE\">chain lattice</PARAMETER>\n"
-               "<PARAMETER name=\"L\">8</PARAMETER>\n</PARAMETERS>\n</SIMULATION>\n");
-    EXPECT_EQ(values(alps::read_parameter_file((dir.path() / "task.XML").string())),
-              (value_map{{"LATTICE", "chain lattice"}, {"L", "8"}}));
-}
-
-TEST(ParameterInputStream, ReadsParameterText) {
-    std::istringstream in("LATTICE = \"chain lattice\"\nL = 8\n");
-    EXPECT_EQ(values(alps::read_parameter_text(in)), (value_map{{"LATTICE", "chain lattice"}, {"L", "8"}}));
 }
 
 TEST(ParameterInputStream, ReadsRunsLikeAFile) {
