@@ -68,11 +68,13 @@ void MasterScheduler::set_new_jobfile(const std::filesystem::path& jobfilename)
   outfilepath = jobfilename;
   infilepath = jobfilename;
   
-  infilepath=std::filesystem::absolute(infilepath);
-  outfilepath=std::filesystem::absolute(outfilepath);
-
-  if (!jobfilename.empty())
+  // std::filesystem::absolute throws on an empty path; the evaluate
+  // programs and convert2xml start the scheduler without a job file.
+  if (!jobfilename.empty()) {
+    infilepath=std::filesystem::absolute(infilepath);
+    outfilepath=std::filesystem::absolute(outfilepath);
     parse_job_file(infilepath);
+  }
       
   tasks.resize(taskfiles.size());
   sim_results.resize(taskfiles.size());
