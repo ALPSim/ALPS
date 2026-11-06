@@ -14,7 +14,7 @@
 #include <alps/alea.h>
 #include <alps/plot.h>
 #include <alps/scheduler.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <utility>
@@ -22,7 +22,7 @@
 
 std::pair<const std::basic_string<char,std::char_traits<char>,std::allocator<char> >,unsigned long> _buggy;
 
-void evaluate(const boost::filesystem::path& p, const alps::Parameters new_parms) {
+void evaluate(const std::filesystem::path& p, const alps::Parameters new_parms) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
   alps::Parameters parms=sim.get_parameters();  
@@ -190,8 +190,8 @@ try {
   if (alps::cli_is_master()) alps::print_copyright(std::cout, "qwl");
 
   while (i < argc) {
-    boost::filesystem::path p(argv[i]);
-    evaluate(boost::filesystem::absolute(p),parms);
+    std::filesystem::path p(argv[i]);
+    evaluate(std::filesystem::absolute(p),parms);
     ++i;
   }
 

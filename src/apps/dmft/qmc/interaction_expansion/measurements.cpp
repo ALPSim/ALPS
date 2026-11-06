@@ -21,7 +21,7 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 #include "xml.h"
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
 typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
@@ -51,7 +51,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
-    boost::filesystem::path fn(fns);
+    std::filesystem::path fn(fns);
     checkpoint(fn);
   }
   clock_t time1=clock();

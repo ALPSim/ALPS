@@ -16,7 +16,7 @@
 
 #include <alps/hdf5/archive.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/random.hpp>
 
 #include <string>
@@ -27,8 +27,8 @@
 TEST(Hdf5, Family) {
     alps::testing::TemporaryDirectory temporary;
     std::string const filename = (temporary.path() / "test%05d.h5").string();
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    if (std::filesystem::exists(std::filesystem::path(filename)))
+        std::filesystem::remove(std::filesystem::path(filename));
     {
         using namespace alps;
         alps::hdf5::archive oar(filename, "al");
@@ -72,6 +72,6 @@ TEST(Hdf5, Family) {
         iar4 >> make_pvp("/data", test4);
         EXPECT_EQ(test4, 42);
     }
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    std::filesystem::remove(std::filesystem::path(filename));
 
 }

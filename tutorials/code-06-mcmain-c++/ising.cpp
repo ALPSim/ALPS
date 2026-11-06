@@ -123,12 +123,12 @@ ising_sim::results_type ising_sim::collect_results(result_names_type const & nam
     return partial_results;
 }
 
-void ising_sim::save(boost::filesystem::path const & filename) const {
+void ising_sim::save(std::filesystem::path const & filename) const {
     alps::hdf5::archive ar(filename, "w");
     ar["/simulation/realizations/0/clones/0"] << *this;
 }
 
-void ising_sim::load(boost::filesystem::path const & filename) {
+void ising_sim::load(std::filesystem::path const & filename) {
     alps::hdf5::archive ar(filename);
     ar["/simulation/realizations/0/clones/0"] >> *this;
 }

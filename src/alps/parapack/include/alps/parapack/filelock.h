@@ -17,18 +17,18 @@
 #include <alps/export.h>
 #include <alps/config.h>
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 namespace alps {
 
 class ALPS_DECL filelock {
 public:
   filelock();
-  filelock(boost::filesystem::path const& file, bool lock_now = false, int wait = -1,
+  filelock(std::filesystem::path const& file, bool lock_now = false, int wait = -1,
     bool auto_release = true);
   ~filelock();
 
-  void set_file(boost::filesystem::path const& file);
+  void set_file(std::filesystem::path const& file);
 
   void lock(int wait = -1); // wait = -1 means waiting forever
   void release();
@@ -38,7 +38,7 @@ public:
 
 private:
   std::string file_;
-  boost::filesystem::path lock_;
+  std::filesystem::path lock_;
   bool auto_release_;
   bool is_locking_;
 };

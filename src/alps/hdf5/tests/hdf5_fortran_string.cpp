@@ -17,15 +17,15 @@
 #include <alps/hdf5.hpp>
 #include <alps/version.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <iostream>
 #include <string>
 
 TEST(Hdf5Compatibility, HistoricalFortranString) {
-    boost::filesystem::path infile(ALPS_TEST_SOURCE_DIR);
+    std::filesystem::path infile(ALPS_TEST_SOURCE_DIR);
     infile /= "hdf5_fortran_string.h5";
-    ASSERT_TRUE(boost::filesystem::exists(infile)) << infile;
+    ASSERT_TRUE(std::filesystem::exists(infile)) << infile;
     alps::hdf5::archive archive(infile);
     EXPECT_TRUE(archive.is_datatype<std::string>("/fortran_string"));
     std::string value;

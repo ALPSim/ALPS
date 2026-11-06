@@ -16,7 +16,7 @@
 #include "factory.h"
 #include "dmrg.h"
 
-alps::scheduler::Task* DMRGFactory::make_task(const alps::ProcessList& w, const boost::filesystem::path& fn, const alps::Parameters& parms) const
+alps::scheduler::Task* DMRGFactory::make_task(const alps::ProcessList& w, const std::filesystem::path& fn, const alps::Parameters& parms) const
 {
   return DMRGTask<double>::read_parameters(parms)["COMPLEX"].as<bool>() ?
     static_cast<alps::scheduler::Task*>(new DMRGTask<std::complex<double> >(w,fn)) :

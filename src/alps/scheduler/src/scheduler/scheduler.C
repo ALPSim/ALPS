@@ -86,7 +86,7 @@ int Scheduler::run() // a slave scheduler
             message.receive(MCMP_make_task);
             simmaster = message.sender();
             message >> where >> filename;
-            theTask = make_task(where,boost::filesystem::path(filename));
+            theTask = make_task(where,std::filesystem::path(filename));
             break;
          
           case MCMP_ready:
@@ -163,7 +163,7 @@ void Scheduler::delete_slave_task(const Process& w)
 }
 
 // load from file
-AbstractTask* Scheduler::make_task(const ProcessList& w,const boost::filesystem::path& fname)
+AbstractTask* Scheduler::make_task(const ProcessList& w,const std::filesystem::path& fname)
 {
   ProcessList where(w); // we will modify it
   bool found=false;
@@ -185,7 +185,7 @@ AbstractTask* Scheduler::make_task(const ProcessList& w,const boost::filesystem:
 
 }
 
-AbstractTask* Scheduler::make_task(const boost::filesystem::path& fn)
+AbstractTask* Scheduler::make_task(const std::filesystem::path& fn)
 {
   ProcessList nowhere;
   return make_task(nowhere,fn);

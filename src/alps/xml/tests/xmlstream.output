@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="MyEncoding"?>
 <?xml-stylesheet type="text/xsl" href="URL to my stylesheet"?>
 <?my_pi?>
-<tag0 name0="1">
+<tag0 name0="1" file="dir/job.xml">
   this is a text
   <tag1>
     <tag2 xmlns:MyNameSpace="MyURL">

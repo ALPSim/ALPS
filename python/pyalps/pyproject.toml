@@ -4,7 +4,9 @@
 # releases (2.10 -> v17, 2.15 -> v21). An unpinned build would let every
 # wheel pick up whatever is newest. Bump deliberately, with a full test run,
 # and keep the test-requires pin below in step.
-requires = ["scikit-build-core>=1.0", "nanobind==2.15.0", "patchelf>=0.14; sys_platform == 'linux'"]
+# Keep patchelf aligned with the Linux repair command below. Downgrading
+# from 0.19.3 to 0.19.1 between ELF rewrites can corrupt load mappings.
+requires = ["scikit-build-core>=1.0", "nanobind==2.15.0", "patchelf==0.19.3.0; sys_platform == 'linux'"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -102,14 +104,14 @@ before-all = [
   "python -m pip install 'cmake>=3.27' 'ninja>=1.12'",
   "cd {project}",
   "ccache --zero-stats",
-  "if command -v dnf >/dev/null 2>&1; then ALPS_BOOST_MPI=OFF python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install; fi",
+  "if command -v dnf >/dev/null 2>&1; then python .github/scripts/prepare_dependencies.py boost-1.91.0 _build/boost-install; fi",
   "cmake --preset distribution",
   "cmake --build --preset distribution -j4",
   "ccache --show-stats || true",
 ]
 repair-wheel-command = [
-  # patchelf 0.17 can corrupt non-PIE executables during auditwheel repair.
-  "python -m pip install --only-binary=:all: wheel patchelf==0.19.1.0",
+  # Keep this version aligned with build-system.requires above.
+  "python -m pip install --only-binary=:all: wheel patchelf==0.19.3.0",
   "patchelf --version",
   # Boost's transitive libraries need the same search path as its direct ones.
   # Scope this to repair so installed-wheel tests cannot use the build prefix.

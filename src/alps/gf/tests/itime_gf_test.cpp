@@ -78,7 +78,7 @@ TEST_F(ItimeTestGF,saveload)
     EXPECT_EQ(6., gf2(g::itime_index(4),g::momentum_index(3), g::momentum_index(2), g::index(1)));
     
     
-    //boost::filesystem::remove("g5.h5");
+    //std::filesystem::remove("g5.h5");
 }
 
 TEST_F(ItimeTestGF,saveloadstream)
@@ -102,5 +102,5 @@ TEST_F(ItimeTestGF,saveloadstream)
     EXPECT_EQ(6., gf2(g::itime_index(4),g::momentum_index(3), g::momentum_index(2), g::index(1)));
     
     
-    //boost::filesystem::remove("g5.h5");
+    //std::filesystem::remove("g5.h5");
 }

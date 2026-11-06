@@ -12,7 +12,8 @@
 *****************************************************************************/
 #include <alps/parapack/clone.h>
 #include <alps/parapack/logger.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
+#include <alps/utilities/fs/absolute.hpp>
 
 namespace alps {
 
@@ -115,7 +116,7 @@ bool load_observable(alps::IDump& dp, std::vector<ObservableSet>& obs) {
 // clone
 //
 
-clone::clone(boost::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid,
+clone::clone(std::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid,
   cid_t cid, Parameters const& params, std::string const& base, bool is_new)
   : task_id_(tid), clone_id_(cid), params_(params), basedir_(basedir),
     dump_format_(opt.dump_format), dump_policy_(opt.dump_policy), timer_(opt.check_interval) {
@@ -132,9 +133,9 @@ clone::clone(boost::filesystem::path const& basedir, alps::parapack::option opt,
   worker_ = parapack::worker_factory::make_worker(params_);
   if (!is_new) {
     bool exists = 
-      boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile()), basedir_)) &&
-      (boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
-       boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_)));
+      std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_)) &&
+      (std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
+       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_)));
     if (exists) {
       this->load();
     } else {
@@ -189,11 +190,11 @@ bool clone::halted() const { return !worker_; }
 clone_info const& clone::info() const { return info_; }
 
 void clone::load() {
-  boost::filesystem::path dump = absolute(boost::filesystem::path(info_.dumpfile()), basedir_);
-  boost::filesystem::path dump_h5 =
-    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
-  boost::filesystem::path dump_xdr =
-    absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_);
+  std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
+  std::filesystem::path dump_h5 =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
+  std::filesystem::path dump_xdr =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (exists(dump_h5)) {
     #pragma omp critical (hdf5io)
     {
@@ -213,11 +214,11 @@ void clone::load() {
 }
 
 void clone::save() const{
-  boost::filesystem::path dump = absolute(boost::filesystem::path(info_.dumpfile()), basedir_);
-  boost::filesystem::path dump_h5 =
-    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
-  boost::filesystem::path dump_xdr =
-    absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_);
+  std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
+  std::filesystem::path dump_h5 =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
+  std::filesystem::path dump_xdr =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (dump_format_ == dump_format::hdf5) {
     #pragma omp critical (hdf5io)
     {
@@ -279,8 +280,8 @@ void clone::output() const{
 // clone_mpi
 //
 
-clone_mpi::clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communicator const& work,
-  boost::filesystem::path const& basedir, alps::parapack::option opt, clone_create_msg_t const& msg)
+clone_mpi::clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicator const& work,
+  std::filesystem::path const& basedir, alps::parapack::option opt, clone_create_msg_t const& msg)
   : ctrl_(ctrl), work_(work), task_id_(msg.task_id), clone_id_(msg.clone_id),
     group_id_(msg.group_id), params_(msg.params), basedir_(basedir), dump_format_(opt.dump_format),
     dump_policy_(opt.dump_policy), timer_(opt.check_interval) {
@@ -301,10 +302,12 @@ clone_mpi::clone_mpi(boost::mpi::communicator const& ctrl, boost::mpi::communica
     worker_ = alps::parapack::worker_factory::make_worker(params_);
   if (!is_new) {
     bool exists = 
-      boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile()), basedir_)) &&
-      (boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
-       boost::filesystem::exists(absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_)));
-    exists = boost::mpi::all_reduce(work_, exists, boost::mpi::bitwise_and<bool>());
+      std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_)) &&
+      (std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
+       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_)));
+    int all_exist = exists;
+    MPI_Allreduce(MPI_IN_PLACE, &all_exist, 1, MPI_INT, MPI_LAND, work_);
+    exists = all_exist;
     if (exists) {
       this->load();
     } else {
@@ -341,8 +344,8 @@ clone_mpi::~clone_mpi() {}
 
 void clone_mpi::run() {
   int tag = (info_.progress() < 1) ? mcmp_tag::do_step : mcmp_tag::do_nothing;
-  if (work_.rank() == 0 && ctrl_.iprobe(0, boost::mpi::any_tag)) {
-    boost::mpi::status stat = ctrl_.recv(0, boost::mpi::any_tag);
+  if (work_.rank() == 0 && mpi::iprobe(ctrl_, 0, mpi::any_tag)) {
+    mpi::status stat = mpi::recv(ctrl_, 0, mpi::any_tag);
     tag = stat.tag();
     if (tag == mcmp_tag::clone_suspend && info_.progress() >= 1)
       tag = mcmp_tag::clone_halt;
@@ -447,11 +450,11 @@ bool clone_mpi::halted() const { return !worker_; }
 clone_info const& clone_mpi::info() const { return info_; }
 
 void clone_mpi::load() {
-  boost::filesystem::path dump = absolute(boost::filesystem::path(info_.dumpfile()), basedir_);
-  boost::filesystem::path dump_h5 =
-    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
-  boost::filesystem::path dump_xdr =
-    absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_);
+  std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
+  std::filesystem::path dump_h5 =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
+  std::filesystem::path dump_xdr =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (exists(dump_h5)) {
     #pragma omp critical (hdf5io)
     {
@@ -466,17 +469,17 @@ void clone_mpi::load() {
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
   broadcast(work_, workerdump, 0);
   if (workerdump) {
-    IXDRFileDump dp(absolute(boost::filesystem::path(info_.dumpfile()), basedir_));
+    IXDRFileDump dp(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_));
     worker_->load_worker(dp);
   }
 }
 
 void clone_mpi::save() const{
-  boost::filesystem::path dump = absolute(boost::filesystem::path(info_.dumpfile()), basedir_);
-  boost::filesystem::path dump_h5 =
-    absolute(boost::filesystem::path(info_.dumpfile_h5()), basedir_);
-  boost::filesystem::path dump_xdr =
-    absolute(boost::filesystem::path(info_.dumpfile_xdr()), basedir_);
+  std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
+  std::filesystem::path dump_h5 =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
+  std::filesystem::path dump_xdr =
+    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (dump_format_ == dump_format::hdf5) {
     #pragma omp critical (hdf5io)
     {
@@ -524,14 +527,14 @@ void clone_mpi::output() const{
 void clone_mpi::send_info(mcmp_tag_t tag) {
   if (work_.rank() == 0) {
     if (ctrl_.rank() == 0) std::cerr << "Error: sending to myself in clone_mpi::send_info()\n";
-    ctrl_.send(0, tag, clone_info_msg_t(task_id_, clone_id_, group_id_, info_));
+    mpi::send(ctrl_, 0, tag, clone_info_msg_t(task_id_, clone_id_, group_id_, info_));
   }
 }
 
 void clone_mpi::send_halted() {
   if (work_.rank() == 0) {
     if (ctrl_.rank() == 0) std::cerr << "Error: sending to myself in clone_mpi::send_halted()\n";
-    ctrl_.send(0, mcmp_tag::clone_halt, clone_halt_msg_t(task_id_, clone_id_, group_id_));
+    mpi::send(ctrl_, 0, mcmp_tag::clone_halt, clone_halt_msg_t(task_id_, clone_id_, group_id_));
   }
 }
 

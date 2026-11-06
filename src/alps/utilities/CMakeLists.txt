@@ -11,7 +11,7 @@ add_library(alps_utilities
   src/stacktrace.cpp
   src/temporary_filename.cpp
   src/vmusage.cpp)
-target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Boost::filesystem Threads::Threads)
+target_link_libraries(alps_utilities PUBLIC ALPS::configuration ALPS::containers Threads::Threads)
 
 # Stacktraces require both platform headers and linkable runtime symbols.
 # Detect them for every build, including embedded consumers on musl.
@@ -39,10 +39,10 @@ if(NOT ALPS_HAVE_STACKTRACE)
 endif()
 
 if(ALPS_ENABLE_MPI)
-  target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX;Boost::mpi>")
+  target_link_libraries(alps_utilities PUBLIC "$<COMPILE_ONLY:MPI::MPI_CXX>")
 endif()
 if(ALPS_ENABLE_MPI)
-  target_link_libraries(alps_utilities PUBLIC MPI::MPI_CXX Boost::mpi)
+  target_link_libraries(alps_utilities PUBLIC MPI::MPI_CXX)
 endif()
 if(WIN32)
   target_link_libraries(alps_utilities PRIVATE ws2_32 mswsock)
@@ -59,12 +59,10 @@ target_sources(alps_utilities PUBLIC
     include/alps/cctype.h
     include/alps/factory.h
     include/alps/lambda.hpp
-    include/alps/ngs/boost_mpi.hpp
     include/alps/ngs/config.hpp
     include/alps/ngs/hash.hpp
     include/alps/ngs/mutex.hpp
     include/alps/ngs/sleep.hpp
-    include/alps/ngs/thread_exceptions.hpp
     include/alps/stringvalue.h
     include/alps/testing/fp_compare.hpp
     include/alps/type_traits/average_type.hpp
@@ -88,6 +86,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/data.hpp
     include/alps/utilities/deprecated.hpp
     include/alps/utilities/encode.hpp
+    include/alps/utilities/fs/absolute.hpp
     include/alps/utilities/fs/get_basename.hpp
     include/alps/utilities/fs/get_dirname.hpp
     include/alps/utilities/fs/get_extension.hpp

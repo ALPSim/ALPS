@@ -22,7 +22,7 @@
 #include <alps/utilities/type_wrapper.hpp>
 
 #include <boost/mpl/and.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_same.hpp>
 #include <boost/type_traits/is_array.hpp>
@@ -30,7 +30,7 @@
 
 #ifndef ALPS_NGS_SINGLE_THREAD
 
-#include <boost/thread.hpp>
+#include <mutex>
 
 #endif
 
@@ -120,7 +120,7 @@ namespace alps {
 
                 /// A closed archive; open() attaches it to a file (from ALPSCore 38e49c73).
                 archive();
-                archive(boost::filesystem::path const & filename, std::string mode = "r");
+                archive(std::filesystem::path const & filename, std::string mode = "r");
                 explicit archive(std::string const & filename, int props); // TODO: remove that!
                 explicit archive(std::string const & filename, char prop); // TODO: remove that!
                 explicit archive(std::string const & filename, char signed prop); // TODO: remove that!
@@ -144,7 +144,7 @@ namespace alps {
                 /// Opens a file in a closed archive, also after close(). Throws
                 /// archive_opened if the archive is open and wrong_mode for
                 /// letters other than "rwaclm".
-                void open(boost::filesystem::path const & filename, std::string const & mode = "r");
+                void open(std::filesystem::path const & filename, std::string const & mode = "r");
                 void close();
                 bool is_open();
 
@@ -233,7 +233,7 @@ namespace alps {
                 detail::archivecontext * context_;
 
 #ifndef ALPS_NGS_SINGLE_THREAD
-                static boost::recursive_mutex mutex_;
+                static std::recursive_mutex mutex_;
 #endif
                 static std::map<std::string, std::pair<detail::archivecontext *, std::size_t> > ref_cnt_;
 

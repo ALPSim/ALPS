@@ -35,10 +35,10 @@ namespace scheduler {
 
 struct CheckpointFiles
 {
-  boost::filesystem::path in;
-  boost::filesystem::path out;
-  boost::filesystem::path hdf5in;
-  boost::filesystem::path hdf5out;
+  std::filesystem::path in;
+  std::filesystem::path out;
+  std::filesystem::path hdf5in;
+  std::filesystem::path hdf5out;
 };
 
 //=======================================================================
@@ -78,7 +78,7 @@ public:
   AbstractTask(const ProcessList&);
   virtual ~AbstractTask();
 
-  virtual void checkpoint(const boost::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const = 0; 
+  virtual void checkpoint(const std::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const = 0; 
 
   virtual uint32_t cpus() const=0; // cpus per run
   virtual bool local() {return false;}; // is it running on the local process?
@@ -117,16 +117,16 @@ class ALPS_DECL Task : public AbstractTask
 public:
   static void print_copyright(std::ostream&);
   
-  Task(const ProcessList&, const boost::filesystem::path&);    
+  Task(const ProcessList&, const std::filesystem::path&);    
   Task(const ProcessList&, const Parameters&);    
     
   ~Task();
   
   virtual void construct(); // needs to be called to finish construction
 
-  void checkpoint(const boost::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
-  void checkpoint_hdf5(const boost::filesystem::path&) const; // write into a file
-  void checkpoint_xml(const boost::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
+  void checkpoint(const std::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
+  void checkpoint_hdf5(const std::filesystem::path&) const; // write into a file
+  void checkpoint_xml(const std::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
 
   void add_process(const Process&);
 
@@ -153,12 +153,12 @@ public:
 protected:
   virtual void write_xml_header(alps::oxstream&) const;
   virtual void write_xml_trailer(alps::oxstream&) const;
-  virtual void write_xml_body(alps::oxstream&, boost::filesystem::path const& fn,bool writeall) const=0;
+  virtual void write_xml_body(alps::oxstream&, std::filesystem::path const& fn,bool writeall) const=0;
   virtual void handle_tag(std::istream&, const XMLTag&);
 
   alps::Parameters parms;
   bool finished_;
-  boost::filesystem::path infilename;
+  std::filesystem::path infilename;
   bool from_file;
 
 
@@ -179,7 +179,7 @@ public:
   };
 
 public:
-  WorkerTask(const ProcessList&, const boost::filesystem::path&);      
+  WorkerTask(const ProcessList&, const std::filesystem::path&);      
   WorkerTask(const ProcessList&, const Parameters&);     
   ~WorkerTask();
   
@@ -200,7 +200,7 @@ public:
 
 protected:
   virtual std::string worker_tag() const=0;
-  void write_xml_body(alps::oxstream&, boost::filesystem::path const&,bool writeall) const;
+  void write_xml_body(alps::oxstream&, std::filesystem::path const&,bool writeall) const;
   void handle_tag(std::istream&, const XMLTag&);
   std::vector<RunStatus> workerstatus;
 
@@ -214,9 +214,9 @@ private:
 class ALPS_DECL RemoteTask : public AbstractTask
 {
 public:
-  RemoteTask(const ProcessList&,const boost::filesystem::path&);
+  RemoteTask(const ProcessList&,const std::filesystem::path&);
   ~RemoteTask();
-  void checkpoint(const boost::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
+  void checkpoint(const std::filesystem::path&, bool = ALPS_WRITE_ALL_XML) const; // write into a file
 
   void add_processes(const ProcessList&);
   void add_process(const Process&);
@@ -241,7 +241,7 @@ public:
   SlaveTask(const Process&);
   
   virtual void run(); // run a few steps and return control
-  virtual void checkpoint(const boost::filesystem::path& fn, bool = ALPS_WRITE_ALL_XML) const;
+  virtual void checkpoint(const std::filesystem::path& fn, bool = ALPS_WRITE_ALL_XML) const;
   virtual void add_process(const Process& p);
   virtual void start();
   virtual double work() const;

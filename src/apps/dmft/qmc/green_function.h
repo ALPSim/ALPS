@@ -18,6 +18,7 @@
 #include "types.h"
 #include <fstream>
 #include <iostream>
+#include <cassert>
 #include <cstring>
 
 

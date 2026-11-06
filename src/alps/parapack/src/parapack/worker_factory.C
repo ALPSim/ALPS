@@ -130,12 +130,12 @@ worker_factory::worker_pointer_type worker_factory::make_worker(Parameters const
 }
 
 alps::scheduler::MCSimulation* worker_factory::make_task(alps::ProcessList const& nodes,
-  boost::filesystem::path const& file) {
+  std::filesystem::path const& file) {
   return new alps::scheduler::MCSimulation(nodes, file);
 }
 
 alps::scheduler::MCSimulation* worker_factory::make_task(alps::ProcessList const& nodes,
-  boost::filesystem::path const& file, alps::Parameters const&) {
+  std::filesystem::path const& file, alps::Parameters const&) {
   return new alps::scheduler::MCSimulation(nodes, file);
 }
 
@@ -303,7 +303,7 @@ evaluator_factory::make_creator(Parameters const& params) const {
 //
 
 parallel_worker_factory::worker_pointer_type
-parallel_worker_factory::make_worker(boost::mpi::communicator const& comm,
+parallel_worker_factory::make_worker(alps::mpi::communicator const& comm,
   Parameters const& params) {
   return instance()->make_creator(params)->create(comm, params);
 }

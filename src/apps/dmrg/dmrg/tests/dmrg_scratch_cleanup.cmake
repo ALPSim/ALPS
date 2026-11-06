@@ -15,6 +15,7 @@ J=1
 SWEEPS=2
 NUMBER_EIGENVALUES=1
 MAXSTATES=20
+CHECKPOINT=0
 ]=])
 foreach(task 1 2)
   file(WRITE "${test_dir}/scratch${task}/block_ALPS_unrelated" "keep me")

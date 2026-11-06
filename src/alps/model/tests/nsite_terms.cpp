@@ -486,6 +486,25 @@ TEST(SectorCheck, MomentumSectorsTogetherGiveTheFullSpectrum) {
     }
 }
 
+TEST(NSiteHamiltonian, RandomCouplingsAreRefused) {
+  // One local table serves every n-site group of a type, so a random coupling
+  // would be drawn once and shared by all groups.
+  const std::string library = std::string(spinless_model).substr(0, std::string(spinless_model).find("<HAMILTONIAN"));
+  for (const char* term : {"random()*n(i)*n(j)*n(k)", "gaussian_random(0,1)*n(i)*n(j)*n(k)",
+                           "sqrt(random())*n(i)*n(j)*n(k)", "R*n(i)*n(j)*n(k)",
+                           "integer_random(5)*n(i)*n(j)*n(k)", "normal_random()*n(i)*n(j)*n(k)"}) {
+    Files f(spinless_chain, library + "<HAMILTONIAN name=\"random\"><BASIS ref=\"spinless\"/>"
+            "<NSITETERM sites=\"i j k\">" + std::string(term) + "</NSITETERM></HAMILTONIAN>");
+    alps::Parameters p = f.parms();
+    p["LATTICE"] = "periodic three-site chain"; p["L"] = 5; p["MODEL"] = "random";
+    p["CONSERVED_QUANTUMNUMBERS"] = "N"; p["N_total"] = 3; p["R"] = "random()";
+    const std::string error = build_error(p);
+    EXPECT_NE(error.find("cannot carry disorder"), std::string::npos) << term;
+    // the message names the term, with parameters already substituted
+    EXPECT_NE(error.find("n(i) * n(j) * n(k)"), std::string::npos) << error;
+  }
+}
+
 TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
   // operator_matrix (measurements) keeps dropping elements that leave the sector
   Files f(chain4, "<HAMILTONIAN name=\"hop\"><BASIS ref=\"fermion\"/>"

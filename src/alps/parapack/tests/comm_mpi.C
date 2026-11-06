@@ -15,7 +15,7 @@
 #include "process_mpi_checks.hpp"
 
 TEST(ParallelCommunicators, SplitsWorkersAndGroupHeads) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   alps::process_helper_mpi process(world, 2);
   EXPECT_EQ(process.num_procs_per_group(), 2);

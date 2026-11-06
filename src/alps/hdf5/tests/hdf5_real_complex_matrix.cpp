@@ -18,7 +18,7 @@
 #include <alps/hdf5/archive.hpp>
 #include <alps/numeric/matrix.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <complex>

@@ -20,8 +20,9 @@ ctest --preset dev -R Matrix
 ```
 
 `dev` omits applications. `default` includes application tests. `mpi` enables
-MPI, `extensive` enables graph and HDF5 type-matrix tests, and `sanitizers`
-instruments a Debug build with AddressSanitizer and UndefinedBehaviorSanitizer.
+MPI, `extensive` enables graph and HDF5 type-matrix tests, `debug` builds
+applications and tests with assertions enabled, and `sanitizers` instruments a
+Debug build with AddressSanitizer and UndefinedBehaviorSanitizer.
 Build each preset before testing it. To exercise actual ranks:
 
 ```sh

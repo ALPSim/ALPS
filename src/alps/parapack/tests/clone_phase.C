@@ -13,7 +13,7 @@
 
 #include <alps/parapack/clone_info_p.h>
 #include <alps/parser/xmlparser.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <iostream>
 
 #include <alps/testing/stream_fixture.hpp>
@@ -34,7 +34,7 @@ TEST(Serialization, clone_phase) {
 
     ox << phase;
 
-    boost::filesystem::path xdrpath((directory.path() / "clone_phase.xdr").string());
+    std::filesystem::path xdrpath((directory.path() / "clone_phase.xdr").string());
     {
       alps::OXDRFileDump dp(xdrpath);
       dp << phase;
@@ -45,9 +45,9 @@ TEST(Serialization, clone_phase) {
       dp >> phase;
     }
     ox << phase;
-    boost::filesystem::remove(xdrpath);
+    std::filesystem::remove(xdrpath);
 
-    boost::filesystem::path h5path((directory.path() / "clone_phase.h5").string());
+    std::filesystem::path h5path((directory.path() / "clone_phase.h5").string());
 #pragma omp critical(hdf5io)
     {
       alps::hdf5::archive ar(h5path.string(), "a");
@@ -60,7 +60,7 @@ TEST(Serialization, clone_phase) {
       ar["/phase"] >> phase;
     }
     ox << phase;
-    boost::filesystem::remove(h5path);
+    std::filesystem::remove(h5path);
 
   } // Flush oxstream before comparing its serialized bytes.
   transcript.expect_output(ALPS_TEST_SOURCE_DIR "/clone_phase.op");

@@ -17,7 +17,7 @@
 #include <alps/utilities/os.hpp>
 #include <alps/version.h>
 #include <boost/throw_exception.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <stdexcept>
 #include <vector>
 
@@ -42,20 +42,20 @@ std::string username() {
   return "unknown";
 }
 
-boost::filesystem::path temp_directory_path() {
-  return boost::filesystem::temp_directory_path();
+std::filesystem::path temp_directory_path() {
+  return std::filesystem::temp_directory_path();
 }
 
-boost::filesystem::path installation_directory()
+std::filesystem::path installation_directory()
 {
-  return boost::filesystem::path(ALPS_PREFIX);
+  return std::filesystem::path(ALPS_PREFIX);
 }
 
-boost::filesystem::path bin_directory()
+std::filesystem::path bin_directory()
 {
   if (const char* bin = std::getenv("ALPS_BIN_PATH"))
-    return boost::filesystem::path(bin);
-  return boost::filesystem::path(ALPS_BIN_DIR);
+    return std::filesystem::path(bin);
+  return std::filesystem::path(ALPS_BIN_DIR);
 }
 
   

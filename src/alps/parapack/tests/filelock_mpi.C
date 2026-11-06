@@ -13,8 +13,7 @@
 
 #include <alps/parapack/filelock.h>
 #include <alps/testing/temporary_directory.hpp>
-#include <boost/mpi.hpp>
-#include <boost/serialization/string.hpp>
+#include <alps/parapack/mpi.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <chrono>
@@ -23,12 +22,12 @@
 #include <string>
 
 TEST(ParallelFileLock, ExcludesOtherRanksAndReleasesOnScopeExit) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   alps::testing::TemporaryDirectory directory;
   std::string filename = (directory.path() / "shared-checkpoint").string();
-  boost::mpi::broadcast(world, filename, 0);
-  const boost::filesystem::path path(filename);
+  alps::mpi::broadcast(world, filename, 0);
+  const std::filesystem::path path(filename);
   for (int owner = 0; owner < world.size(); ++owner) {
     SCOPED_TRACE("owner=" + std::to_string(owner));
     auto lock = std::make_unique<alps::filelock>(path);
@@ -63,31 +62,34 @@ TEST(ParallelFileLock, ExcludesOtherRanksAndReleasesOnScopeExit) {
 }
 
 TEST(ParallelFileLock, BlockingLockRetriesUntilOwnerReleases) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   alps::testing::TemporaryDirectory directory;
   std::string filename = (directory.path() / "contended-checkpoint").string();
-  boost::mpi::broadcast(world, filename, 0);
-  alps::filelock lock{boost::filesystem::path(filename)};
+  alps::mpi::broadcast(world, filename, 0);
+  alps::filelock lock{std::filesystem::path(filename)};
   if (world.rank() == 0)
     EXPECT_NO_THROW(lock.lock(0));
   world.barrier();
   if (world.rank() == 0) {
     int ready = 0, acquired = 0;
-    world.recv(1, 0, ready);
-    auto completed = world.irecv(1, 1, acquired);
+    alps::mpi::recv(world, 1, 0, ready);
+    MPI_Request completed;
+    MPI_Irecv(&acquired, 1, MPI_INT, 1, 1, world, &completed);
     // Keep the lock through at least one one-second retry. CTest bounds the
     // entire topology if a regression makes the blocking call hang.
     std::this_thread::sleep_for(std::chrono::seconds(2));
-    EXPECT_FALSE(completed.test()) << "contender returned before release";
+    int done = 0;
+    MPI_Test(&completed, &done, MPI_STATUS_IGNORE);
+    EXPECT_FALSE(done) << "contender returned before release";
     EXPECT_NO_THROW(lock.release());
-    completed.wait();
+    if (!done) MPI_Wait(&completed, MPI_STATUS_IGNORE);
     EXPECT_EQ(acquired, 1);
   } else if (world.rank() == 1) {
-    world.send(0, 0, 1);
+    alps::mpi::send(world, 0, 0, 1);
     EXPECT_NO_THROW(lock.lock());
     const int acquired = lock.locking() ? 1 : 0;
-    world.send(0, 1, acquired);
+    alps::mpi::send(world, 0, 1, acquired);
     if (lock.locking())
       EXPECT_NO_THROW(lock.release());
   }

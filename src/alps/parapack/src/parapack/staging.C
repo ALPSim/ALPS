@@ -7,8 +7,8 @@
 namespace alps {
 namespace parapack {
 
-void load_checkpoints(boost::filesystem::path const& file_chp,
-		      boost::filesystem::path const& basedir,
+void load_checkpoints(std::filesystem::path const& file_chp,
+		      std::filesystem::path const& basedir,
 		      std::queue<suspended_queue_t>& suspended_queue) {
 
   std::cout << "  tasks ordered by " << file_chp << " = ";
