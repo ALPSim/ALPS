@@ -1,5 +1,10 @@
 # PR review: group the changes for easier review
 
+---
+name: "pr_code_review"
+description: "Trigger this skill when the user types '/pr_code_review', 'pr code review', or provides a PR number/URL to organize into a categorized HTML review page."
+---
+
 Input: a GitHub PR, given as a number or URL.
 
 Goal: show every changed file in the PR exactly once, grouped into categories so it is easier to review, and open the result in a new browser tab. You are organizing the changes, not judging them. The reviewer decides what matters.
