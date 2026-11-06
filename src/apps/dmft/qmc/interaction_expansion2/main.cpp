@@ -21,12 +21,14 @@
 #endif
 
 int main(int argc, char** argv) {
+#ifdef ALPS_HAVE_MPI
+  // outside the try: destroyed while an exception unwinds, it calls MPI_Abort
+  // before the catch below can print the message
+  alps::mpi::environment env(argc, argv);
+#endif
   try {
     alps::mcoptions options(argc, argv, "interaction");
     if (!options.valid) return 0;
-#ifdef ALPS_HAVE_MPI
-    alps::mpi::environment env(argc, argv);
-#endif
     alps::params parms;
     {
       alps::hdf5::archive input(options.input_file, alps::hdf5::archive::READ);

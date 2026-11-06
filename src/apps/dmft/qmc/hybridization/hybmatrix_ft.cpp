@@ -13,6 +13,7 @@
  *
  *****************************************************************************/
 
+#include <algorithm>
 #include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "hybmatrix.hpp"
@@ -75,8 +76,8 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
     cdagger_times[it->second] = it->first;
   }
 
-  memset(&(G2w[0]),0, G2w.size()*sizeof(std::complex<double>));
-  memset(&(F2w[0]),0, F2w.size()*sizeof(std::complex<double>));
+  std::fill(G2w.begin(), G2w.end(), std::complex<double>(0.));
+  std::fill(F2w.begin(), F2w.end(), std::complex<double>(0.)); //F2w is empty unless MEASURE_h2w
 
   double w_ini = (2*(-N_w2/2)+1)*boost::math::constants::pi<double>()/beta_;
   double w_inc = 2*boost::math::constants::pi<double>()/beta_;
