@@ -1,6 +1,7 @@
 ---
 name: "pr_code_review"
-description: "Trigger this skill when the user types '/pr_code_review', 'pr code review', or provides a PR number/URL to organize into a categorized HTML review page."
+description: "Organize a PR's changed files into a categorized HTML review page. Run with /pr_code_review <PR number or URL>."
+disable-model-invocation: true
 ---
 
 # PR review: group the changes for easier review
