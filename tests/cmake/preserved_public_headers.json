@@ -1018,6 +1018,7 @@
     "alps/ngs/mcresults.hpp": "the NGS observables over ALEA (alps::mcobservables, alps::mcresults), which ALPSCore's accumulators in <alps/accumulators.hpp> replace",
     "alps/ngs/mpi.hpp": "MPI reductions of the NGS accumulators; ALPSCore's accumulators reduce through <alps/utilities/mpi.hpp>",
     "alps/ngs/observablewrappers.hpp": "the NGS observables over ALEA (alps::mcobservables, alps::mcresults), which ALPSCore's accumulators in <alps/accumulators.hpp> replace",
-    "alps/ngs/result.hpp": "included <alps/ngs/result/result.hpp> and <alps/ngs/result/result_set.hpp>, which do not exist, so no code could use it"
+    "alps/ngs/result.hpp": "included <alps/ngs/result/result.hpp> and <alps/ngs/result/result_set.hpp>, which do not exist, so no code could use it",
+    "alps/osiris/dumparchive.h": "Boost.Serialization archives on top of an osiris dump; nothing in ALPS used them, and ALPS no longer links Boost.Serialization"
   }
 }

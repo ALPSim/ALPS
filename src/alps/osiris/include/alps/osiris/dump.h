@@ -231,6 +231,7 @@ IDump& operator>>(IDump& d, std::complex<T>& x) { d.read_complex(x); return d; }
 
 } // end namespace
 
-#include "dumparchive.h"
+// Dump operators for std::string, which this header has always provided.
+#include "std/string.h"
 
 #endif // OSIRIS_DUMP_H

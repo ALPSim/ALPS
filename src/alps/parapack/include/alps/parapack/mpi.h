@@ -23,9 +23,10 @@
 //   broadcast(comm, object, root) ->  mpi::broadcast_object(comm, object, root)
 //   gather(comm, string, ...)     ->  mpi::gather(comm, string, ...)
 //
-// Arithmetic values and arrays go as their MPI type. Other values are
-// written to a Boost.Serialization binary archive and sent as one MPI_BYTE
-// message, so their type needs a serialize() function, as with Boost.MPI.
+// Arithmetic values and arrays go as their MPI type, and strings as their
+// characters. Other values are written to an in-memory osiris dump with
+// operator<<(ODump&, T const&) and sent as one MPI_BYTE message, so their
+// type needs save(ODump&) and load(IDump&), as for XDR checkpoints.
 
 #ifndef PARAPACK_MPI_H
 #define PARAPACK_MPI_H
@@ -34,12 +35,12 @@
 
 #ifdef ALPS_HAVE_MPI
 
+#include <alps/osiris/dump.h>
 #include <alps/utilities/mpi.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/string.hpp>
+#include <boost/throw_exception.hpp>
+#include <cstring>
 #include <optional>
-#include <sstream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -97,21 +98,76 @@ namespace detail {
 template<typename T>
 inline constexpr bool is_mpi_value = std::is_arithmetic<T>::value && !std::is_same<T, bool>::value;
 
+// The value types that ODump and IDump read and write
+#define ALPS_PARAPACK_MPI_DUMP_TYPES \
+  ALPS_PARAPACK_MPI_DO_TYPE(bool) ALPS_PARAPACK_MPI_DO_TYPE(char) \
+  ALPS_PARAPACK_MPI_DO_TYPE(signed char) ALPS_PARAPACK_MPI_DO_TYPE(unsigned char) \
+  ALPS_PARAPACK_MPI_DO_TYPE(short) ALPS_PARAPACK_MPI_DO_TYPE(unsigned short) \
+  ALPS_PARAPACK_MPI_DO_TYPE(int) ALPS_PARAPACK_MPI_DO_TYPE(unsigned int) \
+  ALPS_PARAPACK_MPI_DO_TYPE(long) ALPS_PARAPACK_MPI_DO_TYPE(unsigned long) \
+  ALPS_PARAPACK_MPI_DO_TYPE(long long) ALPS_PARAPACK_MPI_DO_TYPE(unsigned long long) \
+  ALPS_PARAPACK_MPI_DO_TYPE(float) ALPS_PARAPACK_MPI_DO_TYPE(double) \
+  ALPS_PARAPACK_MPI_DO_TYPE(long double)
+
+// An osiris dump that writes values in native byte order to a string. The
+// sender and receiver are processes of the same run, so nothing is converted.
+class obuffer_dump : public ODump {
+public:
+  std::string const& buffer() const { return buffer_; }
+# define ALPS_PARAPACK_MPI_DO_TYPE(T) \
+  void write_simple(T x) { buffer_.append(reinterpret_cast<char const*>(&x), sizeof(T)); }
+  ALPS_PARAPACK_MPI_DUMP_TYPES
+# undef ALPS_PARAPACK_MPI_DO_TYPE
+  void write_string(std::size_t n, char const* s) { buffer_.append(s, n); }
+  using ODump::write_string;
+private:
+  std::string buffer_;
+};
+
+// Reads what obuffer_dump wrote
+class ibuffer_dump : public IDump {
+public:
+  explicit ibuffer_dump(std::string const& buffer) : buffer_(buffer), pos_(0) {}
+# define ALPS_PARAPACK_MPI_DO_TYPE(T) \
+  void read_simple(T& x) { read_bytes(&x, sizeof(T)); }
+  ALPS_PARAPACK_MPI_DUMP_TYPES
+# undef ALPS_PARAPACK_MPI_DO_TYPE
+  void read_string(std::size_t n, char* s) { read_bytes(s, n); }
+  using IDump::read_string;
+private:
+  void read_bytes(void* p, std::size_t n) {
+    if (pos_ + n > buffer_.size())
+      boost::throw_exception(std::runtime_error("MPI message is shorter than its contents"));
+    std::memcpy(p, buffer_.data() + pos_, n);
+    pos_ += n;
+  }
+  std::string const& buffer_;
+  std::size_t pos_;
+};
+
+#undef ALPS_PARAPACK_MPI_DUMP_TYPES
+
 template<typename T>
 std::string serialize(T const* values, int n) {
-  std::ostringstream os;
-  {
-    boost::archive::binary_oarchive ar(os);
-    for (int i = 0; i < n; ++i) ar << values[i];
-  }
-  return os.str();
+  obuffer_dump dump;
+  for (int i = 0; i < n; ++i) dump << values[i];
+  return dump.buffer();
 }
 
 template<typename T>
 void deserialize(std::string const& buffer, T* values, int n) {
-  std::istringstream is(buffer);
-  boost::archive::binary_iarchive ar(is);
-  for (int i = 0; i < n; ++i) ar >> values[i];
+  ibuffer_dump dump(buffer);
+  for (int i = 0; i < n; ++i) dump >> values[i];
+}
+
+inline std::string serialize(std::string const* values, int n) {
+  if (n != 1) return serialize<std::string>(values, n);
+  return *values;
+}
+
+inline void deserialize(std::string const& buffer, std::string* values, int n) {
+  if (n != 1) return deserialize<std::string>(buffer, values, n);
+  *values = buffer;
 }
 
 } // namespace detail
