@@ -7,6 +7,9 @@ testing guide, and [REVIEW.md](REVIEW.md) what reviewers look for.
 - Anything a person will read must account for limited human attention.
 - Run the tests that cover the change before opening a pull request, and
   report what they printed, not that they pass.
+- Before opening a pull request, have the diff reviewed in a fresh agent
+  context against REVIEW.md (`/code-review` where available), and fix, answer
+  or dismiss its findings.
 - Add only the tests a real bug would fail
   ([when to add a test](tests/README.md#when-to-add-a-test)).
 - A change to numerical results is checked against an independent value.
