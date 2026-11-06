@@ -19,8 +19,19 @@
 
 #include <alps/expression.h>
 #include <alps/parameter.h>
+#include <sstream>
+#include <string>
 
 namespace alps {
+
+// An expression, term or factor as it prints.
+template <class X>
+std::string expression_text(const X& x)
+{
+  std::ostringstream out;
+  out << x;
+  return out.str();
+}
 
 template <class T=std::complex<double> >
 class OperatorEvaluator : public expression::ParameterEvaluator<T>
