@@ -308,7 +308,9 @@ bool QWL_SSE_Simulation::is_thermalized() const {
 
 
 double QWL_SSE_Simulation::work_done() const {
-  return all_done? 1. : ( doing_multicanonical ? (histo.min()>=minimum_histogram || parms.defined("SWEEPS") ? double(block_sweeps)/double(block_sweeps_total) : 0. ) : 0.);
+  // Results are stored at the end of the run, and the scheduler ends a task when
+  // the work of its runs adds up to 1: partial work would end every run first.
+  return all_done ? 1. : 0.;
 }
 
 
