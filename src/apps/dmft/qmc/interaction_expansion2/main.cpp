@@ -23,7 +23,8 @@
 int main(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
   // outside the try: destroyed while an exception unwinds, it calls MPI_Abort
-  // before the catch below can print the message
+  // before the catch below can print the message. The catch aborts itself,
+  // since other ranks may be waiting in a collective.
   alps::mpi::environment env(argc, argv);
 #endif
   try {
@@ -41,9 +42,15 @@ int main(int argc, char** argv) {
     alps::solvers::ctint(parms, options.output_file);
   } catch (std::exception const& exc) {
     std::cerr << exc.what() << '\n';
+#ifdef ALPS_HAVE_MPI
+    alps::mpi::environment::abort(255);
+#endif
     return -1;
   } catch (...) {
     std::cerr << "Fatal Error: Unknown Exception!\n";
+#ifdef ALPS_HAVE_MPI
+    alps::mpi::environment::abort(255);
+#endif
     return -2;
   }
   return 0;

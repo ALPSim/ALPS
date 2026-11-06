@@ -13,7 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
-- `hybridization` and `interaction` built with MPI print the message of an input error, such as "parameter N_w2 must be even", before exiting. They printed only Open MPI's `MPI_ABORT was invoked` notice. The hybridization solver no longer writes through an empty vector when `MEASURE_g2w` is set without `MEASURE_h2w`.
+- `hybridization` and `interaction` built with MPI print the message of an error, such as "parameter N_w2 must be even", before aborting. They printed only Open MPI's `MPI_ABORT was invoked` notice. The hybridization solver no longer writes through an empty vector when `MEASURE_g2w` is set without `MEASURE_h2w`.
 - `dmrg` no longer writes a quantum-number update for `Sz` or `N` past the end of the quantum-number record when the model defines neither (an assertion failure in debug builds). `spinmc`'s fitter skips the residuum for a measurement whose temperature differs from the simulation's, as its message says, instead of computing it anyway. Adding two `QuantumNumberDescriptor`s resets the cached limits of the sum. `std::multimap` and `std::multiset` can be written to an osiris dump.
 - `pyalps.ngs.params[key]` raises `KeyError` for a key that is neither defined nor supplied, as a `dict` does. It returned `None`, so a misspelled key failed later, away from the typo, and `params.get()` ignored its default. Use `key in p` or `p.get(key, default)` to test for a parameter.
 - `dmrg` with `START_SWEEP` started every remaining sweep at `START_DIR` and `START_ITER`; only the first sweep does now.
