@@ -17,7 +17,7 @@ gh pr view <PR> --json number,title,body,url,headRefOid
 gh pr diff <PR> > pr.diff
 ```
 
-Save `pr.diff` and any scripts outside the repo. Read the title and description first.
+Make one fresh folder for this review with `mktemp -d` and save `pr.diff`, any scripts and the page there, never in the repo. Read the title and description first.
 
 **Stacked PRs.** If the PR is stacked on other open PRs (the description says "stacked on #N", or the commits of another open PR are in its branch), GitHub's diff against the base branch also contains every PR below it in the stack. Review only this PR's own changes: diff its head against the head of the PR directly below it, which already includes the ones further down.
 
@@ -98,6 +98,6 @@ Generate the diffs with a small script that reads `pr.diff`, not by copying code
 
 ## 6. Open it
 
-Save it as `pr-<number>-review.html` outside the repo and open it in the browser (`open` on macOS, `xdg-open` on Linux, `start` on Windows).
+Save it as `pr-<number>-review.html` in that folder and open it in the browser (`open` on macOS, `xdg-open` on Linux, `start` on Windows). Then delete `pr.diff` and the scripts, and tell the user the folder's path in one line.
 
 In chat, list the numbered categories with their file counts and what each depends on, and give the file path. Don't post anything to GitHub.
