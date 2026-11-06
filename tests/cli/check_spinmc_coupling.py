@@ -41,7 +41,7 @@ def main():
             '<OUTPUT file="task.out.xml"/></TASK></JOB>'
         )
         environment = dict(os.environ, ALPS_XML_PATH=xml_path, ALPS_NO_CITATIONS="1")
-        subprocess.run([spinmc, "--write-xml", "job.in.xml"], cwd=work, env=environment, check=True,
+        subprocess.run([spinmc, "--Tmin", "1", "--Tmax", "1", "--write-xml", "job.in.xml"], cwd=work, env=environment, check=True,
                        stdout=subprocess.DEVNULL)
         averages = ET.parse(work / "task.out.xml").iter("SCALAR_AVERAGE")
         energy = next(float(a.findtext("MEAN")) for a in averages if a.get("name") == "Energy Density")
