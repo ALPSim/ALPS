@@ -36,7 +36,7 @@ public:
   typedef integer_range<uint32_t> range_type;
 
   task();
-  task(boost::filesystem::path const& file);
+  task(std::filesystem::path const& file);
 
   task_status_t status() const { return status_; }
   tid_t task_id() const { return task_id_; }
@@ -215,7 +215,7 @@ private:
   double progress_;
   double weight_;
   double dump_weight_;
-  boost::filesystem::path basedir_;
+  std::filesystem::path basedir_;
   std::string file_in_str_;
   std::string file_out_str_;
   std::string base_;

@@ -17,7 +17,7 @@
 #include <iostream>
 #include <alps/hdf5.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/lexical_cast.hpp>
 
 TEST(Hdf5OpenMP, ConcurrentArchivesRetainEachWorkersValue) {

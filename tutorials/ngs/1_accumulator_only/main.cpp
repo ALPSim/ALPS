@@ -17,10 +17,10 @@
 #include <alps/utilities/signal.hpp>
 #include <alps/ngs/make_parameters_from_file.hpp>
 
-#include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
+#include <chrono>
 #include <string>
 #include <iostream>
 #include <stdexcept>
@@ -28,17 +28,17 @@
 struct stop_callback {
     stop_callback(std::size_t timelimit)
         : limit(timelimit)
-        , start(boost::chrono::high_resolution_clock::now())
+        , start(std::chrono::steady_clock::now())
     {}
 
     bool operator()() {
         return !signals.empty() 
-            || (limit.count() > 0 && boost::chrono::high_resolution_clock::now() > start + limit);
+            || (limit.count() > 0 && std::chrono::steady_clock::now() > start + limit);
     }
 
-    boost::chrono::duration<std::size_t> limit;
+    std::chrono::seconds limit;
     alps::signal signals;
-    boost::chrono::high_resolution_clock::time_point start;
+    std::chrono::steady_clock::time_point start;
 };
 
 int main(int argc, char *argv[]) {
@@ -51,10 +51,10 @@ int main(int argc, char *argv[]) {
     try {
 
         std::size_t timelimit = boost::lexical_cast<std::size_t>(argv[1]);
-        boost::filesystem::path input_file = argv[2];
+        std::filesystem::path input_file = argv[2];
         std::string basename = std::string(argv[2]).substr(0, std::string(argv[2]).find_last_of('.'));
-        boost::filesystem::path checkpoint_file = basename + ".clone0.h5";
-        boost::filesystem::path output_file = basename +  ".out.h5";
+        std::filesystem::path checkpoint_file = basename + ".clone0.h5";
+        std::filesystem::path output_file = basename +  ".out.h5";
 
         alps::parameters_type<ising_sim>::type parameters = alps::make_parameters_from_file(input_file);
         ising_sim::define_parameters(parameters);

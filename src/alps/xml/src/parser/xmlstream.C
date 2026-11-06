@@ -19,7 +19,6 @@
 #undef tolower
 #undef toupper
 
-#include <boost/regex.hpp>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
 #include <sstream>
@@ -33,7 +32,7 @@ oxstream::oxstream()
 oxstream::oxstream(std::ostream& os, uint32_t incr)
   : of_(), os_(os), stack_(), attr_(), context_(NotSpecified),
     linebreak_(true), offset_(0), offset_incr_(incr) {}
-oxstream::oxstream(const boost::filesystem::path& file, uint32_t incr)
+oxstream::oxstream(const std::filesystem::path& file, uint32_t incr)
   : of_(file), os_(of_), stack_(), attr_(), context_(NotSpecified),
     linebreak_(true), offset_(0), offset_incr_(incr) {}
 oxstream::~oxstream() {
@@ -218,13 +217,19 @@ void oxstream::output_offset()
 
 std::string convert(const std::string& str)
 {
-  std::ostringstream out;
-  std::ostream_iterator<char> oi(out);
-  boost::regex_replace(oi, str.begin(), str.end(),
-                       boost::regex("(&)|(')|(>)|(<)|(\")"),
-                       "(?1&amp;)(?2&apos;)(?3&gt;)(?4&lt;)(?5&quot;)",
-                       boost::match_default | boost::format_all);
-  return out.str();
+  std::string out;
+  out.reserve(str.size());
+  for (char c : str) {
+    switch (c) {
+      case '&': out += "&amp;"; break;
+      case '\'': out += "&apos;"; break;
+      case '>': out += "&gt;"; break;
+      case '<': out += "&lt;"; break;
+      case '"': out += "&quot;"; break;
+      default: out += c;
+    }
+  }
+  return out;
 }
 
 oxstream& oxstream::operator<<(const detail::stylesheet_t& c)

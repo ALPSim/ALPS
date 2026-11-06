@@ -12,14 +12,14 @@
 *****************************************************************************/
 
 #include <alps/alea.h>
-#include <boost/mpi.hpp>
+#include <alps/parapack/mpi.h>
 #include <boost/random.hpp>
 #include <gtest/gtest.h>
 #include <cmath>
 #include <string>
 
 TEST(ParallelObservableSet, PreservesSamplesAndDerivedStatisticsAcrossRanks) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   boost::mt19937 engine(2873u);
   boost::variate_generator<boost::mt19937 &, boost::uniform_real<>> random(engine,
@@ -40,11 +40,11 @@ TEST(ParallelObservableSet, PreservesSamplesAndDerivedStatisticsAcrossRanks) {
   // Every rank independently constructs the reference; it is not serialized.
   alps::ObservableSet received;
   if (world.rank() == 0) {
-    world.send(1, 0, expected);
-    world.recv(world.size() - 1, 0, received);
+    alps::mpi::send(world, 1, 0, expected);
+    alps::mpi::recv(world, world.size() - 1, 0, received);
   } else {
-    world.recv(world.rank() - 1, 0, received);
-    world.send((world.rank() + 1) % world.size(), 0, received);
+    alps::mpi::recv(world, world.rank() - 1, 0, received);
+    alps::mpi::send(world, (world.rank() + 1) % world.size(), 0, received);
   }
   // Pin the historical observableset_mpi.op-2 values from ALPS at
   // 64d5c09e0, independently of the freshly computed round-trip reference.

@@ -37,7 +37,7 @@ TEST(Serialization, parameters_xml) {
 
     {
       alps::OXDRFileDump od(
-          boost::filesystem::path((directory.path() / "parameters.dump").string()));
+          std::filesystem::path((directory.path() / "parameters.dump").string()));
       od << parameters;
     }
 
@@ -45,7 +45,7 @@ TEST(Serialization, parameters_xml) {
 
     {
       alps::IXDRFileDump id(
-          boost::filesystem::path((directory.path() / "parameters.dump").string()));
+          std::filesystem::path((directory.path() / "parameters.dump").string()));
       id >> parameters;
     }
 

@@ -9,7 +9,7 @@
 #include <alps/utilities/cast.hpp>
 #include <alps/utilities/short_print.hpp>
 #include <alps/ngs/sleep.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <sstream>
 #include <functional>
 #include <stdexcept>
@@ -18,16 +18,17 @@
 #include <sys/stat.h>
 #endif
 #ifdef ALPS_HAVE_MPI
-#include <alps/ngs/boost_mpi.hpp>
+#include <alps/utilities/mpi.hpp>
 #endif
 
 int main(int argc, char** argv) {
 #ifdef ALPS_HAVE_MPI
-    boost::mpi::environment environment(argc, argv);
-    boost::mpi::communicator world;
-    std::vector<int> local{1, 2}, total;
-    boost::mpi::reduce(world, local, total, std::plus<int>(), 0);
-    if (world.rank() == 0 && total != std::vector<int>{world.size(), 2 * world.size()})
+    alps::mpi::environment environment(argc, argv);
+    alps::mpi::communicator world;
+    const int local[2] = {1, 2};
+    int total[2];
+    alps::mpi::all_reduce(world, local, 2, total, std::plus<int>());
+    if (total[0] != world.size() || total[1] != 2 * world.size())
         throw std::runtime_error("Utility MPI reduction failed");
 #endif
     std::ostringstream banner;
@@ -57,7 +58,7 @@ int main(int argc, char** argv) {
     if (stat(temporary.c_str(), &status) != 0 || (status.st_mode & 0777) != 0600)
         throw std::runtime_error("Utility temporary file is not private to its owner");
 #endif
-    if (!boost::filesystem::remove(temporary))
+    if (!std::filesystem::remove(temporary))
         throw std::runtime_error("Utility temporary file was not created");
     alps::sleep(0);
     (void)alps::vmusage();

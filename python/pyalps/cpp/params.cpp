@@ -67,7 +67,7 @@ nb::object params_getitem(alps::params const & self, nb::object const & key_obj)
     auto const supplied = self.supplied_text().find(key);
     if (supplied != self.supplied_text().end())
         return alps::params_ns::supplied_value(key, supplied->second).apply_visitor(dict_value_to_py());
-    return nb::none();
+    throw nb::key_error(key.c_str());
 }
 // A copy of `self` without `key`, which params cannot remove. Its other
 // values are kept; parameters lose their definitions and supplied text

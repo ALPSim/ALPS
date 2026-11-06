@@ -1,0 +1,28 @@
+name: New issues to Bucket
+
+# Puts every new issue on the project board with Owner "Bucket", so it lands
+# in the Bucket column of Task Overview. The board's own workflows can only set
+# Status, not Owner.
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  bucket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # GITHUB_TOKEN can't write the org project, so this uses a token with
+      # Projects write on the org and read access to this repo.
+      - name: Add the issue to the board in Bucket
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: |
+          item=$(gh project item-add 5 --owner ALPSim --url "$ISSUE_URL" --format json --jq .id)
+          # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
+          gh project item-edit --id "$item" --project-id PVT_kwDOClreF84BpeQ0 \
+            --field-id PVTSSF_lADOClreF84BpeQ0zhn8nwk --single-select-option-id 478ea68c

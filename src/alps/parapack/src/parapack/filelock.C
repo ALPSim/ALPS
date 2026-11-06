@@ -13,7 +13,7 @@
 *
 *****************************************************************************/
 #include <alps/parapack/filelock.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/throw_exception.hpp>
 #include <iostream>
 #include <cstdio>
@@ -25,7 +25,7 @@ namespace alps {
 
 filelock::filelock() : auto_release_(true), is_locking_(false) {}
 
-filelock::filelock(boost::filesystem::path const& file, bool lock_now, int wait,
+filelock::filelock(std::filesystem::path const& file, bool lock_now, int wait,
   bool auto_release) : auto_release_(auto_release), is_locking_(false) {
   set_file(file);
   if (lock_now) lock(wait);
@@ -39,7 +39,7 @@ filelock::~filelock() {
   }
 }
 
-void filelock::set_file(boost::filesystem::path const& file) {
+void filelock::set_file(std::filesystem::path const& file) {
   if (is_locking_) {
     std::cerr << "Warning: lock for \"" << file_ << "\" is being removed\n";
     release();

@@ -47,7 +47,7 @@ public:
   { 
     return master_scheduler ? master_scheduler->get_task() : 0;
   }
-  void checkpoint(const boost::filesystem::path &/*fn*/){
+  void checkpoint(const std::filesystem::path &/*fn*/){
     if(master_scheduler) master_scheduler->checkpoint();
   }
   void clear()

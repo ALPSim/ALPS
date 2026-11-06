@@ -42,7 +42,7 @@
 #include <alps/model/hamiltonian_matrix.hpp>
 #include <alps/model/model_helper.h>
 #include <alps/parameter.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/lexical_cast.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 
@@ -507,11 +507,11 @@ inline void write(const integrals& I, const std::string& file, int nelec, int ms
   out << std::setw(24) << I.ecore << std::setw(5) << 0 << std::setw(5) << 0
       << std::setw(5) << 0 << std::setw(5) << 0 << "\n";
   out.close();
-  boost::system::error_code ec;
+  std::error_code ec;
   if (out)
-    boost::filesystem::rename(tmp, file, ec);
+    std::filesystem::rename(tmp, file, ec);
   if (!out || ec) {
-    boost::filesystem::remove(tmp, ec);
+    std::filesystem::remove(tmp, ec);
     throw std::runtime_error("cannot write " + file);
   }
 }

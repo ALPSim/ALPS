@@ -24,8 +24,7 @@
 #include <vector>
 
 #ifdef ALPS_HAVE_MPI
-# include <boost/mpi/communicator.hpp>
-# include <boost/mpi/collectives.hpp>
+# include "mpi.h"
 #endif
 
 #ifdef _OPENMP
@@ -91,12 +90,12 @@ private:
   enum group_state { Free, Active };
 
 public:
-  process_helper_mpi(boost::mpi::communicator const& comm, int np);
+  process_helper_mpi(alps::mpi::communicator const& comm, int np);
   ~process_helper_mpi();
 
-  boost::mpi::communicator const& comm_ctrl() const { return ctrl_; }
-  boost::mpi::communicator const& comm_work() const { return work_; }
-  boost::mpi::communicator const& comm_head() const { return head_; }
+  alps::mpi::communicator const& comm_ctrl() const { return ctrl_; }
+  alps::mpi::communicator const& comm_work() const { return work_; }
+  alps::mpi::communicator const& comm_head() const { return head_; }
   int num_procs_per_group() const { return np_; }
 
   int num_total_processes() const { return ctrl_.size(); }
@@ -114,7 +113,7 @@ public:
   bool check_halted();
 
 private:
-  boost::mpi::communicator ctrl_, work_, head_;
+  alps::mpi::communicator ctrl_, work_, head_;
 
   // number of processes in each group
   int np_;
@@ -145,29 +144,29 @@ private:
 //
 
 template<typename T>
-void collect_vector(boost::mpi::communicator const& comm, std::vector<int> const& nelms,
+void collect_vector(alps::mpi::communicator const& comm, std::vector<int> const& nelms,
   std::vector<int> const& offsets, std::vector<T> const& source, std::vector<T>& target) {
   if (comm.rank() == 0) {
     target.resize(std::accumulate(nelms.begin(), nelms.end(), 0));
     std::copy(source.begin(), source.begin() + nelms[0], target.begin());
     for (int p = 1; p < nelms.size(); ++p)
-      comm.recv(p, 0, &target[offsets[p]], nelms[p]);
+      alps::mpi::recv(comm, p, 0, &target[offsets[p]], nelms[p]);
   } else {
-    comm.send(0, 0, &source[0], nelms[comm.rank()]);
+    alps::mpi::send(comm, 0, 0, &source[0], nelms[comm.rank()]);
   }
 }
 
 template<typename T>
-void distribute_vector(boost::mpi::communicator const& comm, std::vector<int> const& nelms,
+void distribute_vector(alps::mpi::communicator const& comm, std::vector<int> const& nelms,
   std::vector<int> const& offsets, std::vector<T> const& source, std::vector<T>& target) {
   if (comm.rank() == 0) {
     for (int p = 1; p < nelms.size(); ++p)
-      comm.send(p, 0, &source[offsets[p]], nelms[p]);
+      alps::mpi::send(comm, p, 0, &source[offsets[p]], nelms[p]);
     target.resize(nelms[0]);
     std::copy(source.begin(), source.begin() + nelms[0], target.begin());
   } else {
     target.resize(nelms[comm.rank()]);
-    comm.recv(0, 0, &target[0], nelms[comm.rank()]);
+    alps::mpi::recv(comm, 0, 0, &target[0], nelms[comm.rank()]);
   }
 }
 

@@ -27,9 +27,11 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstddef>
+#include <filesystem>
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace alps {
@@ -47,7 +49,7 @@ public:
   XMLAttribute(const key_type& k, const char * v) : key_(k), value_(v) {}
   template<class T>
   XMLAttribute(const key_type& k, const T& v)
-    : key_(k), value_(boost::lexical_cast<std::string, T>(v)) {}
+    : key_(k), value_(to_value(v)) {}
 
   key_type& key() { return key_; }
   const key_type& key() const { return key_; }
@@ -55,6 +57,16 @@ public:
   const value_type& value() const { return value_; }
 
 private:
+  // A path's operator<< quotes it, so a path is written as path.string().
+  template<class T>
+  static value_type to_value(const T& v) {
+    if constexpr (std::is_same_v<T, std::filesystem::path>) {
+      return v.string();
+    } else {
+      return boost::lexical_cast<std::string, T>(v);
+    }
+  }
+
   key_type key_;
   value_type value_;
 };

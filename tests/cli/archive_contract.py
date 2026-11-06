@@ -7,9 +7,9 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 
-def run(program, *args, success=True):
+def run(program, *args, success=True, cwd=None):
     result = subprocess.run([program, *map(str, args)], capture_output=True, text=True,
-                            timeout=15)
+                            timeout=15, cwd=cwd)
     assert (result.returncode == 0) == success, result.stdout + result.stderr
     return result.stdout
 
@@ -46,6 +46,7 @@ def main():
 <TASK status="finished"><INPUT file="simulation.xml"/>
 <OUTPUT file="simulation.xml"/></TASK></JOB>''')
         result = ET.fromstring(run(xml_command, job))
+        assert run(xml_command, job.name, cwd=root) == run(xml_command, job)
         assert result.tag == "ARCHIVE" and result.attrib["name"] == "archive regression"
         assert float(result.findtext("SIMULATION/PARAMETERS/PARAMETER")) == 1.25
         assert float(result.findtext("SIMULATION/AVERAGES/SCALAR_AVERAGE/MEAN")) == -2

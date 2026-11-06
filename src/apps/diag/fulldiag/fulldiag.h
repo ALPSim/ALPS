@@ -30,7 +30,6 @@
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/upper.hpp>
 #include <boost/numeric/bindings/lower.hpp>
-#include <boost/regex.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 template <class T> 
@@ -66,7 +65,7 @@ public:
   typedef typename super_type::operator_matrix_type operator_matrix_type;
   
   // settings, if given, are the parameters already read by read_parameters
-  FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,
+  FullDiagMatrix (const alps::ProcessList& where , const std::filesystem::path& p,
                   const alps::params* settings = 0);
   void evaluate(const alps::Parameters&, const std::string&) const;
   void print_eigenvectors(std::ostream& os) const;
@@ -78,7 +77,7 @@ private:
   magnitude_type groundstate_energy() const;
   void do_subspace();
   magnitude_type calculate_averages(MeasurementsPlot<magnitude_type>&) const;
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
+  void write_xml_body(alps::oxstream&, const std::filesystem::path&,bool) const;
   std::vector<value_type> calculate(operator_matrix_type const& m) const;
 
   mutable magnitude_type energy;
@@ -99,7 +98,7 @@ private:
 };
 
 template <class T>
-FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,
+FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const std::filesystem::path& p,
                                    const alps::params* settings)
  : super_type(where,p,true,&FullDiagMatrix::define_parameters,settings)
  , field(0.)
@@ -349,26 +348,26 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   }
 
   // write plots to files
-  boost::filesystem::path enp(basename+".plot.energy.xml");
+  std::filesystem::path enp(basename+".plot.energy.xml");
   alps::oxstream ens(enp);
   ens << energy_plot;
-  boost::filesystem::path fenp(basename+".plot.free_energy.xml");
+  std::filesystem::path fenp(basename+".plot.free_energy.xml");
   alps::oxstream fens(fenp);
   fens << free_energy_plot;
-  boost::filesystem::path entp(basename+".plot.entropy.xml");
+  std::filesystem::path entp(basename+".plot.entropy.xml");
   alps::oxstream ents(entp);
   ents << entropy_plot;
-  boost::filesystem::path shp(basename+".plot.specific_heat.xml");
+  std::filesystem::path shp(basename+".plot.specific_heat.xml");
   alps::oxstream shs(shp);
   shs << specific_heat_plot;
   
   plots.write(basename);
   
   if (have_Conserved && measure_properties) {
-     boost::filesystem::path magp(basename+".plot."+conserved_label_lc+".xml");
+     std::filesystem::path magp(basename+".plot."+conserved_label_lc+".xml");
      alps::oxstream mags(magp);
      mags << magnetization_plot;
-     boost::filesystem::path susp(basename+".plot."+second_moment_name_lc+".xml");
+     std::filesystem::path susp(basename+".plot."+second_moment_name_lc+".xml");
      alps::oxstream suss(susp);
      suss << susceptibility_plot;
     }
@@ -468,7 +467,7 @@ typename FullDiagMatrix<T>::magnitude_type FullDiagMatrix<T>::calculate_averages
 
 
 template <class T>
-void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
+void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const std::filesystem::path& p, bool writeallxml) const
 {
     const alps::Parameters& pa = this->get_parameters();
     if (writeallxml && (pa.defined("T") || pa.defined("beta"))) {

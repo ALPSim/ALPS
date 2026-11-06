@@ -15,7 +15,6 @@ add_library(ALPS::maxent ALIAS alps_maxent)
 set_target_properties(alps_maxent PROPERTIES EXPORT_NAME maxent
   CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 target_link_libraries(alps_maxent PUBLIC ALPS::solver_headers ALPS::params ALPS::hdf5 ALPS::utilities ALPS::osiris
-  Boost::filesystem Boost::date_time
   PRIVATE ALPS::cli $<BUILD_INTERFACE:Eigen3::Eigen> ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
 target_compile_definitions(alps_maxent PRIVATE HAVE_LAPACK)
 install(TARGETS alps_maxent EXPORT ALPSTargets

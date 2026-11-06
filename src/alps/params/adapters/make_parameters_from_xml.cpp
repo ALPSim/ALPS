@@ -14,13 +14,15 @@
 #include <alps/ngs/make_deprecated_parameters.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
+#include "evaluated_parameters.hpp"
+
 #include <string>
 
 namespace alps {
 
-    ALPS_DECL params make_parameters_from_xml(boost::filesystem::path const & arg) {
+    ALPS_DECL params make_parameters_from_xml(std::filesystem::path const & arg) {
         Parameters par;
-        boost::filesystem::ifstream infile(arg.string());
+        std::ifstream infile(arg.string());
 
         // read outermost tag (e.g. <SIMULATION>)
         XMLTag tag = parse_tag(infile, true);
@@ -37,10 +39,7 @@ namespace alps {
         par.read_xml(tag, infile, true);
         if (!par.defined("SEED"))
             par["SEED"] = 0;
-        
-        params res;
-        for (Parameters::const_iterator it = par.begin(); it != par.end(); ++it)
-            res.supply(it->key(), it->value());
-        return res;
+
+        return detail::make_parameters_evaluated(par);
     }
 }

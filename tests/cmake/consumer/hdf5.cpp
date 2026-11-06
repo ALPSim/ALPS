@@ -3,7 +3,7 @@
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/utilities/signal.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <complex>
 #include <stdexcept>
 #include <vector>
@@ -41,5 +41,5 @@ int main() {
     signals.pop();
     if (!signals.empty())
         throw std::runtime_error("HDF5 signal queue was not cleared");
-    boost::filesystem::remove(filename);
+    std::filesystem::remove(filename);
 }

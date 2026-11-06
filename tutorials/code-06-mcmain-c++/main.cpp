@@ -19,8 +19,7 @@
 #include <alps/ngs/make_parameters_from_file.hpp>
 #include <alps/ngs/make_parameters_from_xml.hpp>
 
-#include <boost/chrono.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <string>
 #include <iostream>
@@ -34,9 +33,9 @@ int main(int argc, char *argv[]) {
 
         alps::parameters_type<ising_sim>::type parameters;
         // TODO: better check the first few bytes. provide an ALPS function to do so
-        if (boost::filesystem::path(options.input_file).extension().string() == ".xml")
+        if (std::filesystem::path(options.input_file).extension().string() == ".xml")
             parameters = alps::make_parameters_from_xml(options.input_file);
-        else if (boost::filesystem::path(options.input_file).extension().string() == ".h5")
+        else if (std::filesystem::path(options.input_file).extension().string() == ".h5")
             alps::hdf5::archive(options.input_file)["/parameters"] >> parameters;
         else
             parameters = alps::make_parameters_from_file(options.input_file);

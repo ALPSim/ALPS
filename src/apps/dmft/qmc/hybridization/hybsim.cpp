@@ -91,8 +91,6 @@ hyb_config(parms)
   nprop.assign(7,0.);
   sweep_count=0;
   output_period=parms["OUTPUT_PERIOD"];
-  //lasttime = boost::chrono::steady_clock::now();
-  //delay = boost::chrono::seconds(parms["OUTPUT_PERIOD"]|600);
   
   update_type.clear();
   update_type.push_back("change zero state   ");

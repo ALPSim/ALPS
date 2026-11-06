@@ -49,22 +49,22 @@ ALPS_DECL void print_taskinfo(std::ostream& os, std::vector<alps::task> const& t
   task_range_t const& task_range);
 
 // return 1 for job XML (<JOB>) file or 2 for task XML (<SIMULATION>)
-ALPS_DECL int load_filename(boost::filesystem::path const& file, std::string& file_in_str,
+ALPS_DECL int load_filename(std::filesystem::path const& file, std::string& file_in_str,
   std::string& file_out_str);
 
-ALPS_DECL void load_version(boost::filesystem::path const& file,
+ALPS_DECL void load_version(std::filesystem::path const& file,
   std::vector<std::pair<std::string, std::string> >& versions);
 
-ALPS_DECL void load_tasks(boost::filesystem::path const& file_in,
-  boost::filesystem::path const& file_out, boost::filesystem::path const& basedir,
+ALPS_DECL void load_tasks(std::filesystem::path const& file_in,
+  std::filesystem::path const& file_out, std::filesystem::path const& basedir,
   std::string& simname, std::vector<alps::task>& tasks, bool check_parameter,
   alps::parapack::option const& opt);
 
-ALPS_DECL void load_tasks(boost::filesystem::path const& file_in,
-  boost::filesystem::path const& file_out, boost::filesystem::path const& basedir,
+ALPS_DECL void load_tasks(std::filesystem::path const& file_in,
+  std::filesystem::path const& file_out, std::filesystem::path const& basedir,
   std::string& simname, std::vector<alps::task>& tasks);
 
-ALPS_DECL void save_tasks(boost::filesystem::path const& file, std::string const& simname,
+ALPS_DECL void save_tasks(std::filesystem::path const& file, std::string const& simname,
   std::string const& file_in_str, std::string const& file_out_str, std::vector<alps::task>& tasks);
 
 } // namespace parapack

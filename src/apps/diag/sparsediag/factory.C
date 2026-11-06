@@ -14,7 +14,7 @@
 #include "factory.h"
 #include "sparsediag.h"
 
-alps::scheduler::Task* SparseDiagFactory::make_task(const alps::ProcessList& w, const boost::filesystem::path& fn, const alps::Parameters& parms) const
+alps::scheduler::Task* SparseDiagFactory::make_task(const alps::ProcessList& w, const std::filesystem::path& fn, const alps::Parameters& parms) const
 {
   alps::LatticeLibrary lib(parms);
   bool is_graph = false;

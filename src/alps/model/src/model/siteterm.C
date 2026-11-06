@@ -22,7 +22,7 @@
 #undef tolower
 #undef toupper
 
-#include <boost/regex.hpp> 
+#include <regex>
 
 #ifndef ALPS_WITHOUT_XML
 
@@ -107,8 +107,8 @@ void alps::SiteTermDescriptor::write_xml(oxstream& os) const
 std::set<std::string> alps::SiteOperator::operator_names() const
 {
   std::set<std::string> names;
-  boost::regex expression("^(.*)\\(.*\\)$");
-  boost::smatch what;
+  std::regex expression("^(.*)\\(.*\\)$");
+  std::smatch what;
   alps::Expression ex(term_);
   ex.flatten();
   ex.simplify();
@@ -117,7 +117,7 @@ std::set<std::string> alps::SiteOperator::operator_names() const
     for (Term::factor_iterator fit = tit->factors().first;
          fit != tit->factors().second; ++fit) {
       std::string name = boost::lexical_cast<std::string>(*fit);
-      if (boost::regex_match(name, what, expression))
+      if (std::regex_match(name, what, expression))
         names.insert(std::string(what[1].first, what[1].second));
     }
   return names;

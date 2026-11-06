@@ -295,7 +295,7 @@ ObservableSet& ObservableSet::operator<<(const Observable& obs)
 
 ObservableFactory ObservableSet::factory_;
 
-void ObservableSet::write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5) const
+void ObservableSet::write_xml(oxstream& oxs, const std::filesystem::path& fn_hdf5) const
 {
   oxs << start_tag("AVERAGES");
   for(const_iterator i = begin(); i != end(); ++i)
@@ -304,7 +304,7 @@ void ObservableSet::write_xml(oxstream& oxs, const boost::filesystem::path& fn_h
 }
 
 void ObservableSet::write_xml_with_id(oxstream& oxs, int id,
-  const boost::filesystem::path& fn_hdf5) const {
+  const std::filesystem::path& fn_hdf5) const {
   oxs << start_tag("AVERAGES") << attribute("id", id);
   for(const_iterator i = begin(); i != end(); ++i)
     i->second->write_xml(oxs, fn_hdf5);

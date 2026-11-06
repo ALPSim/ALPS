@@ -31,7 +31,7 @@ LatticeLibrary::LatticeLibrary(const Parameters& parms)
   else
     libname = "lattices.xml";
   
-  boost::filesystem::path p=search_xml_library_path(libname);
+  std::filesystem::path p=search_xml_library_path(libname);
   
   std::ifstream libfile(p.string().c_str());
   if(!libfile)

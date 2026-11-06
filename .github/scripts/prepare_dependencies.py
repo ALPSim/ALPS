@@ -24,7 +24,7 @@ def prepare_boost(version: str, destination: Path):
     if version not in checksums:
         raise ValueError(f'Unpinned Boost version: {version}')
     stamp = destination / '.alps-boost-sha256'
-    fingerprint = checksums[version] + os.environ.get('CXX', 'c++') + os.environ.get('ALPS_BOOST_MPI', 'ON')
+    fingerprint = checksums[version] + os.environ.get('CXX', 'c++')
     if stamp.is_file() and stamp.read_text() == fingerprint:
         return
     if destination.exists() and any(destination.iterdir()):

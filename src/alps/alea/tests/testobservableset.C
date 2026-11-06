@@ -19,7 +19,7 @@
 #include <alps/alea.h>
 #include <alps/parameter.h> 
 #include <alps/osiris/xdrdump.h> 
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/random.hpp> 
 
 TEST(AleaXml, testobservableset)
@@ -62,12 +62,12 @@ TEST(AleaXml, testobservableset)
 
   // SAVE and LOAD
   {
-    alps::OXDRFileDump dump(boost::filesystem::path("observableset.dump"));
+    alps::OXDRFileDump dump(std::filesystem::path("observableset.dump"));
     dump << measurement;
   }
   measurement.clear();
   {
-    alps::IXDRFileDump dump(boost::filesystem::path("observableset.dump"));
+    alps::IXDRFileDump dump(std::filesystem::path("observableset.dump"));
     dump >> measurement;
   }
 
@@ -79,19 +79,19 @@ TEST(AleaXml, testobservableset)
 
   // SAVE and LOAD
   {
-    alps::OXDRFileDump dump(boost::filesystem::path("observableset.dump"));
+    alps::OXDRFileDump dump(std::filesystem::path("observableset.dump"));
     dump << measurement;
   }
   measurement.clear();
   {
-    alps::IXDRFileDump dump(boost::filesystem::path("observableset.dump"));
+    alps::IXDRFileDump dump(std::filesystem::path("observableset.dump"));
     dump >> measurement;
   }
 
   alps::oxstream oxs;
   measurement.write_xml(oxs);
 
-  boost::filesystem::remove(boost::filesystem::path("observableset.dump"));
+  std::filesystem::remove(std::filesystem::path("observableset.dump"));
 
   }
   transcript.expect_output(std::string(ALPS_TEST_SOURCE_DIR) + "/testobservableset.output");

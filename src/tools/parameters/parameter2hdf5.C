@@ -18,8 +18,7 @@
 #include <alps/parser/xslt_path.h>
 #include <alps/parameter.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <fstream>
@@ -85,7 +84,7 @@ void convert_params(const std::string& inname, const std::string& basename,
     if (p.defined("SIMULATION_NAME")) p.erase("SIMULATION_NAME");
   }
 
-  boost::filesystem::path infile((basename+".in.xml").c_str());
+  std::filesystem::path infile((basename+".in.xml").c_str());
   alps::oxstream out(infile);
 
   // make sure ths stylesheet is there
@@ -125,7 +124,7 @@ void convert_params(const std::string& inname, const std::string& basename,
         << alps::end_tag("TASK");
 
     {
-      alps::hdf5::archive ar(boost::filesystem::path(taskname + ".in.h5"), "w");
+      alps::hdf5::archive ar(std::filesystem::path(taskname + ".in.h5"), "w");
       ar["/parameters"] << list[i];
     }
   }
@@ -180,10 +179,10 @@ try {
   if (outbase.size() >= 2 && outbase.substr(outbase.size()-1, outbase.size()) == "/")
     outbase.erase(outbase.size()-1, outbase.size());
   if (outbase.size() == 0 || outbase == ".")
-    outbase = boost::filesystem::path(inname).filename().string();
-  if (boost::filesystem::is_directory(outbase))
-    outbase += '/' + boost::filesystem::path(inname).filename().string();
-  if (!force && boost::filesystem::exists(outbase + ".out.xml")) {
+    outbase = std::filesystem::path(inname).filename().string();
+  if (std::filesystem::is_directory(outbase))
+    outbase += '/' + std::filesystem::path(inname).filename().string();
+  if (!force && std::filesystem::exists(outbase + ".out.xml")) {
     std::cerr << "Output files (" + outbase + ".out.xml, etc) exist.  "
               << "Please use '-f' option to force replacing input HDF5 files.\n"
               << "Do you really want to overwrite input files? [y/N] ";

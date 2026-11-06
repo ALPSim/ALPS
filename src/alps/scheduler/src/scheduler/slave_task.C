@@ -100,7 +100,7 @@ void SlaveTask::halt()
 
 // OTHER MEMBER FUNCTIONS NEVER USED
 
-void SlaveTask::checkpoint(const boost::filesystem::path&, bool ) const
+void SlaveTask::checkpoint(const std::filesystem::path&, bool ) const
 {
   boost::throw_exception(std::logic_error("should never checkpoint a slave simulation"));
 }
