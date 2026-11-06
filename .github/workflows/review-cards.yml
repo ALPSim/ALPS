@@ -36,6 +36,8 @@ concurrency:
 
 jobs:
   cards:
+    # The schedule runs upstream only, not on every fork.
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

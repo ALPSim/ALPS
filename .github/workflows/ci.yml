@@ -17,8 +17,7 @@ name: CI
         default: false
 permissions:
   contents: read
-# Change detection on push diffs against github.event.before only, so a
-# cancelled master run would leave its commits untested. Cancel PR runs only.
+# A master run is the only macOS test of the merged tree. Cancel PR runs only.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -53,8 +52,11 @@ jobs:
         python3 .github/scripts/ci/fingerprint.py --check-workflow .github/workflows/ci.yml
     - id: fp
       name: Detect changes and fingerprint areas
+      # Pushes and manual runs pass no base, which marks every area affected:
+      # an area then skips only on a recorded pass of its exact fingerprint, so
+      # a failure on master keeps running until it is fixed.
       env:
-        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        BASE: ${{ github.event.pull_request.base.sha }}
       run: |
         export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
         python3 .github/scripts/ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"

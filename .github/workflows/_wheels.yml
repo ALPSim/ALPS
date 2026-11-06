@@ -89,7 +89,7 @@ jobs:
         package-dir: python/pyalps
       env:
         CIBW_ARCHS: ${{ matrix.plat.arch }}
-        CIBW_BUILD: ${{ inputs.full && 'cp3{10,11,12,13,14}' || 'cp3{10,11,12,14}' }}-${{ matrix.plat.family == 'macos' && 'macosx' || matrix.plat.family }}*
+        CIBW_BUILD: ${{ inputs.full && 'cp3{10,11,12,13,14}' || 'cp3{10,12,14}' }}-${{ matrix.plat.family == 'macos' && 'macosx' || matrix.plat.family }}*
         CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/boost-install:/project/_build/boost-install"
           --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache" --volume "${{ github.workspace
           }}/_build/wheel-reports:/project/_build/wheel-reports"'
