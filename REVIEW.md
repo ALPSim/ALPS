@@ -55,8 +55,8 @@ right. Look first for:
   single formatter and asks only that new code match its surroundings.
 - Start the summary with the number of blocking findings, and say plainly when
   there are none.
-- Raise doubts about the approach early, in the first round, not as blocking
-  comments on a finished pull request.
+- A wrong approach is Blocking when you can name what it breaks, a Suggestion
+  when you would only have built it differently. Name the alternative.
 
 ## Tests
 
@@ -65,21 +65,12 @@ right. Look first for:
   is practical.
 - A test that still passes with the bug present is a blocking finding. For a
   bug fix, the pull request says that the new test fails without the fix.
-- Tests check observable behaviour: a physical result against an exact or
-  independent value, a file that round-trips, an input that is rejected. They
-  do not pin how a result is computed, private data layouts, or API shapes that
-  are expected to change. One test per behaviour, not one per function.
-- An unnecessary test is a finding, not a nit; ask for it to be removed before
-  merge. Strike a test when the only thing that would make it fail is a change
-  to the code rather than a wrong result: tables of default values, parameters
-  read back as written, constructor members, `--help` runs, matches on warning
-  text, timing assertions, one test per overload or separator, and tests of
-  code the pull request did not change. This pattern is common in AI-assisted
-  changes. For each test that stays, the author can name the bug it would
-  catch.
-- Follow [tests/README.md](tests/README.md#choosing-assertions-and-reference-data)
-  for tolerances, seeds and fixtures. A tolerance widened to make a new
-  platform pass needs a numerical reason in the pull request.
+- A test that fails the bar in [when to add a test](tests/README.md#when-to-add-a-test)
+  is a finding, not a nit; ask for it to be removed before merge. This pattern
+  is common in AI-assisted changes. For each test that stays, the author can
+  name the bug it would catch.
+- A tolerance widened to make a new platform pass needs a numerical reason in
+  the pull request ([reference data](tests/README.md#choosing-assertions-and-reference-data)).
 
 ## What to skip
 

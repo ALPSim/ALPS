@@ -160,45 +160,13 @@ Reuse build directories for ordinary edits. Machine-specific CMake settings belo
 
 ### Run the tests
 
-Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
-
-See [the testing guide](tests/README.md) for GoogleTest conventions, component selection, MPI, sanitizers, standalone tutorial checks, and CI coverage policy. For library-only iteration use the `dev` configure/build/test presets; the `default` preset below also builds applications.
-
-CTest runs the native suite only. After the SDK build, run:
-
 ```sh
-ctest --preset default
+ctest --preset default                       # native suite
+python -m pytest python/pyalps/tests -q -rs  # after the editable install above
 ```
 
-After the editable install above, test Python and installed-SDK consumers too:
-
-```sh
-python -m pip install "pytest>=8"
-PYALPS_TEST_DOWNSTREAM_EXPORT=1 CMAKE_BUILD_PARALLEL_LEVEL=2 \
-  python -m pytest python/pyalps/tests tests/cmake -q -rs
-```
-
-Keep `ALPS_DIR` and any dependency prefixes set. The downstream flag enables tests that compile Python extensions against the installed SDK and pyalps runtime. These checks compile additional small projects and take longer than import tests. `tests/cmake` assumes an MPI-disabled LP64 SDK for its consumer contracts; use the default SDK for this command. If custom toolchain arguments are needed by these temporary builds, `ALPS_TEST_CMAKE_ARGS` accepts a JSON array of CMake arguments.
-
-Read the skip reasons: MPI tests need additional MPI setup, and some wheel checks apply only to repaired distribution artifacts. A successful local run with skips does not exercise every CI configuration. For a quick iteration, select native tests with `ctest --preset default -R <pattern>` or Python tests with `python -m pytest <test-file> -q`.
-
-For XML CLI changes, install `xsltproc` (Ubuntu: `sudo apt-get install xsltproc`; Homebrew: `brew install libxslt` and add its `bin` directory to `PATH`), then run:
-
-```sh
-ALPS_XML_BUILD="$PWD/_build/default" python -m pytest tests/cli -q
-```
-
-These tests install and relocate the XML component before exercising transformations. Build/release helper changes also have tests under `tests/ci` and `tests/packaging`; release-version helpers require Python ≥ 3.11 and `packaging`.
-
-To retain installed-wheel validation evidence, run:
-
-```sh
-python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
-```
-
-The runner records test reports, logs, source and binary hashes, dependency versions and timings. Add `--packaging` for packaging checks, `--downstream` for compiled consumers (requires the matching SDK, CMake, a compiler and nanobind), or `--applications` for six installed solver smoke workflows. The exact-diagonalization cases check the four-site Heisenberg ground-state energy; the short Monte Carlo and DMRG runs check finite results, not convergence.
-
-Historical checkpoint loading runs in the regular Python suite using `python/pyalps/tests/fixtures/legacy_checkpoint.h5`. Its adjacent C++ source records the historical serializer revision and reproduction instructions. Keep this fixture frozen during ALPSCore consolidation: a checkpoint regenerated with the current SDK would lose the backward-compatibility check. The retired Boost.Python comparison scripts remain available in Git history.
+[tests/README.md](tests/README.md) is the testing guide: presets and labels,
+the installed-library, CLI and packaging suites, and how to write a test.
 
 All tests must pass before submitting a pull request.
 
@@ -227,7 +195,7 @@ All tests must pass before submitting a pull request.
    docs: add Heisenberg chain tutorial
    ```
 
-4. **Add or update tests** for any changed behaviour. New simulation methods should include at least one regression test comparing output against a known result.
+4. **Add the test the change needs**, following [when to add a test](tests/README.md#when-to-add-a-test).
 
 ---
 
@@ -269,10 +237,8 @@ request review.
 
 2. Open a pull request against the `master` branch of `ALPSim/ALPS`.
 
-3. Fill in the pull request template: what the change does and why, which
-   commit you built and what the tests reported, what a result was validated
-   against, and what breaks if the change is wrong. The template asks only for
-   what a reviewer cannot see in the diff.
+3. Fill in the pull request template. It asks only for what a reviewer cannot
+   see in the diff.
 
 4. Ensure CI passes (build + tests on Linux and macOS).
 
