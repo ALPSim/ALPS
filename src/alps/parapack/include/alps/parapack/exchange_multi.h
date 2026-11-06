@@ -72,7 +72,7 @@ public:
   static void print_copyright(std::ostream& out) { walker_type::print_copyright(out); }
 
   multiple_parallel_exchange_worker(alps::mpi::communicator const& comm, alps::Parameters const& params)
-    : super_type(params), process_helper_(comm, params.value_or_default("PROCESS_PER_WORKER", 1)),
+    : super_type(params), process_helper_(comm, input::read_process_per_worker(params)),
       comm_(process_helper_.comm_ctrl()), work_(process_helper_.comm_work()),
       head_(process_helper_.comm_head()), init_(params), beta_(params), mcs_(params),
       num_returnee_(0) {

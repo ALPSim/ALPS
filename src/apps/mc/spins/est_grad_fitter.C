@@ -27,11 +27,7 @@
 EstGradFitter::EstGradFitter(const std::string filename)
    : BaseIncrFitter(filename)
 {
-  alps::Parameters sim_param;
-  {
-    std::ifstream in(filename.c_str());
-    in >> sim_param;
-  }
+  alps::Parameters sim_param = alps::read_parameter_file(filename);
 
   tracefile << "Constructor of EstGradFitter:\n"
             << "=============================\n"
@@ -77,11 +73,7 @@ EstGradFitter::EstGradFitter(const std::string filename)
                0.316227766); // = 1/sqrt(10)
   decrease_step_limit = sim_param.value_or_default("DECREASE_STEP_LIMIT", 4);
 
-  alps::ParameterList init_params;
-  {
-    std::ifstream param_stream(filenamebase.c_str());
-    param_stream >> init_params;
-  }
+  alps::ParameterList init_params = alps::read_parameter_list(filenamebase);
   FitterParamList initial;
   initial.parms = AbstractFitter::adjust_parameters(init_params, exp_results);
   initial.is_genuine = true;

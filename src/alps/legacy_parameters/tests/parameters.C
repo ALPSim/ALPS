@@ -16,7 +16,9 @@
 #include <alps/parameter/parameters.h>
 #include <gtest/gtest.h>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 TEST(LegacyParameters, ParsesCommentsPreservesOrderAndSupportsMutation) {
@@ -57,4 +59,41 @@ b = sqrt(4)+2*Pi/L-X^5;
   copy["N"] = copy["L"];
   EXPECT_EQ(std::string(copy["N"].c_str()), "3");
   EXPECT_FALSE(params.defined("N"));
+}
+
+namespace {
+std::vector<std::pair<std::string, std::string>> parse(const std::string &text) {
+  std::istringstream input(text);
+  const alps::Parameters params(input);
+  std::vector<std::pair<std::string, std::string>> entries;
+  for (const auto &p : params) entries.emplace_back(p.key(), p.value().c_str());
+  return entries;
+}
+}
+
+TEST(LegacyParameters, AcceptsWindowsLineEndings) {
+  EXPECT_EQ(parse("A = 1\r\nB = \"two words\"\r\n"),
+            (std::vector<std::pair<std::string, std::string>>{{"A", "1"}, {"B", "two words"}}));
+}
+
+TEST(LegacyParameters, LastDuplicateWins) {
+  EXPECT_EQ(parse("BETA = 1\nL = 4\nBETA = 2\n"),
+            (std::vector<std::pair<std::string, std::string>>{{"BETA", "2"}, {"L", "4"}}));
+}
+
+TEST(LegacyParameters, AcceptsEmptyUnquotedValue) {
+  EXPECT_EQ(parse("L = 4\nOUTPUT_PREFIX =\nBETA = 2\n"),
+            (std::vector<std::pair<std::string, std::string>>{
+                {"L", "4"}, {"OUTPUT_PREFIX", ""}, {"BETA", "2"}}));
+}
+
+// The grammar requires at least one parameter.
+TEST(LegacyParameters, RejectsTextWithoutParameters) {
+  for (const char *text : {"", "\n\n   \n", "// nothing\n/* here */\n"})
+    EXPECT_THROW(parse(text), std::runtime_error) << text;
+}
+
+TEST(LegacyParameters, RejectsMalformedText) {
+  for (const char *text : {"= 3", "L 3", "L = two words", "L = \"open", "1L = 3", "L = 4; ; BETA = 2"})
+    EXPECT_THROW(parse(text), std::runtime_error) << text;
 }

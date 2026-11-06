@@ -13,7 +13,7 @@ spec.loader.exec_module(generator)
 _, policy, references, framework = generator.load_catalog(root)
 # A missing initial Green function ends each path deterministically after solver
 # selection. This keeps the regression independent of Monte Carlo convergence.
-for solver, component, omega in (("Hirsch-Fye", "hirschfye", 0),
+for solver, component, omega in (("Hirsch-Fye", "hirschfye", 1),
                                   ("Interaction Expansion", "interaction", 1)):
     for disabled in (False, True):
         env = os.environ.copy()
@@ -45,3 +45,13 @@ G0OMEGA_INPUT="missing-green-function"
             expected = generator.notice(policy, references, framework, key)
             assert result.stdout.count(expected) == (0 if disabled else 1), result.stdout
         assert result.stdout.count("Recommended citations for ") == (0 if disabled else 2), result.stdout
+
+# Both built-in solvers read G0 in Matsubara frequencies only; the
+# imaginary-time loop rejects them before any notice or computation.
+for solver in ("Hirsch-Fye", "Interaction Expansion", "hirschfye", "interaction"):
+    with tempfile.TemporaryDirectory(prefix="alps-dmft-itime-") as cwd:
+        Path(cwd, "parameters").write_text(f'SOLVER="{solver}"\nOMEGA_LOOP=0\nN=8\nBETA=1\n')
+        result = subprocess.run([sys.argv[1], "parameters"], cwd=cwd, text=True,
+                                capture_output=True, timeout=45)
+    assert result.returncode != 0, result.stdout
+    assert "needs the Matsubara loop; set OMEGA_LOOP = 1" in result.stderr, result.stdout + result.stderr

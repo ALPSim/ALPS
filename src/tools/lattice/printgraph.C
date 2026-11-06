@@ -15,9 +15,8 @@
 /* $Id: example4.C 730 2004-04-02 18:20:12Z troyer $ */
 
 #include <alps/lattice.h>
+#include <alps/parameter_input.hpp>
 #include <iostream>
-#include <fstream>
-#include <boost/algorithm/string.hpp>
 
 #ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
 using namespace alps;
@@ -32,18 +31,10 @@ int main(int argc, char ** argv)
     alps::Parameters parameters;
     switch(argc) {
        case 1:
-         std::cin >> parameters;
+         parameters = alps::read_parameter_text(std::cin);
          break;
        case 2:
-         {
-           std::string fn(argv[1]);
-           std::ifstream parmfile(fn.c_str());
-
-           if(boost::algorithm::iends_with(fn, ".xml"))
-             parameters.extract_from_xml(parmfile);
-           else
-             parmfile >> parameters;
-         }
+         parameters = alps::read_parameter_file(argv[1]);
          break;
        default:
          std::cerr << "Usage: " << argv[0] << " [parameterfile]\n";

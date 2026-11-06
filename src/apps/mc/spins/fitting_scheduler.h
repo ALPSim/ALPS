@@ -17,6 +17,7 @@
 
 #include <alps/utilities/copyright.hpp>
 #include <alps/scheduler.h>
+#include <alps/parameter_input.hpp>
 #include <alps/scheduler/factory.h>
 #include <alps/scheduler/options.h>
 #include <alps/scheduler/types.h>
@@ -52,11 +53,7 @@ public:
     checkpoint_filename = std::filesystem::absolute(
                std::string(sim_file_name) + ".checkpoint");
 
-    alps::Parameters sim_param;
-    {
-      std::ifstream in(sim_file_name);
-      in >> sim_param;
-    }
+    alps::Parameters sim_param = alps::read_parameter_file(sim_file_name);
 
     if (sim_param.defined("FITTER")) {
       if (sim_param["FITTER"] == "Dummy")

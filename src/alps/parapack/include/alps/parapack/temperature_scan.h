@@ -33,13 +33,17 @@ public:
   static void print_copyright(std::ostream& out) { worker_type::print_copyright(out); }
 
   temperature_scan_adaptor(alps::Parameters const& params)
-    : steps_(params),
-      num_temps_(static_cast<int>(evaluate("NUM_TEMPERATURES", params))),
-      temp_init_(evaluate("INITIAL_TEMPERATURE", params)),
-      temp_diff_(evaluate("DIFF_TEMPERATURE", params)),
-      stage_(0), mcs_(params) {
-    if (params.defined("INITIAL_THERMALIZATION"))
-      mcs_.set_thermalization(static_cast<int>(evaluate("INITIAL_THERMALIZATION", params)));
+    : temperature_scan_adaptor(params, input::read_mc_steps_parameters(params),
+                               input::read_temperature_scan_parameters(params)) {}
+  temperature_scan_adaptor(alps::Parameters const& params, input::mc_steps_parameters const& steps,
+                           input::temperature_scan_parameters const& scan)
+    : steps_(steps),
+      num_temps_(scan.num_temperatures),
+      temp_init_(scan.initial_temperature),
+      temp_diff_(scan.diff_temperature),
+      stage_(0), mcs_(steps) {
+    if (scan.initial_thermalization)
+      mcs_.set_thermalization(*scan.initial_thermalization);
     worker_.reset(new worker_type(params));
     std::cout << "TEMPSCAN: number of temperatures = " << num_temps_ << std::endl;
     std::cout << "TEMPSCAN: initial temperature = " << temp_init_ << std::endl;
