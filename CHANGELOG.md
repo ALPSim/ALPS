@@ -13,6 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `multiple_parallel_exchange_worker` distributes replicas over process groups instead of all ranks. With `PROCESS_PER_WORKER > 1` and more replicas than groups, only one walker per group existed while the temperature ladder kept `NUM_REPLICAS` entries, and the exchange and temperature optimization read weights of walkers that did not exist.
 - `dirloop_sse` and `worm` no longer stop with `Cannot add measurement to observable` on a custom `MEASURE_STRUCTURE_FACTOR[name]=operator`. The measurement now records the sign-weighted value per site.
 - `dmrg` no longer writes a quantum-number update for `Sz` or `N` past the end of the quantum-number record when the model defines neither (an assertion failure in debug builds). `spinmc`'s fitter skips the residuum for a measurement whose temperature differs from the simulation's, as its message says, instead of computing it anyway. Adding two `QuantumNumberDescriptor`s resets the cached limits of the sum. `std::multimap` and `std::multiset` can be written to an osiris dump.
 - `pyalps.ngs.params[key]` raises `KeyError` for a key that is neither defined nor supplied, as a `dict` does. It returned `None`, so a misspelled key failed later, away from the typo, and `params.get()` ignored its default. Use `key in p` or `p.get(key, default)` to test for a parameter.
