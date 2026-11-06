@@ -3,10 +3,12 @@
 
 For every open ALPSim/ALPS issue on the project board
 (github.com/orgs/ALPSim/projects/5) whose Owner is a person rather than
-Bucket, that person is assigned to the issue, and anyone else on the board's
-Owner list is unassigned from it, so moving a card from one name to another
-moves the assignment. Assignees who are not on the Owner list are left alone,
-and so are issues in Bucket.
+Bucket, that person is assigned to the issue, unless they were unassigned
+after the card was put under their name: someone did that on purpose.
+
+Moving a card from one name to another unassigns the previous person if this
+workflow had assigned them. People assigned by hand stay assigned, and so does
+everyone on an issue whose card goes back to Bucket.
 
 BOARD_TOKEN reads the board; GH_TOKEN edits the issues. With DRY_RUN=1 it only
 prints what it would do.
@@ -19,6 +21,7 @@ ORG, PROJECT = "ALPSim", 5
 REPO = "ALPSim/ALPS"
 BUCKET = "Bucket"
 DRY_RUN = os.environ.get("DRY_RUN") == "1"
+BOT = "github-actions"  # actor of assignments made with GITHUB_TOKEN
 
 ITEMS = """
 query($org: String!, $number: Int!, $after: String) {
@@ -28,12 +31,19 @@ query($org: String!, $number: Int!, $after: String) {
       items(first: 100, after: $after) {
         pageInfo { hasNextPage endCursor }
         nodes {
-          owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+          owner: fieldValueByName(name: "Owner") { ... on ProjectV2ItemFieldSingleSelectValue { name updatedAt } }
           content {
             ... on Issue {
               number state
               repository { nameWithOwner }
               assignees(first: 20) { nodes { login } }
+              timelineItems(itemTypes: [ASSIGNED_EVENT, UNASSIGNED_EVENT], last: 50) {
+                nodes {
+                  __typename
+                  ... on AssignedEvent { createdAt actor { login } assignee { ... on User { login } } }
+                  ... on UnassignedEvent { createdAt assignee { ... on User { login } } }
+                }
+              }
             }
           }
         }
@@ -64,6 +74,20 @@ def load_board():
         after = project["items"]["pageInfo"]["endCursor"]
 
 
+def last_events(issue):
+    """Latest AssignedEvent and UnassignedEvent per login (ISO times sort as strings)."""
+    assigned, unassigned = {}, {}
+    for e in issue["timelineItems"]["nodes"]:
+        login = ((e.get("assignee") or {}).get("login") or "").lower()
+        if not login:
+            continue
+        if e["__typename"] == "AssignedEvent":
+            assigned[login] = e
+        else:
+            unassigned[login] = e
+    return assigned, unassigned
+
+
 def main():
     names, items = load_board()
     people = {n.lower(): n for n in names if n != BUCKET}
@@ -71,13 +95,22 @@ def main():
     for item in items:
         issue = item["content"] or {}
         owner = (item["owner"] or {}).get("name")
+        moved = (item["owner"] or {}).get("updatedAt") or ""
         if (issue.get("repository") or {}).get("nameWithOwner") != REPO or issue.get("state") != "OPEN":
             continue
         if not owner or owner.lower() not in people:
             continue
         assigned = [a["login"] for a in issue["assignees"]["nodes"]]
-        add = [] if owner.lower() in (a.lower() for a in assigned) else [owner]
-        remove = [a for a in assigned if a.lower() in people and a.lower() != owner.lower()]
+        by, off = last_events(issue)
+        add = []
+        if owner.lower() not in (a.lower() for a in assigned):
+            if off.get(owner.lower(), {}).get("createdAt", "") < moved:
+                add = [owner]
+        # Only undo this workflow's own assignments, and only after the card moved.
+        remove = [a for a in assigned
+                  if a.lower() in people and a.lower() != owner.lower()
+                  and (by.get(a.lower(), {}).get("actor") or {}).get("login") == BOT
+                  and by[a.lower()]["createdAt"] < moved]
         if not add and not remove:
             continue
         print(f"#{issue['number']}: add {add or '-'}, remove {remove or '-'}")

@@ -3,7 +3,9 @@ name: Board assignees
 # Assigns each issue on the project board to the person whose name its card
 # is under, so dropping a card from Bucket onto a name assigns that person
 # (.github/scripts/board_assignees.py). Workflows can't be triggered by changes
-# on an organization project, so this runs on a schedule.
+# on an organization project, so this runs on a schedule. Unassigning yourself
+# on the issue sticks; moving a card back to Bucket leaves its assignees as
+# they are.
 on:
   schedule:
     - cron: '*/15 * * * *'
