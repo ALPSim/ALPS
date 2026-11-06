@@ -728,6 +728,13 @@ bool WRun::create_worm()
   shift_kink(worm_head[1],worm_head[0]);
   subinterval_valid = false;
 
+  // Choose at random which of the two discontinuities becomes the moving
+  // head. annihilate_worm() accepts both time orderings of head and tail,
+  // so creation must produce both orderings as well, otherwise the
+  // creation/annihilation pair does not satisfy detailed balance.
+  if (random_real()<0.5)
+    worm_head[0].swap_with(worm_head[1]);
+
   return true;
 }   // WRun::create_worm
  

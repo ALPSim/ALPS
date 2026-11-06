@@ -179,6 +179,14 @@ public:
     if (s==site())
       valid_=false;
   }
+
+  // exchange the roles of two worm heads (same graph and kink storage)
+  void swap_with(Wormhead& other) {
+    std::swap(time_,other.time_);
+    std::swap(s_,other.s_);
+    std::swap(iterator_,other.iterator_);
+    std::swap(valid_,other.valid_);
+  }
   
 private:
   void revalidate() {
