@@ -91,7 +91,11 @@ ALPS_DIR = "$(pwd)/_build/distribution/install/share/alps"
 CMAKE_PREFIX_PATH = "$(pwd)/_build/boost-install"
 CCACHE_DIR = "$(pwd)/_build/ccache"
 CCACHE_NAMESPACE = "pyalps-wheel"
-CCACHE_MAXSIZE = "256M"
+# One SDK and wheel build stores about 220 MB uncompressed, and the manylinux
+# image's ccache 3.7 does not compress by default: at 256M every run evicted
+# entries the next one needed.
+CCACHE_COMPRESS = "1"
+CCACHE_MAXSIZE = "512M"
 CMAKE_C_COMPILER_LAUNCHER = "ccache"
 CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 PYALPS_TEST_DOWNSTREAM_EXPORT = "1"
