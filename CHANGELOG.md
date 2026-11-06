@@ -36,7 +36,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Saving a `std::map` at an HDF5 archive's root tried to delete the root group and failed. It now writes its entries beside the root's other children.
 - End thermalization in the interaction-expansion solver (`interaction`, `alps::solvers::ctint`) after `THERMALIZATION` steps. It never ended, so a run with `THERMALIZATION` > 0 went on until `MAX_TIME` and measured from the first step. Such runs now discard the thermalization steps and stop `SWEEPS` steps later, so their results change; one whose `MAX_TIME` ends during thermalization stops with "No measurements available." Under MPI, a run that ends while any rank is still thermalizing stops with an error on every rank. Runs with `THERMALIZATION=0` are unchanged.
 - Under MPI, `collect_results()` now throws on every rank when an observable was measured on some ranks but not others, for example when `MAX_TIME` ends while some ranks are still thermalizing. It used to skip the collective reduction only on the empty ranks, which could hang the run.
-- Dividing by a site operator in a `SITETERM`, `BONDTERM` or `NSITETERM`, as in `1/Sz(i)` or `Sz(j)/Sz(i)`, is refused with an error. It used to act as multiplying by the operator, so `1/Sz(i)` gave the spectrum of `Sz(i)`.
+- Dividing by a site operator in a `SITETERM`, `BONDTERM` or `NSITETERM`, as in `1/Sz(i)` or `Sz(j)/Sz(i)`, is refused with an error. It used to act as multiplying by the operator, so `1/Sz(i)` gave the spectrum of `Sz(i)`. This also holds inside a `SITEOPERATOR` or `BONDOPERATOR`.
+- Simplifying an expression no longer turns a division by a product into a multiplication: `x/(2*y)` became `2*x*y`. Printing `1/x` no longer drops the `1 /`.
 
 ### Changed
 

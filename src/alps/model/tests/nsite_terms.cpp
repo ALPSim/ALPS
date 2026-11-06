@@ -987,3 +987,24 @@ TEST(NSiteBoson, NoCutoffWarningForFermions) {
   spectrum(p);
   EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
 }
+
+// A division inside a library operator used to be accepted and act as a
+// product, because the operator's simplified text had lost the "/".
+TEST(NSiteHamiltonian, DivisionInsideLibraryOperatorsThrows) {
+  const char* g = "<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
+                  "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>";
+  const std::vector<std::pair<std::string, std::string> > refused = {
+    {"<SITEOPERATOR name=\"invn\" site=\"x\">1/n(x)</SITEOPERATOR>",
+     "<NSITETERM sites=\"a b c\">invn(a)*n(b)</NSITETERM>"},
+    {"<SITEOPERATOR name=\"invn\" site=\"x\">1/n(x)</SITEOPERATOR>", "<SITETERM site=\"i\">invn(i)</SITETERM>"},
+    {"<BONDOPERATOR name=\"ratio\" source=\"x\" target=\"y\">n(y)/n(x)</BONDOPERATOR>",
+     "<BONDTERM source=\"i\" target=\"j\">ratio(i,j)</BONDTERM>"},
+  };
+  for (const auto& c : refused) {
+    Files f(g, c.first + "<HAMILTONIAN name=\"divide\"><BASIS ref=\"fermion\"/>" + c.second + "</HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);
+    p["GRAPH"] = "g"; p["MODEL"] = "divide";
+    const std::string error = build_error(p);
+    EXPECT_NE(error.find("Cannot divide by a site operator"), std::string::npos) << c.second << ": " << error;
+  }
+}
