@@ -17,6 +17,7 @@
 
 #include "hirschfyesim.h"
 #include <alps/parameter.h>
+#include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/cli.hpp>
 #include <alps/utilities/vectorio.hpp>
@@ -65,22 +66,21 @@ int main(int argc, char** argv)
     alps::cli_mpi_guard mpi(argc, argv);
 		// read parameters and G0
 		
-    alps::hdf5::archive ar(infile, "r");
-		alps::Parameters parms;
-    ar["/parameters"] >> parms;
+    alps::Parameters parms = alps::read_parameter_file(infile);
     parms["INFILE"]=infile;
     parms["OUTFILE"]=outfile;
     int N=(int)parms["NMATSUBARA"];
     int sites=parms.value_or_default("SITES", 1);
     int flavors=parms.value_or_default("FLAVORS", 2);
     
+    alps::hdf5::archive ar(infile, "r");
     matsubara_green_function_t g0(N, sites, flavors); g0.read_hdf5(ar, "/G0");
     if (alps::cli_is_master()) {
       std::cout << "ALPS Hirsch-Fye solver for the single site impurity problem.\n\n";
       alps::print_copyright(std::cout, "hirschfye");
     }
     alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-    alps::ImpuritySolver solver(factory,argc,argv,true);
+    alps::ImpuritySolver solver(factory,parms,argc,argv);
 		
 		// write g into output file
     solver.solve_omega(g0,parms);
