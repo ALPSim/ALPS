@@ -10,14 +10,9 @@ nothing about the Python package.
 
 A test earns its place when a real bug would make it fail. A bug fix adds the
 one test that fails without the fix; a new feature checks its result against an
-exact or independent value and rejects the inputs it refuses; a refactor that
-changes no behaviour adds none; if the behaviour it moves had no test, add one
-behavioural test, not a mirror of the new structure. Do not add tests that only
-break when the code changes rather than when a result is wrong: tables of
-default values, parameters read back as written, constructor members, `--help`
-runs, matches on warning text, timing assertions, one case per overload or
-separator, or tests of code the change does not touch. Reviewers remove such
-tests before merge ([REVIEW.md](../REVIEW.md#tests)).
+exact or independent value; a refactor adds none. A test that would only fail
+because the code changed, not because a result is wrong (a default value read
+back, one case per overload), is removed in review.
 
 ## Local workflows
 

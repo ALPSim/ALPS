@@ -13,13 +13,9 @@ right. Look first for:
 - Results that are wrong while the tests pass: a dropped term, a wrong sign or
   prefactor, a boundary condition that is off by one site, a sum that stops a
   step early.
-- The second code path. Most wrong results found in review in autumn 2026 were
-  in the less common form of a feature, while the common form was right and
-  tested: a custom measurement next to a built-in one, a multi-term operator
-  next to a single-term one, a scalar parameter next to a vector one, an
-  unconstrained state next to a constrained one, a value given on the command
-  line next to one in the parameter file, a positional argument next to an
-  option. When a change touches one form, run the other.
+- The less common form of a feature, such as a custom measurement beside a
+  built-in one or a vector parameter beside a scalar one. When a change
+  touches one form, run the other.
 - Random numbers drawn once where they should be drawn per sample, per bond or
   per site, for example when a parameter expression such as `random()` is
   evaluated at load time.
@@ -51,8 +47,7 @@ right. Look first for:
   to fix now.
 - Name the file and line. For a wrong result, give a reproducer: the parameter
   file, the expected value and where it comes from, and the observed value.
-- Keep nits to a few per review. Formatting is not a finding; ALPS has no
-  single formatter and asks only that new code match its surroundings.
+- Keep nits to a few per review. Formatting is not a finding.
 - Start the summary with the number of blocking findings, and say plainly when
   there are none.
 - A wrong approach is Blocking when you can name what it breaks, a Suggestion
@@ -63,12 +58,10 @@ right. Look first for:
 - A review miss becomes a test. When a reviewer catches a wrong result, the fix
   adds the test that would have caught it, in the same pull request where that
   is practical.
-- A test that still passes with the bug present is a blocking finding. For a
-  bug fix, the pull request says that the new test fails without the fix.
+- A test that still passes with the bug present is a blocking finding.
 - A test that fails the bar in [when to add a test](tests/README.md#when-to-add-a-test)
-  is a finding, not a nit; ask for it to be removed before merge. This pattern
-  is common in AI-assisted changes. For each test that stays, the author can
-  name the bug it would catch.
+  is a finding, not a nit; ask for it to be removed before merge. For each
+  test that stays, the author can name the bug it would catch.
 - A tolerance widened to make a new platform pass needs a numerical reason in
   the pull request ([reference data](tests/README.md#choosing-assertions-and-reference-data)).
 
