@@ -24,6 +24,10 @@ foreach(name vmusage)
   alps_add_gtest(${name} COMPONENT utilities)
 endforeach()
 
+add_executable(ngs_cast ngs_cast.cpp)
+target_link_libraries(ngs_cast PRIVATE ALPS::utilities)
+alps_add_gtest(ngs_cast COMPONENT utilities)
+
 add_executable(ngs_hash ngs_hash.cpp)
 target_link_libraries(ngs_hash PRIVATE ALPS::utilities)
 alps_add_gtest(ngs_hash COMPONENT utilities)

@@ -13,6 +13,7 @@
 
 #include <alps/cli.hpp>
 #include <alps/model.h>
+#include <alps/parameter_input.hpp>
 #include <alps/lattice.h>
 #include <alps/utilities/copyright.hpp>
 #include <alps/xml.h>
@@ -36,20 +37,10 @@ void check_parameters(const std::string& n, int i, alps::Parameters& p)
 
 void check_parameterfile(const std::string& name)
 {
-  alps::ParameterList parms;
-  { // scope for ifstream lifetime
-    std::ifstream in(name.c_str());
-    in >> parms;
-  }
-  if (parms.size()==0) { // we got a single simulation parameter set
-    std::ifstream in(name.c_str());
-    alps::Parameters p;
-    in >> p;
-    check_parameters(name,0,p);
-  }
-  else
-    for (int i=0;i<parms.size();++i)
-      check_parameters(name,i+1,parms[i]);
+  alps::ParameterList parms = alps::read_parameter_list(name);
+  // a single parameter set is not numbered
+  for (int i=0;i<parms.size();++i)
+    check_parameters(name,parms.size()==1 ? 0 : i+1,parms[i]);
 }
 
 void check_xmlfile(const std::string& name)

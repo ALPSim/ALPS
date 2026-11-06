@@ -14,7 +14,7 @@
 #ifndef HYB_CONFIG_HPP
 #define HYB_CONFIG_HPP
 
-#include <alps/params.hpp>
+#include <alps/input/hybridization.hpp>
 #include"hybfun.hpp"
 #include"hybsegment.hpp"
 #include"hybmatrix.hpp"
@@ -23,7 +23,7 @@
 //this is where \det \Delta is implemented.
 class hybridization_configuration{
 public:
-  hybridization_configuration(const alps::params &p);
+  hybridization_configuration(const alps::input::hybridization_parameters &input);
   hybridization_configuration(const hybridization_configuration &rhs) : Delta(rhs.Delta),hybmat_(rhs.hybmat_) {
     std::cerr << hybmat_.size() << std::endl;
     for (int i=0;i<hybmat_.size();i++)

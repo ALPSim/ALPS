@@ -28,6 +28,7 @@
 #include <alps/utilities/os.hpp>
 #include <alps/utilities/vmusage.hpp>
 #include <alps/osiris/comm.h>
+#include <alps/parameter_input.hpp>
 
 // some file (probably a python header) defines a tolower macro ...
 #undef tolower
@@ -333,8 +334,7 @@ int run_sequential(int argc, char **argv) {
     help.print(std::cout);
   })) return 0;
 
-  alps::ParameterList parameterlist;
-  std::cin >> parameterlist;
+  alps::ParameterList parameterlist = alps::read_parameter_list_text(std::cin);
   if (alps::cli_is_master() && !parameterlist.empty()) print_copyright(std::cerr);
 
 #ifdef _OPENMP
@@ -730,7 +730,7 @@ int run_sequential_mpi(int argc, char** argv) {
   alps::mpi::environment env(argc, argv);
   alps::mpi::communicator world;
   alps::ParameterList parameterlist;
-  if (world.rank() == 0) std::cin >> parameterlist;
+  if (world.rank() == 0) parameterlist = alps::read_parameter_list_text(std::cin);
   alps::mpi::broadcast_object(world, parameterlist, 0);
   if (world.rank() == 0 && !parameterlist.empty()) print_copyright(std::cerr);
 
