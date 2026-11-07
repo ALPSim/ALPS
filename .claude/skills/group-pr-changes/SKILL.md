@@ -1,10 +1,10 @@
 ---
-name: "pr_code_review"
-description: "Organize a PR's changed files into a categorized HTML review page. Run with /pr_code_review <PR number or URL>."
+name: "group-pr-changes"
+description: "Organize a PR's changed files into a categorized HTML review page. Run with /group-pr-changes <PR number or URL>."
 disable-model-invocation: true
 ---
 
-# PR review: group the changes for easier review
+# Group PR changes for easier review
 
 Input: a GitHub PR, given as a number or URL.
 
