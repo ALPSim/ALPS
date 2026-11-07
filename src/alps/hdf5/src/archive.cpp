@@ -23,6 +23,7 @@
 
 #include <hdf5.h>
 
+#include <cstring>
 #include <memory>
 #include <sstream>
 #include <iostream>
