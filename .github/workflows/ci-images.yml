@@ -1,7 +1,8 @@
 name: CI images
 # Build environments for the platform matrix in ci.yml: ghcr.io/alpsim/alps-ci:<name>.
 # Rebuilt weekly (distribution security and compiler updates) and whenever their inputs
-# change on master; run by hand to try changes from a branch (pushes the same tags).
+# change on master. Run by hand from a branch to try changes: that builds and checks
+# the images, but only master pushes them, since master's CI uses the same tags.
 'on':
   push:
     branches:
@@ -23,7 +24,7 @@ concurrency:
 jobs:
   image:
     name: alps-ci:${{ matrix.name }}
-    runs-on: [self-hosted, ift-vm]
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
@@ -65,6 +66,7 @@ jobs:
           -t "$TAG" .
         docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3'
     - name: Push
+      if: github.ref == 'refs/heads/master'
       env:
         TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -40,11 +40,12 @@ jobs:
     needs:
     - check_version
     - build_sdist
-    # Fork pull requests run on GitHub's machines instead of the IFT runner VMs.
-    runs-on: ${{ (matrix.plat.os == 'ift-vm' && github.event.pull_request.head.repo.fork) && 'ubuntu-24.04' || matrix.plat.os }}
+    # Fork pull requests, and every job while the repo variable IFT_RUNNERS is 'off',
+    # run on GitHub's machines instead of the IFT runner VMs.
+    runs-on: ${{ (matrix.plat.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.plat.os }}
     timeout-minutes: 120
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || github.event.pull_request.head.repo.fork && '4' || '16' }}
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '4' || '16' }}
     strategy:
       fail-fast: false
       matrix:
@@ -181,7 +182,7 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ${{ (matrix.os == 'ift-vm' && github.event.pull_request.head.repo.fork) && 'ubuntu-24.04' || matrix.os }}
+    runs-on: ${{ (matrix.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -225,7 +226,7 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

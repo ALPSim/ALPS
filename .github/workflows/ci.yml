@@ -145,7 +145,7 @@ jobs:
     name: Static and helper checks
     needs: changes
     if: needs.changes.outputs.static_run == 'true'
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -197,7 +197,7 @@ jobs:
   linux:
     needs: changes
     if: needs.changes.outputs.linux_run == 'true'
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: gcc
@@ -270,7 +270,9 @@ jobs:
     needs: changes
     if: needs.changes.outputs.platforms_run == 'true'
     # Fork pull requests run on GitHub's machines, everything else on the IFT runner VMs.
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    # Setting the repo variable IFT_RUNNERS to 'off' sends every job to GitHub's machines,
+    # for when no workstation is free (here and in compatibility.yml, ci-images.yml, _wheels.yml).
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     container:
       image: ghcr.io/alpsim/alps-ci:${{ matrix.image }}
       credentials:
@@ -316,7 +318,6 @@ jobs:
       CXX: ${{ matrix.cxx }}
       CMAKE_C_COMPILER_LAUNCHER: ccache
       CMAKE_CXX_COMPILER_LAUNCHER: ccache
-      CCACHE_DIR: ${{ github.workspace }}/_build/ccache
       CCACHE_MAXSIZE: 256M
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -325,6 +326,9 @@ jobs:
     - name: Identify compiler and dependencies
       id: toolchain
       run: |
+        # In a container job, github.workspace is the host's path. GITHUB_WORKSPACE is the
+        # container's, where the cache steps restore and save _build/ccache.
+        echo "CCACHE_DIR=$GITHUB_WORKSPACE/_build/ccache" >> "$GITHUB_ENV"
         { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
         "$CXX" --version | head -1
@@ -380,7 +384,7 @@ jobs:
   mpi:
     needs: changes
     if: needs.changes.outputs.mpi_run == 'true'
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: clang-18
@@ -490,7 +494,7 @@ jobs:
     name: Native debug build with assertions
     needs: changes
     if: needs.changes.outputs.debug_run == 'true'
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: gcc
@@ -562,12 +566,12 @@ jobs:
     name: Native address and undefined behavior sanitizers
     needs: changes
     if: needs.changes.outputs.sanitizers_run == 'true'
-    runs-on: ${{ github.event.pull_request.head.repo.fork && 'ubuntu-24.04' || 'ift-vm' }}
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 60
     env:
       CC: clang-18
       CXX: clang++-18
-      CMAKE_BUILD_PARALLEL_LEVEL: ${{ github.event.pull_request.head.repo.fork && '2' || '8' }}  # ASan: more memory per process
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '2' || '8' }}  # ASan: more memory per process
       ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
     steps:
@@ -666,7 +670,7 @@ defaults:
   run:
     shell: bash
 env:
-  CMAKE_BUILD_PARALLEL_LEVEL: ${{ github.event.pull_request.head.repo.fork && '4' || '16' }}  # IFT runner VMs: 8 vCPUs, oversubscribed 2x; fork PRs: GitHub's 4
+  CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '4' || '16' }}  # IFT runner VMs: 8 vCPUs, oversubscribed 2x; GitHub's: 4
   CTEST_PARALLEL_LEVEL: 2
   CMAKE_GENERATOR: Ninja
   ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
