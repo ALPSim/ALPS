@@ -13,6 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- The parallel Ising tutorial (`tutorials/examples/parapack/multiple`) computed the heat-bath energy difference with the wrong operator precedence, so it sampled the wrong ensemble and reported wrong energies. For the chain, `Energy / Number of Sites` now agrees with `-tanh(J/T)`.
 - `dirloop_sse` and `worm` no longer stop with `Cannot add measurement to observable` on a custom `MEASURE_STRUCTURE_FACTOR[name]=operator`. The measurement now records the sign-weighted value per site.
 - `dmrg` no longer writes a quantum-number update for `Sz` or `N` past the end of the quantum-number record when the model defines neither (an assertion failure in debug builds). `spinmc`'s fitter skips the residuum for a measurement whose temperature differs from the simulation's, as its message says, instead of computing it anyway. Adding two `QuantumNumberDescriptor`s resets the cached limits of the sum. `std::multimap` and `std::multiset` can be written to an osiris dump.
 - `pyalps.ngs.params[key]` raises `KeyError` for a key that is neither defined nor supplied, as a `dict` does. It returned `None`, so a misspelled key failed later, away from the typo, and `params.get()` ignored its default. Use `key in p` or `p.get(key, default)` to test for a parameter.
