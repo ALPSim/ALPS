@@ -1,6 +1,6 @@
 SIMULATION_NAME = "example/exchange loop-1";
 
-WORKER = "loop exchange"
+WORKER = "loop; exchange"
 
 LATTICE = "chain lattice"
 L = 32
