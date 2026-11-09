@@ -11,11 +11,12 @@
 *
 *****************************************************************************/
 #include <alps/parapack/option.h>
+#include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace alps {
 namespace parapack {
 
-namespace po = boost::program_options;
 namespace pt = boost::posix_time;
 
 option::option(int argc, char** argv, bool eval)
@@ -28,52 +29,46 @@ option::option(int argc, char** argv, bool eval)
     task_range(), write_xml(false),
     use_mpi(false), default_total_threads(true), auto_total_threads(false),
     num_total_threads(1), threads_per_clone(1), jobfiles(), valid(true) {
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("license,l", "print license conditions")
-    ("dump-format", po::value<std::string>(),
+  desc.flag("help,h", "produce help message")
+    .flag("license,l", "print license conditions")
+    .value<std::string>("dump-format",
      "format for dumping info, parameter, and measurements [hdf5 (default), xdr]")
-    ("task-range", po::value<std::string>(),
+    .value<std::string>("task-range",
      "specify range of task indices to be processed, e.g. [2:5]")
-    ("write-xml", "write results to XML files")
-    ("input-file", po::value<std::vector<std::string> >(),
-     "input master XML files");
+    .flag("write-xml", "write results to XML files")
+    .list("input-file", "input master XML files")
+    .positional("input-file", -1);
   if (!for_evaluate) {
-    desc.add_options()
-      ("auto-evaluate", "evaluate observables upon halting [default = true]")
-      ("check-parameter", "perform parameter checking")
-      ("check-interval", po::value<int>(),
+    desc.flag("auto-evaluate", "evaluate observables upon halting [default = true]")
+      .flag("check-parameter", "perform parameter checking")
+      .value<int>("check-interval",
        "time between internal status check [unit = millisec; default = 100ms]")
-      ("checkpoint-interval", po::value<int>(),
+      .value<int>("checkpoint-interval",
        "time between checkpointing [unit = sec; default = 3600s]")
-      ("dump-policy", po::value<std::string>(),
+      .value<std::string>("dump-policy",
        "policy for dumping user checkpoint data [running (default), never, all]")
-      ("enable-termination-file", "enable termination file support (*.term)")
-      ("evaluate", "evaluation mode")
-      ("mpi", "run in parallel using MPI")
-      ("Nmin", po::value<int>(), "obsolete")
-      ("Nmax", po::value<int>(), "obsolete")
-      ("no-evaluate", "prevent evaluating observables upon halting")
-      ("report-interval", po::value<int>(),
+      .flag("enable-termination-file", "enable termination file support (*.term)")
+      .flag("evaluate", "evaluation mode")
+      .flag("mpi", "run in parallel using MPI")
+      .value<int>("Nmin", "obsolete")
+      .value<int>("Nmax", "obsolete")
+      .flag("no-evaluate", "prevent evaluating observables upon halting")
+      .value<int>("report-interval",
        "time between progress report of clones [unit = sec; default = 600s]")
-      ("vmusage-interval", po::value<int>(),
+      .value<int>("vmusage-interval",
        "time between virtual memory usage report of processes [unit = sec; default = none]")
-      ("time-limit,T", po::value<int>(),
+      .value<int>("time-limit,T",
        "time limit for the simulation [unit = sec; default = no time limit]")
-      ("Tmin", po::value<int>(), "obsolete")
-      ("Tmax", po::value<int>(), "obsolete")
-      ("threads-per-clone,p", po::value<int>(),
+      .value<int>("Tmin", "obsolete")
+      .value<int>("Tmax", "obsolete")
+      .value<int>("threads-per-clone,p",
        "number of threads for each clone [default = 1]")
-      ("total-threads,r", po::value<std::string>(),
+      .value<std::string>("total-threads,r",
        "total number of threads [integer or 'auto'; default = total number of processes]");
   }
-  po::positional_options_description p;
-  p.add("input-file", -1);
 
-  po::variables_map vm;
   try {
-    po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-    po::notify(vm);
+    desc.parse(argc, argv);
   }
   catch (std::exception& e) {
     valid = false;
@@ -81,12 +76,12 @@ option::option(int argc, char** argv, bool eval)
     return;
   }
 
-  if (vm.count("help"))
+  if (desc.count("help"))
     show_help = true;
-  if (vm.count("license"))
+  if (desc.count("license"))
     show_license = true;
-  if (vm.count("dump-format")) {
-    std::string value = vm["dump-format"].as<std::string>();
+  if (desc.count("dump-format")) {
+    std::string value = desc.get<std::string>("dump-format");
     if (value == "hdf5")
       dump_format = dump_format::hdf5;
     else if (value == "xdr")
@@ -96,25 +91,25 @@ option::option(int argc, char** argv, bool eval)
       return;
     }
   }
-  if (vm.count("task-range"))
-    task_range = task_range_t(vm["task-range"].as<std::string>());
-  if (vm.count("write-xml"))
+  if (desc.count("task-range"))
+    task_range = task_range_t(desc.get<std::string>("task-range"));
+  if (desc.count("write-xml"))
     write_xml = true;
-  if (vm.count("input-file"))
-    jobfiles = vm["input-file"].as<std::vector<std::string> >();
+  if (desc.count("input-file"))
+    jobfiles = desc.values("input-file");
   if (!for_evaluate) {
-    if (vm.count("auto-evaluate"))
+    if (desc.count("auto-evaluate"))
       auto_evaluate = true;
-    if (vm.count("no-evaluate"))
+    if (desc.count("no-evaluate"))
       auto_evaluate = false;
-    if (vm.count("check-interval"))
-      check_interval = pt::millisec(vm["check-interval"].as<int>());
-    if (vm.count("checkpoint-interval"))
-      checkpoint_interval = pt::seconds(vm["checkpoint-interval"].as<int>());
-    if (vm.count("enable-termination-file"))
+    if (desc.count("check-interval"))
+      check_interval = pt::millisec(desc.get<int>("check-interval"));
+    if (desc.count("checkpoint-interval"))
+      checkpoint_interval = pt::seconds(desc.get<int>("checkpoint-interval"));
+    if (desc.count("enable-termination-file"))
       use_termfile = true;
-    if (vm.count("dump-policy")) {
-      std::string value = vm["dump-policy"].as<std::string>();
+    if (desc.count("dump-policy")) {
+      std::string value = desc.get<std::string>("dump-policy");
       if (value == "never")
         dump_policy = dump_policy::Never;
       else if (value == "running")
@@ -126,24 +121,24 @@ option::option(int argc, char** argv, bool eval)
         return;
       }
     }
-    if (vm.count("report-interval"))
-      report_interval = pt::seconds(vm["report-interval"].as<int>());
-    if (vm.count("vmusage-interval"))
-      vmusage_interval = pt::seconds(vm["vmusage-interval"].as<int>());
-    if (vm.count("mpi"))
+    if (desc.count("report-interval"))
+      report_interval = pt::seconds(desc.get<int>("report-interval"));
+    if (desc.count("vmusage-interval"))
+      vmusage_interval = pt::seconds(desc.get<int>("vmusage-interval"));
+    if (desc.count("mpi"))
       use_mpi = true;
-    if (vm.count("evaluate"))
+    if (desc.count("evaluate"))
       evaluate_only = true;
-    if (vm.count("time-limit"))
-      time_limit = pt::seconds(vm["time-limit"].as<int>());
-    if (vm.count("threads-per-clone"))
-      threads_per_clone = vm["threads-per-clone"].as<int>();
-    if (vm.count("total-threads")) {
+    if (desc.count("time-limit"))
+      time_limit = pt::seconds(desc.get<int>("time-limit"));
+    if (desc.count("threads-per-clone"))
+      threads_per_clone = desc.get<int>("threads-per-clone");
+    if (desc.count("total-threads")) {
       default_total_threads = false;
-      if (vm["total-threads"].as<std::string>() == "auto") {
+      if (desc.get<std::string>("total-threads") == "auto") {
         auto_total_threads = true;
       } else {
-        num_total_threads = boost::lexical_cast<int>(vm["total-threads"].as<std::string>());
+        num_total_threads = boost::lexical_cast<int>(desc.get<std::string>("total-threads"));
       }
     }
   }

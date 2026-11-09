@@ -20,30 +20,22 @@
 #include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/cli.hpp>
+#include <alps/cli/options.hpp>
 #include <alps/utilities/vectorio.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/program_options.hpp>
 
 bool parse_options(int argc, char** argv, std::string& infile, std::string& outfile)
 {
 
-	namespace po = boost::program_options;
-	
-	po::options_description desc("Allowed options");
-	desc.add_options()
-  ("help", "produce help message")
-  ("license,l", "print license conditions") 
-  ("input-file", po::value<std::string>(&infile), "input file")
-  ("output-file", po::value<std::string>(&outfile), "output file");
+  alps::cli::options desc("Allowed options");
+  desc.flag("help", "produce help message")
+    .flag("license,l", "print license conditions")
+    .value("input-file", infile, "input file")
+    .value("output-file", outfile, "output file")
+    .positional("input-file").positional("output-file");
   if (alps::handle_cli_information(argc, argv, "hirschfye", [&] { std::cout << desc << "\n"; })) return false;
-	po::positional_options_description p;
-	p.add("input-file", 1);
-	p.add("output-file", 1);
-	
-	po::variables_map vm;
-	po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-	po::notify(vm);    
-	
+  desc.parse(argc, argv);
+
   if (infile.empty() || outfile.empty())
     throw std::invalid_argument("Expected input and output files");
   return true;
