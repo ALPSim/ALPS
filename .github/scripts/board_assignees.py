@@ -6,7 +6,7 @@ For every open ALPSim/ALPS issue on the project board
 Bucket, that person is assigned to the issue, unless they were unassigned
 after the card was put under their name: someone did that on purpose.
 
-Moving a card from one name to another unassigns the previous person if this
+Moving a card from one name to another unassigns the previous person if a
 workflow had assigned them. People assigned by hand stay assigned, and so does
 everyone on an issue whose card goes back to Bucket.
 
@@ -106,7 +106,7 @@ def main():
         if owner.lower() not in (a.lower() for a in assigned):
             if off.get(owner.lower(), {}).get("createdAt", "") < moved:
                 add = [owner]
-        # Only undo this workflow's own assignments, and only after the card moved.
+        # Only undo assignments made by a workflow, and only after the card moved.
         remove = [a for a in assigned
                   if a.lower() in people and a.lower() != owner.lower()
                   and (by.get(a.lower(), {}).get("actor") or {}).get("login") == BOT
