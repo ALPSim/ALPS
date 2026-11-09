@@ -48,15 +48,17 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   matsubara_green_function_t green_matsubara_measured(n_matsubara, n_site, n_flavors);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   boost::shared_ptr<FourierTransformer> fourier_ptr_g0;
-  // An ATOMIC run starts from the atomic-limit G0, which has MU = H = EPS_f = 0,
-  // whatever INFILE and these parameters say. The evaluation uses the same G0,
-  // and the same values for the high-frequency tails.
+  // An ATOMIC run starts from the atomic-limit G0, which has MU = H = EPS_f =
+  // EPSSQ_f = 0, whatever INFILE and these parameters say. The evaluation uses
+  // the same G0, and the same values for the high-frequency tails.
   alps::Parameters transformer_parms = alps::make_deprecated_parameters(parms);
   if(input.atomic) {
     transformer_parms["MU"] = 0.;
     transformer_parms["H"] = 0.;
-    for(unsigned int f=0; f<n_flavors; ++f)
+    for(unsigned int f=0; f<n_flavors; ++f) {
       transformer_parms["EPS_"+std::to_string(f)] = 0.;
+      transformer_parms["EPSSQ_"+std::to_string(f)] = 0.;
+    }
   }
   FourierTransformer::generate_transformer(transformer_parms, fourier_ptr_g0);
   //find whether our data is in imaginary time or frequency:
