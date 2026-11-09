@@ -531,11 +531,21 @@ namespace alps {
         }
 
         std::string archive::decode_segment(std::string segment) const {
-            for (std::size_t pos = segment.find_first_of('&'); pos < std::string::npos; pos = segment.find_first_of('&', pos + 1))
-                segment = segment.substr(0, pos) 
-                        + static_cast<char>(cast<int>(segment.substr(pos + 2, segment.find_first_of(';', pos) - pos - 2))) 
-                        + segment.substr(segment.find_first_of(';', pos) + 1);
-            return segment;
+            // Only the two entities encode_segment writes are decoded; files
+            // from other tools may contain a raw '&' in a name.
+            std::string result;
+            result.reserve(segment.size());
+            for (std::size_t pos = 0; pos < segment.size();) {
+                if (segment.compare(pos, 5, "&#38;") == 0) {
+                    result.push_back('&');
+                    pos += 5;
+                } else if (segment.compare(pos, 5, "&#47;") == 0) {
+                    result.push_back('/');
+                    pos += 5;
+                } else
+                    result.push_back(segment[pos++]);
+            }
+            return result;
         }
 
         std::string archive::get_context() const {

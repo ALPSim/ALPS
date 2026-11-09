@@ -396,8 +396,9 @@ namespace alps {
             // load() keeps it as text.
             for(const strmap::value_type& kv: raw_kv_content_) {
                 if (exists(kv.first)) continue;
-                ar[kv.first] << supplied_value(kv.first, kv.second);
-                ar[kv.first+"@supplied_only"] << true;
+                const std::string path=ar.encode_segment(kv.first);
+                ar[path] << supplied_value(kv.first, kv.second);
+                ar[path+"@supplied_only"] << true;
             }
             // ALPS: params with no values still get their group
             if (!ar.is_group(context)) ar.create_group(context);
@@ -417,7 +418,7 @@ namespace alps {
 
             std::vector<std::string> keys=ar.list_children(context);
             for(const std::string& key: keys) {
-                td_map_type::const_iterator it=td_map_.find(key);
+                td_map_type::const_iterator it=td_map_.find(ar.decode_segment(key));
 
                 if (it!=td_map_.end()) {
                     ar[key+"@description"] << it->second.descr();
@@ -441,7 +442,7 @@ namespace alps {
             const std::string context=ar.get_context();
             // ALPS: values save() wrote for parameters only supplied stay text
             for(const std::string& key: ar.list_children(context)) {
-                if (ar.is_attribute(key+"@supplied_only")) newpar.erase(key);
+                if (ar.is_attribute(key+"@supplied_only")) newpar.erase(ar.decode_segment(key));
             }
 
             ar[context+"@status"] >> newpar.err_status_;
@@ -483,13 +484,14 @@ namespace alps {
                         throw std::runtime_error("Invalid HDF5 format: missing attribute "+ num_attr);
                     }
 
-                    const_iterator it=newpar.find(key);
+                    const std::string name=ar.decode_segment(key);
+                    const_iterator it=newpar.find(name);
                     if (newpar.end()==it) {
                         throw std::logic_error("params::load(): loading the dictionary"
-                                               " missed key '"+key+"'??");
+                                               " missed key '"+name+"'??");
                     }
                     std::string typestr=apply_visitor(detail::make_typestr(), it);
-                    newpar.td_map_.insert(std::make_pair(key, detail::td_type(typestr, descr, dn)));
+                    newpar.td_map_.insert(std::make_pair(name, detail::td_type(typestr, descr, dn)));
                 }
             }
 
