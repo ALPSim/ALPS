@@ -111,6 +111,7 @@ namespace {
 // quote would be read as the start of a quoted value.
 bool needs_quotes(std::string const& s) {
   if (s.empty() || s[0] == '\'' || s[0] == '"') return true;
+  if (s.size() >= 2 && s[0] == '/' && (s[1] == '/' || s[1] == '*')) return true;
   for (unsigned char c : s)
     if (!(std::isalnum(c) || c == '#' || (c >= '\'' && c <= '+') ||
           (c >= '-' && c <= '/') || c == '^' || c == '_'))
