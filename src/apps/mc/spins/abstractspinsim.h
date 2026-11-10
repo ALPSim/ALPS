@@ -70,6 +70,7 @@ protected:
   boost::vector_property_map<MAT,site_type_map> selfinteraction_; /* D */
   boost::vector_property_map<MAT,bond_type_map> couplings_; /* J */ 
   boost::vector_property_map<double,bond_type_map> couplings_det; /* |J| */
+  std::vector<site_descriptor> bond_source_; /* stored source of each bond */
  
   bool use_error_limit;
   bool ferromagnetic_;
@@ -179,7 +180,9 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   int num_bond_types=0;
 
 
+  bond_source_.resize(num_bonds());
   for (bond_iterator b = bonds().first; b!=bonds().second ;++b) {
+    bond_source_[index(*b)] = source(*b);
     bond_tuple_type this_bond(bond_type[*b],site_type(source(*b)),site_type(target(*b)));
     std::map<bond_tuple_type,int>::const_iterator found = new_bond_type.find(this_bond);
     if (found!=new_bond_type.end())
