@@ -1,0 +1,77 @@
+name: CI images
+# Build environments for the platform matrix in ci.yml: ghcr.io/alpsim/alps-ci:<name>.
+# Rebuilt weekly (distribution security and compiler updates) and whenever their inputs
+# change on master. Run by hand from a branch to try changes: that builds and checks
+# the images, but only master pushes them, since master's CI uses the same tags.
+'on':
+  push:
+    branches:
+    - master
+    paths:
+    - .github/ci-images/**
+    - .github/scripts/prepare_dependencies.py
+    - .github/scripts/build-boost.sh
+    - .github/dependencies.json
+    - .github/workflows/ci-images.yml
+  schedule:
+  - cron: 41 3 * * 6
+  workflow_dispatch: null
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: ci-images-${{ github.ref }}
+jobs:
+  image:
+    name: alps-ci:${{ matrix.name }}
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: ubuntu-22.04
+          base: ubuntu:22.04
+          packages: gcc-11 g++-11 clang-15
+          boost: 1.76.0
+        - name: ubuntu-24.04
+          base: ubuntu:24.04
+          packages: gcc-14 g++-14 clang-19
+          boost: ''
+        - name: debian-12
+          base: debian:12
+          packages: gcc-12 g++-12 clang-16
+          boost: 1.81.0
+        - name: rocky-9
+          base: rockylinux/rockylinux:9
+          packages: gcc-toolset-13-gcc gcc-toolset-13-gcc-c++ clang
+          boost: 1.86.0
+        - name: fedora
+          base: fedora:latest
+          packages: clang
+          boost: ''
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - name: Build
+      env:
+        BASE: ${{ matrix.base }}
+        PACKAGES: ${{ matrix.packages }}
+        BOOST: ${{ matrix.boost }}
+        TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
+      run: |
+        docker build --pull -f .github/ci-images/Dockerfile \
+          --build-arg BASE="$BASE" --build-arg PACKAGES="$PACKAGES" --build-arg BOOST="$BOOST" \
+          -t "$TAG" .
+        docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3'
+    - name: Push
+      if: github.ref == 'refs/heads/master'
+      env:
+        TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ACTOR: ${{ github.actor }}
+      run: |
+        echo "$TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+        docker push "$TAG"
+        docker logout ghcr.io
