@@ -13,6 +13,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- Merging the runs of a task no longer stops with `std::bad_cast` when one run has no measurements yet, for example a run that started late and was still thermalizing when the task ended. `spinmc_evaluate` failed this way on tasks with several run files, with exit status 251.
 - The exchange Monte Carlo tutorial (`tutorials/examples/parapack/exchange`) registers its parallel loop worker as `"loop; exchange"`, like the serial one, so `exchange --mpi < exchange.ip` no longer stops with `unknown algorithm`.
 - The parallel Ising tutorial (`tutorials/examples/parapack/multiple`) computed the heat-bath energy difference with the wrong operator precedence, so it sampled the wrong ensemble and reported wrong energies. For the chain, `Energy / Number of Sites` now agrees with `-tanh(J/T)`.
 - `dirloop_sse` and `worm` no longer stop with `Cannot add measurement to observable` on a custom `MEASURE_STRUCTURE_FACTOR[name]=operator`. The measurement now records the sign-weighted value per site.
