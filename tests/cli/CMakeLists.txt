@@ -27,6 +27,11 @@ if(Python_Interpreter_FOUND)
     COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/archive_contract.py"
       ${archive_arguments})
   set_tests_properties(archive_cli_contract PROPERTIES TIMEOUT 60 LABELS "cli;compatibility")
+  if(TARGET p2h5)
+    add_test(NAME p2h5_cli
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_p2h5.py" "$<TARGET_FILE:p2h5>")
+    set_tests_properties(p2h5_cli PROPERTIES TIMEOUT 60 LABELS "cli")
+  endif()
   if(TARGET spinmc)
     add_test(NAME spinmc_nonsymmetric_coupling
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"

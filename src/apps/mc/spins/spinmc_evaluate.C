@@ -70,7 +70,10 @@ int main(int argc, char** argv)
 try {
 #endif
   if (alps::handle_cli_information(argc, argv, "spinmc", [&] {
-    std::cout << "Usage: " << argv[0] << " [--write-xml] inputfile [inputfile ...]\n";
+    std::cout << "Usage: " << argv[0] << " [--write-xml] inputfile [inputfile ...]\n"
+              << "\"Binder Cumulant\" is the moment ratio <m^4>/<m^2>^2, \"Binder Cumulant U2\" is\n"
+              << "<m^2>/<|m|>^2. \"Connected Susceptibility\" is beta N (<m^2> - <|m|>^2). spinmc's\n"
+              << "\"Susceptibility\" is beta N <m^2>/n for n spin components.\n";
   })) return 0;
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);

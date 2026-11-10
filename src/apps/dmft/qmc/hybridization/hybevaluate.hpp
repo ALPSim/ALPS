@@ -18,14 +18,14 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 
-void evaluate_basics(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_time(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_freq(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_legendre(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_nnt(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_nnw(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_sector_statistics(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
-void evaluate_2p(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parms, alps::hdf5::archive &solver_output);
+void evaluate_basics(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_time(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_freq(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_legendre(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_nnt(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_nnw(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_sector_statistics(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
+void evaluate_2p(const alps::results_type<hybridization>::type &results, const alps::input::hybridization_parameters &input, alps::hdf5::archive &solver_output);
 
 inline std::complex<double> t(int n, int l){//transformation matrix from Legendre to Matsubara basis
   std::complex<double> i_c(0., 1.);

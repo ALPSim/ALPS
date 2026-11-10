@@ -20,6 +20,6 @@ PARAPACK_REGISTER_EVALUATOR(alps::parapack::simple_evaluator, "loop");
 PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<qmc_worker>, "loop; exchange");
 #ifdef ALPS_HAVE_MPI
 PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::parallel_exchange_worker<qmc_worker>,
-                                  "loop exchange");
+                                  "loop; exchange");
 #endif
 PARAPACK_REGISTER_EVALUATOR(alps::parapack::simple_evaluator, "loop; exchange");

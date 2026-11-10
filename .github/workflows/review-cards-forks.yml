@@ -1,0 +1,40 @@
+name: PR cards after fork reviews
+
+# A review on a PR from a fork starts "PR cards" without BOARD_TOKEN, so that
+# run can't update the review lights. This runs when it finishes, from the
+# default branch with the token, and updates every PR on the board: the fork's
+# run doesn't say which PR it was for.
+#
+# A review on a PR with merge conflicts starts no "PR cards" run at all; the
+# schedule in review-cards.yml still catches those.
+on:
+  workflow_run:
+    workflows: [PR cards]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  cards:
+    # A fork PR's run lists no pull_requests; its head_repository is this repo,
+    # not the fork, so that can't tell them apart.
+    if: >-
+      github.event.workflow_run.event == 'pull_request_review'
+      && !github.event.workflow_run.pull_requests[0]
+    # Same queue as the scheduled full-board run in review-cards.yml. On the
+    # job, not the workflow, so skipped runs never join it and replace a
+    # pending update.
+    concurrency:
+      group: review-cards-all
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Update every PR's cards
+        env:
+          GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
+        run: python .github/scripts/review_cards.py
