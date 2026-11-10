@@ -48,7 +48,7 @@ public:
   virtual void save(ODump&) const;
   virtual void load(IDump&);
 
-  void write_xml(const boost::filesystem::path& name) const;
+  void write_xml(const std::filesystem::path& name) const;
   const ObservableSet& get_measurements() const { return measurements;}
   ObservableSet get_compacted_measurements() const;
   ObservableSet get_and_remove_observable(const std::string& obsname, bool compact=false);
@@ -77,7 +77,7 @@ public:
 class ALPS_DECL MCSimulation : public WorkerTask
 {        
 public:
-  MCSimulation(const ProcessList& w, const boost::filesystem::path& p) 
+  MCSimulation(const ProcessList& w, const std::filesystem::path& p) 
       : WorkerTask(w,p) { 
     construct();
   }
@@ -111,7 +111,7 @@ public:
 private:
   void accumulate_measurements(std::vector<std::pair<std::size_t, ObservableSet> > & all_measurements, ObservableSet const & measurements) const;
   std::string worker_tag() const;
-  void write_xml_body(alps::oxstream&, boost::filesystem::path const& fn, bool) const;
+  void write_xml_body(alps::oxstream&, std::filesystem::path const& fn, bool) const;
   virtual void handle_tag(std::istream&, const XMLTag&);
   ObservableSet measurements;
 };

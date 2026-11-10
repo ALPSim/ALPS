@@ -21,6 +21,7 @@
 #include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
 #include "externalsolver.h"
+#include <alps/utilities/fs/absolute.hpp>
 #include "fouriertransform.h"
 #include "U_matrix.h"
 #include "bandstructure.h"
@@ -28,14 +29,15 @@
 #include <fstream>
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
+#include <alps/parameter_input.hpp>
 #include "alps/utilities/vectorio.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
 #include "alps/numeric/isinf.hpp"
 #include <alps/utilities/os.hpp>
 
-ExternalSolver::ExternalSolver(const boost::filesystem::path& executable)
-: exe_(boost::filesystem::absolute(executable,alps::bin_directory()))
+ExternalSolver::ExternalSolver(const std::filesystem::path& executable)
+: exe_(alps::fs::absolute(executable,alps::bin_directory()))
 {
 }
 
@@ -112,9 +114,9 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     } else {
       G0.write_hdf5(solver_input, "/G0");
     }
-    solver_input<<alps::make_pvp("/parameters",p);
-  } 
-  
+  }
+  alps::write_parameter_file(infile, p);
+
   call(infile,outfile);
   
   // read the output
@@ -123,7 +125,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     alps::hdf5::archive ar(outfile, "r");
     g.read_hdf5(ar, "/G_tau");
   }
-  boost::filesystem::remove(outfile);
+  std::filesystem::remove(outfile);
   return g;
 }
 
@@ -170,10 +172,12 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       
       prepare_parms_for_hybridization(p,solver_input);
     }
-    solver_input<<alps::make_pvp("/parameters", p);//hier problem
     G0_omega.write_hdf5(solver_input, "/G0");
   }
-  
+  // /G0 is a Matsubara Green's function, which solvers read only in DMFT mode
+  p["DMFT_FRAMEWORK"]=1;
+  alps::write_parameter_file(infile, p);
+
   call(infile,outfile);
   
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
@@ -215,7 +219,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       }
     }
   }
-  boost::filesystem::remove(outfile);
+  std::filesystem::remove(outfile);
   return std::make_pair(G_omega, G_tau);
 }
 
@@ -232,8 +236,8 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
   
-  boost::filesystem::remove(infile);
+  std::filesystem::remove(infile);
   
-  if (!boost::filesystem::exists(outfile))
+  if (!std::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }

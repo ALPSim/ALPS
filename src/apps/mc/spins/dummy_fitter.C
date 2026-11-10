@@ -20,11 +20,7 @@
 DummyFitter::DummyFitter(const std::string& filename)
   : AbstractFitter(filename)
 {
-  alps::ParameterList init_params;
-  {
-    std::ifstream param_stream(filenamebase.c_str());
-    param_stream >> init_params;
-  }
+  alps::ParameterList init_params = alps::read_parameter_list(filenamebase);
   FitterParamList initial;
   initial.parms = adjust_parameters(init_params, all_exp_res);
   initial.is_genuine = true;

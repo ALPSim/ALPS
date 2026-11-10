@@ -40,14 +40,14 @@ namespace alps {
 class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver
 {
 public:
-  ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0, bool h5input=false);
+  ImpuritySolver(const scheduler::Factory& f, const Parameters& parms, int argc=0, char** argv=0);
   ~ImpuritySolver();
     
   scheduler::AbstractTask* get_task() const 
   { 
     return master_scheduler ? master_scheduler->get_task() : 0;
   }
-  void checkpoint(const boost::filesystem::path &/*fn*/){
+  void checkpoint(const std::filesystem::path &/*fn*/){
     if(master_scheduler) master_scheduler->checkpoint();
   }
   void clear()

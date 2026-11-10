@@ -20,7 +20,7 @@ namespace alps {
 
 class clone_proxy {
 public:
-  clone_proxy(clone*& clone_ptr, boost::filesystem::path const& basedir, alps::parapack::option opt)
+  clone_proxy(clone*& clone_ptr, std::filesystem::path const& basedir, alps::parapack::option opt)
     : clone_ptr_(clone_ptr), basedir_(basedir), opt_(opt) {}
   bool is_local(Process const&) const { return true; }
   void start(tid_t tid, cid_t cid, thread_group const&, Parameters const& params,
@@ -44,7 +44,7 @@ public:
   }
 private:
   clone*& clone_ptr_;
-  boost::filesystem::path basedir_;
+  std::filesystem::path basedir_;
   alps::parapack::option opt_;
 };
 
@@ -52,8 +52,8 @@ private:
 
 class clone_proxy_mpi {
 public:
-  clone_proxy_mpi(clone_mpi*& clone_ptr, boost::mpi::communicator const& comm_ctrl,
-    boost::mpi::communicator const& comm_work, boost::filesystem::path const& basedir,
+  clone_proxy_mpi(clone_mpi*& clone_ptr, alps::mpi::communicator const& comm_ctrl,
+    alps::mpi::communicator const& comm_work, std::filesystem::path const& basedir,
     alps::parapack::option opt)
     : clone_ptr_(clone_ptr), comm_ctrl_(comm_ctrl), comm_work_(comm_work), basedir_(basedir),
       opt_(opt) {}
@@ -66,7 +66,7 @@ public:
       if (p == 0)
         worker_on_master = true;
       else
-        comm_ctrl_.send(p, mcmp_tag::clone_create, msg);
+        alps::mpi::send(comm_ctrl_, p, mcmp_tag::clone_create, msg);
     }
     if (worker_on_master)
       clone_ptr_ =
@@ -85,7 +85,7 @@ public:
     if (proc == 0) {
       if (clone_ptr_) clone_ptr_->checkpoint();
     } else {
-      comm_ctrl_.send(proc, mcmp_tag::clone_checkpoint);
+      alps::mpi::send(comm_ctrl_, proc, mcmp_tag::clone_checkpoint);
     }
   }
 
@@ -93,7 +93,7 @@ public:
     if (proc == 0) {
       // nothing to do
     } else {
-      comm_ctrl_.send(proc, mcmp_tag::clone_info);
+      alps::mpi::send(comm_ctrl_, proc, mcmp_tag::clone_info);
     }
   }
 
@@ -101,7 +101,7 @@ public:
     if (proc == 0) {
       if (clone_ptr_) clone_ptr_->suspend();
     } else {
-      comm_ctrl_.send(proc, mcmp_tag::clone_suspend);
+      alps::mpi::send(comm_ctrl_, proc, mcmp_tag::clone_suspend);
     }
   }
 
@@ -109,7 +109,7 @@ public:
     if (proc == 0) {
       // nothing to do
     } else {
-      comm_ctrl_.send(proc, mcmp_tag::clone_halt);
+      alps::mpi::send(comm_ctrl_, proc, mcmp_tag::clone_halt);
     }
   }
 
@@ -122,8 +122,8 @@ public:
 
 private:
   clone_mpi*& clone_ptr_;
-  boost::mpi::communicator comm_ctrl_, comm_work_;
-  boost::filesystem::path basedir_;
+  alps::mpi::communicator comm_ctrl_, comm_work_;
+  std::filesystem::path basedir_;
   alps::parapack::option opt_;
 };
 

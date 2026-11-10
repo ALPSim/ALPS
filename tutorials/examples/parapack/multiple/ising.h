@@ -15,9 +15,9 @@
 #define PARAPACK_EXAMPLE_MULTIPLE_ISING_H
 
 #include <alps/parapack/worker.h>
-#include <functional>
+#include <alps/parapack/mpi.h>
 
-namespace mpi = boost::mpi;
+namespace mpi = alps::mpi;
 
 // a vector with 'tabs' on both sides: elements at i = -1 as well as
 // i = size() are also accessible
@@ -95,7 +95,7 @@ public:
     ++mcs_;
 
     for (int i = 0; i < loclen_; ++i) {
-      double diff = coupling_ * (4 * (spins_[i-1] ^ spins_[i] + spins_[i] ^ spins_[i+1]) - 4);
+      double diff = coupling_ * (4 * ((spins_[i-1] ^ spins_[i]) + (spins_[i] ^ spins_[i+1])) - 4);
       if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) spins_[i] ^= 1;
       if (i == 0) copy2left();
       if (i == loclen_ - 1) copy2right();
@@ -108,15 +108,11 @@ public:
       energy_ -= coupling_ * (2 * (spins_[i] ^ spins_[i+1]) - 1);
       mag += (2 * spins_[i] - 1);
     }
+    double local[2] = {energy_, mag}, total[2];
+    MPI_Reduce(local, total, 2, MPI_DOUBLE, MPI_SUM, 0, comm_);
     if (comm_.rank() == 0) {
-      double energy_out, mag_out;
-      reduce(comm_, energy_, energy_out, std::plus<double>(), 0);
-      reduce(comm_, mag, mag_out, std::plus<double>(), 0);
-      energy_ = energy_out;
-      mag = mag_out;
-    } else {
-      reduce(comm_, energy_, std::plus<double>(), 0);
-      reduce(comm_, mag, std::plus<double>(), 0);
+      energy_ = total[0];
+      mag = total[1];
     }
 
     if (comm_.rank() == 0) {
@@ -145,8 +141,8 @@ protected:
     if (comm_.size() == 1) {
       spins_[-1] = spins_[loclen_-1];
     } else {
-      comm_.send((comm_.rank() + 1) % comm_.size(), 0, spins_[loclen_-1]);
-      comm_.recv((comm_.rank() + comm_.size() - 1) % comm_.size(), 0, spins_[-1]);
+      mpi::send(comm_, (comm_.rank() + 1) % comm_.size(), 0, spins_[loclen_-1]);
+      mpi::recv(comm_, (comm_.rank() + comm_.size() - 1) % comm_.size(), 0, spins_[-1]);
     }
   }
 
@@ -154,8 +150,8 @@ protected:
     if (comm_.size() == 1) {
       spins_[loclen_] = spins_[0];
     } else {
-      comm_.send((comm_.rank() + comm_.size() - 1) % comm_.size(), 0, spins_[0]);
-      comm_.recv((comm_.rank() + 1) % comm_.size(), 0, spins_[loclen_]);
+      mpi::send(comm_, (comm_.rank() + comm_.size() - 1) % comm_.size(), 0, spins_[0]);
+      mpi::recv(comm_, (comm_.rank() + 1) % comm_.size(), 0, spins_[loclen_]);
     }
   }
 

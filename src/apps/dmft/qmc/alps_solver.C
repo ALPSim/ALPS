@@ -20,6 +20,7 @@
 #include "types.h"
 #include <boost/assert.hpp>
 #include <alps/osiris/comm.h>
+#include <alps/parameter_input.hpp>
 #include <alps/scheduler/options.h>
 #include <vector>
 #include <utility>
@@ -27,7 +28,7 @@
 
 #define DEFAULT_CHECK_TIME 300
 
-alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv, bool h5input)
+alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, const Parameters& parms, int argc, char** argv)
 {
 #ifdef ALPS_HAVE_MPI
 	comm_init(argc,argv, true);
@@ -36,18 +37,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
 #endif
 	if(is_master()){
     alps::scheduler::NoJobfileOptions opt(1,argv);
-    unsigned int max_time;
-    if (!h5input){
-      alps::Parameters parms;
-      std::ifstream is(argv[1]);
-      is>>parms;
-      max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
-    } else {
-      alps::Parameters parms;
-      alps::hdf5::archive ar(argv[1], "r");
-      ar["/parameters"] >> parms;
-      max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
-    }
+    unsigned int max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
     if (max_time < DEFAULT_CHECK_TIME) { opt.checkpoint_time=max_time; opt.max_check_time=max_time; opt.min_check_time=max_time; }
     else {
       unsigned int checks = (max_time + DEFAULT_CHECK_TIME - 1) / DEFAULT_CHECK_TIME;
@@ -92,9 +82,8 @@ itime_green_function_t  alps::ImpuritySolver::solve(const itime_green_function_t
   
   alps::Parameters parms(p);
   std::string basename=parms["BASENAME"];
-  //boost::filesystem::remove(basename+".h5");
-  alps::hdf5::archive dumpfile(basename+".h5", "a");
-  dumpfile["/parameters"]<<parms;
+  //std::filesystem::remove(basename+".h5");
+  alps::write_parameter_file(basename+".h5", parms);
   
   std::ostringstream G0_text;
   alps::oxstream G0_xml(G0_text);
@@ -102,7 +91,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(const itime_green_function_t
   parms["G0"] = G0_text.str();
   
   int res=solve_it(parms);
-  //boost::filesystem::remove(basename+".h5");
+  //std::filesystem::remove(basename+".h5");
   if (res)
     boost::throw_exception(
                            std::runtime_error(" solver finished with nonzero exit code"));
@@ -122,9 +111,8 @@ alps::ImpuritySolver::solve_omega(const matsubara_green_function_t& G0_omega, co
   alps::Parameters parms(p);
   
   std::string basename=parms["BASENAME"];
-  //boost::filesystem::remove(basename+".h5");
-  alps::hdf5::archive dumpfile(basename+".h5", "a");
-  dumpfile["/parameters"]<<parms;
+  //std::filesystem::remove(basename+".h5");
+  alps::write_parameter_file(basename+".h5", parms);
   
   std::ostringstream G0_omega_text;
   alps::oxstream G0_omega_xml(G0_omega_text);
@@ -132,7 +120,7 @@ alps::ImpuritySolver::solve_omega(const matsubara_green_function_t& G0_omega, co
   write_freq(G0_omega_xml,G0_omega);
   parms["G0(omega)"] = G0_omega_text.str();
   int res=solve_it(parms);
-  //boost::filesystem::remove(basename+".h5");
+  //std::filesystem::remove(basename+".h5");
   if (res)
     boost::throw_exception(
                            std::runtime_error(" solver finished with nonzero exit code"));

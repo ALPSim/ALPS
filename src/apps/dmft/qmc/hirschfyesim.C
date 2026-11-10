@@ -27,7 +27,7 @@
 #include <alps/numeric/matrix/algorithms.hpp>
 
 #include <alps/config.h> // needed to set up correct bindings
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 using namespace std;
 using namespace alps;
@@ -302,7 +302,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   int N=parms["N"];
   //double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
-  int n_site=parms["SITES"];
+  int n_site=parms.value_or_default("SITES", 1);
 
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
@@ -325,7 +325,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     }
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
-    boost::filesystem::path fn(fns);
+    std::filesystem::path fn(fns);
     checkpoint(fn);
   }
   for(int i=0;i<n_site;++i){
@@ -360,9 +360,12 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
-  alps::hdf5::archive ar(static_cast<std::string>(parms["OUTFILE"]), "a");
-  green_result.write_hdf5(ar, "/G_tau");
-  green_result_matsubara.write_hdf5(ar, "/G_omega");
+  // the hirschfye program writes an output file; inside dmft there is none
+  if (parms.defined("OUTFILE")) {
+    alps::hdf5::archive ar(static_cast<std::string>(parms["OUTFILE"]), "a");
+    green_result.write_hdf5(ar, "/G_tau");
+    green_result_matsubara.write_hdf5(ar, "/G_omega");
+  }
   return std::make_pair(green_result_matsubara, green_result);
 }
 

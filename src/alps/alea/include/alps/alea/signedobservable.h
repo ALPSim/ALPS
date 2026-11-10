@@ -90,7 +90,7 @@ public:
   }
   void output_scalar(std::ostream&) const;
   void output_vector(std::ostream&) const;
-  void write_xml(oxstream& oxs, const boost::filesystem::path& p) const
+  void write_xml(oxstream& oxs, const std::filesystem::path& p) const
   {
     base_type::write_xml(oxs,p);
     obs_.write_xml(oxs,p);
@@ -205,8 +205,8 @@ public:
   void operator<<(const value_type& x) { super_type::obs_ << x;}
   void add(const value_type& x) { operator<<(x);}
   void add(const value_type& x, sign_type s) { add(x*static_cast<typename element_type<value_type>::type >(s));}
-  void write_hdf5(const boost::filesystem::path& fn_hdf, std::size_t realization=0, std::size_t clone=0) const;
-  void read_hdf5 (const boost::filesystem::path& fn_hdf, std::size_t realization=0, std::size_t clone=0);
+  void write_hdf5(const std::filesystem::path& fn_hdf, std::size_t realization=0, std::size_t clone=0) const;
+  void read_hdf5 (const std::filesystem::path& fn_hdf, std::size_t realization=0, std::size_t clone=0);
 };
 
 

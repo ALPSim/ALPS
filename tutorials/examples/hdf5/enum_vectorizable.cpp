@@ -15,7 +15,7 @@
 #include <alps/hdf5/vector.hpp>
 
 #include <boost/integer.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <string>
 #include <iostream>
@@ -101,8 +101,8 @@ int main() {
 
     std::string const filename = "example_enum_vectorizable.h5";
 
-    if (boost::filesystem::exists(boost::filesystem::path(filename)))
-        boost::filesystem::remove(boost::filesystem::path(filename));
+    if (std::filesystem::exists(std::filesystem::path(filename)))
+        std::filesystem::remove(std::filesystem::path(filename));
 
     enum_type scalar_read, scalar_write = PLUS;
     std::vector<enum_type> vector_read, vector_write(10, MINUS);
@@ -123,7 +123,7 @@ int main() {
         ;
     }
 
-    boost::filesystem::remove(boost::filesystem::path(filename));
+    std::filesystem::remove(std::filesystem::path(filename));
 
     bool match = (
            scalar_read == scalar_write

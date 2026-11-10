@@ -11,6 +11,7 @@
 *
 *****************************************************************************/
 #include <alps/parapack/job.h>
+#include <alps/utilities/fs/absolute.hpp>
 #include <alps/parapack/clone.h>
 #include <alps/parapack/filelock.h>
 #include <alps/parapack/measurement.h>
@@ -24,7 +25,7 @@
 
 #include <boost/config.hpp>
 #include <boost/foreach.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace alps {
 
@@ -34,15 +35,15 @@ namespace alps {
 
 task::task() : status_(task_status::Undefined) {}
 
-task::task(boost::filesystem::path const& file) : status_(task_status::Undefined) {
+task::task(std::filesystem::path const& file) : status_(task_status::Undefined) {
   basedir_ = file.parent_path();
   file_in_str_ = file.filename().string();
-  file_out_str_ = regex_replace(file.filename().string(), boost::regex("\\.in\\.xml$"), ".out.xml");
+  file_out_str_ = std::regex_replace(file.filename().string(), std::regex("\\.in\\.xml$"), ".out.xml");
   if (file_in_str_ == file_out_str_) {
-    file_in_str_ = regex_replace(file.filename().string(), boost::regex("\\.out\\.xml$"), ".in.xml");
+    file_in_str_ = std::regex_replace(file.filename().string(), std::regex("\\.out\\.xml$"), ".in.xml");
     file_out_str_ = file.filename().string();
   }
-  base_ = regex_replace(file_out_str_, boost::regex("\\.out\\.xml$"), "");
+  base_ = std::regex_replace(file_out_str_, std::regex("\\.out\\.xml$"), "");
 }
 
 bool task::on_memory() const {
@@ -83,8 +84,8 @@ void task::load() {
   params_.clear();
   obs_.clear();
   clone_info_.clear();
-  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str_), basedir_);
-  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
+  std::filesystem::path file_in = alps::fs::absolute(std::filesystem::path(file_in_str_), basedir_);
+  std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
   simulation_xml_handler handler(params_, obs_, clone_info_);
   XMLParser parser(handler);
   if (!exists(file_out)) {
@@ -121,7 +122,7 @@ void task::load() {
 
 void task::save(alps::parapack::option const& opt) const {
   if (!on_memory()) boost::throw_exception(std::logic_error("task not loaded"));
-  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
+  std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
   {
     filelock lock(file_out, /* lock_now = */ true, /* wait = */ 60);
     if (!lock.locked())
@@ -142,7 +143,7 @@ void task::save(alps::parapack::option const& opt) const {
 
 void task::save_observable(alps::parapack::option const& opt) const {
   if (!on_memory()) boost::throw_exception(std::logic_error("task not loaded"));
-  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
+  std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
   {
     filelock lock(file_out, /* lock_now = */ true, /* wait = */ 60);
     if (!lock.locked())
@@ -161,7 +162,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
         if (opt.dump_format == dump_format::hdf5) {
           #pragma omp critical (hdf5io)
           {
-            boost::filesystem::path file = absolute(boost::filesystem::path(base_ + ".out.h5"),
+            std::filesystem::path file = alps::fs::absolute(std::filesystem::path(base_ + ".out.h5"),
               basedir_);
             hdf5::archive h5(file.string(), "a");
             h5["/parameters"] << params_tmp;
@@ -171,7 +172,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
             //      boost::lexical_cast<std::string>(n) + "/results"] << oss[n][0];
           }
         } else {
-          boost::filesystem::path file = absolute(boost::filesystem::path(base_ + ".out.xdr"),
+          std::filesystem::path file = alps::fs::absolute(std::filesystem::path(base_ + ".out.xdr"),
             basedir_);
           OXDRFileDump dp(file);
           dp << params_tmp << obs_[0];
@@ -183,7 +184,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
           if (opt.dump_format == dump_format::hdf5) {
             #pragma omp critical (hdf5io)
             {
-              boost::filesystem::path file = absolute(boost::filesystem::path(
+              std::filesystem::path file = alps::fs::absolute(std::filesystem::path(
                 base_ + ".replica" + boost::lexical_cast<std::string>(i+1) + ".h5"), basedir_);
               hdf5::archive h5(file.string(), "a");
               h5["/parameters"] << p;
@@ -193,7 +194,7 @@ void task::save_observable(alps::parapack::option const& opt) const {
               //      boost::lexical_cast<std::string>(n) + "/results"] << oss[n][i];
             }
           } else {
-            boost::filesystem::path file = absolute(boost::filesystem::path(
+            std::filesystem::path file = alps::fs::absolute(std::filesystem::path(
               base_ + ".replica" + boost::lexical_cast<std::string>(i+1) + ".xdr"), basedir_);
             OXDRFileDump dp(file);
             dp << p << obs_[i];
@@ -242,8 +243,8 @@ void task::check_parameter(alps::parapack::option const& opt) {
   // change in SEED : ignored
   // change in other parameters : throw away all the old clones
 
-  boost::filesystem::path file_in = absolute(boost::filesystem::path(file_in_str_), basedir_);
-  boost::filesystem::path file_out = absolute(boost::filesystem::path(file_out_str_), basedir_);
+  std::filesystem::path file_in = alps::fs::absolute(std::filesystem::path(file_in_str_), basedir_);
+  std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
   if (exists(file_out)) {
     // loading parameters from *.in.xml
     Parameters params_in;
@@ -358,10 +359,10 @@ void task::evaluate(alps::parapack::option const& opt) {
     std::cout << (cid+1) << ' ' << std::flush;
     // std::vector<ObservableSet> os;
     if (clone_info_[cid].checkpoints().size() == 1) {
-      boost::filesystem::path dump_h5 =
-        absolute(boost::filesystem::path(clone_info_[cid].checkpoints()[0] + ".h5"), basedir_);
-      boost::filesystem::path dump_xdr =
-        absolute(boost::filesystem::path(clone_info_[cid].checkpoints()[0] + ".xdr"), basedir_);
+      std::filesystem::path dump_h5 =
+        alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[0] + ".h5"), basedir_);
+      std::filesystem::path dump_xdr =
+        alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[0] + ".xdr"), basedir_);
       std::vector<ObservableSet> o;
       bool success;
       if (exists(dump_h5)) {
@@ -380,10 +381,10 @@ void task::evaluate(alps::parapack::option const& opt) {
       }
     } else {
       for (unsigned int w = 0; w < clone_info_[cid].checkpoints().size(); ++w) {
-        boost::filesystem::path dump_h5 =
-          absolute(boost::filesystem::path(clone_info_[cid].checkpoints()[w] + ".h5"), basedir_);
-        boost::filesystem::path dump_xdr =
-          absolute(boost::filesystem::path(clone_info_[cid].checkpoints()[w] + ".xdr"), basedir_);
+        std::filesystem::path dump_h5 =
+          alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[w] + ".h5"), basedir_);
+        std::filesystem::path dump_xdr =
+          alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[w] + ".xdr"), basedir_);
         std::vector<ObservableSet> o;
         bool success;
         if (exists(dump_h5)) {

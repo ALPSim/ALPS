@@ -17,7 +17,7 @@
 #include <vector>
 
 TEST(ParallelProcessGroups, AllocatesExhaustsRecyclesAndReleasesGroups) {
-  boost::mpi::communicator world;
+  alps::mpi::communicator world;
   ASSERT_GE(world.size(), 2);
   const int group_size = world.size() >= 4 ? 2 : 1;
   const int group_count = world.size() / group_size;

@@ -284,11 +284,7 @@ AbstractFitter::AbstractFitter(const std::string& fit_file_name)
   results_namebase = fit_file_name;
 
   // read the simulation parameter file
-  alps::Parameters fit_param;
-  {
-    std::ifstream in(fit_file_name.c_str());
-    in >> fit_param;
-  }
+  alps::Parameters fit_param = alps::read_parameter_file(fit_file_name);
   // handle the time limit
   long time_limit = static_cast<boost::int64_t>
                (fit_param.value_or_default("TIME_LIMIT",-1l));
@@ -298,10 +294,10 @@ AbstractFitter::AbstractFitter(const std::string& fit_file_name)
   std::string fname = fit_file_name + "_LOG";
   int counter;
   char new_name[256];
-  if (boost::filesystem::exists(fname)) {
+  if (std::filesystem::exists(fname)) {
     counter = 1;
     snprintf(new_name, sizeof(new_name), "%s_restart%i_LOG", fit_file_name.c_str(), counter);
-    while (boost::filesystem::exists(new_name)) {
+    while (std::filesystem::exists(new_name)) {
       counter++;
       snprintf(new_name, sizeof(new_name), "%s_restart%i_LOG", fit_file_name.c_str(), counter);
     }
@@ -692,7 +688,7 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
   }
   baseseed &= ((1<<30)|((1<<30)-1));
 
-  alps::oxstream out(boost::filesystem::path(basename+".in.xml"));
+  alps::oxstream out(std::filesystem::path(basename+".in.xml"));
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("JOB")
@@ -721,7 +717,7 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
         << alps::end_tag("OUTPUT")
         << alps::end_tag("TASK");
 
-    alps::oxstream task(boost::filesystem::path(taskname+".in.xml"));
+    alps::oxstream task(std::filesystem::path(taskname+".in.xml"));
     task << alps::header("UTF-8")
          << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION")
@@ -837,7 +833,7 @@ std::vector<ResidualType> AbstractFitter::get_residuum(unsigned int pos,
                 << "\nTemperature of oberved data is " << exp_res[i].T
                 << "\nTemperature of simulation data is " << eff_res[i].T
                 << "\nNo residuum will be computed\n\n";
-    } else
+    } else {
       res[i].T = exp_res[i].T;
       res[i].mean = exp_res[i].mean - eff_res[i].mean;
       if (exp_res[i].error == 0)
@@ -845,6 +841,7 @@ std::vector<ResidualType> AbstractFitter::get_residuum(unsigned int pos,
       else
         res[i].error = sqrt(SQUARE(eff_res[i].error)
                            +SQUARE(exp_res[i].error));
+    }
   }
   return res;
 }

@@ -21,7 +21,7 @@
 #include <alps/xml_export.h>
 #include <alps/parser/xmlhandler.h>
 
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <iosfwd>
 #include <string>
 
@@ -35,7 +35,7 @@ public:
 
   void parse(std::istream& is);
   void parse(const std::string& file);
-  void parse(const boost::filesystem::path& file);
+  void parse(const std::filesystem::path& file);
 
 private:
   XMLParser();

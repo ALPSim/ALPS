@@ -32,8 +32,9 @@ jobs:
           echo "method=$method" >> "$GITHUB_OUTPUT"
           echo "Method: '${method:-<none>}'"
 
-      # Issues without a Method field (bug reports, feature requests, website
-      # help) and the "Other" choice fall through to the default assignee.
+      # Issues without a Method field (bug reports, feature requests) and the
+      # "Other" choice are left unassigned. Website help issues are assigned by
+      # their issue template.
       - name: Assign maintainer based on 'Method' choice
         env:
           METHOD_FROM_FORM: ${{ steps.parse.outputs.method }}
@@ -47,8 +48,12 @@ jobs:
             *"(Worm)"*)                                           assignee="LodePollet" ;;
             *Density*Matrix*Renormalization*Group* | *"(DMRG)"*) assignee="afeiguin" ;;
             *Dynamical*Mean*Field*Theory* | *"(DMFT)"*)          assignee="egull" ;;
-            *)                                                    assignee="Ooolab" ;;
+            *)                                                    assignee="" ;;
           esac
 
+          if [ -z "$assignee" ]; then
+            echo "Leaving #$ISSUE_NUMBER unassigned"
+            exit 0
+          fi
           echo "Assigning #$ISSUE_NUMBER to $assignee"
           gh issue edit "$ISSUE_NUMBER" --add-assignee "$assignee"

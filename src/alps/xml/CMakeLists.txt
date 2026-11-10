@@ -6,8 +6,7 @@ add_library(alps_xml
   src/parser/xmlparser.C
   src/parser/xmlstream.C
   src/parser/xslt_path.C)
-target_link_libraries(alps_xml PUBLIC ALPS::configuration "$<COMPILE_ONLY:ALPS::utilities>" Boost::filesystem
-  PRIVATE Boost::regex)
+target_link_libraries(alps_xml PUBLIC ALPS::configuration "$<COMPILE_ONLY:ALPS::utilities>")
 alps_configure_component(alps_xml xml)
 
 target_sources(alps_xml PUBLIC

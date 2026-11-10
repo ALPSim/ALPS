@@ -14,7 +14,7 @@
 #include <alps/parapack/process.h>
 #include <iostream>
 
-namespace mpi = boost::mpi;
+namespace mpi = alps::mpi;
 
 #include <gtest/gtest.h>
 #include <boost/random/mersenne_twister.hpp>

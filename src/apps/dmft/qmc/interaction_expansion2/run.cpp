@@ -46,6 +46,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   std::ostringstream missing;
   if (parms.has_missing(missing))
     throw std::invalid_argument("interaction: " + missing.str());
+  const alps::input::ctint_parameters ctint = alps::input::read_ctint_parameters(parms);
   int rank;
 #ifndef ALPS_HAVE_MPI
   rank=0;
@@ -62,7 +63,8 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
     parms.has_unused(std::cerr);
   }
   //run the simulation
-  s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+  const boost::posix_time::ptime deadline = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)ctint.max_time);
+  s.run([deadline] { return stop_requested(deadline); });
 #ifdef ALPS_HAVE_MPI
   //a rank that is still thermalizing has no measurements. collect_results
   //throws if only some ranks have them, but if none has, only rank 0 fails
@@ -74,8 +76,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
-    unsigned int n_site(parms["SITES"]);
-    divide_sz_results_by_sign(results, n_site);
+    divide_sz_results_by_sign(results, ctint.sites);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);

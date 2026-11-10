@@ -12,6 +12,7 @@
 *****************************************************************************/
 
 #include <alps/lattice.h>
+#include <alps/parameter_input.hpp>
 #include <alps/parser/xmlstream.h>
 
 #ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
@@ -28,7 +29,7 @@ try {
   alps::Parameters parameters;
   switch (argc) {
   case 1 :
-    std::cin >> parameters;
+    parameters = alps::read_parameter_text(std::cin);
     break;
   case 2 :
     parameters["LATTICE"] = std::string(argv[1]);

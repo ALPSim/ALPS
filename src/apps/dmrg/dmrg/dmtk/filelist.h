@@ -5,7 +5,7 @@
 #define ALPS_DMTK_FILELIST_H
 
 #include <alps/utilities/temporary_filename.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/throw_exception.hpp>
 #include <fstream>
 #include <iostream>
@@ -23,7 +23,7 @@ namespace dmtk {
 namespace detail {
 
 // Flush a file (or directory) to disk; ofstream gives no access to its descriptor.
-inline bool sync_path(const boost::filesystem::path& path)
+inline bool sync_path(const std::filesystem::path& path)
 {
   int fd = ::open(path.c_str(), O_RDONLY);
   if (fd < 0) return false;
@@ -33,9 +33,9 @@ inline bool sync_path(const boost::filesystem::path& path)
 }
 
 // Replace path by contents so that a crash leaves either the old or the new file.
-inline void write_atomically(const boost::filesystem::path& path, const std::string& contents)
+inline void write_atomically(const std::filesystem::path& path, const std::string& contents)
 {
-  boost::filesystem::path tmp = path;
+  std::filesystem::path tmp = path;
   tmp += ".tmp";
   {
     std::ofstream out(tmp.string().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
@@ -44,7 +44,7 @@ inline void write_atomically(const boost::filesystem::path& path, const std::str
     if (!out || !sync_path(tmp))
       boost::throw_exception(std::runtime_error("could not write " + tmp.string()));
   }
-  boost::filesystem::rename(tmp, path);
+  std::filesystem::rename(tmp, path);
   sync_path(path.parent_path()); // not supported on every filesystem
 }
 
@@ -59,7 +59,7 @@ inline void write_atomically(const boost::filesystem::path& path, const std::str
 // so a run killed at any point leaves the last committed state intact.
 class FileList {
   public:
-    FileList() : temp_dir(boost::filesystem::current_path()) {}
+    FileList() : temp_dir(std::filesystem::current_path()) {}
     explicit FileList(const char* dir) { set_temp_dir(dir); }
     FileList(const FileList&) = delete;
     FileList& operator=(const FileList&) = delete;
@@ -70,8 +70,8 @@ class FileList {
       if (in_entry) cleanup();
       // Store absolute paths so a later working-directory change cannot make
       // cleanup remove a different file or lose track of the original one.
-      boost::filesystem::path path = boost::filesystem::absolute(dir);
-      if (!boost::filesystem::is_directory(path))
+      std::filesystem::path path = std::filesystem::absolute(dir);
+      if (!std::filesystem::is_directory(path))
         boost::throw_exception(std::runtime_error("ALPS DMRG temporary directory does not exist: " + path.string()));
       temp_dir = path;
       std::cout << "ALPS DMRG temporary files will be written to " << temp_dir.string() << std::endl;
@@ -85,13 +85,13 @@ class FileList {
     std::string open_entry(const char* dir)
     {
       cleanup();
-      temp_dir = boost::filesystem::absolute(dir);
+      temp_dir = std::filesystem::absolute(dir);
       in_entry = true;
       generation = 0;
       _committed.clear();
       std::string record;
-      const boost::filesystem::path progress = temp_dir / "progress";
-      if (boost::filesystem::exists(progress)) {
+      const std::filesystem::path progress = temp_dir / "progress";
+      if (std::filesystem::exists(progress)) {
         std::ifstream in(progress.string().c_str(), std::ios::in | std::ios::binary);
         std::string magic, word;
         std::size_t count = 0;
@@ -102,9 +102,9 @@ class FileList {
         for (std::size_t i = 0; i < count; ++i) {
           std::string name;
           in >> name;
-          boost::filesystem::path staged = temp_dir / (name + suffix(generation));
-          if (boost::filesystem::exists(staged))
-            boost::filesystem::rename(staged, temp_dir / name);
+          std::filesystem::path staged = temp_dir / (name + suffix(generation));
+          if (std::filesystem::exists(staged))
+            std::filesystem::rename(staged, temp_dir / name);
         }
         if (!in || !(in >> word >> count) || word != "files")
           boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
@@ -113,8 +113,8 @@ class FileList {
           std::uintmax_t size;
           if (!(in >> name >> size))
             boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
-          boost::system::error_code error;
-          std::uintmax_t actual = boost::filesystem::file_size(temp_dir / name, error);
+          std::error_code error;
+          std::uintmax_t actual = std::filesystem::file_size(temp_dir / name, error);
           if (error)
             boost::throw_exception(std::runtime_error("checkpoint file " + name + " is missing"));
           if (actual != size)
@@ -128,9 +128,9 @@ class FileList {
         record = rest.str();
         ++generation;
       }
-      for (boost::filesystem::directory_iterator it(temp_dir), end; it != end; ++it)
+      for (std::filesystem::directory_iterator it(temp_dir), end; it != end; ++it)
         if (it->path().filename().string().find(".new.") != std::string::npos)
-          boost::filesystem::remove(it->path());
+          std::filesystem::remove(it->path());
       return record;
     }
 
@@ -182,8 +182,8 @@ class FileList {
       out << progress_magic() <<"\ngeneration " << generation << "\nstaged " << _staged.size() << "\n";
       std::map<std::string, std::uintmax_t> committed = _committed;
       for (const auto& entry : _staged) {
-        boost::system::error_code error;
-        committed[entry.first] = boost::filesystem::file_size(entry.second, error);
+        std::error_code error;
+        committed[entry.first] = std::filesystem::file_size(entry.second, error);
         if (error || !detail::sync_path(entry.second))
           boost::throw_exception(std::runtime_error("could not write checkpoint file " + entry.second));
         out << entry.first << "\n";
@@ -194,7 +194,7 @@ class FileList {
       out << record;
       detail::write_atomically(temp_dir / "progress", out.str());
       for (const auto& entry : _staged)
-        boost::filesystem::rename(entry.second, temp_dir / entry.first);
+        std::filesystem::rename(entry.second, temp_dir / entry.first);
       _staged.clear();
       _committed.swap(committed);
       ++generation;
@@ -207,8 +207,8 @@ class FileList {
     {
       // A checkpoint entry outlives the run; only uncommitted writes go.
       for (const auto& entry : in_entry ? _staged : _tmp_filenames) {
-        boost::system::error_code error;
-        boost::filesystem::remove(entry.second, error);
+        std::error_code error;
+        std::filesystem::remove(entry.second, error);
         if (error)
           std::cerr << "ALPS DMRG could not remove temporary file " << entry.second
                     << ": " << error.message() << std::endl;
@@ -228,7 +228,7 @@ class FileList {
     // name and size of every file the last commit left in the entry
     std::map<std::string, std::uintmax_t> _committed;
     std::vector<std::string> _failed_writes;
-    boost::filesystem::path temp_dir;
+    std::filesystem::path temp_dir;
     bool in_entry = false;
     unsigned long generation = 0;
 };

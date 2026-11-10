@@ -33,7 +33,7 @@ void SpinFactory::print_copyright(std::ostream& out) const
 
 alps::scheduler::MCSimulation* SpinFactory::make_task(
         const alps::ProcessList& w,
-        const boost::filesystem::path& fn) const
+        const std::filesystem::path& fn) const
 {
   return new alps::scheduler::MCSimulation(w,fn);
 }

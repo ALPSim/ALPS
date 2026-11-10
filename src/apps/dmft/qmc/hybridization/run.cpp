@@ -37,7 +37,7 @@ bool stop_requested(boost::posix_time::ptime const & end_time) {
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 void master_final_tasks(const alps::results_type<hybridization>::type &results,
-                        const alps::parameters_type<hybridization>::type &parms,
+                        const alps::input::hybridization_parameters &parms,
                         const std::string &output_name){
   //do some post processing: collect Green functions and write
   //them into hdf5 files; calls compute vertex at the very end
@@ -62,6 +62,7 @@ void alps::solvers::cthyb(alps::params const& input, std::string const& output_f
   std::ostringstream missing;
   if (parms.has_missing(missing))
     throw std::invalid_argument("hybridization: " + missing.str());
+  const alps::input::hybridization_parameters hyb = alps::input::read_hybridization_parameters(parms);
 #ifndef ALPS_HAVE_MPI
   global_mpi_rank=0;
   sim_type s(parms,global_mpi_rank);
@@ -77,14 +78,15 @@ void alps::solvers::cthyb(alps::params const& input, std::string const& output_f
     parms.has_unused(std::cerr);
   }
   //run the simulation
-  s.run(boost::bind(&stop_requested, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)parms["MAX_TIME"])));
+  const boost::posix_time::ptime deadline = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds((int)hyb.max_time);
+  s.run([deadline] { return stop_requested(deadline); });
 
   //on the master: collect MC results and store them in file, then postprocess
   if (global_mpi_rank==0){
     alps::results_type<hybridization>::type results = collect_results(s);
-    std::string output_path = parms["BASEPATH"].as<std::string>()+"/simulation/results";
+    std::string output_path = hyb.basepath+"/simulation/results";
     save_results(results, parms, output_file, output_path); //"/simulation/results");
-    master_final_tasks(results, parms, output_file);
+    master_final_tasks(results, hyb, output_file);
   }
 #ifdef ALPS_HAVE_MPI
   else{ //on any slave: send back results to master.

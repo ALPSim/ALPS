@@ -14,6 +14,7 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `ietl/` | Iterative eigensolver headers under `include/ietl/` | `ALPS::headers` |
 | `hdf5/` | Archive API, container adapters, shared context registry and signal cleanup | `ALPS::hdf5` |
 | `params/` | ALPSCore's parameters (`<alps/params.hpp>`, `<alps/dictionary.hpp>`, `<alps/params/*.hpp>`): typed definitions, values supplied as text by INI, parameter and XML files, HDF5 groups and Python, and HDF5 checkpoints; and the adapters from parameter and XML files and to `alps::Parameters` (`<alps/ngs/make_*.hpp>`). See [its README](params/README.md) | `ALPS::params`; `adapters/` contributes to `ALPS::alps` |
+| `input/` | Parsers for the parameters each application reads itself, here the CT-INT and CT-HYB impurity solvers | `ALPS::alps` |
 | `osiris/` | Dump serialization, process/communication state and XDR implementation | `ALPS::osiris` |
 | `xml/` | XML parsing, handlers, attributes and output streams | `ALPS::xml` |
 | `cli/` | Existing `mcoptions` and `parseargs` command-line grammars | `ALPS::cli` |

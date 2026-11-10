@@ -57,7 +57,7 @@ const std::string& Observable::name() const
   return name_;
 }
 
-void Observable::write_xml(oxstream& oxs, const boost::filesystem::path&) const
+void Observable::write_xml(oxstream& oxs, const std::filesystem::path&) const
 {
   oxs << start_tag("AVERAGE") << attribute("name", name()) << end_tag("AVERAGE");
 }

@@ -280,10 +280,29 @@ ObservableSet& ObservableSet::operator<<(const ObservableSet& obs)
   return *this;
 }
 
+namespace {
+// The HDF5 layout of a binned vector observable without measurements is that of
+// a scalar one, so a run that stopped before measuring reloads it as an empty
+// scalar. Nothing tells them apart, and they hold no data.
+bool is_empty_scalar(const Observable& obs)
+{
+  const AbstractSimpleObservable<double>* scalar = dynamic_cast<const AbstractSimpleObservable<double>*>(&obs);
+  return scalar && scalar->count() == 0;
+}
+}
+
 ObservableSet& ObservableSet::operator<<(const Observable& obs)
 {
   if(has(obs.name()))
   {
+    if(is_empty_scalar(obs))
+      return *this;
+    if(is_empty_scalar((*this)[obs.name()]))
+    {
+      removeObservable(obs.name());
+      addObservable(obs);
+      return *this;
+    }
     if(!(*this)[obs.name()].can_merge())
       addObservable((*this)[obs.name()].convert_mergeable());
     (*this)[obs.name()].merge(obs);
@@ -295,7 +314,7 @@ ObservableSet& ObservableSet::operator<<(const Observable& obs)
 
 ObservableFactory ObservableSet::factory_;
 
-void ObservableSet::write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5) const
+void ObservableSet::write_xml(oxstream& oxs, const std::filesystem::path& fn_hdf5) const
 {
   oxs << start_tag("AVERAGES");
   for(const_iterator i = begin(); i != end(); ++i)
@@ -304,7 +323,7 @@ void ObservableSet::write_xml(oxstream& oxs, const boost::filesystem::path& fn_h
 }
 
 void ObservableSet::write_xml_with_id(oxstream& oxs, int id,
-  const boost::filesystem::path& fn_hdf5) const {
+  const std::filesystem::path& fn_hdf5) const {
   oxs << start_tag("AVERAGES") << attribute("id", id);
   for(const_iterator i = begin(); i != end(); ++i)
     i->second->write_xml(oxs, fn_hdf5);

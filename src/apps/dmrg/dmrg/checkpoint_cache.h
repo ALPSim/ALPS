@@ -12,7 +12,7 @@
 #include <alps/parameter.h>
 #include <alps/params.hpp>
 #include <alps/scheduler/signal.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <algorithm>
 #include <cerrno>
 #include <csignal>
@@ -33,7 +33,7 @@
 
 namespace dmrg_checkpoint {
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 const char* const meta_magic = "ALPS DMRG checkpoint 1";
 // reruns that may fail to commit anything after resuming before the
@@ -276,7 +276,7 @@ public:
   {
     if (!active_) return;
     active_ = false;
-    boost::system::error_code error;
+    std::error_code error;
     fs::remove_all(entry_, error);
     if (error)
       std::cerr << "ALPS DMRG: could not remove checkpoint " << entry_.string() << ": " << error.message() << std::endl;
@@ -292,7 +292,7 @@ public:
     std::string note;
     Series series;
     if (!read_progress(record_, at, note, series)) {
-      boost::system::error_code error;
+      std::error_code error;
       fs::remove_all(entry_, error);
       std::cerr << "DMRG run failed before its first checkpoint; there is nothing to resume." << std::endl;
       return;

@@ -1,0 +1,4 @@
+# Labels of the self-hosted runners (IFT workstation VMs) used by the workflows
+self-hosted-runner:
+  labels:
+  - ift-vm

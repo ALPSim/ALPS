@@ -56,7 +56,7 @@ public:
 
   virtual ~Scheduler();
 
-  virtual void set_new_jobfile(const boost::filesystem::path&) {};
+  virtual void set_new_jobfile(const std::filesystem::path&) {};
 
   virtual int run(); // start the scheduler
   
@@ -72,8 +72,8 @@ public:
   }
        
   // USER OBJECT CREATION functions
-  AbstractTask* make_task(const ProcessList&,const boost::filesystem::path&);
-  AbstractTask* make_task(const boost::filesystem::path&);
+  AbstractTask* make_task(const ProcessList&,const std::filesystem::path&);
+  AbstractTask* make_task(const std::filesystem::path&);
   
   AbstractWorker* make_worker(const ProcessList&,const Parameters&,int=0);
   AbstractWorker* make_worker(const Parameters&);
@@ -94,7 +94,7 @@ public:
 protected:
 
   AbstractTask* theTask; //the simulation running on this node
-  boost::filesystem::path defaultpath;
+  std::filesystem::path defaultpath;
   
   bool use_error_limit;
  
@@ -137,7 +137,7 @@ public:
 
   ~MasterScheduler();
 
-  virtual void set_new_jobfile(const boost::filesystem::path& jobilename);
+  virtual void set_new_jobfile(const std::filesystem::path& jobilename);
 
 protected: 
   std::vector<AbstractTask*> tasks;   // all simulations
@@ -160,10 +160,10 @@ protected:
 private:
 
   std::vector<CheckpointFiles> taskfiles;
-  boost::filesystem::path outfilepath;
-  boost::filesystem::path infilepath;
+  std::filesystem::path outfilepath;
+  std::filesystem::path infilepath;
   
-  void parse_job_file(const boost::filesystem::path&);
+  void parse_job_file(const std::filesystem::path&);
   void task_failed(int, const std::exception&);
 };
 

@@ -19,7 +19,7 @@
 #include <alps/mc/mcbase.hpp>
 
 #include <boost/function.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <vector>
 #include <string>

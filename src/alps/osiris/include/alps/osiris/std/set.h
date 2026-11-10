@@ -56,7 +56,8 @@ template <class T, class Compare, class Allocator>
 inline alps::ODump& operator << (alps::ODump& dump,
                                    const std::multiset<T,Compare,Allocator>& x)
 {
-  return alps::detail::saveContainer(dump,x);
+  alps::detail::saveContainer(dump,x);
+  return dump;
 }          
 
 } // end namespace alps

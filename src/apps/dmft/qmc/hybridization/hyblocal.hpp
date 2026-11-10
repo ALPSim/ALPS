@@ -15,7 +15,7 @@
 #ifndef LOCAL_CONFIG_HPP
 #define LOCAL_CONFIG_HPP
 
-#include<alps/params.hpp>
+#include <alps/input/hybridization.hpp>
 #include"hybint.hpp"
 #include"hybretintfun.hpp"
 #include"hybsegment.hpp"
@@ -30,7 +30,7 @@ typedef std::map<double,int> state_map;
 
 typedef class local_configuration{
 public:
-  local_configuration(const alps::params &p, int crank);
+  local_configuration(const alps::input::hybridization_parameters &input, int crank);
   double local_energy(const segment &seg, int orb,bool d_mu_only=false) const;
   double local_weight_change(const segment &seg, int orb, bool antisegment) const;
   int order(int orbital) const{ return segments_[orbital].size(); }

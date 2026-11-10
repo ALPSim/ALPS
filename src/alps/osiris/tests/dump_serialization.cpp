@@ -81,21 +81,21 @@ TEST(OsirisSerialization, PreservesScalarAndComplexValues) {
   alps::testing::TemporaryDirectory directory;
   const auto path = directory.path() / "record.dump";
   {
-    alps::OXDRFileDump output(boost::filesystem::path(path.string()));
+    alps::OXDRFileDump output(std::filesystem::path(path.string()));
     write_record<true>(output);
   }
-  alps::IXDRFileDump input(boost::filesystem::path(path.string()));
+  alps::IXDRFileDump input(std::filesystem::path(path.string()));
   expect_record(input, true);
 }
 
 TEST(OsirisSerialization, ReadsHistoricalXdrRecord) {
   // These historical readers are independent of the current writer.
-  alps::IXDRFileDump input(boost::filesystem::path(ALPS_TEST_SOURCE_DIR "/xdrdump2.dump"));
+  alps::IXDRFileDump input(std::filesystem::path(ALPS_TEST_SOURCE_DIR "/xdrdump2.dump"));
   expect_record(input);
 }
 
 TEST(OsirisSerialization, ArchiveAdapterReadsHistoricalXdrRecord) {
-  alps::IXDRFileDump input(boost::filesystem::path(ALPS_TEST_SOURCE_DIR "/xdrdump2.dump"));
+  alps::IXDRFileDump input(std::filesystem::path(ALPS_TEST_SOURCE_DIR "/xdrdump2.dump"));
   alps::idump_archive archive(input);
   expect_record(archive);
 }
@@ -121,10 +121,10 @@ TEST(OsirisSerialization, ArchiveAdapterReadsNativeDump) {
   alps::testing::TemporaryDirectory directory;
   const auto path = directory.path() / "record.dump";
   {
-    alps::OXDRFileDump output(boost::filesystem::path(path.string()));
+    alps::OXDRFileDump output(std::filesystem::path(path.string()));
     write_record(output);
   }
-  alps::IXDRFileDump input(boost::filesystem::path(path.string()));
+  alps::IXDRFileDump input(std::filesystem::path(path.string()));
   alps::idump_archive archive(input);
   expect_record(archive);
 }
@@ -133,11 +133,11 @@ TEST(OsirisSerialization, NativeDumpReadsArchiveAdapter) {
   alps::testing::TemporaryDirectory directory;
   const auto path = directory.path() / "record.dump";
   {
-    alps::OXDRFileDump dump(boost::filesystem::path(path.string()));
+    alps::OXDRFileDump dump(std::filesystem::path(path.string()));
     alps::odump_archive output(dump);
     write_record(output);
   }
-  alps::IXDRFileDump input(boost::filesystem::path(path.string()));
+  alps::IXDRFileDump input(std::filesystem::path(path.string()));
   expect_record(input);
 
   // A matching writer/reader bug must not silently change the checkpoint format.

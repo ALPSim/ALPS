@@ -20,13 +20,13 @@ def consumer(tmp_path):
     (sdk / "ALPSConfig.cmake").write_text(
         'set(ALPS_VERSION "3.0.0")\n'
         'set(ALPS_RUNTIME_TARGETS ALPS::alps ALPS::utilities)\n'
-        'foreach(target ALPS::alps ALPS::utilities ALPS::headers Threads::Threads Boost::filesystem)\n'
+        'foreach(target ALPS::alps ALPS::utilities ALPS::headers Threads::Threads Boost::serialization)\n'
         '  if(NOT TARGET ${target})\n'
         '    add_library(${target} INTERFACE IMPORTED)\n'
         '  endif()\n'
         'endforeach()\n'
         'set_property(TARGET ALPS::alps PROPERTY INTERFACE_LINK_LIBRARIES "ALPS::utilities;ALPS::headers")\n'
-        'set_property(TARGET ALPS::utilities PROPERTY INTERFACE_LINK_LIBRARIES "Boost::filesystem")\n')
+        'set_property(TARGET ALPS::utilities PROPERTY INTERFACE_LINK_LIBRARIES "Boost::serialization")\n')
     (sdk / "src").mkdir()
     (sdk / "src/nb_abi.h").write_text("#  define NB_INTERNALS_VERSION 21\n")
     package = tmp_path / "original" / "pyalps"
@@ -72,7 +72,7 @@ else()
   endforeach()
   if(NOT EXPECT_REPAIRED)
     if("ALPS::utilities" IN_LIST links OR "ALPS::alps" IN_LIST links
-       OR NOT "Boost::filesystem" IN_LIST links)
+       OR NOT "Boost::serialization" IN_LIST links)
       message(FATAL_ERROR "Developer extensions must use packaged components and SDK external dependencies")
     endif()
   endif()

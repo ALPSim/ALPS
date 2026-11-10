@@ -152,9 +152,9 @@ public:
 
   void extract_timeseries(ODump& dump) const;
 
-  void write_xml(oxstream&, const boost::filesystem::path& = boost::filesystem::path()) const;
-  void write_xml_scalar(oxstream&, const boost::filesystem::path&) const;
-  void write_xml_vector(oxstream&, const boost::filesystem::path&) const;
+  void write_xml(oxstream&, const std::filesystem::path& = std::filesystem::path()) const;
+  void write_xml_scalar(oxstream&, const std::filesystem::path&) const;
+  void write_xml_vector(oxstream&, const std::filesystem::path&) const;
 
   virtual std::string evaluation_method(Target) const { return "";}
 
@@ -197,13 +197,13 @@ private:
 //=======================================================================
 
 template <class T>
-void AbstractSimpleObservable<T>::write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5) const
+void AbstractSimpleObservable<T>::write_xml(oxstream& oxs, const std::filesystem::path& fn_hdf5) const
 {
   output_helper<typename is_scalar<T>::type>::write_xml(*this, oxs, fn_hdf5);
 }
 
 template <class T>
-void AbstractSimpleObservable<T>::write_xml_scalar(oxstream& oxs, const boost::filesystem::path&) const {
+void AbstractSimpleObservable<T>::write_xml_scalar(oxstream& oxs, const std::filesystem::path&) const {
   if (count())
   {
     std::string mm = evaluation_method(Mean);
@@ -249,7 +249,7 @@ void AbstractSimpleObservable<T>::write_xml_scalar(oxstream& oxs, const boost::f
 }
 
 template <class T>
-void AbstractSimpleObservable<T>::write_xml_vector(oxstream& oxs, boost::filesystem::path const &) const {
+void AbstractSimpleObservable<T>::write_xml_vector(oxstream& oxs, std::filesystem::path const &) const {
   if(count())
   {
     std::string mm = evaluation_method(Mean);

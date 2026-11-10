@@ -15,7 +15,7 @@
 #define ALPS_NGS_MAKE_PARAMETERS_FROM_FILE_HPP
 
 #include <alps/params.hpp>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <alps/parameter.h>
 #include <alps/config.h>
@@ -24,8 +24,11 @@ namespace alps {
 
     /// Parameters supplied as text from a classic ALPS parameter file
     /** The file is read as alps::Parameters reads it, `KEY = value` per
-        line; each value is supplied as its text. */
-    ALPS_DECL params make_parameters_from_file(boost::filesystem::path const & filename);
+        line. Expressions such as `J/4` are supplied as their value, other
+        values as their text. A file with one `{ }` block is read as that
+        block with the keys set before it.
+        @throws std::runtime_error for a file with more than one block */
+    ALPS_DECL params make_parameters_from_file(std::filesystem::path const & filename);
 
 }
 

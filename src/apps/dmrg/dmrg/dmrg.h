@@ -61,7 +61,7 @@ class DMRGTask
 {
 public:  
   typedef alps::half_integer<short> half_integer_type;
-  DMRGTask<value_type>(const alps::ProcessList& , const boost::filesystem::path& );
+  DMRGTask<value_type>(const alps::ProcessList& , const std::filesystem::path& );
   DMRGTask<value_type>(const alps::ProcessList& w, const alps::Parameters& p);
 
   /// Defines the parameters dmrg reads, with their defaults
@@ -72,7 +72,7 @@ public:
   static alps::params read_parameters(const alps::Parameters& parms);
 
   void dostep();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
+  void write_xml_body(alps::oxstream&, const std::filesystem::path&,bool) const;
 
   static void print_copyright(std::ostream& os = std::cout) 
   {
@@ -183,7 +183,7 @@ void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >&
 }
 
 template<class value_type>
-DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
+DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const std::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
   , alps::graph_helper<>(parms) 
   , alps::model_helper<>(*this,parms,false,true)
@@ -860,7 +860,7 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
 #endif
 
 template<class value_type>
-void DMRGTask<value_type>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
+void DMRGTask<value_type>::write_xml_body(alps::oxstream& out, const std::filesystem::path& p, bool writeallxml) const
 {
   if (writeallxml) {
     out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);

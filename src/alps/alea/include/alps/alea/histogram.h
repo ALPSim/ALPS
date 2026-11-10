@@ -85,7 +85,7 @@ public:
 
   value_type& operator[](size_type i) { return histogram_[i]; }
 
-  void write_xml(oxstream&, const boost::filesystem::path& = boost::filesystem::path()) const;
+  void write_xml(oxstream&, const std::filesystem::path& = std::filesystem::path()) const;
 
 
   inline count_type count() const {  return count_; }
@@ -145,7 +145,7 @@ inline HistogramObservable<T>::HistogramObservable(const std::string& n, T min, 
 
 
 template <class T>
-void HistogramObservable<T>::write_xml(oxstream& oxs, const boost::filesystem::path&) const
+void HistogramObservable<T>::write_xml(oxstream& oxs, const std::filesystem::path&) const
 {
   if (count()) {
     oxs << start_tag("HISTOGRAM") << attribute("name",name())

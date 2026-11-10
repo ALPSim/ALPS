@@ -25,6 +25,7 @@
 #include "interaction_expansion_choice.h"
 
 #include <alps/parameter.h>
+#include <alps/parameter_input.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/utilities/citations.hpp>
 #include <alps/cli.hpp>
@@ -33,7 +34,7 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
@@ -65,38 +66,39 @@ int main(int argc, char** argv)
     })) return 0;
     if (argc != 2) throw std::invalid_argument("Expected one parameter file");
     alps::cli_mpi_guard mpi(argc, argv);
-    alps::Parameters parms;
-    {
-      std::ifstream is(argv[1]);
-      if (!is.is_open()) throw std::runtime_error(std::string("Cannot open parameter file: ") + argv[1]);
-      is>>parms;
-      parms["BASENAME"]=std::string(argv[1]);
-    }
+    alps::Parameters parms = alps::read_parameter_file(argv[1]);
+    parms["BASENAME"]=std::string(argv[1]);
     if (alps::cli_is_master()) {
       std::cout << "ALPS DMFT framework for the single site impurity problem.\n\n";
       alps::print_copyright(std::cout, "dmft");
     }
     // set working directory
-    boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
+    std::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
     if (!p.parent_path().empty())
-      boost::filesystem::current_path(p.parent_path());
+      std::filesystem::current_path(p.parent_path());
+    // all files are now relative to the input's directory
+    const std::string input = p.filename().string();
+    // results go to BASENAME.h5, which is the input itself for parm.h5
+    if (p.extension() == ".h5")
+      p.replace_extension();
+    parms["BASENAME"]=p.filename().string();
+    const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
+        // Hirsch-Fye and CT-INT, built in or external, read G0 in Matsubara
+        // frequencies only.
+        const std::string solver = parms["SOLVER"];
+        const std::string program = std::filesystem::path(solver).filename().string();
+        if (solver=="Hirsch-Fye" || solver=="Interaction Expansion"
+            || program=="hirschfye" || program=="interaction")
+          throw std::invalid_argument("SOLVER = " + solver
+                                      + " needs the Matsubara loop; set OMEGA_LOOP = 1");
         SemicircleHilbertTransformer transform(parms);
         boost::shared_ptr<ImpuritySolver> solver_ptr;
-        if (parms["SOLVER"]=="Hirsch-Fye"){
-          std::cout<<"solving Hirsch Fye"<<std::endl;
-          // we need a factory to create Hirsch-Fye simulations
-          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;  
-          solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-          // Built-in solvers print no notice of their own; external solvers do.
-          if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
-          selfconsistency_loop(parms, *solver_ptr, transform);
-        }
-        else if (parms["SOLVER"]=="Hybridization") {
+        if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
         } else if (parms["SOLVER"]=="hybridization" || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
           std::string p(parms["SOLVER"]);
@@ -105,8 +107,8 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(p));
           F_selfconsistency_loop(parms, *solver_ptr, transform);
         } else {
-            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
+            /*std::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
+          solver_ptr.reset(new ExternalSolver(/*std::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       }
@@ -141,17 +143,24 @@ int main(int argc, char** argv)
           switch (select_interaction_expansion(flavors, sites)) {
             case interaction_expansion_choice::single_site_hubbard:
               std::cout<<"using single site Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,parms,argc,argv));
               break;
             case interaction_expansion_choice::multiband_density:
               std::cout<<"using multiband Hubbard solver"<<std::endl;
-              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
+              solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,parms,argc,argv));
               break;
             case interaction_expansion_choice::unsupported:
               throw std::runtime_error("DMFT Interaction Expansion: unsupported (FLAVORS, SITES) "
                                        "combination; set FLAVORS=2 (single site) or SITES=1 (multiband).");
           }
           if (alps::cli_is_master()) alps::print_citations(std::cout, "interaction");
+        }
+        else if (parms["SOLVER"]=="Hirsch-Fye") {
+          std::cout<<"solving Hirsch Fye"<<std::endl;
+          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
+          solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
+          // Built-in solvers print no notice of their own; external solvers do.
+          if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
         }
         else if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
@@ -168,15 +177,9 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    {
-      std::ofstream os(argv[1]);
-      os<<parms;
-      os.close();
-    }
-    {
-      alps::hdf5::archive os(std::string(argv[1])+".h5", "a");
-      os<<alps::make_pvp("/parameters",parms);
-    }
+    alps::write_parameter_file(input, parms);
+    if (basename+".h5" != input)
+      alps::write_parameter_file(basename+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

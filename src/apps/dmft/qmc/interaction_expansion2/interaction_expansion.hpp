@@ -18,6 +18,7 @@
 
 #include <alps/mc/api.hpp>
 #include <alps/mc/mcbase.hpp>
+#include <alps/input/ctint.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <alps/numeric/vector_valarray_conversion.hpp>
 
@@ -185,7 +186,7 @@ private:
 {
 public:
 
-  InteractionExpansionSim(const alps::ProcessList &w, const boost::filesystem::path &p) : alps::scheduler::MCSimulation(w,p) {}
+  InteractionExpansionSim(const alps::ProcessList &w, const std::filesystem::path &p) : alps::scheduler::MCSimulation(w,p) {}
   
   InteractionExpansionSim(const alps::ProcessList &w, const alps::Parameters &p) : alps::scheduler::MCSimulation(w,p) {p_=p;}
   
@@ -211,24 +212,15 @@ private:
 
 
 
-//Parameters with older spellings, or whose defaults depend on other
-//parameters. The simulation and the evaluation read them through these.
-namespace ctint_parameters {
-  unsigned int n_flavors(const alps::params &p);               //FLAVORS, else N_ORBITALS
-  unsigned int n_matsubara(const alps::params &p);             //N_MATSUBARA, or its older name NMATSUBARA
-  unsigned int n_matsubara_measurements(const alps::params &p);//NMATSUBARA_MEASUREMENTS, else n_matsubara
-  unsigned int n_tau(const alps::params &p);                   //N_TAU, or its older name N
-  unsigned int n_self(const alps::params &p);                  //NSELF, else 10*n_tau
-  unsigned int measurement_period(const alps::params &p);      //MEASUREMENT_PERIOD, else N_MEAS
-  unsigned int convergence_check_period(const alps::params &p);//CONVERGENCE_CHECK_PERIOD, else RECALC_PERIOD
-}
-
 class InteractionExpansion: public alps::mcbase
 {
 public:
 
   InteractionExpansion(const alps::params& p, int rank);
   static void define_parameters(alps::params &p); //define the parameters the solver reads, with their defaults
+private:
+  InteractionExpansion(const alps::params& p, int rank, const alps::input::ctint_parameters& input);
+public:
   ~InteractionExpansion() {}
   bool is_thermalized() const {return thermalized;} //set by update() once step exceeds THERMALIZATION
   void update();

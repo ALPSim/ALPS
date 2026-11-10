@@ -29,7 +29,7 @@ public:
     pre_evaluator_selector<measurement_t>::pre_evaluate(m, p, m_in);
   }
   void evaluate(alps::scheduler::MCSimulation& sim, alps::Parameters const& p,
-    boost::filesystem::path const&) const {
+    std::filesystem::path const&) const {
     alps::ObservableSet m;
     energy_evaluator::evaluate(m, sim.get_measurements());
     evaluator_selector<measurement_t>::evaluate(m, p, sim.get_measurements());

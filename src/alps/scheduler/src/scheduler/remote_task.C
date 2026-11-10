@@ -20,7 +20,7 @@
 namespace alps {
 namespace scheduler {
 
-RemoteTask::RemoteTask(const ProcessList& w, const boost::filesystem::path& fn)
+RemoteTask::RemoteTask(const ProcessList& w, const std::filesystem::path& fn)
  : AbstractTask(w)
 {
   OMPDump message;
@@ -110,7 +110,7 @@ uint32_t RemoteTask::cpus() const
   return static_cast<uint32_t>(receive);
 }
 
-void RemoteTask::checkpoint(const boost::filesystem::path& fn,bool write_all_xml) const
+void RemoteTask::checkpoint(const std::filesystem::path& fn,bool write_all_xml) const
 {
   OMPDump send;
   send << fn.string() << write_all_xml;

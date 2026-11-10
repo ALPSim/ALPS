@@ -112,7 +112,7 @@ bool AbstractTask::handle_message(const Process& master,int tag)
     case MCMP_checkpoint:
       message.receive(master,MCMP_checkpoint);
       message >> filename >> flag;
-      checkpoint(boost::filesystem::path(filename),flag);
+      checkpoint(std::filesystem::path(filename),flag);
       return true;
 
     default:

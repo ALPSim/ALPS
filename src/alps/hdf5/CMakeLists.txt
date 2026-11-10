@@ -3,7 +3,7 @@
 add_library(alps_hdf5
   src/archive.cpp)
 target_link_libraries(alps_hdf5 PUBLIC ALPS::configuration ALPS::containers ALPS::utilities
-  HDF5::HDF5 Boost::filesystem Boost::thread Threads::Threads)
+  HDF5::HDF5 Threads::Threads)
 # FindHDF5 may expose provider targets or absolute paths through its aggregate.
 get_target_property(hdf5_dependencies HDF5::HDF5 INTERFACE_LINK_LIBRARIES)
 alps_configure_component(alps_hdf5 hdf5 ${hdf5_dependencies})

@@ -17,7 +17,7 @@
 #include <alps/alea.h>
 #include <fstream>
 
-void evaluate(const boost::filesystem::path& p, std::ostream& out) {
+void evaluate(const std::filesystem::path& p, std::ostream& out) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
   alps::RealObsevaluator m2=sim.get_measurements()["Magnetization^2"];
@@ -50,7 +50,7 @@ try {
     std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
     std::exit(-1);
   }
-  boost::filesystem::path p(argv[1]);
+  std::filesystem::path p(argv[1]);
   std::string name=argv[1];
   if (argc==2)
     evaluate(p,std::cout);

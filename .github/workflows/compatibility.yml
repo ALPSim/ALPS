@@ -6,9 +6,16 @@ name: Compatibility
   workflow_call: null
 permissions:
   contents: read
+  packages: read   # CI images on ghcr.io (.github/ci-images)
 jobs:
   minimum:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
+    # Ubuntu 22.04 with gcc-11, Python 3.10 and Boost 1.76 (/opt/boost); see .github/ci-images.
+    container:
+      image: ghcr.io/alpsim/alps-ci:ubuntu-22.04
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     timeout-minutes: 90
     env:
       CC: gcc-11
@@ -17,23 +24,15 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - uses: ./.github/actions/setup-native
-      with:
-        python: '3.10'
-        cmake: cmake==3.27.9
-    - name: Build the minimum supported Boost
-      env:
-        ALPS_BOOST_MPI: 'OFF'
+    - name: Minimum supported build tools and Python packages
       run: |
-        python -m pip install numpy==1.26.0
+        python -m pip install cmake==3.27.9 numpy==1.26.0
         python -m pytest tests/tutorials -q --junitxml=_build/ci/tutorial-floor.xml
-        python .github/scripts/prepare_dependencies.py boost-1.76.0 _build/boost-install
-        echo "CMAKE_PREFIX_PATH=$PWD/_build/boost-install" >> "$GITHUB_ENV"
     - name: Build and test minimum supported dependencies
       run: |
         cmake --preset dev -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
-          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DBoost_DIR="$PWD/_build/boost-install/lib/cmake/Boost-1.76.0"
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DBoost_DIR=/opt/boost/lib/cmake/Boost-1.76.0
         cmake --build _build/ci
         ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
         cmake --install _build/ci
@@ -51,10 +50,10 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   extensive:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CMAKE_BUILD_PARALLEL_LEVEL: 8
       CC: gcc-14
       CXX: g++-14
     steps:
@@ -112,7 +111,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   cxx23:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: gcc-14
@@ -143,7 +142,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   mpi-python:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: clang-18
@@ -253,7 +252,7 @@ defaults:
   run:
     shell: bash
 env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CMAKE_BUILD_PARALLEL_LEVEL: ${{ vars.IFT_RUNNERS == 'off' && '4' || '16' }}  # IFT runner VMs: 8 vCPUs, oversubscribed 2x; GitHub's: 4
   CTEST_PARALLEL_LEVEL: 2
   CMAKE_GENERATOR: Ninja
   ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps
