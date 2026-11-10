@@ -177,7 +177,15 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    alps::write_parameter_file(input, parms);
+    // Rewrite the input parameter file in its own format. If it cannot be
+    // rewritten (for example a read-only input file) warn instead of failing:
+    // the results are intact and BASENAME.h5 is still written below.
+    try {
+      alps::write_parameter_file(input, parms);
+    } catch (std::exception const& exc) {
+      std::cerr << "Warning: could not rewrite parameter file '" << input
+                << "': " << exc.what() << "\n";
+    }
     if (basename+".h5" != input)
       alps::write_parameter_file(basename+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS
