@@ -16,17 +16,16 @@
 //construct a retarded interaction function. ntime: number of time slices.
 //noffidag_orbitals: number of offdiagonal orbitals. ndiag_orbitals: number
 //of diagonal orbitals. 
-ret_int_fun::ret_int_fun(const alps::params &p):
-green_function<double>(p["N_TAU"].as<int>()+1, 1, 2)//2 "flavors": K and K'
+ret_int_fun::ret_int_fun(const alps::input::hybridization_parameters &input):
+green_function<double>(input.n_tau+1, 1, 2)//2 "flavors": K and K'
 {
-  bool use_retarded_interaction=!p["RET_INT_K"].as<std::string>().empty();
+  bool use_retarded_interaction=!input.ret_int_k.empty();
   if(!use_retarded_interaction) return;
 
-  if(!p.defined("N_TAU") || (int)(p["N_TAU"])==0) throw std::invalid_argument("define parameter N_TAU, the number of retarded interaction time slices!");
-  beta_=p["BETA"];
+  beta_=input.beta;
   
   //read in Green's function from a file
-  read_interaction_K_function(p);
+  read_interaction_K_function(input);
   interaction_K_function_sanity_check();
 
   extern int global_mpi_rank;
@@ -45,10 +44,10 @@ if(operator()(0,0)!=0.) throw std::invalid_argument("Problem with retarded inter
 //this routine reads in the retarded interaction function, either from a text file or from an hdf5 file (for easy passing of binary data).
 //In  case of text files the file format is index - hyb_1 - hyb2 - hyb3 - ... in columns that go from time=0 to time=beta. Note that
 //the retarded interaction function is in imaginary time and always positive both for negative and positive times. It is also symmetric.
-void ret_int_fun::read_interaction_K_function(const alps::params &p){
-  if(p["RET_INT_K"].as<std::string>().empty()) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
-  std::string fname=p["RET_INT_K"].as<std::string>();
-  if(p["K_IN_HDF5"].as<bool>()){//attempt to read from h5 archive
+void ret_int_fun::read_interaction_K_function(const alps::input::hybridization_parameters &input){
+  if(input.ret_int_k.empty()) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
+  std::string fname=input.ret_int_k;
+  if(input.k_in_hdf5){//attempt to read from h5 archive
     alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
     std::vector<double> tmp(ntime());
     ar>>alps::make_pvp("/Ret_int_K",tmp);
@@ -63,18 +62,18 @@ void ret_int_fun::read_interaction_K_function(const alps::params &p){
   else{//read from text file
     std::ifstream infile(fname.c_str());
     if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open retarded interaction file (text format) ") + p["RET_INT_K"].as<std::string>()));
+      throw(std::invalid_argument(std::string("could not open retarded interaction file (text format) ") + input.ret_int_k));
     }
     for (std::size_t i=0; i<ntime(); i++) {
       if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + p["RET_INT_K"].as<std::string>() + ". probably wrong number of lines"));
+        throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + input.ret_int_k + ". probably wrong number of lines"));
       }
       double dummy;
       infile >> dummy;
       //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
       for (std::size_t j=0; j<nflavor(); j++){
         if(!infile.good()){
-          throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + p["RET_INT_K"].as<std::string>() + ". probably wrong number of columns"));
+          throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + input.ret_int_k + ". probably wrong number of columns"));
         }
         double delta;
         infile >> delta;

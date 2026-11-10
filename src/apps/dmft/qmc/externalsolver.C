@@ -29,6 +29,7 @@
 #include <fstream>
 #include "boost/tuple/tuple.hpp"
 #include "alps/parser/parser.h"
+#include <alps/parameter_input.hpp>
 #include "alps/utilities/vectorio.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
@@ -113,9 +114,9 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     } else {
       G0.write_hdf5(solver_input, "/G0");
     }
-    solver_input<<alps::make_pvp("/parameters",p);
-  } 
-  
+  }
+  alps::write_parameter_file(infile, p);
+
   call(infile,outfile);
   
   // read the output
@@ -171,10 +172,12 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       
       prepare_parms_for_hybridization(p,solver_input);
     }
-    solver_input<<alps::make_pvp("/parameters", p);//hier problem
     G0_omega.write_hdf5(solver_input, "/G0");
   }
-  
+  // /G0 is a Matsubara Green's function, which solvers read only in DMFT mode
+  p["DMFT_FRAMEWORK"]=1;
+  alps::write_parameter_file(infile, p);
+
   call(infile,outfile);
   
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
