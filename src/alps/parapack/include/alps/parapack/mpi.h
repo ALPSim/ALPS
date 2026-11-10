@@ -38,7 +38,10 @@
 #include <alps/osiris/dump.h>
 #include <alps/utilities/mpi.hpp>
 #include <boost/throw_exception.hpp>
+#include <cstddef>
 #include <cstring>
+#include <iostream>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <string>
@@ -54,7 +57,6 @@ int const any_tag = MPI_ANY_TAG;
 /// Source and tag of a received or probed message
 class status {
 public:
-  status() : status_() {}
   explicit status(MPI_Status const& s) : status_(s) {}
   int source() const { return status_.MPI_SOURCE; }
   int tag() const { return status_.MPI_TAG; }
@@ -97,6 +99,18 @@ namespace detail {
 // Values sent with their own MPI type; bool has none in every MPI.
 template<typename T>
 inline constexpr bool is_mpi_value = std::is_arithmetic<T>::value && !std::is_same<T, bool>::value;
+
+// A byte count or offset as the int that MPI takes. The message goes to stderr
+// too, since parapack's MPI programs abort while unwinding, before their catch
+// blocks can print it (see alps::mpi::environment).
+inline int mpi_count(std::size_t n) {
+  if (n > static_cast<std::size_t>(std::numeric_limits<int>::max())) {
+    char const* const message = "alps::mpi: message exceeds the MPI count limit of 2 GiB";
+    std::cerr << "Error: " << message << std::endl;
+    throw std::length_error(message);
+  }
+  return static_cast<int>(n);
+}
 
 // The value types that ODump and IDump read and write
 #define ALPS_PARAPACK_MPI_DUMP_TYPES \
@@ -191,7 +205,7 @@ void send(communicator const& comm, int dest, int tag, T const* values, int n) {
     MPI_Send(const_cast<T*>(values), n, detail::mpi_type<T>(), dest, tag, comm);
   } else {
     std::string const buffer = detail::serialize(values, n);
-    MPI_Send(const_cast<char*>(buffer.data()), static_cast<int>(buffer.size()), MPI_BYTE,
+    MPI_Send(const_cast<char*>(buffer.data()), detail::mpi_count(buffer.size()), MPI_BYTE,
              dest, tag, comm);
   }
 }
@@ -241,12 +255,12 @@ void broadcast_object(communicator const& comm, T& value, int root) {
 inline void gather(communicator const& comm, std::string const& value,
                    std::vector<std::string>& values, int root) {
   int const n = comm.size();
-  int size = static_cast<int>(value.size());
+  int size = detail::mpi_count(value.size());
   std::vector<int> sizes(n), offsets(n);
   MPI_Gather(&size, 1, MPI_INT, sizes.data(), 1, MPI_INT, root, comm);
-  int total = 0;
+  std::size_t total = 0;
   for (int p = 0; p < n; ++p) {
-    offsets[p] = total;
+    offsets[p] = detail::mpi_count(total);
     total += sizes[p];
   }
   std::vector<char> buffer(total);
@@ -259,7 +273,7 @@ inline void gather(communicator const& comm, std::string const& value,
 
 /// Sends one string to root, which calls the other gather()
 inline void gather(communicator const& comm, std::string const& value, int root) {
-  int size = static_cast<int>(value.size());
+  int size = detail::mpi_count(value.size());
   MPI_Gather(&size, 1, MPI_INT, nullptr, 1, MPI_INT, root, comm);
   MPI_Gatherv(const_cast<char*>(value.data()), size, MPI_CHAR, nullptr, nullptr, nullptr,
               MPI_CHAR, root, comm);

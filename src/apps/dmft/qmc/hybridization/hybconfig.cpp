@@ -14,9 +14,9 @@
 
 #include"hybconfig.hpp"
 
-hybridization_configuration::hybridization_configuration(const alps::params &p):
-  Delta(p),
-  hybmat_((int)(p["N_ORBITALS"]), p)
+hybridization_configuration::hybridization_configuration(const alps::input::hybridization_parameters &input):
+  Delta(input),
+  hybmat_((int)(input.n_orbitals), input)
 {
 }
 

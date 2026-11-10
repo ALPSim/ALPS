@@ -94,7 +94,7 @@ public:
   inline void s(site_t s){s_=s;}
   inline const std::complex<double> * exp_iomegat() const {return exp_iomegat_;} 
   //contains exp(iomegat) if its a creator, exp(-iomegat) if it's an annihilator.
-  static void initialize_simulation(const alps::params &parms);
+  static void initialize_simulation(const alps::input::ctint_parameters &input);
   
   
   static const std::complex<double> *exp_iomegan_tau(const double &tau) 
