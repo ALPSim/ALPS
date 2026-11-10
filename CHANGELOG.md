@@ -13,6 +13,8 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- Monte Carlo applications on the legacy scheduler (`spinmc`, `worm`, `qwl`) stop a run when its work is done instead of sweeping on until the scheduler's next check, which came 60 s later by default (`--Tmin`). A task with one run now takes exactly `SWEEPS` measurements, gives the same result to the last digit when repeated with the same `SEED`, and ends as soon as it is done. With several runs per task under MPI, the runs still share `SWEEPS` according to their speed, so only their total is fixed; their results are now merged in the order of the runs instead of the order of arrival. `spinmc` with `ERROR_LIMIT` tests the error every 100 sweeps.
+- A `qwl` task with several runs under MPI waits for all of its runs. It used to end when the progress of the runs added up to one, which stopped every run before it had stored its coefficients, or with only the fastest run's.
 - The exchange Monte Carlo tutorial (`tutorials/examples/parapack/exchange`) registers its parallel loop worker as `"loop; exchange"`, like the serial one, so `exchange --mpi < exchange.ip` no longer stops with `unknown algorithm`.
 - The parallel Ising tutorial (`tutorials/examples/parapack/multiple`) computed the heat-bath energy difference with the wrong operator precedence, so it sampled the wrong ensemble and reported wrong energies. For the chain, `Energy / Number of Sites` now agrees with `-tanh(J/T)`.
 - `dirloop_sse` and `worm` no longer stop with `Cannot add measurement to observable` on a custom `MEASURE_STRUCTURE_FACTOR[name]=operator`. The measurement now records the sign-weighted value per site.

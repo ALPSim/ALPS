@@ -36,6 +36,8 @@ class QWL_SSE_Simulation : public scheduler::LatticeModelMCRun<> {
   void dostep();
   bool is_thermalized() const;
   double work_done() const;
+  // Coefficients are stored when a run finishes, so a task needs all of its runs
+  bool needs_complete_run() const { return true; }
   bool change_parameter(const std::string& name, const StringValue& value);
   static void print_copyright(std::ostream&);
   
