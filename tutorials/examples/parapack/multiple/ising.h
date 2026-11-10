@@ -95,7 +95,7 @@ public:
     ++mcs_;
 
     for (int i = 0; i < loclen_; ++i) {
-      double diff = coupling_ * (4 * (spins_[i-1] ^ spins_[i] + spins_[i] ^ spins_[i+1]) - 4);
+      double diff = coupling_ * (4 * ((spins_[i-1] ^ spins_[i]) + (spins_[i] ^ spins_[i+1])) - 4);
       if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) spins_[i] ^= 1;
       if (i == 0) copy2left();
       if (i == loclen_ - 1) copy2right();
