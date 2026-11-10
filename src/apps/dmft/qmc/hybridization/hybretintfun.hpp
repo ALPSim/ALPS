@@ -12,7 +12,7 @@
  *
  *****************************************************************************/
 
-#include <alps/params.hpp>
+#include <alps/input/hybridization.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <fstream>
@@ -24,13 +24,13 @@
 class ret_int_fun : public green_function<double>{
   public:
     //constructor
-  ret_int_fun(const alps::params &p);
+  ret_int_fun(const alps::input::hybridization_parameters &input);
   double interpolate(double time) const;
   double interpolate_deriv(double time) const;
 
   friend std::ostream &operator<<(std::ostream &os, const ret_int_fun &K);
 private:
-  void read_interaction_K_function(const alps::params &p);
+  void read_interaction_K_function(const alps::input::hybridization_parameters &input);
   void interaction_K_function_sanity_check(void);
   double beta_;
 };

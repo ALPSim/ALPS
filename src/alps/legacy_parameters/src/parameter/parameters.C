@@ -16,13 +16,19 @@
 #include <alps/parameter/parameters.h>
 #include <alps/parameter/parameters_p.h>
 #include <boost/foreach.hpp>
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <streambuf>
+#include <string>
+#include <variant>
 
 #include <alps/expression.h>
 
 #include <alps/hdf5.hpp>
+#include <alps/hdf5/vector.hpp>
+#include <alps/utility/vectorio.hpp>
 
 namespace bs = boost::spirit::classic;
 
@@ -122,34 +128,55 @@ void Parameters::replace_envvar() {
   BOOST_FOREACH(Parameter& p, list_) p.replace_envvar();
 }
 
-void Parameters::save(hdf5::archive & ar) const {
-    expression::ParameterEvaluator<double> eval(*this,false);
-    for (const_iterator it = begin(); it != end(); ++it) {
+namespace {
+
+// Values that evaluate to a number become numbers; names, paths and
+// symbolic expressions stay exactly as written.
+std::variant<int, double, std::string> typed_value(const Parameters& parameters, const std::string& key) {
+    std::string const text = boost::lexical_cast<std::string>(parameters[key]);
+    if (text.find_first_not_of(" \t") != std::string::npos) {
         try {
-            expression::Expression<double> expr(it->value());
+            expression::ParameterEvaluator<double> eval(parameters,false);
+            expression::Expression<double> expr(text);
             if (expr.can_evaluate(eval)) {
                 double value = expr.value(eval);
-                if (numeric::is_zero(value - static_cast<double>(static_cast<int>(value)))) 
-                    ar << make_pvp(it->key(), static_cast<int>(value+ (value > 0 ? 0.25 : -0.25)));
-                else 
-                    ar << make_pvp(it->key(), value);
-            } else {
-                expr.partial_evaluate(eval);
-                ar << make_pvp(it->key(), boost::lexical_cast<std::string>(expr));
+                if (std::abs(value) <= std::numeric_limits<int>::max()
+                    && numeric::is_zero(value - static_cast<double>(static_cast<int>(value))))
+                    return static_cast<int>(value+ (value > 0 ? 0.25 : -0.25));
+                return value;
             }
         } catch(...) {
-          // we had a problem evaluating, use original full value
-          ar << make_pvp(it->key(), boost::lexical_cast<std::string>(it->value()));
         }
     }
+    return text;
+}
+
+}
+
+void Parameters::save(hdf5::archive & ar) const {
+    // keys such as MEASURE_LOCAL[a/b] must not become nested groups
+    for (const_iterator it = begin(); it != end(); ++it)
+        std::visit([&](auto const& value) { ar << make_pvp(ar.encode_segment(it->key()), value); },
+                   typed_value(*this, it->key()));
 }
 void Parameters::load(hdf5::archive & ar) {
   std::vector<std::string> list = ar.list_children(ar.get_context());
 
   for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
     std::string v;
-    ar >> make_pvp(*it, v);
-    operator[](*it) = v;
+    if (ar.is_scalar(*it))
+      ar >> make_pvp(*it, v);
+    else if (ar.is_datatype<std::string>(*it)) {
+      std::vector<std::string> values;
+      ar >> make_pvp(*it, values);
+      v = write_vector(values);
+    } else {
+      // vectors are held as the text read_vector reads
+      std::vector<double> values;
+      ar >> make_pvp(*it, values);
+      v = write_vector(values);
+    }
+    operator[](ar.decode_segment(*it)) = v;
   }
 }
 
@@ -182,17 +209,8 @@ namespace alps {
 
 std::ostream& operator<<(std::ostream& os, const alps::Parameters& p)
 {
-  for (alps::Parameters::const_iterator it = p.begin(); it != p.end(); ++it) {
-    if (it->value().valid()) {
-      std::string s = it->value().c_str();
-      os << it->key() << " = ";
-      if (s.find(' ') != std::string::npos)
-        os << '"' << s << '"';
-      else
-        os << s;
-      os << ";\n";
-    }
-  }
+  for (alps::Parameters::const_iterator it = p.begin(); it != p.end(); ++it)
+    os << *it << "\n";
   return os;
 }
 

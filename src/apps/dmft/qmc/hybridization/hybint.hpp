@@ -16,7 +16,7 @@
 #define HYB_INT_HPP
 #include <vector>
 #include <fstream>
-#include <alps/params.hpp>
+#include <alps/input/hybridization.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include "../green_function.h"
@@ -25,7 +25,7 @@
 class interaction_matrix{
 public:
   //constructor
-  interaction_matrix(const alps::params &p);
+  interaction_matrix(const alps::input::hybridization_parameters &input);
   //element access routines
   double &operator()(std::size_t flavor_i, std::size_t flavor_j){
     return val_[flavor_i*n_orbitals_+flavor_j];
@@ -47,13 +47,13 @@ private:
 //The values can be different through a magnetic or christal field, or due to a double counting which is orbitally dependent.
 class chemical_potential{
 public:
-  chemical_potential(const alps::params &p){
+  chemical_potential(const alps::input::hybridization_parameters &input){
     extern int global_mpi_rank;
-    val_.resize(p["N_ORBITALS"].as<int>(), p["MU"].as<double>());
-    if(!p["MU_VECTOR"].as<std::string>().empty()){
-      if(p.supplied("MU") && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR defined, ignoring parameter MU" << std::flush << std::endl; };
-      std::string mufilename=p["MU_VECTOR"].as<std::string>();
-      if(p["MU_IN_HDF5"].as<bool>()){//attempt to read from h5 archive
+    val_.resize(input.n_orbitals, input.mu);
+    if(!input.mu_vector.empty()){
+      if(input.mu_ignored && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR defined, ignoring parameter MU" << std::flush << std::endl; };
+      std::string mufilename=input.mu_vector;
+      if(input.mu_in_hdf5){//attempt to read from h5 archive
         alps::hdf5::archive ar(mufilename, alps::hdf5::archive::READ);
         ar>>alps::make_pvp("/MUvector",val_);
       }

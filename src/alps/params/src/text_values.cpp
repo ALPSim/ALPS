@@ -156,8 +156,9 @@ namespace alps {
 
         void supply_plain_group(alps::hdf5::archive& ar, params& p) {
             for (const std::string& name : ar.list_children(ar.get_context())) {
+                const std::string key = ar.decode_segment(name);
                 if (!ar.is_group(name)) {
-                    p.supply(name, data_text(ar, name, name));
+                    p.supply(key, data_text(ar, name, key));
                     continue;
                 }
                 // A Python list of mixed or Boolean elements: scalars 0, 1, ...
@@ -166,12 +167,12 @@ namespace alps {
                 for (std::size_t i = 0; i < elements.size(); ++i) {
                     const std::string element = name + "/" + std::to_string(i);
                     if (!ar.is_data(element) || !ar.is_scalar(element)) {
-                        throw std::runtime_error(error_prefix(name) + " is a group that is not a list of scalars");
+                        throw std::runtime_error(error_prefix(key) + " is a group that is not a list of scalars");
                     }
                     if (i != 0) text += ',';
-                    text += data_text(ar, element, name);
+                    text += data_text(ar, element, key);
                 }
-                p.supply(name, text);
+                p.supply(key, text);
             }
         }
 

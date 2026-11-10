@@ -12,7 +12,7 @@
  *
  *****************************************************************************/
 
-#include <alps/params.hpp>
+#include <alps/input/hybridization.hpp>
 #include <alps/hdf5/archive.hpp>
 #include <alps/hdf5/vector.hpp>
 #include <fstream>
@@ -24,7 +24,7 @@
 class hybfun : public green_function<double>{
   public:
     //constructor
-  hybfun(const alps::params &p);
+  hybfun(const alps::input::hybridization_parameters &input);
   hybfun(const hybfun &rhs):green_function<double>(rhs),beta_(rhs.beta_) {
 //    operator=(rhs);
 //    for (int nf=0;nf<nflavor();nf++)
@@ -52,7 +52,7 @@ class hybfun : public green_function<double>{
 
   friend std::ostream &operator<<(std::ostream &os, const hybfun &hyb);
 private:
-  void read_hybridization_function(const alps::params &p);
+  void read_hybridization_function(const alps::input::hybridization_parameters &input);
   void hybridization_function_sanity_check(void);
   double beta_;
 };
