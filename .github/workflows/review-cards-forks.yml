@@ -15,10 +15,6 @@ on:
 permissions:
   contents: read
 
-# Same queue as the scheduled full-board run in review-cards.yml.
-concurrency:
-  group: review-cards-all
-
 jobs:
   cards:
     # A fork PR's run lists no pull_requests; its head_repository is this repo,
@@ -26,6 +22,11 @@ jobs:
     if: >-
       github.event.workflow_run.event == 'pull_request_review'
       && !github.event.workflow_run.pull_requests[0]
+    # Same queue as the scheduled full-board run in review-cards.yml. On the
+    # job, not the workflow, so skipped runs never join it and replace a
+    # pending update.
+    concurrency:
+      group: review-cards-all
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
