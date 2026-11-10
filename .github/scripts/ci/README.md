@@ -1,8 +1,7 @@
 # CI change detection
 
 The PR workflow checks six areas defined in `areas.json`. `fingerprint.py`
-compares the complete PR diff against its base (master pushes use the previous
-commit), then hashes each area's inputs, configuration, and runner image.
+compares the complete PR diff against its base, then hashes each area's inputs, configuration, and runner image.
 Successful jobs save an exact-key pass marker; compiler caches are separate
 and never establish that tests passed.
 

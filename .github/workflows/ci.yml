@@ -1,6 +1,11 @@
 name: CI
 'on':
   pull_request:
+    types:
+    - opened
+    - synchronize
+    - reopened
+    - ready_for_review
   push:
     branches:
     - master
@@ -12,8 +17,7 @@ name: CI
         default: false
 permissions:
   contents: read
-# Change detection on push diffs against github.event.before only, so a
-# cancelled master run would leave its commits untested. Cancel PR runs only.
+# A master run is the only macOS test of the merged tree. Cancel PR runs only.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -48,8 +52,11 @@ jobs:
         python3 .github/scripts/ci/fingerprint.py --check-workflow .github/workflows/ci.yml
     - id: fp
       name: Detect changes and fingerprint areas
+      # Pushes and manual runs pass no base, which marks every area affected:
+      # an area then skips only on a recorded pass of its exact fingerprint, so
+      # a failure on master keeps running until it is fixed.
       env:
-        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        BASE: ${{ github.event.pull_request.base.sha }}
       run: |
         export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
         python3 .github/scripts/ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"
@@ -250,9 +257,10 @@ jobs:
       with:
         path: .ci-passed
         key: pass-linux-${{ needs.changes.outputs.linux_key }}
+  # MPI and sanitizers passed on the PR; master pushes do not repeat them.
   mpi:
     needs: changes
-    if: needs.changes.outputs.mpi_run == 'true'
+    if: needs.changes.outputs.mpi_run == 'true' && github.event_name != 'push' && !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -314,9 +322,11 @@ jobs:
       with:
         path: .ci-passed
         key: pass-mpi-${{ needs.changes.outputs.mpi_key }}
+  # macOS runner minutes cost ten times Linux ones: test once per merge on
+  # master and weekly in Compatibility, not on every PR push.
   macos:
     needs: changes
-    if: needs.changes.outputs.macos_run == 'true'
+    if: needs.changes.outputs.macos_run == 'true' && github.event_name != 'pull_request'
     runs-on: macos-15
     timeout-minutes: 90
     env:
@@ -362,7 +372,7 @@ jobs:
   debug:
     name: Native debug build with assertions
     needs: changes
-    if: needs.changes.outputs.debug_run == 'true'
+    if: needs.changes.outputs.debug_run == 'true' && !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -434,7 +444,7 @@ jobs:
   sanitizers:
     name: Native address and undefined behavior sanitizers
     needs: changes
-    if: needs.changes.outputs.sanitizers_run == 'true'
+    if: needs.changes.outputs.sanitizers_run == 'true' && github.event_name != 'push' && !github.event.pull_request.draft
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
@@ -490,26 +500,8 @@ jobs:
         key: pass-sanitizers-${{ needs.changes.outputs.sanitizers_key }}
   packaging:
     needs: changes
-    if: needs.changes.outputs.packaging_run == 'true'
+    if: needs.changes.outputs.packaging_run == 'true' && !github.event.pull_request.draft
     uses: ./.github/workflows/_wheels.yml
-  packaging_pass:
-    name: Record packaging pass
-    needs:
-    - changes
-    - packaging
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-    - name: Record pass marker
-      if: needs.changes.outputs.packaging_key != ''
-      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
-      env:
-        KEY: ${{ needs.changes.outputs.packaging_key }}
-    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      if: needs.changes.outputs.packaging_key != ''
-      with:
-        path: .ci-passed
-        key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
   status:
     name: CI
     if: always()
@@ -525,6 +517,17 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+    # packaging is a reusable workflow and cannot save its own marker.
+    - name: Record packaging pass marker
+      if: needs.packaging.result == 'success' && needs.changes.outputs.packaging_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.packaging_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.packaging.result == 'success' && needs.changes.outputs.packaging_key != ''
+      with:
+        path: .ci-passed
+        key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
     - env:
         RESULTS: ${{ toJSON(needs) }}
       run: |
