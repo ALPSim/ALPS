@@ -519,6 +519,79 @@ TEST(SectorCheck, MeasuringANonConservingOperatorGivesZero) {
       EXPECT_EQ(m(i, j), 0.);
 }
 
+// PROJECT_NSITE_TERMS=1 drops the products of an n-site term that change a
+// quantum number fixed in the sector: the result is the model written without
+// them, and a note says how many were dropped.
+TEST(SectorProjection, DroppedProductsGiveTheModelWithoutThem) {
+  const std::string pairing = " + 0.4*(cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l)"
+                              " + c_down(l)*c_up(k)*c_down(j)*c_up(i))";
+  Files f(ladder_cell, hubbard_model("with pairing",
+          "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + pairing + "</NSITETERM>")
+          + hubbard_model("pair hopping", "<NSITETERM sites=\"i j k l\">" + std::string(pair_hop) + "</NSITETERM>"));
+  for (auto [nup, ndown] : std::vector<std::pair<int, int> >{{2, 2}, {3, 1}}) {
+    alps::Parameters p = sector(f.parms(), nup, ndown);
+    p["LATTICE"] = "open ladder"; p["L"] = 3; p["U"] = 4.0; p["K"] = 0.9;
+    p["MODEL"] = "with pairing";
+    EXPECT_NE(build_error(p).find("PROJECT_NSITE_TERMS=1"), std::string::npos);
+    p["PROJECT_NSITE_TERMS"] = 1;
+    testing::internal::CaptureStderr();
+    std::vector<double> a = spectrum(p);
+    std::string note = testing::internal::GetCapturedStderr();
+    EXPECT_NE(note.find("Note: PROJECT_NSITE_TERMS drops 2 of 10 products"), std::string::npos) << note;
+    EXPECT_NE(note.find("Ndown (2), Nup (2)"), std::string::npos) << note;
+    p["MODEL"] = "pair hopping";
+    testing::internal::CaptureStderr();
+    std::vector<double> b = spectrum(p);
+    EXPECT_EQ(testing::internal::GetCapturedStderr(), "");   // nothing to drop
+    ASSERT_EQ(a.size(), b.size());
+    for (std::size_t i = 0; i < a.size(); ++i)
+      EXPECT_NEAR(a[i], b[i], 1e-12) << "sector " << nup << "," << ndown << " level " << i;
+  }
+}
+
+TEST(SectorProjection, NoFixedQuantumNumberKeepsEveryProduct) {
+  Files f("<GRAPH name=\"g\" vertices=\"4\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/><SITE id=\"4\"/></NSITE></GRAPH>",
+          "<HAMILTONIAN name=\"pairing\"><BASIS ref=\"fermion\"/><NSITETERM sites=\"i j k l\">"
+          "cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l) + c_down(l)*c_up(k)*c_down(j)*c_up(i)"
+          "</NSITETERM></HAMILTONIAN>");
+  alps::Parameters p = f.parms();
+  p["GRAPH"] = "g"; p["MODEL"] = "pairing";
+  std::vector<double> a = spectrum(p);
+  p["PROJECT_NSITE_TERMS"] = 1;
+  std::vector<double> b = spectrum(p);
+  ASSERT_EQ(a.size(), 256u);
+  ASSERT_EQ(a.size(), b.size());
+  for (std::size_t i = 0; i < a.size(); ++i)
+    EXPECT_EQ(a[i], b[i]);
+  EXPECT_NEAR(a.front(), -1, 1e-12);   // the pairing is kept
+}
+
+TEST(SectorProjection, LibraryOperatorsAreSplitBeforeProjecting) {
+  // pair(x) changes N by +2 or -2; pair(i)*pair(j) is split into its four
+  // products, and the two that keep N are kept
+  Files f("<GRAPH name=\"g\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>",
+          "<SITEOPERATOR name=\"pair\" site=\"x\">cdag_up(x)*cdag_down(x) + c_down(x)*c_up(x)</SITEOPERATOR>"
+          "<HAMILTONIAN name=\"pairs\"><BASIS ref=\"fermion\"/>"
+          "<NSITETERM sites=\"i j\">pair(i)*pair(j)</NSITETERM></HAMILTONIAN>"
+          "<HAMILTONIAN name=\"pair hopping\"><BASIS ref=\"fermion\"/><NSITETERM sites=\"i j\">"
+          "cdag_up(i)*cdag_down(i)*c_down(j)*c_up(j) + c_down(i)*c_up(i)*cdag_up(j)*cdag_down(j)"
+          "</NSITETERM></HAMILTONIAN>");
+  alps::Parameters p = sector(f.parms(), 1, 1);
+  p["GRAPH"] = "g"; p["PROJECT_NSITE_TERMS"] = 1;
+  p["MODEL"] = "pairs";
+  testing::internal::CaptureStderr();
+  std::vector<double> a = spectrum(p);
+  std::string note = testing::internal::GetCapturedStderr();
+  EXPECT_NE(note.find("drops 2 of 4 products"), std::string::npos) << note;
+  p["MODEL"] = "pair hopping";
+  std::vector<double> b = spectrum(p);
+  ASSERT_EQ(a.size(), 4u);
+  ASSERT_EQ(a.size(), b.size());
+  for (std::size_t i = 0; i < a.size(); ++i)
+    EXPECT_NEAR(a[i], b[i], 1e-12);
+  EXPECT_NEAR(a.front(), -1, 1e-12);
+}
+
 TEST(NSiteHamiltonian, TableIndexOverflowThrows) {
   // The local table keys each configuration of the n-site group's sites by one
   // std::size_t; with 32 fermion sites (4^32 = 2^64) it would wrap.

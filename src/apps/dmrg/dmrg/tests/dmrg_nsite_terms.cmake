@@ -51,6 +51,21 @@ string(REPLACE "</MODELS>" [=[
     + C
   </NSITETERM>
 </HAMILTONIAN>
+<HAMILTONIAN name="pairing ladder">
+  <PARAMETER name="t" default="1"/><PARAMETER name="U" default="0"/><PARAMETER name="K" default="0"/>
+  <PARAMETER name="C" default="0"/>
+  <BASIS ref="fermion"/>
+  <SITETERM site="i">U*n_up(i)*n_down(i)</SITETERM>
+  <BONDTERM source="i" target="j">
+    -t*(cdag_up(i)*c_up(j) + cdag_up(j)*c_up(i) + cdag_down(i)*c_down(j) + cdag_down(j)*c_down(i))
+  </BONDTERM>
+  <NSITETERM sites="i j k l">
+    -K*( (cdag_up(l)*cdag_down(k) - cdag_down(l)*cdag_up(k)) * (c_down(j)*c_up(i) - c_up(j)*c_down(i))
+       + (cdag_up(i)*cdag_down(j) - cdag_down(i)*cdag_up(j)) * (c_down(k)*c_up(l) - c_up(k)*c_down(l)) )
+    + C
+    + 0.4*(cdag_up(i)*cdag_down(j)*cdag_up(k)*cdag_down(l) + c_down(l)*c_up(k)*c_down(j)*c_up(i))
+  </NSITETERM>
+</HAMILTONIAN>
 <HAMILTONIAN name="squared ladder">
   <PARAMETER name="t" default="1"/><PARAMETER name="U" default="0"/><PARAMETER name="W" default="0"/>
   <BASIS ref="fermion"/>
@@ -128,6 +143,35 @@ execute_process(COMMAND "${dmrg}" --write-xml refused.in.xml
   WORKING_DIRECTORY "${test_dir}" RESULT_VARIABLE status OUTPUT_VARIABLE out ERROR_VARIABLE err)
 if(status EQUAL 0 OR NOT "${out}${err}" MATCHES "changes the total Sz")
   message(FATAL_ERROR "dmrg did not refuse an n-site term that changes Sz:\n${out}${err}")
+endif()
+
+# PROJECT_NSITE_TERMS=1 drops the pairing products, which change the fixed
+# Nup and Ndown: the energy is that of task 1 above, without them
+file(WRITE "${test_dir}/projected" [=[
+LATTICE_LIBRARY="lattices.xml"
+MODEL_LIBRARY="models.xml"
+LATTICE="plaquette ladder"
+MODEL="pairing ladder"
+CONSERVED_QUANTUMNUMBERS="Nup,Ndown"
+PROJECT_NSITE_TERMS=1
+U=8
+SWEEPS=4
+MAXSTATES=200
+NUMBER_EIGENVALUES=1
+{ L=3; K=0.7; C=0.3; Nup_total=2; Ndown_total=2; }
+]=])
+execute_process(COMMAND "${parameter2xml}" projected
+  WORKING_DIRECTORY "${test_dir}" COMMAND_ERROR_IS_FATAL ANY)
+execute_process(COMMAND "${dmrg}" --write-xml projected.in.xml
+  WORKING_DIRECTORY "${test_dir}" OUTPUT_QUIET ERROR_VARIABLE err COMMAND_ERROR_IS_FATAL ANY)
+if(NOT err MATCHES "PROJECT_NSITE_TERMS drops 2 of [0-9]+ products")
+  message(FATAL_ERROR "No note on the dropped products:\n${err}")
+endif()
+file(READ "${test_dir}/projected.task1.out.xml" result)
+string(REGEX MATCH "<SCALAR_AVERAGE name=\"Energy\"><MEAN>([^<]+)</MEAN>" found "${result}")
+string(FIND "${CMAKE_MATCH_1}" "${expected_1}" at)
+if(NOT found OR NOT at EQUAL 0)
+  message(FATAL_ERROR "Projected term: E0 = ${CMAKE_MATCH_1}, expected ${expected_1}...")
 endif()
 
 # A power of site operators is expanded into the product, as in ED. fulldiag

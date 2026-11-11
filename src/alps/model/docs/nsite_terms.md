@@ -65,6 +65,16 @@ in order.
 - Terms need not conserve particle number. If a term maps a basis state out of
   the sector set by `CONSERVED_QUANTUMNUMBERS`, the run stops with an error
   instead of dropping the matrix element.
+- With `PROJECT_NSITE_TERMS=1`, the products of an n-site term that change a
+  quantum number fixed in the sector are dropped instead, which projects the
+  term onto the sector. ALPS prints how many were dropped:
+
+  ```
+  Note: PROJECT_NSITE_TERMS drops 2 of 10 products of the <NSITETERM> on n-site
+  groups of type 0, which change the fixed total of Ndown (2), Nup (2).
+  ```
+
+  Site and bond terms are not projected.
 
 ## Bosons and cutoffs
 
@@ -95,7 +105,9 @@ Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
 with one operator per site; operators that fall into the same block are
 combined and carried along as block operators, as for bond terms between
 distant sites. `dmrg` refuses a term that changes the total of any quantum
-number, whether or not it is in `CONSERVED_QUANTUMNUMBERS`.
+number, whether or not it is in `CONSERVED_QUANTUMNUMBERS`. With
+`PROJECT_NSITE_TERMS=1`, it drops the products that change a quantum number
+fixed by `<name>_total`, as in ED, and refuses the others.
 
 - The DMRG site order is the ALPS site order. n-site groups may span any
   sites, but terms between distant sites need more states for the same

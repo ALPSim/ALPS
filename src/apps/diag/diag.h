@@ -142,7 +142,9 @@ void DiagMatrix<T,M>::define_parameters(alps::params& parameters)
 {
   alps::scheduler::DiagTask<T>::define_parameters(parameters);
   parameters.define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers whose sectors are diagonalized separately")
-            .define<bool>("TRANSLATION_SYMMETRY", true, "diagonalize each momentum sector separately");
+            .define<bool>("TRANSLATION_SYMMETRY", true, "diagonalize each momentum sector separately")
+            .define<bool>("PROJECT_NSITE_TERMS", false,
+                          "drop the products of n-site terms that change a quantum number fixed in the sector");
   // without COMPLEX, use_complex() decides. TOTAL_MOMENTUM is read by the
   // model library; here only whether it is supplied matters.
   if (parameters.supplied("COMPLEX"))

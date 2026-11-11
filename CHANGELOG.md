@@ -11,6 +11,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - With checkpoints, `SIGTERM` and `SIGINT` end a `dmrg` run after the current sweep iteration's checkpoint, with exit status 255, instead of being ignored until the task finishes; rerunning the job resumes. `SIGUSR1` and `SIGUSR2` do not end the run, however often they arrive; without checkpoints the second one still does.
 - `alps2fcidump` and the `fulldiag`/`sparsediag` parameter `FCIDUMP="file"` write a spin-1/2 fermion model, including its n-site terms, as FCIDUMP integrals (h_pq, (pq|rs), E_core) for quantum chemistry codes. The integrals are read off ALPS's Hamiltonian matrix and checked against it; models FCIDUMP cannot hold are refused with the reason. See [the export section](src/alps/model/docs/nsite_terms.md#export-to-fcidump).
 - A power of site operators in an `NSITETERM`, such as `n(i)^2` or `(A+B)^2`, is expanded into the repeated product in the written order, also in `dmrg`. Powers were refused before; an exponent that is not a nonnegative integer still is.
+- `PROJECT_NSITE_TERMS=1` (`fulldiag`, `sparsediag`, `dmrg`) drops the products of an `NSITETERM` that change a quantum number fixed in the sector, instead of refusing the term, and prints how many it dropped. This projects a generated Hamiltonian, e.g. one written from integrals, onto the sector. See [n-site terms](src/alps/model/docs/nsite_terms.md).
 
 ### Fixed
 

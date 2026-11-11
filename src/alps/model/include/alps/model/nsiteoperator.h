@@ -77,6 +77,9 @@ struct nsite_matrix
   {
     T coef;
     std::vector<int> ops;   // per role: index into locals, or -1 for the identity
+    std::size_t source;     // index of the product in NSiteOperator::split()
+    // change of each quantum number's sum over the sites
+    std::map<std::string, half_integer<int> > change;
   };
 
   std::vector<std::size_t> dims;
@@ -84,6 +87,41 @@ struct nsite_matrix
   std::vector<product_type> products;
   // quantum numbers whose sum over the sites some product changes
   std::set<std::string> nonconserved;
+
+  // P T P for P the projector onto a sector in which each quantum number in
+  // `fixed` has a fixed total: a product that changes one of these totals maps
+  // the sector out of itself, so it is dropped. Returns, for each quantum
+  // number in `fixed`, how many of the dropped products change it.
+  std::map<std::string, std::size_t> project(const std::set<std::string>& fixed)
+  {
+    std::map<std::string, std::size_t> dropped;
+    std::vector<product_type> kept;
+    nonconserved.clear();
+    for (std::size_t p = 0; p < products.size(); ++p) {
+      bool drop = false;
+      for (std::set<std::string>::const_iterator q = fixed.begin(); q != fixed.end(); ++q) {
+        typename std::map<std::string, half_integer<int> >::const_iterator c = products[p].change.find(*q);
+        if (c != products[p].change.end() && c->second != half_integer<int>(0)) {
+          drop = true;
+          ++dropped[*q];
+        }
+      }
+      if (drop)
+        continue;
+      kept.push_back(products[p]);
+      add_nonconserved(products[p]);
+    }
+    products.swap(kept);
+    rows_.clear();
+    return dropped;
+  }
+
+  void add_nonconserved(const product_type& p)
+  {
+    for (typename std::map<std::string, half_integer<int> >::const_iterator c = p.change.begin(); c != p.change.end(); ++c)
+      if (c->second != half_integer<int>(0))
+        nonconserved.insert(c->first);
+  }
 
   // number of rows (input tuples); 0 if the term has no nonzero product
   std::size_t size() const
@@ -514,9 +552,9 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
   for (std::size_t t = 0; t < products.size(); ++t) {
     typename nsite_matrix<T>::product_type prod;
     prod.coef = products[t].coef;
+    prod.source = t;
 
     bool zero = false;
-    std::map<std::string, half_integer<int> > change;   // total over the roles
     for (std::size_t r = 0; r < n && !zero; ++r) {
       if (products[t].ops[r].empty()) {
         prod.ops.push_back(-1);
@@ -535,15 +573,16 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
         it = built.insert(std::make_pair(key, int(mat.locals.size()) - 1)).first;
       }
       prod.ops.push_back(it->second);
-      // the change of each quantum number on this role, read off one nonzero element
+      // the change of each quantum number on this role, read off one nonzero
+      // element: a product of site operators changes each by a fixed amount
       const typename nsite_matrix<T>::local_type& local = mat.locals[it->second];
       zero = true;
       for (std::size_t i = 0; i < local.size() && zero; ++i)
         if (!local[i].empty()) {
           zero = false;
           for (std::size_t q = 0; q < bases[r].size(); ++q)
-            change[bases[r][q].name()] += get_quantumnumber(states[r][local[i][0].first], q)
-                                          - get_quantumnumber(states[r][i], q);
+            prod.change[bases[r][q].name()] += get_quantumnumber(states[r][local[i][0].first], q)
+                                               - get_quantumnumber(states[r][i], q);
         }
     }
     if (zero)
@@ -551,12 +590,26 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
     if (products[t].odd)
       boost::throw_exception(std::runtime_error("n-site term contains an odd number of fermion operators: "
                                                 + products[t].text));
-    for (std::map<std::string, half_integer<int> >::const_iterator c = change.begin(); c != change.end(); ++c)
-      if (c->second != half_integer<int>(0))
-        mat.nonconserved.insert(c->first);
+    mat.add_nonconserved(prod);
     mat.products.push_back(prod);
   }
   return mat;
+}
+
+// The note printed when PROJECT_NSITE_TERMS drops products of the n-site term
+// on groups of the given type: `dropped` of `total` products, and how many of
+// them change each fixed quantum number.
+inline std::string nsite_projection_note(unsigned int type, std::size_t dropped, std::size_t total,
+                                         const std::map<std::string, std::size_t>& by_quantumnumber)
+{
+  std::ostringstream msg;
+  msg << "Note: PROJECT_NSITE_TERMS drops " << dropped << " of " << total
+      << " products of the <NSITETERM> on n-site groups of type " << type
+      << ", which change the fixed total of";
+  for (std::map<std::string, std::size_t>::const_iterator q = by_quantumnumber.begin(); q != by_quantumnumber.end(); ++q)
+    msg << (q == by_quantumnumber.begin() ? " " : ", ") << q->first << " (" << q->second << ")";
+  msg << ".\n";
+  return msg.str();
 }
 
 // A term that changes a quantum number whose range is capped by a parameter

@@ -117,6 +117,8 @@ private:
   std::vector<std::string> quantumnumber_names;
   std::vector<bool> conserved_quantumnumber;
   std::vector<half_integer_type> conserved_quantumnumber_value;
+  bool project_nsite_terms;
+  std::set<unsigned int> noted_projection;   // n-site group types
   int qnmask;
 
   dmtk::System<value_type > system;
@@ -216,7 +218,9 @@ void DMRGTask<value_type>::define_parameters(alps::params& parameters)
             .define<bool>("SAVE_MPS", false, "save the final state as an MPS")
             .define<int>("NUM_WARMUP_STATES", 20, "states kept in the warmup")
             .define<long>("SEED", 0, "seed of the random Lanczos start vectors")
-            .define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers fixed by <name>_total");
+            .define<std::string>("CONSERVED_QUANTUMNUMBERS", "", "quantum numbers fixed by <name>_total")
+            .define<bool>("PROJECT_NSITE_TERMS", false,
+                          "drop the products of n-site terms that change a quantum number fixed by <name>_total");
   // without them, the number of states alone sets the truncation and the
   // Lanczos tolerance is DMTK's
   if (parameters.supplied("TRUNCATION_ERROR"))
@@ -268,6 +272,7 @@ void DMRGTask<value_type>::init()
   start_iter = settings["START_ITER"].as<int>();
   verbose = settings["VERBOSE"].as<int>();
   save_mps = settings["SAVE_MPS"].as<bool>();
+  project_nsite_terms = settings["PROJECT_NSITE_TERMS"].as<bool>();
   checkpoint.configure(settings);
 
   // read number of states
@@ -991,6 +996,8 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
 // A term with an odd number of fermion operators is refused (building the
 // local table checks it), and so is a term that changes the total of any
 // quantum number, conserved or not: dmrg gives wrong energies for those.
+// With PROJECT_NSITE_TERMS, the products that change a quantum number fixed by
+// <name>_total are dropped first.
 template<class value_type>
 std::vector<alps::nsite_product<value_type> >
 DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p)
@@ -999,11 +1006,27 @@ DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::
   for (std::size_t r = 0; r < p.sites.size(); ++r)
     bases.push_back(basis().site_basis(site_type(p.sites[r])));
   alps::nsite_matrix<value_type> mat = op.template matrix<value_type>(bases,parms);
+  if (project_nsite_terms) {
+    std::set<std::string> fixed;
+    for (std::size_t q = 0; q < quantumnumber_names.size(); ++q)
+      if (conserved_quantumnumber[q])
+        fixed.insert(quantumnumber_names[q]);
+    const std::size_t total = mat.products.size();
+    std::map<std::string,std::size_t> dropped = mat.project(fixed);
+    if (mat.products.size() != total && noted_projection.insert(p.type).second)
+      std::cerr << alps::nsite_projection_note(p.type, total - mat.products.size(), total, dropped);
+  }
   if (!mat.nonconserved.empty())
     throw std::runtime_error("<NSITETERM> on n-site groups of type "
       + std::to_string(p.type) + " changes the total " + *mat.nonconserved.begin()
-      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag.");
-  return op.template split<value_type>(bases,parms);
+      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag"
+      + (project_nsite_terms ? "." : ", or fix " + *mat.nonconserved.begin() + " with CONSERVED_QUANTUMNUMBERS and "
+         + *mat.nonconserved.begin() + "_total and set PROJECT_NSITE_TERMS=1 to drop the products that change it."));
+  std::vector<alps::nsite_product<value_type> > products = op.template split<value_type>(bases,parms);
+  std::vector<alps::nsite_product<value_type> > kept;
+  for (std::size_t t = 0; t < mat.products.size(); ++t)
+    kept.push_back(products[mat.products[t].source]);
+  return kept;
 }
 
 // One dmtk term per product of the n-site term: coef * O_0 * O_1 * ... in

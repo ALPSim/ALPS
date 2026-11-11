@@ -31,6 +31,7 @@
 #include <iostream>
 #include <limits>
 #include <map>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -239,6 +240,7 @@ protected:
   void build() const;
   void build_basis() const;
   void warn_if_cutoff(const nsite_matrix<value_type>& mat, const nsite_group& p) const;
+  void project(nsite_matrix<value_type>& mat, const nsite_group& p) const;
   void check_sector(const state_type& state, const state_type& newstate,
                     const std::string& term, const std::vector<std::size_t>& sites) const;
 
@@ -250,6 +252,7 @@ private:
   mutable bool built_matrix_;
   mutable bool built_basis_;
   mutable bool warned_cutoff_;
+  mutable std::set<unsigned int> noted_projection_;   // n-site group types
   // true while build() fills the Hamiltonian; operator_matrix() for
   // measurements leaves it false
   mutable bool building_hamiltonian_;
@@ -332,6 +335,21 @@ void hamiltonian_matrix<M,G>::warn_if_cutoff(const nsite_matrix<value_type>& mat
   }
 }
 
+// PROJECT_NSITE_TERMS: drop the products of an n-site term that change a
+// quantum number the basis fixes, and say so once per n-site group type.
+template <class M, class G>
+void hamiltonian_matrix<M,G>::project(nsite_matrix<value_type>& mat, const nsite_group& p) const
+{
+  const typename basis_descriptor_type::constraints_type& constraints = basis_.get_basis().constraints();
+  std::set<std::string> fixed;
+  for (std::size_t c=0;c<constraints.size();++c)
+    fixed.insert(constraints[c].first);
+  const std::size_t total = mat.products.size();
+  std::map<std::string,std::size_t> dropped = mat.project(fixed);
+  if (mat.products.size()!=total && noted_projection_.insert(p.type).second)
+    std::cerr << nsite_projection_note(p.type,total-mat.products.size(),total,dropped);
+}
+
 // A term of the Hamiltonian took a basis state to a state that is not in the
 // basis. With momentum sectors this also happens for states whose orbit has
 // zero norm in the sector; those elements are dropped. If instead the term
@@ -364,7 +382,10 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
         msg << " " << sites[r];
       msg << " changes " << qn << ", which the basis fixes in this sector (" << qn << " = "
           << value << " = " << constraints[c].second << "). Remove " << qn
-          << " from CONSERVED_QUANTUMNUMBERS and leave " << value << " undefined.";
+          << " from CONSERVED_QUANTUMNUMBERS and leave " << value << " undefined";
+      if (term.compare(0,10,"<NSITETERM")==0)
+        msg << ", or set PROJECT_NSITE_TERMS=1 to drop the products of the term that change " << qn;
+      msg << ".";
       boost::throw_exception(std::runtime_error(msg.str()));
     }
   }
@@ -592,6 +613,8 @@ void hamiltonian_matrix<M,G>::apply_operator(const GlobalOperator& op, const V& 
       nsite_matrix<value_type> mat;
       if (!term.term().empty()) {
         mat = local_matrix(term,p);
+        if (building_hamiltonian_ && static_cast<bool>(parms.value_or_default("PROJECT_NSITE_TERMS",false)))
+          project(mat,p);
         warn_if_cutoff(mat,p);
       }
       it = cache.insert(std::make_pair(key,mat)).first;
