@@ -29,6 +29,7 @@
 #include <alps/ngs/make_parameters_from_deprecated.hpp>
 
 #include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/archive/tmpdir.hpp>
 #include <boost/foreach.hpp>
@@ -402,6 +403,9 @@ void DMRGTask<value_type>::dostep()
         boost::throw_exception(std::runtime_error("The Hamiltonian changes the fermionic quantum number " + name
           + ". dmrg supports only Hamiltonians that conserve every fermionic quantum number; use fulldiag or sparsediag."));
     }
+    std::cerr << "Warning: the Hamiltonian changes " << boost::algorithm::join(changed, ", ")
+              << ", so dmrg does not label its states by "
+              << (changed.size() == 1 ? "it" : "them") << ".\n";
     build_hamiltonian(changed);
   }
 
