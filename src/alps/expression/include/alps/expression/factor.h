@@ -57,6 +57,8 @@ public:
   Evaluatable<T>* clone() const { return new SimpleFactor<T>(*this); }
   void partial_evaluate(const Evaluator<T>& =Evaluator<T>(), bool=false);
   bool is_single_term() const { return term_ ? term_->is_single_term() : false; }
+  // the number, symbol, function or parenthesized expression this factor holds
+  const Evaluatable<T>* evaluatable() const { return term_.get(); }
   Term<T> term() const { return term_ ? term_->term() : Term<T>(); }
   bool depends_on(const std::string& s) const
   {
@@ -94,6 +96,7 @@ public:
     return super_type::depends_on(s) || power_.depends_on(s);
   }
   bool unit_power() const { return power_.can_evaluate() && power_.value() ==1.;}
+  const SimpleFactor<T>& power() const { return power_; }
   bool is_single_term() const { return super_type::is_single_term() && unit_power(); }
 
 private:

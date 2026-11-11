@@ -12,6 +12,7 @@ name: CI
         default: false
 permissions:
   contents: read
+  packages: read   # CI images on ghcr.io (.github/ci-images)
 # Change detection on push diffs against github.event.before only, so a
 # cancelled master run would leave its commits untested. Cancel PR runs only.
 concurrency:
@@ -27,6 +28,8 @@ jobs:
       static_key: ${{ steps.fp.outputs.static_key }}
       linux_run: ${{ steps.decide.outputs.linux_run }}
       linux_key: ${{ steps.fp.outputs.linux_key }}
+      platforms_run: ${{ steps.decide.outputs.platforms_run }}
+      platforms_key: ${{ steps.fp.outputs.platforms_key }}
       mpi_run: ${{ steps.decide.outputs.mpi_run }}
       mpi_key: ${{ steps.fp.outputs.mpi_key }}
       macos_run: ${{ steps.decide.outputs.macos_run }}
@@ -66,6 +69,13 @@ jobs:
       with:
         path: .ci-passed
         key: pass-linux-${{ steps.fp.outputs.linux_key }}
+        lookup-only: true
+    - id: pass_platforms
+      if: steps.fp.outputs.platforms_key != ''
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: .ci-passed
+        key: pass-platforms-${{ steps.fp.outputs.platforms_key }}
         lookup-only: true
     - id: pass_mpi
       if: steps.fp.outputs.mpi_key != ''
@@ -112,6 +122,9 @@ jobs:
         AFFECTED_LINUX: ${{ steps.fp.outputs.linux_affected }}
         KEY_LINUX: ${{ steps.fp.outputs.linux_key }}
         HIT_LINUX: ${{ steps.pass_linux.outputs.cache-hit }}
+        AFFECTED_PLATFORMS: ${{ steps.fp.outputs.platforms_affected }}
+        KEY_PLATFORMS: ${{ steps.fp.outputs.platforms_key }}
+        HIT_PLATFORMS: ${{ steps.pass_platforms.outputs.cache-hit }}
         AFFECTED_MPI: ${{ steps.fp.outputs.mpi_affected }}
         KEY_MPI: ${{ steps.fp.outputs.mpi_key }}
         HIT_MPI: ${{ steps.pass_mpi.outputs.cache-hit }}
@@ -132,7 +145,7 @@ jobs:
     name: Static and helper checks
     needs: changes
     if: needs.changes.outputs.static_run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -146,6 +159,8 @@ jobs:
         cache-dependency-path: .github/workflows/ci.yml
     - name: Lint workflows and shell helpers
       run: |
+        # GitHub's images ship shellcheck; the IFT runner VMs do not.
+        command -v shellcheck >/dev/null || { sudo apt-get update && sudo apt-get install -y shellcheck; }
         curl --fail --location --retry 3 --connect-timeout 30 --max-time 300 \
           https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
           -o "$RUNNER_TEMP/actionlint.tar.gz"
@@ -182,7 +197,7 @@ jobs:
   linux:
     needs: changes
     if: needs.changes.outputs.linux_run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: gcc
@@ -250,10 +265,126 @@ jobs:
       with:
         path: .ci-passed
         key: pass-linux-${{ needs.changes.outputs.linux_key }}
+  platforms:
+    name: ${{ matrix.image }} / ${{ matrix.cc }}
+    needs: changes
+    if: needs.changes.outputs.platforms_run == 'true'
+    # Fork pull requests run on GitHub's machines, everything else on the IFT runner VMs.
+    # Setting the repo variable IFT_RUNNERS to 'off' sends every job to GitHub's machines,
+    # for when no workstation is free (here and in compatibility.yml, ci-images.yml, _wheels.yml).
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
+    container:
+      image: ghcr.io/alpsim/alps-ci:${{ matrix.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - image: ubuntu-22.04
+          cc: gcc-11
+          cxx: g++-11
+        - image: ubuntu-22.04
+          cc: clang-15
+          cxx: clang++-15
+        - image: debian-12
+          cc: gcc-12
+          cxx: g++-12
+        - image: debian-12
+          cc: clang-16
+          cxx: clang++-16
+        - image: ubuntu-24.04
+          cc: gcc-14
+          cxx: g++-14
+        - image: ubuntu-24.04
+          cc: clang-19
+          cxx: clang++-19
+        - image: rocky-9
+          cc: /opt/rh/gcc-toolset-13/root/usr/bin/gcc
+          cxx: /opt/rh/gcc-toolset-13/root/usr/bin/g++
+        - image: rocky-9
+          cc: clang
+          cxx: clang++
+        - image: fedora
+          cc: gcc
+          cxx: g++
+        - image: fedora
+          cc: clang
+          cxx: clang++
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      CMAKE_C_COMPILER_LAUNCHER: ccache
+      CMAKE_CXX_COMPILER_LAUNCHER: ccache
+      CCACHE_MAXSIZE: 256M
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - name: Identify compiler and dependencies
+      id: toolchain
+      run: |
+        # In a container job, github.workspace is the host's path. GITHUB_WORKSPACE is the
+        # container's, where the cache steps restore and save _build/ccache.
+        echo "CCACHE_DIR=$GITHUB_WORKSPACE/_build/ccache" >> "$GITHUB_ENV"
+        { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
+        echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+        "$CXX" --version | head -1
+    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      id: cache
+      with:
+        path: _build/ccache
+        key: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-
+    - name: Build and test native code
+      run: |
+        cmake --preset dev -B _build/ci \
+          -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+        cmake --build _build/ci
+        ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
+    - name: Compiler cache statistics
+      if: always()
+      run: ccache --show-stats
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: '!cancelled() && steps.cache.outcome == ''success'' && !github.event.pull_request.head.repo.fork'
+      with:
+        path: _build/ccache
+        key: ${{ steps.cache.outputs.cache-primary-key }}
+    - name: Summarize tests
+      run: python .github/scripts/junit_summary.py '_build/ci/*.xml'
+      if: always()
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: always()
+      with:
+        name: native-${{ matrix.image }}-${{ strategy.job-index }}
+        path: |
+          _build/ci/*.xml
+          _build/ci/Testing/Temporary/**
+  platforms_pass:
+    name: Record platform matrix pass
+    needs:
+    - changes
+    - platforms
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+    - name: Record pass marker
+      if: needs.changes.outputs.platforms_key != ''
+      run: mkdir -p .ci-passed && echo "$KEY" > .ci-passed/key
+      env:
+        KEY: ${{ needs.changes.outputs.platforms_key }}
+    - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      if: needs.changes.outputs.platforms_key != ''
+      with:
+        path: .ci-passed
+        key: pass-platforms-${{ needs.changes.outputs.platforms_key }}
   mpi:
     needs: changes
     if: needs.changes.outputs.mpi_run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: clang-18
@@ -363,7 +494,7 @@ jobs:
     name: Native debug build with assertions
     needs: changes
     if: needs.changes.outputs.debug_run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
       CC: gcc
@@ -435,12 +566,12 @@ jobs:
     name: Native address and undefined behavior sanitizers
     needs: changes
     if: needs.changes.outputs.sanitizers_run == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 60
     env:
       CC: clang-18
       CXX: clang++-18
-      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '2' || '8' }}  # ASan: more memory per process
       ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
       UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
     steps:
@@ -517,6 +648,7 @@ jobs:
     - changes
     - static
     - linux
+    - platforms
     - mpi
     - macos
     - debug
@@ -538,7 +670,7 @@ defaults:
   run:
     shell: bash
 env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '4' || '16' }}  # IFT runner VMs: 8 vCPUs, oversubscribed 2x; GitHub's: 4
   CTEST_PARALLEL_LEVEL: 2
   CMAKE_GENERATOR: Ninja
   ALPS_DIR: ${{ github.workspace }}/_build/ci/install/share/alps

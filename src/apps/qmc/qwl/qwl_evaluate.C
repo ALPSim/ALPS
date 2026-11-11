@@ -169,7 +169,8 @@ try {
 #endif
  
   if (alps::handle_cli_information(argc, argv, "qwl", [&] {
-    std::cout << "Usage: " << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile [inputfile ...]\n";
+    std::cout << "Usage: " << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile [inputfile ...]\n"
+              << "Results are per site and have no error bars.\n";
   })) return 0;
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);

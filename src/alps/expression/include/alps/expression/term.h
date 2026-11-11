@@ -136,7 +136,7 @@ void Term<T>::remove_superfluous_parentheses()
   std::vector<Factor<T> > s;
   for (typename std::vector<Factor<T> >::iterator it = terms_.begin();
        it != terms_.end(); ++it) {
-    if (it->is_single_term()) {
+    if (it->is_single_term() && !it->is_inverse()) {
       Term<T> t = it->term();
       if (t.is_negative()) negate();
       std::copy(t.factors().first, t.factors().second,
@@ -254,6 +254,8 @@ void Term<T>::output(std::ostream& os) const
   }
   if(is_negative())
     os << " - ";
+  if (terms_[0].is_inverse())
+    os << "1 / ";
   terms_[0].output(os);
   for (unsigned int i=1;i<terms_.size();++i) {
     os << " " << (terms_[i].is_inverse() ? "/" : "*") << " ";

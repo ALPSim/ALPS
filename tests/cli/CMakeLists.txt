@@ -32,4 +32,10 @@ if(Python_Interpreter_FOUND)
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_p2h5.py" "$<TARGET_FILE:p2h5>")
     set_tests_properties(p2h5_cli PROPERTIES TIMEOUT 60 LABELS "cli")
   endif()
+  if(TARGET spinmc)
+    add_test(NAME spinmc_nonsymmetric_coupling
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"
+        "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(spinmc_nonsymmetric_coupling PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
+  endif()
 endif()

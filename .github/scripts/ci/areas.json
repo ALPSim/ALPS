@@ -55,6 +55,20 @@
       ],
       "strip_comments": true
     },
+    "platforms": {
+      "paths": [
+        "src/**",
+        "legacy/**",
+        "third_party/**",
+        "tutorials/**",
+        "tests/**",
+        "python/**",
+        ".github/scripts/test-editable-bindings.sh",
+        ".github/scripts/run_with_timeout.py",
+        ".github/ci-images/**"
+      ],
+      "strip_comments": true
+    },
     "mpi": {
       "paths": [
         "src/**",
