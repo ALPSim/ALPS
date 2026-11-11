@@ -73,17 +73,10 @@ TEST(CommandLine, MonteCarloOptions) {
     rejects<alps::cli::error>({"a", "b", "c", "d"},
             "Extra positional filename is rejected");
 
-#ifndef ALPS_NGS_SINGLE_THREAD
-    ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "--threaded"}).type == alps::mcoptions::THREADED)) << "Threaded execution option";
-#else
     rejects<alps::cli::error>({"sample.h5", "--threaded"},
-            "Single-thread build rejects threaded execution");
-#endif
+            "Removed --threaded option is rejected");
 #ifdef ALPS_HAVE_MPI
     ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "--mpi"}).type == alps::mcoptions::MPI)) << "MPI execution option";
-#ifndef ALPS_NGS_SINGLE_THREAD
-    ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "--mpi", "--threaded"}).type == alps::mcoptions::HYBRID)) << "Combined MPI and threaded execution";
-#endif
 #else
     rejects<alps::cli::error>({"sample.h5", "--mpi"},
             "Serial build rejects MPI execution");

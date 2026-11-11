@@ -27,9 +27,6 @@ namespace alps {
         cli::options desc("Allowed options");
         desc.flag("help", "produce help message")
             .flag("single", "run single process")
-            #ifndef ALPS_NGS_SINGLE_THREAD
-                .flag("threaded", "run in multithread environment")
-            #endif
             #ifdef ALPS_HAVE_MPI
                 .flag("mpi", "run in parallel using MPI")
             #endif
@@ -44,15 +41,7 @@ namespace alps {
         valid = true;
         if (input_file.empty())
             throw std::invalid_argument("No job file specified" + ALPS_STACKTRACE);
-        if (desc.count("threaded") && desc.count("mpi"))
-            type = HYBRID;
-        else if (desc.count("threaded"))
-            #ifdef ALPS_NGS_SINGLE_THREAD
-                throw std::logic_error("Not build with multithread support" + ALPS_STACKTRACE);
-            #else
-                type = THREADED;
-            #endif
-        else if (desc.count("mpi")) {
+        if (desc.count("mpi")) {
             type = MPI;
             #ifndef ALPS_HAVE_MPI
                 throw std::logic_error("Not build with MPI" + ALPS_STACKTRACE);

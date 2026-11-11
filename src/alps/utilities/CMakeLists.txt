@@ -61,7 +61,6 @@ target_sources(alps_utilities PUBLIC
     include/alps/lambda.hpp
     include/alps/ngs/config.hpp
     include/alps/ngs/hash.hpp
-    include/alps/ngs/mutex.hpp
     include/alps/ngs/sleep.hpp
     include/alps/stringvalue.h
     include/alps/testing/fp_compare.hpp

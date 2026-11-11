@@ -72,7 +72,7 @@ options::option& options::find(const std::string& name) {
 }
 
 std::size_t options::count(const std::string& name) const {
-  // An option that a build does not declare (--mpi, --threaded) was not given.
+  // An option that a build does not declare (--mpi) was not given.
   for (const option& opt : options_)
     if (opt.name == name) return opt.seen;
   return 0;
