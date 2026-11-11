@@ -1,8 +1,8 @@
 # n-site terms
 
 Terms acting on more than two sites. Supported by exact diagonalization
-(`fulldiag`, `sparsediag`). Other applications refuse a model that has
-n-site terms on a lattice that has n-site groups.
+(`fulldiag`, `sparsediag`) and by `dmrg`. Other applications refuse a model
+that has n-site terms on a lattice that has n-site groups.
 
 ## Lattice
 
@@ -45,9 +45,14 @@ in order.
 - The term is any operator expression over the site basis operators and the
   bond/site operators of the library, like a `BONDTERM`. The number of roles
   must match the n-site group size. N-site groups may have 2, 3, 4 or more sites.
-- Site operators may not be raised to a power or used as the argument of a
-  function: write `n(i)*n(i)` rather than `n(i)^2`. Such terms are refused
-  with an error.
+- A power of site operators with a nonnegative integer exponent, a number
+  or a parameter, is the repeated product in the written order:
+  `(A+B)^2` is `A*A + A*B + B*A + B*B` and `n(i)^0` is 1. Other exponents are
+  refused with an error, as are site operators used as the argument of a
+  function, such as `sqrt(n(i))`.
+- Dividing by a site operator, as in `1/n(i)` or `n(j)/n(i)`, is refused with
+  an error, also in site and bond terms. Dividing by numbers and parameters
+  works.
 - Without a `type` attribute the term applies to every n-site group type, and `#`
   is replaced by the type, as for site and bond terms. An n-site group type with no
   matching term contributes nothing.
@@ -83,6 +88,22 @@ N <= Nmax = 2. ... check convergence in Nmax.
 Leave `N` out of `CONSERVED_QUANTUMNUMBERS` for such terms. Fixed ranges
 (fermions, hard-core bosons) and ranges set by another quantum number (`Sz` in
 `-S..S`) are not cutoffs and give no warning.
+
+## DMRG
+
+`dmrg` takes the same input. Each product in the term becomes one DMRG term
+with one operator per site; operators that fall into the same block are
+combined and carried along as block operators, as for bond terms between
+distant sites. `dmrg` refuses a term that changes the total of any quantum
+number, whether or not it is in `CONSERVED_QUANTUMNUMBERS`.
+
+- The DMRG site order is the ALPS site order. n-site groups may span any
+  sites, but terms between distant sites need more states for the same
+  accuracy.
+- Every distinct product is a separate term with its own block operators, so
+  the cost grows with the number of products (for a molecular Hamiltonian,
+  O(N^4) in the number of orbitals).
+- `dmrg` needs at least 4 sites, for any model.
 
 ## Export to FCIDUMP
 
