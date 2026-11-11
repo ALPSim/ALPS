@@ -226,7 +226,8 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   else if (parms["UPDATE"]=="local")
     cluster_updates_=false;
   else if (parms["UPDATE"]=="")
-    cluster_updates_ = !alps::is_frustrated(graph(),couplings_det);
+    // the cluster update ignores the field, so it is only a default without one
+    cluster_updates_ = !has_magnetic_field_ && !alps::is_frustrated(graph(),couplings_det);
   else
     boost::throw_exception(std::runtime_error("Illegal update type " + std::string(parms["UPDATE"])));
 
