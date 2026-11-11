@@ -693,7 +693,7 @@ void DMRGTask<value_type>::dostep()
     }
     dmtk::random_state() = at.random_state;
     if (use_vdisk)
-      S.load_vdisk(dmtk::tmp_files.committed_files());
+      S.load_vdisk(checkpoint.committed_files());
     S.resume(sweep, dir, iter);
   } else if(start_sweep != 0) {
     S.resume(start_sweep, start_dir, start_iter);
