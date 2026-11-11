@@ -25,3 +25,16 @@ add_executable(worm_evaluate evaluate.C)
 target_link_libraries(worm PRIVATE worm_impl)
 target_link_libraries(worm_evaluate PRIVATE worm_impl)
 alps_install_applications(worm worm_evaluate)
+
+if(ALPS_BUILD_TESTING AND TARGET parameter2xml AND TARGET convert2xml)
+  add_test(NAME worm_graph_lattice
+    COMMAND ${CMAKE_COMMAND}
+      "-Dworm=$<TARGET_FILE:worm>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dconvert2xml=$<TARGET_FILE:convert2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/graph-lattice"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_lattice.cmake")
+  set_tests_properties(worm_graph_lattice PROPERTIES LABELS "worm" TIMEOUT 120
+    ENVIRONMENT "OMP_NUM_THREADS=1")
+endif()

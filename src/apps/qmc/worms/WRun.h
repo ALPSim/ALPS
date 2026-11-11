@@ -230,6 +230,7 @@ private:
   std::vector<double> site_hamiltonian(const site_descriptor&);
   void print_hamiltonian();
   void create_observables();
+  void measure_winding_numbers();
 
   //- data ---------------------------------------------------
 
