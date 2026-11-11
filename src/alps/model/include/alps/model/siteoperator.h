@@ -162,6 +162,7 @@ SiteOperator::matrix(const SiteBasisDescriptor<I>& b,  const Parameters& p) cons
   // parse expression and store it as sum of terms
   expression::Expression<value_type> ex(term());
   ex.flatten();
+  refuse_operator_in_denominator(ex, std::vector<std::string>(1, site()));
   ex.simplify();
 
   // fill the matrix
@@ -204,6 +205,7 @@ std::vector<boost::tuple<expression::Term<T>,SiteOperator> > alps::SiteOperator:
   std::vector<boost::tuple<expression::Term<T>,SiteOperator> > terms;
   expression::Expression<T> ex(term());
   ex.flatten();
+  refuse_operator_in_denominator(ex, std::vector<std::string>(1, site()));
   ex.simplify();
   SiteBasisDescriptor<short> b;
   for (typename expression::Expression<T>::term_iterator tit = ex.terms().first; tit !=ex.terms().second; ++tit) {
