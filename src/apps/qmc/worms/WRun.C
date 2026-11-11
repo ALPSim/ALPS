@@ -24,9 +24,6 @@ int64_t WRun::make_worm()
     stat[0]+=1.;
     do {
       length++;
-      if(measure_green_function_)
-        measure_green();
-
       // can/should we annihilate the two kinks?
       if(worm_head[0].site()==worm_head[1].site() && random_real()<P_REMOVE) {
         stat[1]+=1.;
