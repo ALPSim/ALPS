@@ -37,6 +37,15 @@ if(TARGET dmrg AND TARGET parameter2xml)
       "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-nsite"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/dmrg_nsite_terms.cmake")
   set_tests_properties(dmrg_nsite_terms PROPERTIES LABELS "dmrg" TIMEOUT 120)
+
+  add_test(NAME dmrg_quantum_number_changes
+    COMMAND ${CMAKE_COMMAND}
+      "-Ddmrg=$<TARGET_FILE:dmrg>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/dmrg-quantum-number-changes"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/dmrg_quantum_number_changes.cmake")
+  set_tests_properties(dmrg_quantum_number_changes PROPERTIES LABELS "dmrg" TIMEOUT 120)
 endif()
 
 add_executable(dmrg_parameters dmrg_parameters.cpp)
