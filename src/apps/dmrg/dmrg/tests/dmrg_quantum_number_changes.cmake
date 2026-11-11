@@ -1,5 +1,5 @@
-# Site and bond terms that change a quantum number of the site basis (issue
-# #296). The reference energies are sparsediag of the same input.
+# Site and bond terms that change a quantum number of the site basis are
+# refused (issue #296): dmtk dropped them without a message.
 file(REMOVE_RECURSE "${test_dir}")
 file(MAKE_DIRECTORY "${test_dir}")
 set(ENV{ALPS_XML_PATH} "${xml_dir}")
@@ -31,56 +31,26 @@ function(run_dmrg name)
   set(output "${out}${err}" PARENT_SCOPE)
 endfunction()
 
-function(check_energy name task expected)
-  file(READ "${test_dir}/${name}.task${task}.out.xml" result)
-  string(REGEX MATCH "<SCALAR_AVERAGE name=\"Energy\"><MEAN>([^<]+)</MEAN>" found "${result}")
-  string(FIND "${CMAKE_MATCH_1}" "${expected}" at)
-  if(NOT found OR NOT at EQUAL 0)
-    message(FATAL_ERROR "${name} task ${task}: E0 = ${CMAKE_MATCH_1}, expected ${expected}...")
+function(expect_refusal name message)
+  run_dmrg(${name})
+  if(status EQUAL 0 OR NOT output MATCHES "${message}")
+    message(FATAL_ERROR "${name}: dmrg did not refuse with \"${message}\":\n${output}")
   endif()
 endfunction()
 
-# Transverse field -Gamma*Sx(i): sparsediag -2.459487861948, -3.482240487823
+# Transverse field -Gamma*Sx(i), as in the issue
 file(WRITE "${test_dir}/field" [=[
 LATTICE="open chain lattice"
 MODEL="spin"
 local_S=1/2
 L=8
-SWEEPS=4
-MAXSTATES=60
-NUMBER_EIGENVALUES=1
-{ Jz=1; Jxy=0; Gamma=0.5; }
+SWEEPS=2
+MAXSTATES=20
 { Jz=1; Jxy=1; Gamma=0.5; }
 ]=])
-run_dmrg(field)
-if(NOT status EQUAL 0)
-  message(FATAL_ERROR "dmrg failed on a transverse field:\n${output}")
-endif()
-if(NOT output MATCHES "Warning: the Hamiltonian changes Sz, so dmrg does not label its states by it")
-  message(FATAL_ERROR "dmrg did not warn that the field changes Sz:\n${output}")
-endif()
-check_energy(field 1 "-2.45948")
-check_energy(field 2 "-3.48224")
+expect_refusal(field "A <SITETERM> changes Sz")
 
-# A bond term that changes Sz by 2: seven Ising bonds along x, E0 = -7/4
-file(WRITE "${test_dir}/xising" [=[
-MODEL_LIBRARY="models.xml"
-LATTICE="open chain lattice"
-MODEL="x Ising"
-local_S=1/2
-L=8
-SWEEPS=4
-MAXSTATES=60
-NUMBER_EIGENVALUES=1
-{}
-]=])
-run_dmrg(xising)
-if(NOT status EQUAL 0)
-  message(FATAL_ERROR "dmrg failed on an Sx*Sx bond term:\n${output}")
-endif()
-check_energy(xising 1 "-1.75")
-
-# The field changes Sz, which CONSERVED_QUANTUMNUMBERS fixes
+# Also with Sz conserved
 file(WRITE "${test_dir}/conserved" [=[
 LATTICE="open chain lattice"
 MODEL="spin"
@@ -92,12 +62,22 @@ CONSERVED_QUANTUMNUMBERS="Sz"
 Sz_total=0
 { Jz=1; Jxy=1; Gamma=0.5; }
 ]=])
-run_dmrg(conserved)
-if(status EQUAL 0 OR NOT output MATCHES "changes Sz, which CONSERVED_QUANTUMNUMBERS fixes")
-  message(FATAL_ERROR "dmrg did not refuse a field that changes the conserved Sz:\n${output}")
-endif()
+expect_refusal(conserved "A <SITETERM> changes Sz")
 
-# A pair field changes Nup and Ndown, which are fermionic
+# A bond term that changes Sz by 2
+file(WRITE "${test_dir}/xising" [=[
+MODEL_LIBRARY="models.xml"
+LATTICE="open chain lattice"
+MODEL="x Ising"
+local_S=1/2
+L=8
+SWEEPS=2
+MAXSTATES=20
+{}
+]=])
+expect_refusal(xising "A <BONDTERM> changes Sz")
+
+# A pair field changes Nup and Ndown
 file(WRITE "${test_dir}/pairs" [=[
 MODEL_LIBRARY="models.xml"
 LATTICE="open chain lattice"
@@ -108,7 +88,26 @@ SWEEPS=2
 MAXSTATES=20
 {}
 ]=])
-run_dmrg(pairs)
-if(status EQUAL 0 OR NOT output MATCHES "changes the fermionic quantum number")
-  message(FATAL_ERROR "dmrg did not refuse a term that changes a fermionic quantum number:\n${output}")
+expect_refusal(pairs "A <SITETERM> changes N")
+
+# A field along z conserves Sz and is kept: sparsediag -3.374932598688
+file(WRITE "${test_dir}/zfield" [=[
+LATTICE="open chain lattice"
+MODEL="spin"
+local_S=1/2
+L=8
+SWEEPS=4
+MAXSTATES=60
+NUMBER_EIGENVALUES=1
+{ Jz=1; Jxy=1; h=0.3; }
+]=])
+run_dmrg(zfield)
+if(NOT status EQUAL 0)
+  message(FATAL_ERROR "dmrg failed on a field along z:\n${output}")
+endif()
+file(READ "${test_dir}/zfield.task1.out.xml" result)
+string(REGEX MATCH "<SCALAR_AVERAGE name=\"Energy\"><MEAN>([^<]+)</MEAN>" found "${result}")
+string(FIND "${CMAKE_MATCH_1}" "-3.37493" at)
+if(NOT found OR NOT at EQUAL 0)
+  message(FATAL_ERROR "Field along z: E0 = ${CMAKE_MATCH_1}, expected -3.37493...")
 endif()
