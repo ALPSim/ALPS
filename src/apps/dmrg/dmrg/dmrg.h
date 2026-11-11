@@ -144,6 +144,10 @@ private:
 
   // SAVE_MPS: final state as tensors [left bond][local state][right bond]
   bool save_mps;
+
+  // SCRATCH_IN_MEMORY: scratch files in memory instead of on disk; they are
+  // checkpointed only on SIGTERM, SIGINT, SIGQUIT, SIGUSR1 or SIGUSR2
+  bool use_vdisk;
   std::vector<std::vector<value_type> > mps_tensors;
   std::vector<std::vector<std::size_t> > mps_shapes;
 
@@ -179,6 +183,13 @@ void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >&
   std::ostringstream note;
   note << "sweep " << at.sweep << "/" << num_sweeps << ", "
        << (at.dir == dmtk::LEFT2RIGHT ? "left-to-right" : "right-to-left") << " iteration " << at.iter;
+  // in-memory files reach the checkpoint only when a signal asks for it
+  if (use_vdisk) {
+    if (!checkpoint.checkpoint_requested())
+      return;
+    std::cout << "ALPS DMRG: writing in-memory files to the checkpoint after " << note.str() << std::endl;
+    S.dump_vdisk();
+  }
   checkpoint.commit(dmrg_checkpoint::write_progress(at, note.str(), iteration_measurements));
 }
 
@@ -233,6 +244,10 @@ void DMRGTask<value_type>::define_parameters(alps::params& parameters)
   if (parameters.supplied("TEMP_DIRECTORY"))
     parameters.define<std::string>("TEMP_DIRECTORY", "directory for scratch files");
   // a run given TEMP_DIRECTORY keeps its files there, as before checkpoints
+  parameters.define<bool>("SCRATCH_IN_MEMORY", false,
+                          "keep the block, density-matrix and wave-function files in memory instead of on disk (no checkpoints)");
+  parameters.define<bool>("RESUME", false,
+                          "resume from the checkpoint of an earlier run of this task");
   parameters.define<bool>("CHECKPOINT", !parameters.supplied("TEMP_DIRECTORY"),
                           "keep the files of a failed run next to the task files to resume from");
 }
@@ -269,6 +284,13 @@ void DMRGTask<value_type>::init()
   verbose = settings["VERBOSE"].as<int>();
   save_mps = settings["SAVE_MPS"].as<bool>();
   checkpoint.configure(settings);
+  if (checkpoint.resume()) {
+    if (!checkpoint.enabled())
+      boost::throw_exception(std::invalid_argument("RESUME=1 needs checkpoints, which CHECKPOINT=0 or TEMP_DIRECTORY turn off"));
+    if (start_sweep != 0)
+      boost::throw_exception(std::invalid_argument("RESUME and START_SWEEP cannot be used together"));
+  }
+  use_vdisk = settings["SCRATCH_IN_MEMORY"].as<bool>();
 
   // read number of states
   nwarmup = settings["NUM_WARMUP_STATES"].as<int>();
@@ -563,8 +585,14 @@ void DMRGTask<value_type>::dostep()
   if(verbose)
     cout << hami.description() << endl;
   if (checkpoint.enabled()) {
-    if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION), infilename))
+    if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION), infilename)) {
+      if (checkpoint.resume())
+        boost::throw_exception(std::runtime_error("RESUME=1, but the checkpoint cannot be used (see above)"));
       use_temporary_directory();
+    }
+    else if (use_vdisk)
+      std::cout << "ALPS DMRG: with SCRATCH_IN_MEMORY=1 a checkpoint is written only on SIGTERM, SIGINT, "
+                   "SIGQUIT, SIGUSR1 or SIGUSR2" << std::endl;
     else if (temp_directory)
       std::cout << "ALPS DMRG: TEMP_DIRECTORY is not used while checkpoints are on; set CHECKPOINT=0 to use it" << std::endl;
   }
@@ -573,6 +601,7 @@ void DMRGTask<value_type>::dostep()
   this->system = dmtk::System<value_type >(hami,l,"ALPS");
   dmtk::System<value_type > &S = this->system;
   S.set_store_products(false);
+  S.set_use_vdisk(use_vdisk);
   S.signal_connect(handler, dmtk::SYSTEM_SIGNAL_END_ITER, this);
   if(error > 0.0) S.set_error(error, maxstates);
   if(lanczos_tol > 0.0) S.set_lanczos_tolerance(lanczos_tol);
@@ -618,6 +647,8 @@ void DMRGTask<value_type>::dostep()
       parms["SEED"] = seed;
     }
     dmtk::random_state() = at.random_state;
+    if (use_vdisk)
+      S.load_vdisk(dmtk::tmp_files.committed_files());
     S.resume(sweep, dir, iter);
   } else if(start_sweep != 0) {
     S.resume(start_sweep, start_dir, start_iter);
@@ -781,11 +812,9 @@ DMRGTask<value_type>::extract_mps()
   // two-site wave function of the last step
   char file[255];
   snprintf(file, sizeof(file), "gs_%s_%i_l.dat", "ALPS", n);
-  std::ifstream in(dmtk::tmp_files.get_read_filename(file), std::ios::in|std::ios::binary);
-  if (!in)
-    boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: could not read ") + file));
   dmtk::VectorState<value_type > gs;
-  gs.read(in);
+  if (!S.read_file(file, [&](std::istream &in){ gs.read(in); }))
+    boost::throw_exception(std::runtime_error(std::string("SAVE_MPS: could not read ") + file));
   // read() rebuilds the subspaces only when a quantum number is conserved,
   // but the values are stored by subspace in either case (cf. System::read_gs)
   gs.resize(gs.qn_mask());

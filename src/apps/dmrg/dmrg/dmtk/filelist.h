@@ -136,6 +136,14 @@ class FileList {
 
     bool checkpointing() const { return in_entry; }
 
+    // Names of the files of the last commit.
+    std::vector<std::string> committed_files() const
+    {
+      std::vector<std::string> names;
+      for (const auto& entry : _committed) names.push_back(entry.first);
+      return names;
+    }
+
     const char* get_filename(const char* input)
     {
       auto old = _tmp_filenames.find(input);
