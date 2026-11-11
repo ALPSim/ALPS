@@ -5,6 +5,11 @@ target_include_directories(dmrg_temporary_files PRIVATE "${CMAKE_CURRENT_SOURCE_
 target_link_libraries(dmrg_temporary_files PRIVATE ALPS::utilities)
 alps_add_gtest(dmrg_temporary_files COMPONENT dmrg LABELS utilities compatibility)
 
+add_executable(dmrg_checkpoint_files dmrg_checkpoint_files.cpp)
+target_include_directories(dmrg_checkpoint_files PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
+target_link_libraries(dmrg_checkpoint_files PRIVATE ALPS::alps)
+alps_add_gtest(dmrg_checkpoint_files COMPONENT dmrg)
+
 add_executable(dmrg_signals dmrg_signals.cpp)
 target_include_directories(dmrg_signals PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/..")
 target_link_libraries(dmrg_signals PRIVATE ALPS::alps)
