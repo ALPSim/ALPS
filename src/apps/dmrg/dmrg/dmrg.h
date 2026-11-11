@@ -100,6 +100,8 @@ private:
   
   void init();
   void use_temporary_directory();
+  void build_hamiltonian(std::set<std::string> const& unlabeled);
+  std::set<std::string> changed_quantumnumbers() const;
   dmtk::BasicOp<value_type > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
   void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &);
   void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
@@ -360,7 +362,6 @@ void DMRGTask<value_type>::dostep()
     use_temporary_directory();
 
   dmtk::Lattice l(num_sites(),dmtk::OBC);
-  hami = dmtk::Hami<value_type >(l);
   site_block.resize(alps::maximum_vertex_type(graph())+1);
 
 // define quantum numbers first: we need to know which are conserved before we build operators
@@ -386,66 +387,22 @@ void DMRGTask<value_type>::dostep()
     }
   }
 
-//  Iterating over sites: create site blocks
-  for (site_iterator it = sites().first ; it != sites().second ; ++it) {
-    hami.sites(*it) = &site_block[site_type(*it)];
-    site_block[site_type(*it)].clear();
-  }
-
-  // iterate over all ste types
-  for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
-    // create quantum numbers for this site block
-    /*if(conserved_quantumnumber.size() > 0)*/ {
-      for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
-        int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
-      }
+  // dmtk keeps every block Hamiltonian block diagonal in the quantum numbers
+  // of the site basis and drops a term that changes one of them (issue #296).
+  // A quantum number the Hamiltonian changes is left out of the dmtk basis.
+  build_hamiltonian(std::set<std::string>());
+  std::set<std::string> changed = changed_quantumnumbers();
+  if (!changed.empty()) {
+    for (std::string const& name : changed) {
+      std::size_t j = std::find(quantumnumber_names.begin(),quantumnumber_names.end(),name)-quantumnumber_names.begin();
+      if (j < quantumnumber_names.size() && conserved_quantumnumber[j])
+        boost::throw_exception(std::runtime_error("The Hamiltonian changes " + name
+          + ", which CONSERVED_QUANTUMNUMBERS fixes. Remove " + name + " from CONSERVED_QUANTUMNUMBERS."));
+      if (dmtk::QN::qn_index_fermion(dmtk::QN::get_qn_index(name)))
+        boost::throw_exception(std::runtime_error("The Hamiltonian changes the fermionic quantum number " + name
+          + ". dmrg supports only Hamiltonians that conserve every fermionic quantum number; use fulldiag or sparsediag."));
     }
-
-    // create site basis for this block
-    alps::site_basis<short> b(site_basis(type));
-    dmtk::Basis basis(b.size());
-    // iterate over basis states s
-    for (int s=0 ; s<b.size();++s) {
-      dmtk::QN real_qn;
-      // extract values of the quantum numbers
-      for (int qn = 0 ; qn < site_basis(type).size() ; ++qn){
-        if (verbose)
-          std::cout << site_basis(type)[qn].name() << "=" << b[s][qn] << "  ";
-        int idx = dmtk::QN::get_qn_index(site_basis(type)[qn].name()); 
-        if (idx < QN_MAX_SIZE)
-          real_qn[idx] = b[s][qn];
-      }
-      // create the basis state for this block
-      basis[s] = dmtk::State(s,real_qn);
-    }
-    basis.reorder();
-    site_block[type].resize(basis);
-    site_block[type].set_lattice(dmtk::Lattice(1,dmtk::OBC));
-  }
-
-  // create site terms
-  for (site_iterator it = sites().first ; it != sites().second ; ++it)
-    build_site_operator(site_term(site_type(*it)),*it, hami);
-
-  // create bond terms
-  for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
-    build_bond_operator(bond_term(bond_type(*it)),*it, hami);
-
-  // create n-site terms on the n-site groups. The split depends only on the
-  // group type and the site types, so do it once per combination.
-  typedef std::pair<unsigned int,std::vector<int> > nsite_group_key;
-  std::map<nsite_group_key,std::vector<alps::nsite_product<value_type> > > split_cache;
-  for (std::size_t q = 0; q < nsite_groups().size(); ++q) {
-    alps::nsite_group const& p = nsite_groups()[q];
-    alps::NSiteOperator term = model().nsite_term(p.type);
-    if (term.term().empty())
-      continue;
-    nsite_group_key key(p.type,std::vector<int>());
-    for (std::size_t r = 0; r < p.sites.size(); ++r)
-      key.second.push_back(site_type(p.sites[r]));
-    if (split_cache.find(key) == split_cache.end())
-      split_cache[key] = split_nsite_operator(term, p);
-    build_nsite_operator(split_cache[key], term, p, hami);
+    build_hamiltonian(changed);
   }
 
 //-------------------------------------------------------------
@@ -985,6 +942,92 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
     real_t.coef() = tit->template get<0>().value();
     this_hami += real_t;
   }
+}
+
+// The site blocks and the Hamiltonian terms. A quantum number in unlabeled
+// is set to 0 in every basis state.
+template<class value_type>
+void DMRGTask<value_type>::build_hamiltonian(std::set<std::string> const& unlabeled)
+{
+  hami = dmtk::Hami<value_type >(dmtk::Lattice(num_sites(),dmtk::OBC));
+
+//  Iterating over sites: create site blocks
+  for (site_iterator it = sites().first ; it != sites().second ; ++it) {
+    hami.sites(*it) = &site_block[site_type(*it)];
+    site_block[site_type(*it)].clear();
+  }
+
+  // iterate over all ste types
+  for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
+    // create quantum numbers for this site block
+    /*if(conserved_quantumnumber.size() > 0)*/ {
+      for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
+        int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
+      }
+    }
+
+    // create site basis for this block
+    alps::site_basis<short> b(site_basis(type));
+    dmtk::Basis basis(b.size());
+    // iterate over basis states s
+    for (int s=0 ; s<b.size();++s) {
+      dmtk::QN real_qn;
+      // extract values of the quantum numbers
+      for (int qn = 0 ; qn < site_basis(type).size() ; ++qn){
+        if (verbose)
+          std::cout << site_basis(type)[qn].name() << "=" << b[s][qn] << "  ";
+        int idx = dmtk::QN::get_qn_index(site_basis(type)[qn].name()); 
+        if (idx < QN_MAX_SIZE && !unlabeled.count(site_basis(type)[qn].name()))
+          real_qn[idx] = b[s][qn];
+      }
+      // create the basis state for this block
+      basis[s] = dmtk::State(s,real_qn);
+    }
+    basis.reorder();
+    site_block[type].resize(basis);
+    site_block[type].set_lattice(dmtk::Lattice(1,dmtk::OBC));
+  }
+
+  // create site terms
+  for (site_iterator it = sites().first ; it != sites().second ; ++it)
+    build_site_operator(site_term(site_type(*it)),*it, hami);
+
+  // create bond terms
+  for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
+    build_bond_operator(bond_term(bond_type(*it)),*it, hami);
+
+  // create n-site terms on the n-site groups. The split depends only on the
+  // group type and the site types, so do it once per combination.
+  typedef std::pair<unsigned int,std::vector<int> > nsite_group_key;
+  std::map<nsite_group_key,std::vector<alps::nsite_product<value_type> > > split_cache;
+  for (std::size_t q = 0; q < nsite_groups().size(); ++q) {
+    alps::nsite_group const& p = nsite_groups()[q];
+    alps::NSiteOperator term = model().nsite_term(p.type);
+    if (term.term().empty())
+      continue;
+    nsite_group_key key(p.type,std::vector<int>());
+    for (std::size_t r = 0; r < p.sites.size(); ++r)
+      key.second.push_back(site_type(p.sites[r]));
+    if (split_cache.find(key) == split_cache.end())
+      split_cache[key] = split_nsite_operator(term, p);
+    build_nsite_operator(split_cache[key], term, p, hami);
+  }
+}
+
+// The quantum numbers that some Hamiltonian term changes.
+template<class value_type>
+std::set<std::string> DMRGTask<value_type>::changed_quantumnumbers() const
+{
+  std::set<std::string> changed;
+  for (typename dmtk::Hami<value_type >::const_iterator t = hami.begin(); t != hami.end(); ++t) {
+    dmtk::QN dqn;
+    for (typename dmtk::Term<value_type >::const_iterator o = t->begin(); o != t->end(); ++o)
+      dqn += o->dqn;
+    for (std::size_t i = 0; i < dmtk::QN::max_index(); ++i)
+      if (dqn[i] != 0)
+        changed.insert(dmtk::QN::qn_name(i));
+  }
+  return changed;
 }
 
 // Split an n-site term into products of site operators (nsiteoperator.h).
