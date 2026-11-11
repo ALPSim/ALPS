@@ -45,9 +45,14 @@ in order.
 - The term is any operator expression over the site basis operators and the
   bond/site operators of the library, like a `BONDTERM`. The number of roles
   must match the n-site group size. N-site groups may have 2, 3, 4 or more sites.
-- Site operators may not be raised to a power or used as the argument of a
-  function: write `n(i)*n(i)` rather than `n(i)^2`. Such terms are refused
-  with an error.
+- A power of site operators with a nonnegative integer exponent, a number
+  or a parameter, is the repeated product in the written order:
+  `(A+B)^2` is `A*A + A*B + B*A + B*B` and `n(i)^0` is 1. Other exponents are
+  refused with an error, as are site operators used as the argument of a
+  function, such as `sqrt(n(i))`.
+- Dividing by a site operator, as in `1/n(i)` or `n(j)/n(i)`, is refused with
+  an error, also in site and bond terms. Dividing by numbers and parameters
+  works.
 - Without a `type` attribute the term applies to every n-site group type, and `#`
   is replaced by the type, as for site and bond terms. An n-site group type with no
   matching term contributes nothing.

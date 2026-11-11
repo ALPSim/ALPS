@@ -42,6 +42,7 @@
 #include <alps/parameter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
+#include <cmath>
 #include <limits>
 #include <map>
 #include <set>
@@ -341,6 +342,81 @@ private:
 };
 
 
+// Writes each power X^k of a factor that contains a site operator as the
+// product X*X*...*X (k factors, 1 for k = 0) and multiplies out, so
+// (A+B)^2 becomes A*A + A*B + B*A + B*B with the operators in their written
+// order. The splitter replaces each site operator by a sign, so a power left
+// in place would apply the operator once and raise only the sign. The
+// exponent must evaluate to a nonnegative integer. Parentheses around a
+// single product, which flatten() keeps, are removed so that powers inside
+// them are found: ((n(i)^2 + n(j))^2). Expects a flattened expression
+// without divisions by site operators.
+template <class T>
+expression::Expression<T> expand_site_powers(const expression::Expression<T>& ex,
+                                             const std::vector<std::string>& sites, const Parameters& p)
+{
+  typedef expression::Term<T> term_type;
+  typedef typename term_type::factor_iterator factor_iterator;
+  std::vector<term_type> todo(ex.terms().first, ex.terms().second);
+  expression::Expression<T> result;
+  // a term is either kept or rewritten; a rewritten term is flattened and
+  // checked again
+  for (std::size_t t = 0; t < todo.size(); ++t) {
+    const term_type term = todo[t];
+    factor_iterator found = term.factors().second;
+    for (factor_iterator f = term.factors().first; f != term.factors().second && found == term.factors().second; ++f)
+      if (!f->unit_power() || f->is_single_term())
+        for (std::size_t r = 0; r < sites.size(); ++r)
+          if (f->depends_on(sites[r]))
+            found = f;
+    if (found == term.factors().second) {
+      result += term;
+      continue;
+    }
+
+    term_type rewritten;
+    if (term.is_negative())
+      rewritten.negate();
+    if (found->unit_power()) {
+      // (X) with X a single product: splice in the factors of X
+      for (factor_iterator f = term.factors().first; f != term.factors().second; ++f) {
+        if (f != found) {
+          rewritten *= *f;
+          continue;
+        }
+        const term_type inner = f->term();
+        if (inner.is_negative())
+          rewritten.negate();
+        for (factor_iterator g = inner.factors().first; g != inner.factors().second; ++g)
+          rewritten *= *g;
+      }
+    } else {
+      expression::ParameterEvaluator<T> eval(p);
+      expression::SimpleFactor<T> exponent(found->power());
+      double k = -1.;
+      if (exponent.can_evaluate(eval, true))
+        k = expression::evaluate_helper<T>::real(exponent.value(eval, true));
+      if (k < 0. || k != std::floor(k))
+        throw std::runtime_error("n-site term " + expression_text(term)
+          + ": the power " + expression_text(*found) + " of a site operator needs an exponent "
+          "that is a nonnegative integer");
+      for (factor_iterator f = term.factors().first; f != term.factors().second; ++f) {
+        if (f != found)
+          rewritten *= *f;
+        else if (k == 0.)
+          rewritten *= expression::Factor<T>(T(1.));
+        else
+          for (int i = 0; i < int(k); ++i)
+            rewritten *= expression::Factor<T>(static_cast<const expression::SimpleFactor<T>&>(*f));
+      }
+    }
+    expression::Expression<T> flat(rewritten);
+    flat.flatten();
+    todo.insert(todo.end(), flat.terms().first, flat.terms().second);
+  }
+  return result;
+}
+
 template <class T, class I>
 std::vector<nsite_product<T> > NSiteOperator::split(const std::vector<SiteBasisDescriptor<I> >& b, const Parameters& p) const
 {
@@ -359,22 +435,25 @@ std::vector<nsite_product<T> > NSiteOperator::split(const std::vector<SiteBasisD
     parms.copy_undefined(bases[r].get_parameters());
 
   // parse expression and store it as sum of terms
-  expression::Expression<value_type> ex(term());
-  ex.flatten();
+  expression::Expression<value_type> parsed(term());
+  parsed.flatten();
+  refuse_operator_in_denominator(parsed, sites());
+  expression::Expression<value_type> ex = expand_site_powers(parsed, sites(), parms);
   ex.simplify();
+  // expand_site_powers leaves no power of a site operator; a power that got
+  // through would be applied as the operator itself
+  for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit)
+    for (typename expression::Term<value_type>::factor_iterator f = tit->factors().first; f != tit->factors().second; ++f)
+      if (!f->unit_power())
+        for (std::size_t r = 0; r < n; ++r)
+          if (f->depends_on(sites()[r]))
+            throw std::runtime_error("n-site term: the power " + expression_text(*f)
+              + " of a site operator could not be expanded; write the product out, e.g. n(i)*n(i) for n(i)^2");
 
   std::vector<nsite_product<T> > products;
   for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
     NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms, boost::lexical_cast<std::string>(*tit));
     expression::Term<value_type> term(*tit);
-    // The splitter replaces each site operator by a sign, so under a power
-    // the operator would be applied once and only the sign raised.
-    for (typename expression::Term<value_type>::factor_iterator f = term.factors().first; f != term.factors().second; ++f)
-      if (!f->unit_power())
-        for (std::size_t r = 0; r < n; ++r)
-          if (f->depends_on(sites()[r]))
-            boost::throw_exception(std::runtime_error("n-site term: powers of site operators are not supported in "
-              + boost::lexical_cast<std::string>(*f) + "; write the product out, e.g. n(i)*n(i) for n(i)^2"));
     term.partial_evaluate(splitter);
     term.simplify();
     if (!numeric::is_nonzero(term))
