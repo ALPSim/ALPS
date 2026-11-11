@@ -33,9 +33,20 @@ if(Python_Interpreter_FOUND)
     set_tests_properties(p2h5_cli PROPERTIES TIMEOUT 60 LABELS "cli")
   endif()
   if(TARGET spinmc)
+    add_test(NAME scheduler_sweeps_spinmc
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_sweeps.py"
+        "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(scheduler_sweeps_spinmc PROPERTIES TIMEOUT 120 LABELS "cli;scheduler")
     add_test(NAME spinmc_nonsymmetric_coupling
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(spinmc_nonsymmetric_coupling PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
+  endif()
+  if(TARGET qwl AND TARGET qwl_evaluate AND ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
+    add_test(NAME scheduler_qwl_runs_mpi
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_qwl_runs.py"
+        "$<TARGET_FILE:qwl>" "$<TARGET_FILE:qwl_evaluate>" "${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "3" ${MPIEXEC_PREFLAGS})
+    set_tests_properties(scheduler_qwl_runs_mpi PROPERTIES TIMEOUT 300 PROCESSORS 3 LABELS "cli;scheduler;mpi")
   endif()
 endif()
