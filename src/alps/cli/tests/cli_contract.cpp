@@ -2,8 +2,7 @@
 #include <gtest/gtest.h>
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/parseargs.hpp>
-
-#include <boost/program_options/errors.hpp>
+#include <alps/cli/options.hpp>
 
 #include <initializer_list>
 #include <iostream>
@@ -67,17 +66,17 @@ TEST(CommandLine, MonteCarloOptions) {
                 && output.text.str().find("--time-limit") != std::string::npos)) << "Help describes the current grammar";
     }
     rejects<std::invalid_argument>({}, "Missing input is rejected");
-    rejects<boost::program_options::unknown_option>({"sample.h5", "--unknown"},
+    rejects<alps::cli::error>({"sample.h5", "--unknown"},
             "Unknown mcoptions option is rejected");
-    rejects<boost::program_options::invalid_option_value>({"sample.h5", "-T", "not-a-number"},
+    rejects<alps::cli::error>({"sample.h5", "-T", "not-a-number"},
             "Nonnumeric time limit is rejected");
-    rejects<boost::program_options::error>({"a", "b", "c", "d"},
+    rejects<alps::cli::error>({"a", "b", "c", "d"},
             "Extra positional filename is rejected");
 
 #ifndef ALPS_NGS_SINGLE_THREAD
     ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "--threaded"}).type == alps::mcoptions::THREADED)) << "Threaded execution option";
 #else
-    rejects<boost::program_options::unknown_option>({"sample.h5", "--threaded"},
+    rejects<alps::cli::error>({"sample.h5", "--threaded"},
             "Single-thread build rejects threaded execution");
 #endif
 #ifdef ALPS_HAVE_MPI
@@ -86,9 +85,34 @@ TEST(CommandLine, MonteCarloOptions) {
     ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "--mpi", "--threaded"}).type == alps::mcoptions::HYBRID)) << "Combined MPI and threaded execution";
 #endif
 #else
-    rejects<boost::program_options::unknown_option>({"sample.h5", "--mpi"},
+    rejects<alps::cli::error>({"sample.h5", "--mpi"},
             "Serial build rejects MPI execution");
 #endif
+}
+
+// The grammar every ALPS program shares, shown on mcoptions.
+TEST(CommandLine, OptionGrammar) {
+    auto prefix = parse<alps::mcoptions>({"sample.h5", "--time", "5", "--cont"});
+    ASSERT_TRUE((prefix.time_limit == 5 && prefix.resume)) << "A long name may be shortened to a unique prefix";
+    rejects<alps::cli::error>({"sample.h5", "--c"}, "A prefix of both --continue and --checkpoint-file is rejected");
+    rejects<alps::cli::error>({"sample.h5", "--Continue"}, "Option names are case-sensitive");
+
+    auto equals = parse<alps::mcoptions>({"--input-file=sample.h5", "--time-limit=7"});
+    ASSERT_TRUE((equals.input_file == "sample.h5" && equals.time_limit == 7)) << "--name=value";
+    ASSERT_TRUE((parse<alps::mcoptions>({"sample.h5", "-T5"}).time_limit == 5)) << "-T5";
+    auto grouped = parse<alps::mcoptions>({"sample.h5", "-cT5"});
+    ASSERT_TRUE((grouped.resume && grouped.time_limit == 5)) << "Short flags group, and the last may take a value";
+
+    auto ended = parse<alps::mcoptions>({"--", "-c", "--unknown"});
+    ASSERT_TRUE((ended.input_file == "-c" && ended.output_file == "--unknown" && !ended.resume)) << "-- ends the options";
+
+    rejects<alps::cli::error>({"sample.h5", "-c", "-c"}, "A repeated flag is rejected");
+    rejects<alps::cli::error>({"sample.h5", "-T", "5", "--time-limit", "6"}, "A repeated value is rejected");
+    rejects<alps::cli::error>({"sample.h5", "--input-file", "other.h5"}, "Input given both by position and by name is rejected");
+    rejects<alps::cli::error>({"sample.h5", "-T"}, "A missing value is rejected");
+    rejects<alps::cli::error>({"sample.h5", "-T", "-c"}, "A short option is not taken as a value");
+    rejects<alps::cli::error>({"sample.h5", "-T", "-5"}, "A negative time limit is rejected");
+    rejects<alps::cli::error>({"sample.h5", "--continue=1"}, "A flag takes no value");
 }
 
 TEST(CommandLine, LegacyParseargs) {

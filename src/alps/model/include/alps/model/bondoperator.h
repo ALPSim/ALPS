@@ -193,6 +193,10 @@ BondOperator::matrix(const SiteBasisDescriptor<I>& b1,
   // parse expression and store it as sum of terms
   expression::Expression<value_type> ex(term());
   ex.flatten();
+  std::vector<std::string> sites;
+  sites.push_back(source());
+  sites.push_back(target());
+  refuse_operator_in_denominator(ex, sites);
   ex.simplify();
   // fill the matrix
     site_basis<I> states1(basis1);
@@ -238,6 +242,10 @@ std::vector<boost::tuple<expression::Term<T>,SiteOperator,SiteOperator> > alps::
   std::vector<boost::tuple<expression::Term<T>,SiteOperator,SiteOperator> > terms;
   expression::Expression<T> ex(term());
   ex.flatten();
+  std::vector<std::string> sites;
+  sites.push_back(source());
+  sites.push_back(target());
+  refuse_operator_in_denominator(ex, sites);
   ex.simplify();
 
   for (typename expression::Expression<T>::term_iterator tit = ex.terms().first; tit !=ex.terms().second; ++tit) {

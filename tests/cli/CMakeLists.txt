@@ -37,6 +37,10 @@ if(Python_Interpreter_FOUND)
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_sweeps.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(scheduler_sweeps_spinmc PROPERTIES TIMEOUT 120 LABELS "cli;scheduler")
+    add_test(NAME spinmc_nonsymmetric_coupling
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"
+        "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(spinmc_nonsymmetric_coupling PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
   endif()
   if(TARGET qwl AND TARGET qwl_evaluate AND ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
     add_test(NAME scheduler_qwl_runs_mpi
