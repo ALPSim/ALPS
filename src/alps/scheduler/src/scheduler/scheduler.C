@@ -57,6 +57,8 @@ int Scheduler::run() // a slave scheduler
   ProcessList where;
   IMPDump message;
   Parameters param;
+  bool own_task = false; // theTask is a task, not a run of a task on another process
+  bool idle_sent = false;
   
   do {
       // check true
@@ -80,6 +82,7 @@ int Scheduler::run() // a slave scheduler
             message.receive(MCMP_make_slave_task);
             simmaster = message.sender();
             theTask = new SlaveTask(simmaster);
+            own_task = false;
             break;
                   
           case MCMP_make_task:
@@ -87,6 +90,8 @@ int Scheduler::run() // a slave scheduler
             simmaster = message.sender();
             message >> where >> filename;
             theTask = make_task(where,std::filesystem::path(filename));
+            own_task = true;
+            idle_sent = false;
             break;
          
           case MCMP_ready:
@@ -120,8 +125,16 @@ int Scheduler::run() // a slave scheduler
     
     if(terminate&&!theTask)
       return 0; // received stop message and all other messages are processed
-    if(theTask)
+    if(theTask) {
       theTask->run();
+      // tell the master that this task's local run is done, so that it checks
+      // the task now instead of at its next poll
+      if (own_task && !idle_sent && theTask->idle()) {
+        OMPDump notice;
+        notice.send(master, MCMP_task_idle);
+        idle_sent = true;
+      }
+    }
     else
     std::this_thread::sleep_for(std::chrono::seconds(1));
   } while(true) ;// forever
