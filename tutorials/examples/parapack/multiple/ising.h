@@ -95,7 +95,8 @@ public:
     ++mcs_;
 
     for (int i = 0; i < loclen_; ++i) {
-      double diff = coupling_ * (4 * ((spins_[i-1] ^ spins_[i]) + (spins_[i] ^ spins_[i+1])) - 4);
+      // energy change of flipping spin i for -J s_i s_j (the XOR is 1 for an antiparallel pair)
+      double diff = coupling_ * (4 - 4 * ((spins_[i-1] ^ spins_[i]) + (spins_[i] ^ spins_[i+1])));
       if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) spins_[i] ^= 1;
       if (i == 0) copy2left();
       if (i == loclen_ - 1) copy2right();
@@ -105,7 +106,7 @@ public:
     energy_ = 0;
     double mag = 0;
     for (int i = 0; i < loclen_; ++i) {
-      energy_ -= coupling_ * (2 * (spins_[i] ^ spins_[i+1]) - 1);
+      energy_ += coupling_ * (2 * (spins_[i] ^ spins_[i+1]) - 1);
       mag += (2 * spins_[i] - 1);
     }
     double local[2] = {energy_, mag}, total[2];
