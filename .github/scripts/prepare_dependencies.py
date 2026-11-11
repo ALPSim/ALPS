@@ -42,7 +42,12 @@ def prepare_boost(version: str, destination: Path):
             raise ValueError(f'Checksum mismatch for Boost {version}')
         source = Path(temporary) / 'source'
         with tarfile.open(archive) as package:
-            package.extractall(source, filter='data')
+            if hasattr(tarfile, 'data_filter'):
+                package.extractall(source, filter='data')
+            else:
+                # Python without extraction filters (Debian 12's 3.11.2): the archive's
+                # checksum was verified against the pinned value above.
+                package.extractall(source)  # noqa: S202
         extracted, = source.iterdir()
         subprocess.run(['bash', str(ROOT / '.github/scripts/build-boost.sh'), str(extracted), str(destination.resolve())], check=True)
     stamp.write_text(fingerprint)

@@ -11,9 +11,9 @@
  *****************************************************************************/
 
 #include <alps/solvers.hpp>
-#include <alps/hdf5/archive.hpp>
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/params.hpp>
+#include <alps/parameter_input.hpp>
 #include <iostream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
@@ -30,11 +30,7 @@ int main(int argc, char** argv) {
   try {
     alps::mcoptions options(argc, argv, "interaction");
     if (!options.valid) return 0;
-    alps::params parms;
-    {
-      alps::hdf5::archive input(options.input_file, alps::hdf5::archive::READ);
-      input["/parameters"] >> parms;
-    }
+    alps::params parms = alps::read_params_file(options.input_file);
     if (options.time_limit != 0)
       throw std::invalid_argument("time limit is passed in the parameter file!");
     if (!parms.supplied("MAX_TIME"))

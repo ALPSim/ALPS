@@ -1,0 +1,14 @@
+case                                              dim   |<exact|MPS>|  max|dpsi|  <H>_MPS-E0  E_dmrg-E0
+fermions: 2x3 Hubbard + pair term (2,2)           225  1.000000000000    7.9e-11     0.0e+00    8.9e-16
+fermions: 2x3 Hubbard + demo term (2,1)            90  1.000000000000    2.0e-13     0.0e+00    8.9e-16
+fermions: 2x4 Hubbard + pair term (3,3)          3136  1.000000000000    1.3e-11    -6.2e-15   -5.3e-15
+fermions: random 4-op + 6-op terms (2,1)           90  1.000000000000    1.7e-14    -1.8e-15   -3.6e-15
+fermions: random 4-op + 6-op terms (3,2)          300  1.000000000000    1.5e-10    -1.8e-15    5.3e-15
+fermions: random 4-op + 6-op terms (3,3)          400  1.000000000000    7.1e-09    -7.1e-15   -1.1e-14
+bosons: Moore-Read N=6 2S=4 (3-body, 6 ops)       210  1.000000000000    7.6e-12     2.0e-14    1.9e-14
+bosons: Moore-Read N=8 2S=6 (3-body, 6 ops)      3003  1.000000000000    2.1e-09     9.2e-14    9.4e-14
+bosons: 2x3 Bose-Hubbard + ring hop, N=3, Nmax=2     50  1.000000000000    3.9e-16     1.2e-14    1.2e-14
+bosons: 2x3 Bose-Hubbard + ring hop, N=5, Nmax=2    126  1.000000000000    3.5e-15    -3.6e-15   -4.4e-15
+spins: S=1/2 2x4 ladder + 4-spin ring exchange     70  1.000000000000    6.0e-15     0.0e+00   -1.8e-15
+spins: S=1 chain L=6 + 3-site (Si.Sj)(Sj.Sk)      141  1.000000000000    1.4e-14    -1.8e-15    0.0e+00
+ALL OK

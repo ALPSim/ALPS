@@ -170,3 +170,13 @@ TEST(ParamsLegacyAdapters, XmlExpressionsAreEvaluated) {
     EXPECT_EQ(from_xml.supplied_text(), supplied);
     std::filesystem::remove(xml);
 }
+
+TEST(ParamsLegacyAdapters, TextWithoutParametersOrMalformedIsRejected) {
+    alps::testing::TemporaryDirectory temporary;
+    const std::filesystem::path text(temporary.path() / "parm");
+    for (const char *contents : {"", "\n\n   \n", "// nothing\n/* here */\n", "= 3", "L 3", "L = two words",
+                                 "L = \"open", "1L = 3", "L = 4; ; BETA = 2"}) {
+        std::ofstream(text) << contents;
+        EXPECT_THROW({ (void)alps::make_parameters_from_file(text); }, std::runtime_error) << contents;
+    }
+}
