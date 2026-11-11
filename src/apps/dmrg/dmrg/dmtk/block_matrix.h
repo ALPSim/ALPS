@@ -164,81 +164,20 @@ class BMatrix: public std::vector<SubMatrix<T> >
 {
   private:
     PackedBasis _subspace;
-    Vector<int> _hash_index;
-    Vector<int> _dqn;
-    Vector<int> _qn_min;
 
-#ifdef USE_HASH
-    int _get_index(const QN& qn) const
-      {
-        int index = 0;
-        for(int i = 0, j = 0; i < QN::QN_LAST; i++) {
-          if(QN::get_qn_mask() & (1 << i)){
-            index += (qn[i]-_qn_min[j])*_dqn[j];
-            j++;
-          }
-        }
-        return index; 
-      }
+    // Block position of each quantum number. Mutators of this class mark it
+    // stale; changing the qn() of a block in place requires invalidate_index().
+    mutable QNIndex _index;
 
-    void init_hash()
-      {
-        _dqn.resize(QN::QN_LAST);
-        _qn_min.resize(QN::QN_LAST);
-
-        PackedBasis::iterator iter;
-        iter = _subspace.begin();
-        Vector<int> min(QN::QN_LAST,999999);
-        iter = _subspace.end();
-        iter--;
-        Vector<int> max(QN::QN_LAST,-999999);
-        int jmax;
-        for(iter = _subspace.begin(); iter != _subspace.end(); iter++){
-          QN &qn = (*iter).qn();
-          for(int i = 0, j = 0; i < QN::QN_LAST; i++){
-            if(QN::get_qn_mask() & (1 << i)){
-              int qni = qn[i];
-              if(qni < min[j]) min[j] = qni;
-              if(qni > max[j]) max[j] = qni;
-              j++;
-            }
-            jmax = j;
-          }
-        }
-        int dim = 1;
-        Vector<int> dqn(QN::QN_LAST);
-        for(int j = 0; j < jmax; j++) {
-          dqn[j] = max[j]-min[j]+1;
-          _qn_min[j] = min[j];
-          dim *= dqn[j];
-        }
-        _hash_index.resize(dim);
-        
-        dim = 1;
-        _dqn = 1;
-        for(int j = jmax-2; j >= 0; j--) {
-          dim *= dqn[j+1];
-          _dqn[j] = dim;
-        }
-
-        iterator viter;
-        _hash_index = -1;
-        int idx = 0;
-        for(viter = _V::begin(); viter != _V::end(); viter++){
-          _hash_index[_get_index((*viter).qn())] = idx++;
-        }
-      }
-#else // !USE_HASH
-    int _get_index(const QN& qn) const { return -1; }
-    void init_hash() {};
-#endif // USE_HASH
+    // Position of the block with quantum number qn, or -1.
+    int find_block(const QN& qn) const
+      { return _index.find(static_cast<const _V&>(*this), qn); }
 
     BMatrix& init(Basis &b)
       {
-        std::vector<SubMatrix<T> >::clear();
+        clear();
         b.reorder();
         _subspace = b.subspaces();
-        init_hash();
         return *this;
       }
 
@@ -247,50 +186,32 @@ class BMatrix: public std::vector<SubMatrix<T> >
     typedef typename std::vector<SubMatrix<T> >::iterator iterator;
     typedef typename std::vector<SubMatrix<T> >::const_iterator const_iterator;
 
-    BMatrix(): _V() { _dqn.resize(QN::QN_LAST); _qn_min.resize(QN::QN_LAST); }
-    BMatrix(const BMatrix<T>& m):_V(m),_subspace(m._subspace), _hash_index(m._hash_index), _dqn(m._dqn), _qn_min(m._qn_min) {}
-    BMatrix(const PackedBasis& b): _subspace(b) { init_hash(); }
+    BMatrix(): _V() {}
+    BMatrix(const BMatrix<T>& m):_V(m),_subspace(m._subspace),_index(m._index)
+      { _index.copied(m, *this); }
+    BMatrix(const PackedBasis& b): _subspace(b) {}
     BMatrix(const Basis& b) { Basis _b(b); init(_b); }
     BMatrix(const Basis& b1, const Basis &b2) { Basis b(b1,b2); init(b); }
 
     BMatrix& repack(const Basis &basis)
-      { _subspace = basis.subspaces(); init_hash(); return *this; }
+      { _subspace = basis.subspaces(); return *this; }
     BMatrix& repack(const PackedBasis &basis)
-      { _subspace = basis; init_hash(); return *this; }
+      { _subspace = basis; return *this; }
 
-#ifdef USE_HASH
-    BMatrix& push_back(const SubMatrix<T> &o)
-      {
-        _V::push_back(o);
-        _hash_index[_get_index(o.qn())] = _V::size()-1;
-        return *this;
-      }
-
-    iterator erase(iterator iter)
-      {
-        QN qn = (*iter).qn();
-        iterator biter;
-
-        _hash_index[_get_index(qn)] = -1;
-        biter = iter;
-        biter++;
-        for(; biter != _V::end(); biter++){
-          _hash_index[_get_index((*biter).qn())]--;
-        }
-
-        iterator res_iter = _V::erase(iter);
-        return res_iter;
-      } 
-#endif  // USE_HASH
+    // The std::vector mutators, marking the block index stale.
+    void push_back(const SubMatrix<T> &o) { _V::push_back(o); _index.invalidate(); }
+    iterator erase(iterator iter) { _index.invalidate(); return _V::erase(iter); }
+    iterator erase(iterator first, iterator last) { _index.invalidate(); return _V::erase(first, last); }
+    void clear() { _V::clear(); _index.invalidate(); }
+    void invalidate_index() { _index.invalidate(); }
 
     BMatrix& operator=(const BMatrix& m)
       {
         _V::operator=(m);
 
         _subspace = m._subspace;
-        _hash_index = m._hash_index;
-        _dqn = m._dqn;
-        _qn_min = m._qn_min;
+        _index = m._index;
+        _index.copied(m, *this);
 
         return *this;
       }
@@ -421,9 +342,9 @@ class BMatrix: public std::vector<SubMatrix<T> >
      }
 
     BMatrix& resize(const Basis& b) 
-      { if(_V::size() != 0) _V::clear(); Basis _b(b); init(_b); return *this; }
+      { Basis _b(b); init(_b); return *this; }
     BMatrix& resize(const Basis& b1, const Basis &b2) 
-      { if(_V::size() != 0) _V::clear(); Basis b(b1,b2); init(b); return *this; }
+      { Basis b(b1,b2); init(b); return *this; }
 
 //  Streams
 
@@ -441,16 +362,14 @@ class BMatrix: public std::vector<SubMatrix<T> >
         (*siter).read(s);
 //        cout << (*siter).qn().n() << " " << (*siter).qn().sz() << endl;
       }
-
-      _hash_index.read(s);
-      _dqn.read(s);
-      _qn_min.read(s);
+      _subspace.invalidate_index();   // its elements were read in place
 
       iterator iter;
       for(iter = _V::begin(); iter != _V::end(); iter++){
         SubMatrix<T> &sm = (*iter);
         sm.read(s);
       }
+      _index.invalidate();
     }
 
     void write(std::ostream& s) const
@@ -464,10 +383,6 @@ class BMatrix: public std::vector<SubMatrix<T> >
       PackedBasis::const_iterator siter;
       for(siter = _subspace.begin(); siter != _subspace.end(); siter++)
         (*siter).write(s);
-
-      _hash_index.write(s);
-      _dqn.write(s);
-      _qn_min.write(s);
 
       const_iterator iter;
       for(iter = _V::begin(); iter != _V::end(); iter++){
@@ -483,153 +398,23 @@ template<class T>
 SubMatrix<T>*
 BMatrix<T>::get_block(const QN &qn)
 {
-#ifdef USE_HASH
-  int qn_index = _get_index(qn);
-  if(qn_index < 0 || qn_index >= _hash_index.size()) return NULL;
-  int idx = _hash_index[qn_index];
-  if(idx >= 0 && idx < size()) 
-    return operator[](idx);
-  return NULL;
-#endif // USE_HASH
-/*
-  for(int i = 0; i < this->size(); i++){
-    SubMatrix<T> *_s = operator[](i);
-    cout  << "HOLA BLOCK " << _s->qn() << endl;
-//    if(_s->qn() == qn) return _s; 
-  }
-*/
-
-  int origin = 0;
-  int end = _V::size() - 1;
-  int index = -1;
-
-  while(origin <= end){
-    int index_old = index;
-    index = (origin + end) / 2;
-
-    SubMatrix<T> *_s = operator[](index);
-
-    if(_s->qn() == qn) return _s; 
-    if(_s->qn() > qn)
-      end = index;
-    else
-      origin = index;
-
-    if(index == index_old){
-      if(index == end)
-        end = end - 1;
-      else
-        origin = origin + 1;
-    }
-  }
-
-/*
-cout << "HOLA BLOCK NOT FOUND " << qn[0] << endl;
-  for(int i = 0; i < this->size(); i++){
-    const SubMatrix<T> *_s = operator[](i);
-    if(_s->qn() == qn) cout << qn[0] << endl; 
-  }
-*/
-  return NULL;
+  const int i = find_block(qn);
+  return i < 0 ? NULL : operator[](i);
 }
 
 template<class T>
 const SubMatrix<T>*
 BMatrix<T>::get_block(const QN &qn) const
 {
-#ifdef USE_HASH
-  int qn_index = _get_index(qn);
-  if(qn_index < 0 || qn_index >= _hash_index.size()) return NULL;
-  int idx = _hash_index[qn_index];
-  if(idx >= 0 && idx < size()) 
-    return operator[](idx);
-  return NULL;
-#endif // USE_HASH
-/*
-  for(int i = 0; i < this->size(); i++){
-    const SubMatrix<T> *_s = operator[](i);
-    if(_s->qn() == qn) return _s; 
-  }
-*/
-
-  int origin = 0;
-  int end = _V::size() - 1;
-  int index = -1;
-
-  while(origin <= end){
-    int index_old = index;
-    index = (origin + end) / 2;
-
-    const SubMatrix<T> *_s = operator[](index);
-
-    if(_s->qn() == qn) return _s; 
-    if(_s->qn() > qn)
-      end = index;
-    else
-      origin = index;
-
-    if(index == index_old){
-      if(index == end)
-        end = end - 1;
-      else
-        origin = origin + 1;
-    }
-  }
-
-/*
-cout << "HOLA BLOCK NOT FOUND " << qn[0] << endl;
-  for(int i = 0; i < this->size(); i++){
-    const SubMatrix<T> *_s = operator[](i);
-    if(_s->qn() == qn) cout << qn[0] << endl; 
-  }
-*/
-  return NULL;
+  const int i = find_block(qn);
+  return i < 0 ? NULL : operator[](i);
 }
 
 template<class T>
 int
 BMatrix<T>::get_block_index(const QN &qn) const
 {
-#ifdef USE_HASH
-  int qn_index = _get_index(qn);
-  if(qn_index < 0 || qn_index >= _hash_index.size()) return NULL;
-  int idx = _hash_index[qn_index];
-  if(idx >= 0 && idx < size()) 
-    return idx;
-  return -1;
-#endif // USE_HASH
-/*
-  for(int i = 0; i < this->size(); i++){
-    const SubMatrix<T> *_s = operator[](i);
-    if(_s->qn() == qn) return i; 
-  }
-*/
-
-  int origin = 0;
-  int end = _V::size() - 1;
-  int index = -1;
-
-  while(origin <= end){
-    int index_old = index;
-    index = (origin + end) / 2;
-
-    const SubMatrix<T> *_s = operator[](index);
-
-    if(_s->qn() == qn) return index; 
-    if(_s->qn() > qn)
-      end = index;
-    else
-      origin = index;
-
-    if(index == index_old){
-      if(index == end)
-        end = end - 1;
-      else
-        origin = origin + 1;
-    }
-  }
-
-  return -1;
+  return find_block(qn);
 }
 
 //////////////////////////////////////////////////////////////////////

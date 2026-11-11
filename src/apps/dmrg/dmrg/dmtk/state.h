@@ -39,6 +39,25 @@ void new_seed(const VectorState<T>& v, VectorState<T>& res,
               const BMatrix<T>& rho1, const BMatrix<T> &rho2,
               const Basis& basis1, const Basis& basis2, int position);
 
+// The quantum numbers of the four subspaces of a StateSpace, as QN::key()s.
+struct QNKey4
+{
+  uint64_t k1, k2, k3, k4;
+  bool operator==(const QNKey4 &o) const
+    { return k1 == o.k1 && k2 == o.k2 && k3 == o.k3 && k4 == o.k4; }
+};
+
+// Mixes the four keys so that every bit of each one affects the result.
+inline uint64_t hash_key(const QNKey4 &k)
+{
+  const uint64_t c = 0x9E3779B97F4A7C15ull;
+  uint64_t h = k.k1;
+  h = ((h ^ (h >> 32)) * c) ^ k.k2;
+  h = ((h ^ (h >> 32)) * c) ^ k.k3;
+  h = ((h ^ (h >> 32)) * c) ^ k.k4;
+  return h ^ (h >> 32);
+}
+
 class StateSpace
 {
   private:
@@ -91,6 +110,8 @@ class StateSpace
 
     size_t dim() const { return _s1.dim() * _s2.dim() * _s3.dim() * _s4.dim(); }
     int start() const { return _start; } /* negative means error */
+    QNKey4 key() const
+      { QNKey4 k = { _s1.qn().key(), _s2.qn().key(), _s3.qn().key(), _s4.qn().key() }; return k; }
 
     template<class T>
     friend class VectorState;
@@ -169,6 +190,15 @@ class VectorState: public Vector<T>
     std::vector<StateSpace> qn_space;
     Vector<size_t> index; // for condensed vectors
 
+    // Position in qn_space of each combination of four quantum numbers, for
+    // get_qn_space(). qn_space only changes in resize_constrained(), which
+    // marks it stale.
+    mutable HashIndex<QNKey4> qn_space_index;
+    struct StateSpaceKey
+    {
+      QNKey4 operator()(const StateSpace &s) const { return s.key(); }
+    };
+
     void resize_constrained();
     void copy_constrained(const Vector<T>& v);
     T& ref_constrained(size_t i1, size_t i2, size_t i3, size_t i4);
@@ -234,14 +264,16 @@ class VectorState: public Vector<T>
       { init(b1,b2,b3,b4); resize_constrained(); copy_constrained(v); }
 
     VectorState(const VectorState<T>& v):
-      Vector<T>(v), _b1(v._b1), _b2(v._b2), _b3(v._b3), _b4(v._b4), _qn(v._qn), qn_constrained(v.qn_constrained), qn_space(v.qn_space), index(v.index) {}
+      Vector<T>(v), _b1(v._b1), _b2(v._b2), _b3(v._b3), _b4(v._b4), _qn(v._qn), qn_constrained(v.qn_constrained), qn_space(v.qn_space), index(v.index), qn_space_index(v.qn_space_index)
+      { qn_space_index.copied(v.qn_space, qn_space); }
 
 
     VectorState& operator=(const T& v)
       { Vector<T>::operator=(v); return *this; }
     
     VectorState& operator=(const VectorState<T>& v)
-      { Vector<T>::operator=(v); _b1 = v._b1; _b2 = v._b2; _b3 = v._b3; _b4 = v._b4; _qn = v._qn; qn_constrained = v.qn_constrained; qn_space = v.qn_space; index = v.index; return *this; }
+      { Vector<T>::operator=(v); _b1 = v._b1; _b2 = v._b2; _b3 = v._b3; _b4 = v._b4; _qn = v._qn; qn_constrained = v.qn_constrained; qn_space = v.qn_space; index = v.index;
+        qn_space_index = v.qn_space_index; qn_space_index.copied(v.qn_space, qn_space); return *this; }
 
     VectorState& operator=(const Vector<T>& v)
       {
@@ -502,6 +534,7 @@ VectorState<T>::resize_constrained()
   size_t dim = 0;
 
   qn_space.clear();
+  qn_space_index.invalidate();
 
   for(iter1 = _b1.begin(); iter1 != _b1.end(); iter1++){
     for(iter2 = _b2.begin(); iter2 != _b2.end(); iter2++){
@@ -965,57 +998,21 @@ template<class T>
 StateSpace 
 VectorState<T>::get_qn_space(QN qn1, QN qn2, QN qn3, QN qn4) const
 {
-/*
-  if(qn_constrained == 0){
-    typename VectorState<T>::const_iterator iter;
-    for(iter = subspace_begin(); iter != subspace_end(); iter++){
-      const SubSpace &s1 = (*iter)[1];
-      const SubSpace &s2 = (*iter)[2];
-      const SubSpace &s3 = (*iter)[3];
-      const SubSpace &s4 = (*iter)[4];
- 
-      if(s1.qn() == qn1 && s2.qn() == qn2 && s3.qn() == qn3 && s4.qn() == qn4)
-        return (*iter);
+  int i = -1;
+  if(QN::QN_LAST > QN_MAX_SIZE){
+    // keys hold QN_MAX_SIZE components: compare more of them one by one
+    for(size_t j = 0; j < qn_space.size() && i < 0; j++){
+      const StateSpace &s = qn_space[j];
+      if(s._s1.qn() == qn1 && s._s2.qn() == qn2 && s._s3.qn() == qn3 && s._s4.qn() == qn4)
+        i = int(j);
     }
-//    cout << "*** ERROR 1: Indices out of constraint\n";
-    StateSpace error;
-    error._start = -1;
-    return error;
+  } else {
+    const QNKey4 key = { qn1.key(), qn2.key(), qn3.key(), qn4.key() };
+    i = qn_space_index.find(qn_space, key, StateSpaceKey());
   }
-*/
+  if(i >= 0) return qn_space[i];
 
-  int origin = 0;
-  int end = qn_space.size() - 1;
-  int index = -1;
-
-  while(origin <= end){
-    int index_old = index;
-    index = (origin + end) / 2;
- 
-    const StateSpace &s = qn_space[index];
-
-    QN qn = s[1].qn() + s[2].qn() + s[3].qn() + s[4].qn();
-
-    if(s[1].qn() == qn1 && s[2].qn() == qn2 && 
-                           s[3].qn() == qn3 && s[4].qn() == qn4) return s; 
-    if(s[1].qn() > qn1 ||
-       (s[1].qn() == qn1 && s[2].qn() > qn2) ||
-       (s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() > qn3) ||
-       (s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() == qn3 && s[4].qn() > qn4)) 
-      end = index;
-    else
-      origin = index;
-
-    if(index == index_old){
-      if(index == end)
-        end = end - 1;
-      else
-        origin = origin + 1;
-    } 
- 
-  } 
 //  cout << "*** ERROR 2: Indices out of constraint\n";
-
   StateSpace error;
   error._start = -1;
   return error;
