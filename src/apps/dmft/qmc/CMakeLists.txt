@@ -118,6 +118,14 @@ if(ALPS_BUILD_TESTING)
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
 
+  # dmft refuses ATOMIC = 1 for its built-in CT-INT solver (#347).
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dmft_atomic/parm"
+    "SOLVER = \"Interaction Expansion\"\nOMEGA_LOOP = 1\nMAX_IT = 1\nBETA = 4\nU = 2\nt = 0.5\nMU = 0\n"
+    "N = 50\nNMATSUBARA = 40\nALPHA = -0.01\nSWEEPS = 1000\nTHERMALIZATION = 100\nATOMIC = 1\n")
+  add_test(NAME dmft_rejects_atomic COMMAND dmft "${CMAKE_CURRENT_BINARY_DIR}/dmft_atomic/parm")
+  set_tests_properties(dmft_rejects_atomic PROPERTIES LABELS "dmft;regression" TIMEOUT 60
+    PASS_REGULAR_EXPRESSION "ATOMIC = 1 makes the solver ignore the bath")
+
   add_executable(dmft_ctint_sz_results dmft_ctint_sz_results.C)
   target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)
   alps_add_gtest(dmft_ctint_sz_results COMPONENT dmft LABELS regression)
@@ -128,6 +136,11 @@ if(ALPS_BUILD_TESTING)
     add_executable(dmft_ctint_atomic dmft_ctint_atomic.C)
     target_link_libraries(dmft_ctint_atomic PRIVATE ALPS::ctint)
     alps_add_gtest(dmft_ctint_atomic COMPONENT dmft LABELS regression)
+
+    add_executable(dmft_interaction_expansion_atomic dmft_interaction_expansion_atomic.C)
+    target_link_libraries(dmft_interaction_expansion_atomic PRIVATE interaction_expansion_impl dmft_qmc_impl)
+    target_include_directories(dmft_interaction_expansion_atomic PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    alps_add_gtest(dmft_interaction_expansion_atomic COMPONENT dmft LABELS regression)
 
     add_executable(dmft_ctint_thermalization dmft_ctint_thermalization.C)
     target_link_libraries(dmft_ctint_thermalization PRIVATE ALPS::ctint)

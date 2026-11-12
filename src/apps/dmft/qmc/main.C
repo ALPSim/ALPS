@@ -138,6 +138,12 @@ int main(int argc, char** argv)
         // path. No solver is constructed-then-discarded.
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Interaction Expansion") {
+          // An ATOMIC run samples the atomic-limit G0 and ignores the bath, but
+          // the loop builds the self-energy and the next bath from the bath G0.
+          if (static_cast<bool>(parms.value_or_default("ATOMIC", false)))
+            throw std::invalid_argument("ATOMIC = 1 makes the solver ignore the bath, so the DMFT "
+                                        "self-energy and the next iteration would be wrong. For the "
+                                        "atomic limit, run interaction with ATOMIC = 1.");
           const int flavors = static_cast<int>(parms.value_or_default("FLAVORS", 2));
           const int sites   = static_cast<int>(parms.value_or_default("SITES", 1));
           switch (select_interaction_expansion(flavors, sites)) {
