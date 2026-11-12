@@ -27,8 +27,6 @@
 #include <alps/parser/parser.h>
 #include <alps/xml.h>
 #include <boost/foreach.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/split_member.hpp>
 #include <boost/throw_exception.hpp>
 #include <list>
 #include <map>
@@ -210,20 +208,8 @@ public:
   /// extract the contents from the first <PARAMETERS> element in the XML stream
   void extract_from_xml(std::istream& xml);
   
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-  /// support for Boost serialization
-  template<class Archive>
-  void save(Archive& ar, const unsigned int) const {
-    ar & list_;
-  }
 
-  /// support for Boost serialization
-  template<class Archive>
-  void load(Archive& ar, const unsigned int) {
-    ar & list_;
-    for (iterator itr = list_.begin(); itr != list_.end(); ++itr) map_[itr->key()] = itr;
-  }
 
   void save(hdf5::archive &) const;
   void load(hdf5::archive &);

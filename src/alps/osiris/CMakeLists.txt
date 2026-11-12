@@ -23,7 +23,6 @@ target_sources(alps_osiris PUBLIC
             "${PROJECT_SOURCE_DIR}/third_party/xdr/include"
   FILES
     include/alps/osiris.h
-    include/alps/osiris/archivedump.h
     include/alps/osiris/boost/array.h
     include/alps/osiris/boost/ublas.h
     include/alps/osiris/buffer.h

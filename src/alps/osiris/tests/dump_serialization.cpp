@@ -16,14 +16,6 @@
 #include <alps/osiris.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <fstream>
-// archivedump.h adapts a Boost archive to an osiris dump. Testing it needs
-// Boost.Serialization, which ALPS no longer links; CMake defines this when the
-// library is available.
-#ifdef ALPS_TEST_BOOST_ARCHIVES
-#include <alps/osiris/archivedump.h>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#endif
 
 namespace {
 // The legacy fixture has eleven fields. The native extended record additionally
@@ -81,21 +73,3 @@ TEST(OsirisSerialization, ReadsHistoricalXdrRecord) {
   expect_record(input);
 }
 
-#ifdef ALPS_TEST_BOOST_ARCHIVES
-TEST(OsirisSerialization, TextArchivePreservesScalarValues) {
-  alps::testing::TemporaryDirectory directory;
-  const auto path = directory.path() / "record.dump";
-  {
-    std::ofstream stream(path);
-    ASSERT_TRUE(stream.good());
-    boost::archive::text_oarchive archive(stream);
-    alps::archive_odump<boost::archive::text_oarchive> output(archive);
-    write_record(output);
-  }
-  std::ifstream stream(path);
-  ASSERT_TRUE(stream.good());
-  boost::archive::text_iarchive archive(stream);
-  alps::archive_idump<boost::archive::text_iarchive> input(archive);
-  expect_record(input);
-}
-#endif

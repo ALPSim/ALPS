@@ -172,11 +172,6 @@ namespace alps {
             ar[""] >> data_;
         }
 
-        template <class Archive>
-        void serialize(Archive & ar, unsigned int version)
-        {
-            ar & data_;
-        }
         
         friend void swap(diagonal_matrix & x, diagonal_matrix & y)
         {

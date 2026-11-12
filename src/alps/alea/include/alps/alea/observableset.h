@@ -29,14 +29,12 @@
 #include <alps/hdf5.hpp>
 #include <alps/alea/observable.h>
 #include <alps/alea/observablefactory.h>
-#include <alps/osiris/archivedump.h>
 #include <alps/parser/parser.h>
 #include <alps/xml.h>
 #include <alps/alea.h>
 
 #include <boost/functional.hpp>
 #include <filesystem>
-#include <boost/serialization/split_member.hpp>
 #include <map>
 
 namespace alps {
@@ -183,21 +181,8 @@ class ALPS_DECL ObservableSet: public std::map<std::string,Observable*>
 virtual void save(hdf5::archive &) const;
 virtual void load(hdf5::archive &);
 
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-  /// support for Boost serialization
-  template<class Archive>
-  void save(Archive& ar, const unsigned int) const {
-    archive_odump<Archive> dump(ar);
-    save(dump);
-  }
 
-  /// support for Boost serialization
-  template<class Archive>
-  void load(Archive& ar, const unsigned int) {
-    archive_idump<Archive> dump(ar);
-    load(dump);
-  }
 
   // sign support
   void update_signs();
