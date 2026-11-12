@@ -12,6 +12,7 @@
 #ifndef __SSE_ALG_H__
 #define __SSE_ALG_H__
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 #include <limits>
@@ -126,6 +127,9 @@ public:
     
     void do_step()
     {
+        // Keep the cutoff above the expansion order in every sweep, also
+        // after thermalisation; a fixed cutoff would truncate the series.
+        adjust_opstring_len();
         diagonal_update();
         
         if (!worker.is_thermalized()) {
@@ -151,7 +155,6 @@ public:
                 }
 
                 opstring2state();
-                adjust_opstring_len();
             }
         } else {
             measure_green_function = worker.measure_green_function();
@@ -303,10 +306,13 @@ private:
             opstring[last_leg / S2].linked[last_leg % S2] = first_leg;
         }
 
+        // The cutoff grows before every sweep, so this needs the expansion
+        // order to jump by a third plus 20 within one sweep. Then the
+        // truncation is no longer negligible, so stop rather than measure.
         if (worker.is_thermalized() && nnonzero == nops)
-            throw std::runtime_error("nnonzero reached the maximum value. "
-                    "Please increase THERMALIZATION or set INITIAL_CUTOFF "
-                    "to some large enough value.");
+            throw std::runtime_error("the expansion order reached the "
+                    "cutoff within one sweep. Please set INITIAL_CUTOFF "
+                    "well above the typical expansion order.");
     }
     
     boost::uint64_t worm_update()
@@ -545,32 +551,35 @@ private:
     
     void adjust_opstring_len()
     {
-        if (nnonzero < unsigned(0.8 * nops))
+        // Keep a third of the expansion order plus a fixed margin free, so
+        // that one sweep cannot fill the string even for short strings.
+        unsigned const target = nnonzero + nnonzero / 3 + 20;
+        if (nops >= target)
             return;
-            
-        unsigned nops1 = unsigned(1.1 * nops);
-        if (nops1 == nops) ++nops1;
 
-        opstring.reserve(nops1);
+        unsigned nops1 = std::max(target, unsigned(1.1 * nops));
+
         opstring.resize(nops1);
-        op_indices.reserve(nops1);
         op_indices.resize(nops1);
 
+        // Move the operators to the front, keeping their order.
         unsigned j = 0;
         for (unsigned i = 0; i < nops; ++i)
-            if (opstring[i].vertex_index != IDENTITY) {
-                opstring[j] = opstring[i];
-                ++j;
-            }
+            if (opstring[i].vertex_index != IDENTITY)
+                opstring[j++] = opstring[i];
         for (unsigned i = nnonzero; i < nops1; ++i)
             opstring[i].vertex_index = IDENTITY;
 
-        j = nnonzero - 1;
-        for (unsigned i = nops1 - 1; j < i; --i)
-            if (j > 0 && nnonzero > (unsigned) worker.mrandom_int(nops1)) {
-                opstring[i] = opstring[j];
-                opstring[j].vertex_index = IDENTITY;
-                --j;
+        // Spread them over the longer string. Every placement of the
+        // nnonzero operators among nops1 slots is equally likely, which is
+        // the equilibrium distribution of the identities, so growing the
+        // string does not disturb the Markov chain.
+        unsigned left = nnonzero;
+        for (unsigned i = nops1; left > 0 && left < i; --i)
+            if (worker.mrandom_real() * i < left) {
+                opstring[i - 1] = opstring[left - 1];
+                opstring[left - 1].vertex_index = IDENTITY;
+                --left;
             }
 
         nops = nops1;
