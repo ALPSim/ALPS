@@ -460,27 +460,24 @@ void DMRGTask<value_type>::dostep()
   dmtk::Hami<value_type > meas_terms(hami);
   meas_terms.clear();
 
-  // calculate local measurements
+  // calculate local measurements: one entry per site or bond holding the sum
+  // of all terms of the operator with their coefficients (issue #304)
   BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     if (has_bond_operator(ex.second)) {
       int i=0;
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
         dmtk::Hami<value_type > meas;
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas;
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit) {
         dmtk::Hami<value_type > meas;
         build_site_operator(make_site_term(ex.second),*sit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas[0];
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
   }
