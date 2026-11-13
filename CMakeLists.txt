@@ -105,12 +105,11 @@ endif()
 string(TIMESTAMP ALPS_YEAR "%Y" UTC)
 
 find_package(Threads REQUIRED)
-set(ALPS_BOOST_COMPONENTS serialization)
 if(ALPS_ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
   set(ALPS_HAVE_MPI 1)
 endif()
-find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})
+find_package(Boost 1.76 CONFIG REQUIRED)
 
 # FindHDF5 supplies HDF5::HDF5 and preserves the provider's configurations.
 # Keep the manylinux_2_28 system package within the supported source-build range.

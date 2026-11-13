@@ -113,9 +113,7 @@ repair-wheel-command = [
   # Keep this version aligned with build-system.requires above.
   "python -m pip install --only-binary=:all: wheel patchelf==0.19.3.0",
   "patchelf --version",
-  # Boost's transitive libraries need the same search path as its direct ones.
-  # Scope this to repair so installed-wheel tests cannot use the build prefix.
-  'LD_LIBRARY_PATH="$(pwd)/_build/boost-install/lib" auditwheel repair -w {dest_dir} {wheel}',
+  "auditwheel repair -w {dest_dir} {wheel}",
   "python {project}/python/pyalps/_build_support/runtime_manifest.py --wheel {dest_dir}/*.whl",
   "auditwheel show {dest_dir}/*.whl",
 ]

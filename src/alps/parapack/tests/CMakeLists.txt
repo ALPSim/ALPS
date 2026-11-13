@@ -47,7 +47,7 @@ foreach(
 endforeach()
 
 if(ALPS_ENABLE_MPI)
-  foreach(name comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi)
+  foreach(name comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi)
     add_executable(${name} ${name}.C)
 
     target_link_libraries(${name} PRIVATE ALPS::alps)
