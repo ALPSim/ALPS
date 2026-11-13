@@ -364,7 +364,9 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
         msg << " " << sites[r];
       msg << " changes " << qn << ", which the basis fixes in this sector (" << qn << " = "
           << value << " = " << constraints[c].second << "). Remove " << qn
-          << " from CONSERVED_QUANTUMNUMBERS and leave " << value << " undefined.";
+          << " from CONSERVED_QUANTUMNUMBERS and leave " << value
+          << " undefined to diagonalize the full space, or remove the parts of the term that change "
+          << qn << ".";
       boost::throw_exception(std::runtime_error(msg.str()));
     }
   }

@@ -1002,7 +1002,9 @@ DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::
   if (!mat.nonconserved.empty())
     throw std::runtime_error("<NSITETERM> on n-site groups of type "
       + std::to_string(p.type) + " changes the total " + *mat.nonconserved.begin()
-      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag.");
+      + ". dmrg supports only n-site terms that conserve every quantum number. Remove the parts of the term"
+      + " that change " + *mat.nonconserved.begin() + ", or use fulldiag or sparsediag on the full space,"
+      + " without " + *mat.nonconserved.begin() + " in CONSERVED_QUANTUMNUMBERS.");
   return op.template split<value_type>(bases,parms);
 }
 
