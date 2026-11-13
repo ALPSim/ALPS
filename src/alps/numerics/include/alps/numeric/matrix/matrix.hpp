@@ -393,7 +393,6 @@ namespace alps {
         // Definition is supplied by the optional <alps/xml/matrix.hpp> adapter.
         void write_xml(oxstream& xml) const;
 
-
         MemoryBlock const& get_values() const;
         MemoryBlock & get_values();
 

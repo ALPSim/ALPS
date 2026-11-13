@@ -172,7 +172,6 @@ namespace alps {
             ar[""] >> data_;
         }
 
-        
         friend void swap(diagonal_matrix & x, diagonal_matrix & y)
         {
             swap(x.data_, y.data_);
