@@ -208,9 +208,6 @@ public:
   /// extract the contents from the first <PARAMETERS> element in the XML stream
   void extract_from_xml(std::istream& xml);
   
-
-
-
   void save(hdf5::archive &) const;
   void load(hdf5::archive &);
 

@@ -15,20 +15,19 @@
 #include <gtest/gtest.h>
 #include <alps/osiris.h>
 #include <alps/testing/temporary_directory.hpp>
-#include <fstream>
 
 namespace {
 // The legacy fixture has eleven fields. The native extended record additionally
 // exercises a positive 64-bit integer and a complex value in their original order.
-template<bool Extended = false, class Output>
+template<class Output>
 void write_record(Output& output) {
   output << bool(false) << int8_t(63) << uint8_t(201) << int16_t(-699)
          << uint16_t(43299) << int32_t(847229) << uint32_t(4294967295u)
          << int64_t(-1152921504606846976ll);
-  if constexpr (Extended) output << int64_t(343434545665ll);
+  output << int64_t(343434545665ll);
   output << uint64_t(18446744073709551614ull) << double(3.14159265358979323846)
          << std::string("test string");
-  if constexpr (Extended) output << std::complex<double>(1, 2);
+  output << std::complex<double>(1, 2);
 }
 
 void expect_record(alps::IDump& input, bool extended = false) {
@@ -61,7 +60,7 @@ TEST(OsirisSerialization, PreservesScalarAndComplexValues) {
   const auto path = directory.path() / "record.dump";
   {
     alps::OXDRFileDump output(std::filesystem::path(path.string()));
-    write_record<true>(output);
+    write_record(output);
   }
   alps::IXDRFileDump input(std::filesystem::path(path.string()));
   expect_record(input, true);
@@ -72,4 +71,3 @@ TEST(OsirisSerialization, ReadsHistoricalXdrRecord) {
   alps::IXDRFileDump input(std::filesystem::path(ALPS_TEST_SOURCE_DIR "/xdrdump2.dump"));
   expect_record(input);
 }
-

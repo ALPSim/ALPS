@@ -882,7 +882,6 @@ namespace alps {
                     data_is_analyzed_ = true;
                 }
 
-
                 mutable uint64_t count_;
                 mutable uint64_t binsize_;
                 mutable uint64_t max_bin_number_;
