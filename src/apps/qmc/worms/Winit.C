@@ -62,6 +62,11 @@ WRun::WRun(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
   // no site compressibility measurements yet
   measure_site_compressibility_=false;
   
+  if(measure_green_function_)
+    boost::throw_exception(std::runtime_error(
+      "MEASURE[Green Function] is not available in the worm application: it has no "
+      "working estimator for the Green's function. Remove the parameter, or use "
+      "dirloop_sse, which measures it."));
   if(eta<0)
     boost::throw_exception(std::out_of_range("negative eta is illegal"));
   if(thermal_sweeps<0)

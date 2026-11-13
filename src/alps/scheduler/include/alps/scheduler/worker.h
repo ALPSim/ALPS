@@ -128,6 +128,14 @@ public:
   double work_done() const;
   virtual ResultType get_summary() const;  
 
+  /// true if run() has nothing to do: the run is not started or its work is done
+  bool idle() const { return !started || done_; }
+
+  /// A run whose results exist only once it has finished (work_done() >= 1)
+  /// returns true. Its task then ends when all of its runs have finished,
+  /// instead of when their work adds up to 1.
+  virtual bool needs_complete_run() const { return false; }
+
 protected:
   int32_t version;
   int32_t user_version;
@@ -155,6 +163,7 @@ private:
   std::string rng_name() const { return parms.value_or_default("RNG","mt19937");}
   TaskInfo info;
   int started;
+  bool done_; // work_done() has reached 1 since the run was started
   std::string file_name1, file_name2;
 };
 

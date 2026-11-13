@@ -148,6 +148,7 @@ public:
 # undef ALPS_PARAPACK_MPI_DO_TYPE
   void read_string(std::size_t n, char* s) { read_bytes(s, n); }
   using IDump::read_string;
+  bool at_end() const { return pos_ == buffer_.size(); }
 private:
   void read_bytes(void* p, std::size_t n) {
     if (pos_ + n > buffer_.size())
@@ -172,6 +173,9 @@ template<typename T>
 void deserialize(std::string const& buffer, T* values, int n) {
   ibuffer_dump dump(buffer);
   for (int i = 0; i < n; ++i) dump >> values[i];
+  // Bytes left over mean that load() read less than save() wrote.
+  if (!dump.at_end())
+    boost::throw_exception(std::runtime_error("MPI message is longer than its contents"));
 }
 
 inline std::string serialize(std::string const* values, int n) {

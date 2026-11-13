@@ -38,9 +38,6 @@ target_include_directories(alps_configuration INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/third_party/boost_numeric_bindings/include>)
 target_link_libraries(alps PUBLIC alps_headers HDF5::HDF5 Threads::Threads
                                   ${ALPS_BLAS_TARGET} ${ALPS_LAPACK_TARGET})
-foreach(component IN LISTS ALPS_BOOST_COMPONENTS)
-  target_link_libraries(alps PUBLIC Boost::${component})
-endforeach()
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps PUBLIC MPI::MPI_CXX)
 endif()
@@ -56,7 +53,7 @@ endif()
 set_target_properties(
   alps
   PROPERTIES VERSION ${PROJECT_VERSION}
-             SOVERSION ${PROJECT_VERSION_MAJOR}
+             SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
              INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
 
 function(alps_dependency_rpath target)
@@ -104,7 +101,7 @@ function(alps_configure_component target component)
   add_library(ALPS::${component} ALIAS ${target})
   set_target_properties(${target} PROPERTIES
     EXPORT_NAME ${component} VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR} INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
+    SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR} INSTALL_RPATH "${ALPS_LOADER_ORIGIN}")
   alps_dependency_rpath(${target} ${ARGN})
   alps_copy_runtime_dependencies(${target})
   string(TOUPPER "${component}" upper)

@@ -108,19 +108,8 @@ pert_hist(max_order)
     
     FourierTransformer::generate_transformer(alps::make_deprecated_parameters(parms), fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);
-  } else {
-    for(spin_t flavor=0; flavor<n_flavors; ++flavor) 
-      for(site_t site1=0; site1<n_site; ++site1) 
-        for(site_t site2=0; site2<n_site; ++site2) 
-          for(itime_index_t t=0; t<=n_tau; ++t)
-            bare_green_itime(t, site1, site2, flavor)=-0.5;
-    for(spin_t flavor=0; flavor<n_flavors; ++flavor) 
-      for(site_t site1=0; site1<n_site; ++site1) 
-        for(site_t site2=0; site2<n_site; ++site2) 
-          for(unsigned int k=0; k<n_matsubara; ++k) 
-            bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*boost::math::constants::pi<double>()));
-    //fourier transform of -1/2
-  }
+  } else
+    atomic_bare_green(bare_green_itime, bare_green_matsubara, beta);
   //initialize the simulation variables
   initialize_simulation(parms);
   if(node==0) {print(std::cout);}
@@ -132,6 +121,24 @@ pert_hist(max_order)
   c_or_cdagger::initialize_simulation(input);
   
   if(n_site !=1) throw std::invalid_argument("you're trying to run this code for more than one site. Do you know what you're doing?!?");
+}
+
+
+
+void atomic_bare_green(itime_green_function_t &bare_green_itime,
+                       matsubara_green_function_t &bare_green_matsubara, double beta)
+{
+  for(spin_t flavor=0; flavor<bare_green_itime.nflavor(); ++flavor)
+    for(site_t site1=0; site1<bare_green_itime.nsite(); ++site1)
+      for(site_t site2=0; site2<bare_green_itime.nsite(); ++site2)
+        for(itime_index_t t=0; t<bare_green_itime.ntime(); ++t)
+          bare_green_itime(t, site1, site2, flavor)=-0.5;
+  for(spin_t flavor=0; flavor<bare_green_matsubara.nflavor(); ++flavor)
+    for(site_t site1=0; site1<bare_green_matsubara.nsite(); ++site1)
+      for(site_t site2=0; site2<bare_green_matsubara.nsite(); ++site2)
+        for(unsigned int k=0; k<bare_green_matsubara.nfreq(); ++k)
+          bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*boost::math::constants::pi<double>()));
+  //fourier transform of -1/2
 }
 
 
