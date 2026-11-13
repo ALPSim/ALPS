@@ -1,14 +1,21 @@
 # Contribution guidance
 
-Follow [CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements,
-including its provenance and scientific credit policy.
+[CONTRIBUTING.md](CONTRIBUTING.md) is the contributor guide (build, process,
+provenance and scientific credit), [tests/README.md](tests/README.md) the
+testing guide, and [REVIEW.md](REVIEW.md) what reviewers look for.
 
-When copying, translating, or substantially adapting external code, record
-the source and nature of the adaptation near the affected code. Preserve
-copyright and license notices, and flag uncertain provenance or licensing
-for maintainer review. Do not invent attribution or claim independence
-without evidence.
-
-For scientific credit changes, update `CITATION.cff` and `CITATIONS.yaml`
-using [the citation maintenance instructions](.github/scripts/citations/README.md).
-`CITATION.md` is generated; do not edit it directly.
+- Anything a person will read must account for limited human attention.
+- Run the tests that cover the change before opening a pull request, and
+  report what they printed, not that they pass.
+- Before opening a pull request, have the diff reviewed in a fresh agent
+  context against REVIEW.md (`/code-review` where available), and fix, answer
+  or dismiss its findings.
+- Add only the tests a real bug would fail
+  ([when to add a test](tests/README.md#when-to-add-a-test)).
+- A change to numerical results is checked against an independent value.
+- Record the source of copied, translated or adapted code next to it, keep
+  copyright and license notices, and flag uncertain provenance for maintainer
+  review. Do not invent attribution or claim independence without evidence.
+- For scientific credit, update `CITATION.cff` and `CITATIONS.yaml` per
+  [the citation instructions](.github/scripts/citations/README.md).
+  `CITATION.md` is generated; do not edit it.
