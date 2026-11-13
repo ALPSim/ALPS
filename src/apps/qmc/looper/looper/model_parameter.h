@@ -475,7 +475,8 @@ void model_parameter::set_parameters_impl(alps::Parameters params, const G& g,
   frustrated_ = false;
 
   alps::basis_states_descriptor<I> basis(hd.basis(), g);
-  alps::Disorder::seed(params.value_or_default("DISORDER_SEED",0));
+  alps::input::looper_model_parameters const options = alps::input::read_looper_model_parameters(params);
+  alps::Disorder::seed(options.disorder_seed);
 
   if (inhomogeneous_sites || inhomogeneous_bonds)
     alps::throw_if_xyz_defined(params, g);
@@ -484,7 +485,7 @@ void model_parameter::set_parameters_impl(alps::Parameters params, const G& g,
 
   sites_.clear();
   sites_map_.clear();
-  if (inhomogeneous_sites || params.value_or_default("USE_SITE_INDICES_AS_TYPES", false)) {
+  if (inhomogeneous_sites || options.use_site_indices_as_types) {
     use_site_indices_ = true;
     sites_.resize(num_sites(g));
   } else {
@@ -518,7 +519,7 @@ void model_parameter::set_parameters_impl(alps::Parameters params, const G& g,
 
   bonds_.clear();
   bonds_map_.clear();
-  if (inhomogeneous_bonds || params.value_or_default("USE_BOND_INDICES_AS_TYPES", false)) {
+  if (inhomogeneous_bonds || options.use_bond_indices_as_types) {
     use_bond_indices_ = true;
     bonds_.resize(num_bonds(g));
   } else {
@@ -558,8 +559,8 @@ void model_parameter::set_parameters_impl(alps::Parameters params, const G& g,
       site_offset_ += 0.5 * site(s, g).s.get_twice() * site(s, g).d;
   }
 
-  if (params.defined("LOOPER_DEBUG[MODEL OUTPUT]")) {
-    if (params["LOOPER_DEBUG[MODEL OUTPUT]"] == "cerr")
+  if (options.debug_model_output) {
+    if (*options.debug_model_output == "cerr")
       output(std::cerr, g);
     else
       output(std::cout, g);
