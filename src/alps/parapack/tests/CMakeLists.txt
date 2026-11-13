@@ -30,6 +30,7 @@ foreach(
   integer_range
   linear_regression
   merge
+  option
   percentage
   temperature_scan
   time

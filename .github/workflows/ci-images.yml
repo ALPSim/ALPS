@@ -10,7 +10,6 @@ name: CI images
     paths:
     - .github/ci-images/**
     - .github/scripts/prepare_dependencies.py
-    - .github/scripts/build-boost.sh
     - .github/dependencies.json
     - .github/workflows/ci-images.yml
   schedule:

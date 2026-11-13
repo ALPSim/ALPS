@@ -17,6 +17,7 @@
 #define ALPS_OSIRIS_ARCHIVEDUMP_H
 
 #include <alps/osiris/dump.h>
+#include <cstring>
 #include <iostream>
 
 namespace alps {
