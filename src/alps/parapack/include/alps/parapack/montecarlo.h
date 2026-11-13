@@ -103,8 +103,6 @@ public:
 
   void save(alps::ODump& dp) const { dp << energy_ << order_; }
   void load(alps::IDump& dp) { dp >> energy_ >> order_; }
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned int) { ar & energy_ & order_; }
 
 private:
   double energy_;

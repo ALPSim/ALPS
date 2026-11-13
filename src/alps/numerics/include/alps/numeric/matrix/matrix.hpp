@@ -393,9 +393,6 @@ namespace alps {
         // Definition is supplied by the optional <alps/xml/matrix.hpp> adapter.
         void write_xml(oxstream& xml) const;
 
-        template<typename Archive>
-        inline void serialize(Archive & ar, const unsigned int version);
-
         MemoryBlock const& get_values() const;
         MemoryBlock & get_values();
 
