@@ -38,10 +38,6 @@
 #include "globals.h"
 #include "product.h"
 #include "signals.h"
-#ifdef WITH_PTHREADS
-#include <pthread.h>
-#include <unistd.h>
-#endif // WITH_PTHREADS
 
 #include <filesystem>
 #include "filelist.h"
@@ -2399,11 +2395,7 @@ void
 product_term(const System<T> &ss, const AuxTerm<T> &auxt, const Term<T> &t, const VectorState<T> &vv, VectorState<T> &res)
 {
   CTimer aux_timer;
-#ifdef WITH_PTHREADS
-  DMTKglobals<T> *globals = NULL;
-#else
-  DMTKglobals<T> *globals = get_globals(T(0));
-#endif
+  DMTKglobals<T> *globals = &get_globals(T(0));
 
   aux_timer.Start();
 
@@ -4312,11 +4304,9 @@ product_composite(System<T>& ss, const VectorState<T>& vv, int mask_hc)
   product(ss.h23, v23, res23, BLOCK2, T(1), false, &globals);
   res += res23.decondense(MASK_BLOCK2|MASK_BLOCK3, vv);
 
-  typename std::vector<ProductTerm<T> >::iterator term_iter;
-  for(term_iter = ss.product_terms.begin(); term_iter != ss.product_terms.end(); term_iter++){
-    ProductTerm<T> &pterm = *term_iter;
-    product_term(pterm, vv, res, mask_hc, &globals);
-  }
+// The other terms of the Hamiltonian (ss.product_terms), in parallel with
+// OpenMP (see apply_product_terms() in product.h).
+  apply_product_terms(ss.product_terms, vv, res, mask_hc);
 
  if(ss.project()){
     for(int i = 0; i < ss._project_states.size(); i++){
