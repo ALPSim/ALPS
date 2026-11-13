@@ -32,13 +32,4 @@ alps_add_gtest(osiris_comm_contract COMPONENT osiris LABELS compatibility)
 
 add_executable(osiris_dump_serialization dump_serialization.cpp)
 target_link_libraries(osiris_dump_serialization PRIVATE ALPS::osiris)
-# The Boost archive adapter in <alps/osiris/archivedump.h> is tested when
-# Boost.Serialization is installed; ALPS itself does not need it.
-find_package(Boost ${Boost_VERSION} EXACT CONFIG QUIET COMPONENTS serialization)
-if(TARGET Boost::serialization)
-  target_link_libraries(osiris_dump_serialization PRIVATE Boost::serialization)
-  target_compile_definitions(osiris_dump_serialization PRIVATE ALPS_TEST_BOOST_ARCHIVES)
-else()
-  message(STATUS "Boost.Serialization not found: skipping the archivedump.h test")
-endif()
 alps_add_gtest(osiris_dump_serialization COMPONENT osiris LABELS compatibility)

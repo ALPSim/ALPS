@@ -12,7 +12,7 @@ case "$compiler" in
 esac
 cd "$source_dir"
 ./bootstrap.sh --with-toolset="$toolset" \
-  --with-libraries=program_options
+  --with-libraries=serialization
 printf 'using %s : alps : "%s" ;\n' "$toolset" "$compiler" > alps-user-config.jam
 ./b2 --user-config=alps-user-config.jam "toolset=$toolset-alps" \
   variant=release link=shared runtime-link=shared threading=multi cxxstd=17 \

@@ -73,8 +73,6 @@ protected:
   std::vector<site_descriptor> bond_source_; /* stored source of each bond */
  
   bool use_error_limit;
-  mutable uint64_t error_checked_at_; // sweeps_done_ at the last error estimate
-  mutable double wd_error_cached_;
   bool ferromagnetic_;
   bool antiferromagnetic_;
   bool quantum_convention_;
@@ -99,8 +97,6 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   selfinteraction_(boost::get(alps::site_type_t(),graph())),
   couplings_(boost::get(alps::bond_type_t(),graph())),
   couplings_det(boost::get(alps::bond_type_t(),graph())),
-  error_checked_at_(0),
-  wd_error_cached_(0.),
   ferromagnetic_(true),
   antiferromagnetic_(true),
   quantum_convention_(parms.defined("CONVENTION") && parms["CONVENTION"]=="quantum"),
@@ -274,13 +270,7 @@ double AbstractSpinSim<MAT>::work_done() const {
     return 0.;
   double wd_error = 0.0;
   double wd_sweeps = 0.0;
-  // The scheduler asks after every sweep, and the error estimate is costly:
-  // update it every 100 sweeps.
-  if (use_error_limit && sweeps_done_ < error_checked_at_ + 100)
-    wd_error = wd_error_cached_;
-  else if (use_error_limit) {
-    error_checked_at_ = sweeps_done_;
-    wd_error_cached_ = 0.;
+  if (use_error_limit) {
     alps::RealObservable myObs;
 #ifndef BOOST_NO_EXCEPTIONS
     try {
@@ -299,7 +289,7 @@ double AbstractSpinSim<MAT>::work_done() const {
     double current_error = myObs.error();
     double error_limit = parms["ERROR_LIMIT"];
     double tmp = error_limit/current_error;
-    wd_error = wd_error_cached_ = tmp*tmp;
+    wd_error = tmp*tmp;
   }
   double good_sweeps = sweeps_done_-thermalization_sweeps_;
   wd_sweeps = (good_sweeps)/double(sweeps_);

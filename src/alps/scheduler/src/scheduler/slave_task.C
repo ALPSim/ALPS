@@ -84,10 +84,7 @@ void SlaveTask::run()
 
   // no more messages: do some work
   if(theWorker) {
-    Worker& worker = dynamic_cast<Worker&>(*theWorker);
-    worker.run();
-    if (worker.idle()) // nothing to do until the master's next message
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    dynamic_cast<Worker&>(*theWorker).run();
   } else {
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }

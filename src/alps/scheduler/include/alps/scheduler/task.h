@@ -88,7 +88,6 @@ public:
   
   virtual void start() = 0; // start all runs
   virtual void run() = 0; // run for some time (in seconds)
-  bool idle() const; // the run on this process has no work left
   virtual void halt() = 0; // halt all runs, simulation is finished        
 
   /* astreich, 05/16 */

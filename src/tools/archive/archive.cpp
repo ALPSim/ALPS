@@ -21,11 +21,11 @@
 #include <stdexcept>
 #include <fstream>
 
-#include <boost/program_options.hpp>
+#include <alps/cli/options.hpp>
 #include <filesystem>
+#include <map>
 
 namespace fs = std::filesystem;
-namespace po = boost::program_options;
 
 #include "archive_sqlite.hpp"
 #include "archive_index.hpp"
@@ -34,103 +34,114 @@ namespace po = boost::program_options;
 
 #include "archive_plot.hpp"
 
+namespace {
+
+// Settings from a file of "name = value" lines, where # starts a comment.
+// Only the Configuration options can be set this way.
+std::map<std::string, std::string> readConfigFile(char const* file) {
+        std::map<std::string, std::string> settings;
+        auto trim = [](std::string const& text) {
+                std::string::size_type first = text.find_first_not_of(" \t\r");
+                return first == std::string::npos ? std::string() : text.substr(first, text.find_last_not_of(" \t\r") - first + 1);
+        };
+        std::ifstream in(file);
+        for (std::string line; std::getline(in, line);) {
+                line = trim(line.substr(0, line.find('#')));
+                std::string::size_type equals = line.find('=');
+                if (line.empty())
+                        continue;
+                if (equals == std::string::npos)
+                        throw std::runtime_error(std::string(file) + " contains an invalid line '" + line + "'");
+                std::string name = trim(line.substr(0, equals));
+                if (name != "db-file" && name != "xml-file" && name != "plot-file" && name != "output-path"
+                                && name != "pattern-file" && name != "full-list")
+                        throw std::runtime_error(std::string(file) + ": unrecognised option '" + name + "'");
+                if (!settings.emplace(name, trim(line.substr(equals + 1))).second)
+                        throw std::runtime_error(std::string(file) + ": option '" + name + "' cannot be specified more than once");
+        }
+        return settings;
+}
+
+}
+
 int main(int ac, char* av[]) {
         SQLite db = SQLite();
         try {
-                po::options_description generic("Generic options");
-                generic.add_options()
-                        ("version", "print version string")
-                        ("verbose,v", "Prints what's done")
-                        ("help,h", "produce help message");
+                std::string dbFile, outputPath;
+                alps::cli::options options("Generic options");
+                options.flag("version", "print version string")
+                        .flag("verbose,v", "Prints what's done")
+                        .flag("help,h", "produce help message")
+                        .section("Configuration")
+                        .value("db-file,d", dbFile, "archive.db", "database file")
+                        .value<std::string>("xml-file,x", "simulation XML file")
+                        .value<std::string>("plot-file,p", "plot XML file")
+                        .value("output-path,o", outputPath, ".", "output path")
+                        .value<std::string>("pattern-file,i", "index file, only used by installation and if compiled with -DUSEPATTERN")
+                        .flag("full-list,l", "plots the whole list")
+                        .section("Commands")
+                        .value<std::string>("command,c", "possible commands: 'help(h)', 'install(i)', 'plot'(p), 'append'(a), 'rebuilt'(r), 'list'(l)")
+                        .value<std::string>("positional-arg", "positional argument").hidden()
+                        .positional("positional-arg");
+                options.parse(ac, av);
 
-                po::options_description config("Configuration");
-                config.add_options()
-                        ("db-file,d", po::value<std::string>()->default_value("archive.db"), "database file")
-                        ("xml-file,x", po::value<std::string>(), "simulation XML file")
-                        ("plot-file,p", po::value<std::string>(), "plot XML file")
-                        ("output-path,o", po::value<std::string>()->default_value("."), "output path")
-                        ("pattern-file,i", po::value<std::string>(), "index file, only used by installation and if compiled with -DUSEPATTERN")
-                        ("full-list,l", "plots the whole list");
+                // The command line takes precedence over conf/config.cfg.
+                std::map<std::string, std::string> const config = readConfigFile("conf/config.cfg");
+                auto given = [&](char const* name) { return options.count(name) || config.count(name); };
+                auto value = [&](char const* name) {
+                        return options.count(name) ? options.get<std::string>(name) : config.at(name);
+                };
+                if (!options.count("db-file") && config.count("db-file"))
+                        dbFile = config.at("db-file");
+                if (!options.count("output-path") && config.count("output-path"))
+                        outputPath = config.at("output-path");
 
-                po::options_description command("Commands");
-                command.add_options()
-                        ("command,c", po::value<std::string>(), "possible commands: 'help(h)', 'install(i)', 'plot'(p), 'append'(a), 'rebuilt'(r), 'list'(l)");
-
-                po::options_description hidden("Hidden");
-                hidden.add_options()
-                        ("positional-arg", po::value<std::string>(), "positional argument");
-
-                po::options_description cmdline_options;
-                cmdline_options.add(generic).add(config).add(command).add(hidden);
-
-                po::options_description config_file_options;
-                config_file_options.add(config);
-
-                po::options_description visible("Allowed options");
-                visible.add(generic).add(config).add(command);
-
-                po::positional_options_description posOpt;
-                posOpt.add("positional-arg", 1);
-
-                po::variables_map vm;
-                store(po::command_line_parser(ac, av).options(cmdline_options).positional(posOpt).run(), vm);
-
-                std::ifstream ifs("conf/config.cfg");
-                po::store(po::parse_config_file(ifs, config_file_options), vm);
-                po::notify(vm);
-
-                if (vm.count("version")) {
+                if (options.count("version")) {
                         std::cout << "ALPS Plot Generator, version 1.0" << std::endl;
                         exit(0);
 
-                } else if (vm.count("help") || !vm.count("command") || vm["command"].as<std::string>() == "help" || vm["command"].as<std::string>() == "h") {
-                        std::cout << visible << std::endl;
+                } else if (options.count("help") || !options.count("command") || value("command") == "help" || value("command") == "h") {
+                        std::cout << "Allowed options:\n\n" << options << std::endl;
                         exit(0);
 
-                } else if (!vm.count("db-file"))
-                        throw std::runtime_error("no db-file specified!");
-
-                else {
-                        std::string const cmd = vm["command"].as<std::string>();
+                } else {
+                        std::string const cmd = value("command");
 
                         // A positional file stands in for -p (plot) or -x (append, rebuild).
                         // Resolve it once, so a file given both ways or to a command that
                         // reads none is an error instead of being silently ignored.
                         std::string positional;
-                        if (vm.count("positional-arg")) {
-                                positional = vm["positional-arg"].as<std::string>();
-                                if (vm.count("plot-file") || vm.count("xml-file"))
+                        if (options.count("positional-arg")) {
+                                positional = value("positional-arg");
+                                if (given("plot-file") || given("xml-file"))
                                         throw std::runtime_error("give the input file either as a positional argument or with -p/-x, not both");
                                 if (cmd != "plot" && cmd != "p" && cmd != "append" && cmd != "a" && cmd != "rebuild" && cmd != "r")
                                         throw std::runtime_error(std::string("command '") + cmd + "' takes no input file");
                         }
                         auto inputFile = [&](char const* option, char const* what) {
-                                if (positional.empty() && !vm.count(option))
+                                if (positional.empty() && !given(option))
                                         throw std::runtime_error(std::string("no ") + what + " specified");
-                                return absolute(fs::path(positional.empty() ? vm[option].as<std::string>() : positional));
+                                return absolute(fs::path(positional.empty() ? value(option) : positional));
                         };
 
-                        db.setVerbose(vm.count("verbose"));
-                        db.open(absolute(fs::path(vm["db-file"].as<std::string>())));
+                        db.setVerbose(options.count("verbose"));
+                        db.open(absolute(fs::path(dbFile)));
 
                         if (cmd == "install" || cmd == "i") {
                                 #ifdef USEPATTERN
-                                        if (!vm.count("pattern-file"))
+                                        if (!given("pattern-file"))
                                                 throw std::runtime_error("no index-file specified!");
-                                        Index(db, vm.count("verbose")).install(complte(fs::path(vm["pattern-file"].as<std::string>())));
+                                        Index(db, options.count("verbose")).install(complte(fs::path(value("pattern-file"))));
                                 #else
-                                        Index(db, vm.count("verbose")).install();
+                                        Index(db, options.count("verbose")).install();
                                 #endif
 
                         } else if (cmd == "list" || cmd == "l") {
-                                Index(db, vm.count("verbose")).list(vm.count("full-list"));
+                                Index(db, options.count("verbose")).list(given("full-list"));
 
                         } else if (cmd == "plot" || cmd == "p") {
                                 fs::path plotPath = inputFile("plot-file", "plot-file");
-                                if (!vm.count("output-path"))
-                                        throw std::runtime_error("no output-path specified");
-                                fs::path outputPath = absolute(fs::path(vm["output-path"].as<std::string>()));
-                                Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.filename().string());
+                                Plot(absolute(fs::path(outputPath)), db).exec(XML(true)(plotPath, true), plotPath.filename().string());
 
                         } else {
                                 fs::path xmlPath = inputFile("xml-file", "xml-file");
@@ -139,7 +150,7 @@ int main(int ac, char* av[]) {
                                                 throw std::runtime_error("Could not clear tables!");
                                 } else if (cmd != "append" && cmd != "a")
                                         throw std::runtime_error(std::string("Unknown command '") + cmd + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(xmlPath);
+                                Index(db, options.count("verbose")).exec(xmlPath);
                         }
                 }
         } catch(std::exception& e) {

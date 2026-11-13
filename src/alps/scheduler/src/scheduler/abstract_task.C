@@ -24,21 +24,14 @@ namespace alps {
 namespace scheduler {
 
 AbstractTask::AbstractTask(const ProcessList& w)
- : theWorker(0), where(w)
+ : where(w)
 { 
   use_error_limit=false;
 }
 
 AbstractTask::AbstractTask()
- : theWorker(0)
 {
   use_error_limit=false;
-}
-
-bool AbstractTask::idle() const
-{
-  Worker const* worker = dynamic_cast<Worker const*>(theWorker);
-  return worker && worker->idle();
 }
 
 AbstractTask::~AbstractTask()

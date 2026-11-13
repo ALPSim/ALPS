@@ -328,7 +328,7 @@ ResultType WorkerTask::get_summary() const
     // collect results
     for (unsigned int i=0; i<where_master.size(); i++) {
       // receive dump
-      IMPDump receive(where_master[i],MCMP_summary);
+      IMPDump receive(MCMP_summary);
       ResultType s_res;
       receive >> s_res.T >> s_res.mean >> s_res.error >> s_res.count;
       res += s_res;
@@ -339,12 +339,7 @@ ResultType WorkerTask::get_summary() const
 
 double WorkerTask::work_done()  const
 {
-  // Runs whose results exist only once they have finished: the task is done
-  // when every run at work is, so take the minimum instead of the sum. Runs
-  // without a process cannot finish and do not hold the task back.
-  Worker const* local = dynamic_cast<Worker const*>(theWorker);
-  bool const complete_runs = local && local->needs_complete_run();
-  double w = complete_runs ? 1. : 0.;
+  double w=0.;
   ProcessList where_master;
 
   // add runs stored locally
@@ -356,10 +351,8 @@ double WorkerTask::work_done()  const
         //where_master.push_back( Process(dynamic_cast<RemoteWorker&>(*runs[i]).process()));
         where_master.push_back(dynamic_cast<RemoteWorker*>(runs[i])->process());
       }
-      else if(runs[i] && !complete_runs)
+      else if(runs[i])
         w += runs[i]->work_done();
-      else if(runs[i] && workerstatus[i]==LocalRun)
-        w = std::min(w, runs[i]->work_done());
     }
   }
 
@@ -372,9 +365,8 @@ double WorkerTask::work_done()  const
     // collect results
     for (unsigned int i=0;i<where_master.size();i++) {
       // receive dump from remote process, abort if error
-      IMPDump receive(where_master[i],MCMP_run_work);
-      double const run_work = double(receive);
-      w = complete_runs ? std::min(w, run_work) : w + run_work;
+      IMPDump receive(MCMP_run_work);
+      w += double(receive);
     }
   }
   return w;
@@ -489,7 +481,7 @@ void WorkerTask::write_xml_body(alps::oxstream& out, const std::filesystem::path
     OMPDump send;
     send.send(remote_runs, MCMP_get_run_info);
     for (std::size_t i = 0; i < remote_runs.size(); ++i) {
-      IMPDump receive(remote_runs[i],MCMP_run_info);
+      IMPDump receive(MCMP_run_info);
       TaskInfo infos;
       std::string name1, name2;
       receive >> infos >> name1 >> name2;
