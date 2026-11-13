@@ -29,11 +29,7 @@
 #include <iostream>
 #include <typeinfo>
 
-#ifdef ALPS_NGS_SINGLE_THREAD
-    #define ALPS_HDF5_LOCK_MUTEX
-#else
-    #define ALPS_HDF5_LOCK_MUTEX std::lock_guard<std::recursive_mutex> guard(mutex_);
-#endif
+#define ALPS_HDF5_LOCK_MUTEX std::lock_guard<std::recursive_mutex> guard(mutex_);
 
 #ifdef H5_HAVE_THREADSAFE
     #define ALPS_HDF5_FAKE_THREADSAFETY
@@ -1078,7 +1074,7 @@ namespace alps {
                             , H5P_DEFAULT                                                                                                                               \
                         );                                                                                                                                              \
                     }                                                                                                                                                   \
-                    detail::native_ptr_converter<alps::detail::remove_cvr<T>::type> converter(1);                                                \
+                    detail::native_ptr_converter<T> converter(1);                                                                                                       \
                     detail::check_error(H5Dwrite(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, converter.apply(&value)));                                            \
                     detail::check_data(data_id);                                                                                                                        \
                 } else {                                                                                                                                                \
@@ -1112,7 +1108,7 @@ namespace alps {
                             , H5P_DEFAULT                                                                                                                               \
                             , H5P_DEFAULT                                                                                                                               \
                         );                                                                                                                                              \
-                    detail::native_ptr_converter<alps::detail::remove_cvr<T>::type> converter(1);                                                \
+                    detail::native_ptr_converter<T> converter(1);                                                                                                       \
                     detail::check_error(H5Awrite(data_id, type_id, converter.apply(&value)));                                                                           \
                     detail::attribute_type attr_id(data_id);                                                                                                            \
                     if (is_group(detail::attribute_owner(path)))                                                                                           \
@@ -1429,9 +1425,7 @@ namespace alps {
             return (large ? "l" : (memory ? "m" : "_")) + filename;
         }
     
-#ifndef ALPS_NGS_SINGLE_THREAD
         std::recursive_mutex archive::mutex_;
-#endif
         std::map<std::string, std::pair<detail::archivecontext *, std::size_t> > archive::ref_cnt_;
     }
 }

@@ -25,7 +25,7 @@ namespace alps {
 
         public:
 
-            typedef enum { SINGLE, THREADED, MPI, HYBRID } execution_types;
+            typedef enum { SINGLE, MPI } execution_types;
 
             mcoptions(int argc, char* argv[]);
             mcoptions(int argc, char* argv[], const std::string& citation_component);
