@@ -1,10 +1,10 @@
 name: Website pages
 
-# Lists the pages of the ALPS website that describe the code a PR changes, in
-# the job summary, and checks that every source pattern in
-# .github/website-pages.json still matches a file (.github/scripts/website_pages.py).
-# The listing never fails a PR; a stale pattern does. The website checks that
-# the pages named in the map exist.
+# Lists, in the job summary, the pages of the ALPS website that describe the
+# files a PR changes, from the map the website keeps
+# (.github/alps-source-map.json in ALPSim/alpsim.github.io), and warns about
+# map patterns that no longer match a file (.github/scripts/website_pages.py).
+# It never fails a PR.
 on:
   pull_request:
 
@@ -24,8 +24,6 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - name: Check the page map
-        run: python3 .github/scripts/website_pages.py --check
       - name: List the website pages to check
         env:
           BASE: ${{ github.event.pull_request.base.sha }}

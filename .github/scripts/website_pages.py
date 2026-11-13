@@ -1,19 +1,18 @@
 #!/usr/bin/env python3
-"""List the website pages a change may affect, and check the page map.
+"""List the website pages that describe the files a change touches.
 
-.github/website-pages.json maps source paths here to the pages of the ALPS
-website (ALPSim/alpsim.github.io) that describe them. Usage in CI::
+The ALPS website (ALPSim/alpsim.github.io) keeps .github/alps-source-map.json,
+which maps glob patterns over this repository to the pages that describe those
+files. Usage in CI::
 
-    python3 .github/scripts/website_pages.py --check
     python3 .github/scripts/website_pages.py --base "$BASE" --head HEAD
 
---check fails if the map is malformed or a source pattern matches no tracked
-file, so renaming a program or tutorial also updates its entry. The site
-checks the other half: that every page named in the map exists.
-
---base/--head lists the pages whose sources changed in base...head, leaving
-out the map's ignored paths (tests), in the job summary when GITHUB_STEP_SUMMARY is set and on standard output otherwise. It
-only reports; whether a page needs changing is for the author to decide.
+It reads the map from the site's main branch (or --map), lists the pages whose
+sources changed in base...head, leaving out the map's ignored paths (tests),
+and warns about source patterns that no longer match a file at head. It writes
+to the job summary when GITHUB_STEP_SUMMARY is set and to standard output
+otherwise. It never fails: whether a page needs changing, and the map an
+update, is for the author to decide.
 
 Standard library only; keep compatible with Python 3.9.
 """
@@ -22,11 +21,13 @@ import json
 import os
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-MAP = ROOT / ".github/website-pages.json"
-SITE = "https://github.com/ALPSim/alpsim.github.io/blob/main/content/en/"
+SITE = "https://github.com/ALPSim/alpsim.github.io/blob/main/"
+MAP_PATH = ".github/alps-source-map.json"
+MAP_URL = "https://raw.githubusercontent.com/ALPSim/alpsim.github.io/main/" + MAP_PATH
 
 sys.path.insert(0, str(ROOT / ".github/scripts/ci"))
 from fingerprint import glob_to_regex  # noqa: E402
@@ -37,36 +38,17 @@ def git_lines(*args):
     return [line for line in out.decode("utf-8", "surrogateescape").split("\0") if line]
 
 
-def load(path=MAP):
-    with open(path, encoding="utf-8") as f:
-        return json.load(f)
+def load(path=None):
+    if path:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    with urllib.request.urlopen(MAP_URL, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8"))
 
 
-def problems(page_map, files):
-    """What is wrong with the map, given the tracked files."""
-    found = []
-    entries = page_map.get("entries")
-    unmapped = page_map.get("unmapped", {})
-    if not isinstance(entries, list) or not entries:
-        return ["the map has no entries"]
-    mapped = set()
-    for i, entry in enumerate(entries):
-        name = entry.get("name") or "entry %d" % (i + 1)
-        sources, pages = entry.get("sources"), entry.get("pages")
-        if not sources or not pages:
-            found.append("%s: needs both sources and pages" % name)
-            continue
-        for page in pages:
-            if page.startswith("/") or not page.endswith(".md"):
-                found.append("%s: page %r should be a .md path under content/en" % (name, page))
-            mapped.add(page)
-        for pattern in sources:
-            regex = glob_to_regex(pattern)
-            if not any(regex.match(f) for f in files):
-                found.append("%s: %r matches no tracked file" % (name, pattern))
-    for page in sorted(mapped & set(unmapped)):
-        found.append("%s is both mapped and listed as unmapped" % page)
-    return found
+def stale(page_map, files):
+    """[(entry name, pattern)] for the source patterns that match none of files."""
+    return [(entry["name"], pattern) for entry in page_map["entries"] for pattern in entry["sources"]
+            if not any(glob_to_regex(pattern).match(f) for f in files)]
 
 
 def affected(page_map, changed):
@@ -82,59 +64,60 @@ def affected(page_map, changed):
     return found
 
 
-def report(found):
-    if not found:
-        return "No website pages describe the files this PR changes.\n"
-    pages = {page for _, _, entry_pages in found for page in entry_pages}
-    lines = ["### Website pages to check", "",
-             "This PR changes code that %d page(s) of the ALPS website describe "
-             "(from `.github/website-pages.json`). If one is now out of date, update it "
-             "in [alpsim.github.io](https://github.com/ALPSim/alpsim.github.io) "
-             "(en, zh-cn and ja) or open an issue there." % len(pages), "",
-             "| Area | Changed here | Pages |", "|---|---|---|"]
-    for name, hits, entry_pages in found:
-        shown = ", ".join("`%s`" % h for h in hits[:3])
-        if len(hits) > 3:
-            shown += " and %d more" % (len(hits) - 3)
-        links = ", ".join("[%s](%s%s)" % (page[:-3], SITE, page) for page in entry_pages)
-        lines.append("| %s | %s | %s |" % (name, shown, links))
+def report(found, gone=()):
+    lines = []
+    if found:
+        pages = {page for _, _, entry_pages in found for page in entry_pages}
+        lines += ["### Website pages to check", "",
+                  "This PR changes files that %d page(s) of the ALPS website describe "
+                  "(from [`%s`](%s%s)). If one is now out of date, update it in "
+                  "[alpsim.github.io](https://github.com/ALPSim/alpsim.github.io) (en, zh-cn and ja) "
+                  "or open an issue there." % (len(pages), MAP_PATH, SITE, MAP_PATH), "",
+                  "| Area | Changed here | Pages |", "|---|---|---|"]
+        for name, hits, entry_pages in found:
+            shown = ", ".join("`%s`" % h for h in hits[:3])
+            if len(hits) > 3:
+                shown += " and %d more" % (len(hits) - 3)
+            links = ", ".join("[%s](%scontent/en/%s)" % (page[:-3], SITE, page) for page in entry_pages)
+            lines.append("| %s | %s | %s |" % (name, shown, links))
+    else:
+        lines.append("No website pages describe the files this PR changes.")
+    if gone:
+        lines += ["", "These patterns in [`%s`](%s%s) match no file here any more; if this PR moved or "
+                  "removed those files, update the map in alpsim.github.io:" % (MAP_PATH, SITE, MAP_PATH), ""]
+        lines += ["- %s: `%s`" % (name, pattern) for name, pattern in gone]
     return "\n".join(lines) + "\n"
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    parser.add_argument("--check", action="store_true", help="check the map against the tracked files")
-    parser.add_argument("--base", help="list the pages affected by base...head")
+    parser.add_argument("--base", required=True, help="list the pages affected by base...head")
     parser.add_argument("--head", default="HEAD")
+    parser.add_argument("--map", help="a local alps-source-map.json instead of the site's")
     args = parser.parse_args(argv)
-    if not args.check and not args.base:
-        parser.error("give --check or --base")
-    page_map = load()
-    if args.check:
-        found = problems(page_map, git_lines("ls-files", "-z"))
-        for problem in found:
-            print("::error file=.github/website-pages.json::%s" % problem)
+    # The listing only informs, so nothing here fails the PR.
+    try:
+        page_map = load(args.map)
+        changed = git_lines("diff", "--name-only", "-z", "--no-renames", "%s...%s" % (args.base, args.head))
+        files = git_lines("ls-tree", "-r", "-z", "--name-only", args.head)
+    except (OSError, ValueError, subprocess.CalledProcessError) as e:
+        print("::warning title=Website pages to check::no listing: %s" % e)
+        return 0
+    found = affected(page_map, changed)
+    gone = stale(page_map, files)
+    text = report(found, gone)
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary, "a", encoding="utf-8") as f:
+            f.write(text)
         if found:
-            return 1
-        print("website-pages.json: %d entries, all sources match tracked files" % len(page_map["entries"]))
-    if args.base:
-        try:
-            changed = git_lines("diff", "--name-only", "-z", "--no-renames", "%s...%s" % (args.base, args.head))
-        except subprocess.CalledProcessError:
-            # The listing only informs, so a missing base never fails the PR.
-            print("::warning title=Website pages to check::could not diff %s...%s" % (args.base, args.head))
-            return 0
-        found = affected(page_map, changed)
-        text = report(found)
-        summary = os.environ.get("GITHUB_STEP_SUMMARY")
-        if summary:
-            with open(summary, "a", encoding="utf-8") as f:
-                f.write(text)
-            if found:
-                print("::notice title=Website pages to check::%d area(s) of the website describe code"
-                      " this PR changes; see the job summary" % len(found))
-        else:
-            sys.stdout.write(text)
+            print("::notice title=Website pages to check::%d area(s) of the website describe files"
+                  " this PR changes; see the job summary" % len(found))
+        for name, pattern in gone:
+            print("::warning title=Website source map::%s: %r matches no file; update %s in"
+                  " alpsim.github.io if this PR moved it" % (name, pattern, MAP_PATH))
+    else:
+        sys.stdout.write(text)
     return 0
 
 
