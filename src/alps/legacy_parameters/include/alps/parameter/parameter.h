@@ -73,6 +73,7 @@ public:
   /// returns the value
   const value_type& value() const { return value_; }
 
+  
 private:
   key_type key_;
   value_type value_;

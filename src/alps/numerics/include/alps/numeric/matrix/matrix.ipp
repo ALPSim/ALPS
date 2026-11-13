@@ -15,6 +15,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <alps/numeric/numeric_cast.hpp>
 
+
 namespace alps {
 namespace numeric {
 
@@ -440,6 +441,7 @@ namespace numeric {
    {
        return this->values_;
    }
+
 
    } // end namespace numeric
 } // end namespace alps

@@ -15,18 +15,20 @@
 #include <gtest/gtest.h>
 #include <alps/osiris.h>
 #include <alps/testing/temporary_directory.hpp>
+#include <fstream>
 
 namespace {
 // The legacy fixture has eleven fields. The native extended record additionally
 // exercises a positive 64-bit integer and a complex value in their original order.
-void write_record(alps::ODump& output) {
+template<bool Extended = false, class Output>
+void write_record(Output& output) {
   output << bool(false) << int8_t(63) << uint8_t(201) << int16_t(-699)
          << uint16_t(43299) << int32_t(847229) << uint32_t(4294967295u)
          << int64_t(-1152921504606846976ll);
-  output << int64_t(343434545665ll);
+  if constexpr (Extended) output << int64_t(343434545665ll);
   output << uint64_t(18446744073709551614ull) << double(3.14159265358979323846)
          << std::string("test string");
-  output << std::complex<double>(1, 2);
+  if constexpr (Extended) output << std::complex<double>(1, 2);
 }
 
 void expect_record(alps::IDump& input, bool extended = false) {
@@ -40,7 +42,7 @@ void expect_record(alps::IDump& input, bool extended = false) {
   EXPECT_EQ(static_cast<int64_t>(input), -1152921504606846976ll);
   if (extended) EXPECT_EQ(static_cast<int64_t>(input), 343434545665ll);
   EXPECT_EQ(static_cast<uint64_t>(input), 18446744073709551614ull);
-  // Full double precision is part of the contract for both current and historical XDR records.
+  // Full double precision is part of the contract for both wire and text archives.
   EXPECT_EQ(static_cast<double>(input), 3.14159265358979323846);
   std::string text;
   input >> text;
@@ -59,7 +61,7 @@ TEST(OsirisSerialization, PreservesScalarAndComplexValues) {
   const auto path = directory.path() / "record.dump";
   {
     alps::OXDRFileDump output(std::filesystem::path(path.string()));
-    write_record(output);
+    write_record<true>(output);
   }
   alps::IXDRFileDump input(std::filesystem::path(path.string()));
   expect_record(input, true);

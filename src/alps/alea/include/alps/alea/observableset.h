@@ -181,6 +181,9 @@ class ALPS_DECL ObservableSet: public std::map<std::string,Observable*>
 virtual void save(hdf5::archive &) const;
 virtual void load(hdf5::archive &);
 
+
+
+
   // sign support
   void update_signs();
   void set_sign(const std::string&);
