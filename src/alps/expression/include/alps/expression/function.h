@@ -52,12 +52,14 @@ Function<T>::Function(std::istream& in,const std::string& name)
   :  name_(name), args_()
 {
   char c;
-  in >> c;
+  if (!(in >> c))
+    boost::throw_exception(std::runtime_error("missing ) at end of function argument list"));
   if (c!=')') {
     in.putback(c);
     do {
       args_.push_back(Expression<T>(in));
-      in >> c;
+      if (!(in >> c))
+        boost::throw_exception(std::runtime_error("missing ) at end of function argument list"));
     } while (c==',');
     if (c!=')')
       boost::throw_exception(std::runtime_error(std::string("received ") + c + " instead of ) at end of function argument list"));
