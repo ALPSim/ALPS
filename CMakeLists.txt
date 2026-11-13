@@ -105,7 +105,7 @@ endif()
 string(TIMESTAMP ALPS_YEAR "%Y" UTC)
 
 find_package(Threads REQUIRED)
-set(ALPS_BOOST_COMPONENTS serialization program_options)
+set(ALPS_BOOST_COMPONENTS serialization)
 if(ALPS_ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
   set(ALPS_HAVE_MPI 1)
