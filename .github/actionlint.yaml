@@ -1,4 +1,5 @@
-# Labels of the self-hosted runners (IFT workstation VMs) used by the workflows
+# Labels of the self-hosted runners used by the workflows: IFT workstation VMs, VT Mac mini VMs
 self-hosted-runner:
   labels:
   - ift-vm
+  - vt-macos
