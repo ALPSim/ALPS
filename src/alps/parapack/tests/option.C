@@ -16,12 +16,14 @@ alps::parapack::option parse(std::initializer_list<char const*> args) {
   std::vector<char*> argv;
   for (auto& arg : storage) argv.push_back(&arg[0]);
   argv.push_back(nullptr);
-  // A rejected command line prints its reason; keep it out of the test log.
-  std::ostringstream discarded;
-  std::streambuf* previous = std::cerr.rdbuf(discarded.rdbuf());
-  alps::parapack::option result(static_cast<int>(storage.size()), argv.data());
-  std::cerr.rdbuf(previous);
-  return result;
+  // A rejected command line prints its reason; keep it out of the test log,
+  // and restore std::cerr even if the constructor throws.
+  struct silence_cerr {
+    std::ostringstream sink;
+    std::streambuf* previous = std::cerr.rdbuf(sink.rdbuf());
+    ~silence_cerr() { std::cerr.rdbuf(previous); }
+  } quiet;
+  return alps::parapack::option(static_cast<int>(storage.size()), argv.data());
 }
 
 }
