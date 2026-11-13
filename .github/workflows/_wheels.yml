@@ -40,15 +40,17 @@ jobs:
     needs:
     - check_version
     - build_sdist
-    runs-on: ${{ matrix.plat.os }}
+    # Fork pull requests, and every job while the repo variable IFT_RUNNERS is 'off',
+    # run on GitHub's machines instead of the IFT runner VMs.
+    runs-on: ${{ (matrix.plat.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.plat.os }}
     timeout-minutes: 120
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || '4' }}
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '4' || '16' }}
     strategy:
       fail-fast: false
       matrix:
-        plat: ${{ fromJSON(inputs.full && '[{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"manylinux"},{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"musllinux"},{"os":"macos-15","target":"15.0","arch":"arm64","family":"macos"}]'
-          || '[{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"manylinux"}]') }}
+        plat: ${{ fromJSON(inputs.full && '[{"os":"ift-vm","target":"","arch":"x86_64","family":"manylinux"},{"os":"ift-vm","target":"","arch":"x86_64","family":"musllinux"},{"os":"macos-15","target":"15.0","arch":"arm64","family":"macos"}]'
+          || '[{"os":"ift-vm","target":"","arch":"x86_64","family":"manylinux"}]') }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
@@ -180,12 +182,12 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ (matrix.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.full && '["ubuntu-24.04","macos-15","macos-26"]' || '["ubuntu-24.04"]') }}
+        os: ${{ fromJSON(inputs.full && '["ift-vm","macos-15","macos-26"]' || '["ift-vm"]') }}
         python: ${{ fromJSON(inputs.full && '["3.10","3.11","3.12","3.13","3.14"]' || '["3.10","3.11","3.12","3.14"]') }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -224,7 +226,7 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

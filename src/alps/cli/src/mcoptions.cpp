@@ -13,9 +13,8 @@
 
 #include <alps/ngs/mcoptions.hpp>
 #include <alps/cli.hpp>
+#include <alps/cli/options.hpp>
 #include <alps/utilities/stacktrace.hpp>
-
-#include <boost/program_options.hpp>
 
 #include <iostream>
 #include <stdexcept>
@@ -25,47 +24,41 @@ namespace alps {
     mcoptions::mcoptions(int argc, char* argv[]) : mcoptions(argc, argv, "framework") {}
 
     mcoptions::mcoptions(int argc, char* argv[], const std::string& citation_component) : valid(false), resume(false), type(SINGLE) {
-        boost::program_options::options_description desc("Allowed options");
-        desc.add_options()
-            ("help", "produce help message")
-            ("single", "run single process")
+        cli::options desc("Allowed options");
+        desc.flag("help", "produce help message")
+            .flag("single", "run single process")
             #ifndef ALPS_NGS_SINGLE_THREAD
-                ("threaded", "run in multithread environment")
+                .flag("threaded", "run in multithread environment")
             #endif
             #ifdef ALPS_HAVE_MPI
-                ("mpi", "run in parallel using MPI")
+                .flag("mpi", "run in parallel using MPI")
             #endif
-            ("continue,c", "load simulation from checkpoint")
-            ("time-limit,T", boost::program_options::value<std::size_t>(&time_limit)->default_value(0), "time limit for the simulation")
-            ("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format")
-            ("output-file", boost::program_options::value<std::string>(&output_file)->default_value("<unspecified>"), "output file in hdf5 format")
-            ("checkpoint-file", boost::program_options::value<std::string>(&checkpoint_file)->default_value(""), "checkpoint file in hdf5 format");
+            .flag("continue,c", "load simulation from checkpoint")
+            .value("time-limit,T", time_limit, 0, "time limit for the simulation")
+            .value("input-file", input_file, "input file in hdf5 format")
+            .value("output-file", output_file, "<unspecified>", "output file in hdf5 format")
+            .value("checkpoint-file", checkpoint_file, "", "checkpoint file in hdf5 format")
+            .positional("input-file").positional("output-file").positional("checkpoint-file");
         if (handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) return;
-        boost::program_options::positional_options_description p;
-        p.add("input-file", 1);
-        p.add("output-file", 1);
-        p.add("checkpoint-file", 1);
-        boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-        boost::program_options::notify(vm);
+        desc.parse(argc, argv);
         valid = true;
         if (input_file.empty())
             throw std::invalid_argument("No job file specified" + ALPS_STACKTRACE);
-        if (vm.count("threaded") && vm.count("mpi"))
+        if (desc.count("threaded") && desc.count("mpi"))
             type = HYBRID;
-        else if (vm.count("threaded"))
+        else if (desc.count("threaded"))
             #ifdef ALPS_NGS_SINGLE_THREAD
                 throw std::logic_error("Not build with multithread support" + ALPS_STACKTRACE);
             #else
                 type = THREADED;
             #endif
-        else if (vm.count("mpi")) {
+        else if (desc.count("mpi")) {
             type = MPI;
             #ifndef ALPS_HAVE_MPI
                 throw std::logic_error("Not build with MPI" + ALPS_STACKTRACE);
             #endif
         }
-        if (vm.count("continue"))
+        if (desc.count("continue"))
             resume = true;
         if (output_file == "<unspecified>") {
             if (input_file.find(".in.h5") != std::string::npos)
