@@ -135,10 +135,19 @@ option::option(int argc, char** argv, bool eval)
       threads_per_clone = desc.get<int>("threads-per-clone");
     if (desc.count("total-threads")) {
       default_total_threads = false;
-      if (desc.get<std::string>("total-threads") == "auto") {
+      std::string const value = desc.get<std::string>("total-threads");
+      if (value == "auto") {
         auto_total_threads = true;
       } else {
-        num_total_threads = boost::lexical_cast<int>(desc.get<std::string>("total-threads"));
+        try {
+          num_total_threads = boost::lexical_cast<int>(value);
+        }
+        catch (boost::bad_lexical_cast const&) {
+          valid = false;
+          std::cerr << "the argument ('" << value << "') for option '--total-threads' is invalid"
+                    << std::endl;
+          return;
+        }
       }
     }
   }

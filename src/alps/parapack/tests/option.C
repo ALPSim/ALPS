@@ -61,4 +61,5 @@ TEST(ParapackOption, RejectsBadCommandLines) {
   EXPECT_FALSE(parse({"--dump-format", "text", "job.in.xml"}).valid);
   EXPECT_FALSE(parse({"--time-limit", "soon", "job.in.xml"}).valid);
   EXPECT_FALSE(parse({"--no-such-option", "job.in.xml"}).valid);
+  EXPECT_FALSE(parse({"--total-threads", "x", "job.in.xml"}).valid);
 }
