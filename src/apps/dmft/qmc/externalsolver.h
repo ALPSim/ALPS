@@ -51,6 +51,8 @@ public:
               const matsubara_green_function_t& G0_omega
             , const alps::Parameters& parms );
     private:
+    /// adapt the parameters to a solver that reads the hybridization function
+    void prepare_parms(alps::Parameters& p, alps::hdf5::archive& solver_input) const;
     /// call the executable
     void call(std::string const& infile, std::string const& outfile);
       
