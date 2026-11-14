@@ -60,4 +60,14 @@ if(TARGET dmrg)
       -P "${CMAKE_CURRENT_SOURCE_DIR}/same_seed.cmake")
   set_tests_properties(dmrg.same_seed PROPERTIES LABELS "dmrg"
     TIMEOUT 120 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+
+  if(ALPS_ENABLE_OPENMP)
+    add_test(NAME dmrg.openmp_threads
+      COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:dmrg>"
+        "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/openmp_threads"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/openmp_threads.cmake")
+    set_tests_properties(dmrg.openmp_threads PROPERTIES LABELS "dmrg"
+      TIMEOUT 120 PROCESSORS 4)
+  endif()
 endif()
