@@ -74,7 +74,7 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
   measurement_time=0;
   update_time=0;
   thermalized=therm_steps==0?true:false;
-  if(!parms.defined("ATOMIC")) {
+  if(!static_cast<bool>(parms.value_or_default("ATOMIC", false))) {
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
     FourierTransformer::generate_transformer(parms, fourier_ptr);
