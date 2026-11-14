@@ -401,7 +401,7 @@ jobs:
         cmake --preset mpi -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DMPIEXEC_PREFLAGS=--oversubscribe
-        cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
+        cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi dmft_cthyb_segment_exact mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
           mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 aleav2_mpi_twogauss \
           gf_one_index_gf_test_mpi gf_four_index_gf_test_mpi gf_four_index_gf_test_mismatched_mpi gf_four_index_gf_test_mismatched-tail_mpi \
           gf_multiarray_bcast_mpi gf_mesh_test_mpi gf_new_test_mpi gf_new_tail_test_mpi \
@@ -508,12 +508,12 @@ jobs:
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
-    - name: Install compiler cache
-      run: sudo apt-get install -y ccache
+    - name: Install compiler cache and NFFT
+      run: sudo apt-get install -y ccache libnfft3-dev libfftw3-dev
     - name: Identify compiler and dependency ABI
       id: toolchain
       run: |
-        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
+        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*' 'libnfft3*'; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
     - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: cache
@@ -525,12 +525,13 @@ jobs:
     # The other native jobs build Release, where assert() is compiled out.
     # This one keeps assertions on and builds the applications too, so a
     # failing assert in dmrg, spinmc or the QMC codes fails CI instead of
-    # silently continuing in the Release binaries.
+    # silently continuing in the Release binaries. It also builds
+    # CT-HYB-SEGMENT's optional NFFT measurements, which no other job does.
     - name: Build and test with assertions enabled
       run: |
         cmake --preset debug -B _build/debug \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/debug/install" \
-          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DALPS_ENABLE_NFFT=ON
         cmake --build _build/debug
         ctest --test-dir _build/debug --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Compiler cache statistics

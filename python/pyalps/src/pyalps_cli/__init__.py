@@ -15,7 +15,7 @@ import sys
 
 
 NATIVE_PROGRAMS = (
-    "checksign", "dirloop_sse", "dmft", "dmrg", "fulldiag", "fulldiag_evaluate",
+    "checksign", "ct-hyb-segment", "dirloop_sse", "dmft", "dmrg", "fulldiag", "fulldiag_evaluate",
     "hirschfye", "hybridization", "interaction", "loop", "qwl", "qwl_evaluate",
     "simplemc", "sparsediag", "spinmc", "spinmc_evaluate", "worm", "worm_evaluate",
     "parameter2xml", "printgraph", "convert2xml", "snap2vtk", "maxent", "alps2fcidump",
