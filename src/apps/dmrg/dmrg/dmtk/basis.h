@@ -29,12 +29,27 @@ class PackedBasis: public std::vector<SubSpace>
     typedef std::vector<SubSpace> _V;
     typedef std::vector<SubSpace>::iterator iterator;
     typedef std::vector<SubSpace>::const_iterator const_iterator;
-  
-    PackedBasis() {}
-    PackedBasis(const PackedBasis &b): _V(b) {}
 
-    PackedBasis operator=(const PackedBasis &b) 
-      { _V::operator=(b); return *this; }
+  private:
+    // Position of each quantum number. Mutators of this class mark it stale;
+    // changing the qn() of a subspace in place requires invalidate_index().
+    mutable QNIndex _index;
+
+  public:
+    PackedBasis() {}
+    PackedBasis(const PackedBasis &b): _V(b), _index(b._index)
+      { _index.copied(b, *this); }
+
+    PackedBasis& operator=(const PackedBasis &b)
+      { _V::operator=(b); _index = b._index; _index.copied(b, *this); return *this; }
+
+    // The std::vector mutators, marking the index stale.
+    void push_back(const SubSpace &s) { _V::push_back(s); _index.invalidate(); }
+    iterator erase(iterator iter) { _index.invalidate(); return _V::erase(iter); }
+    iterator erase(iterator first, iterator last) { _index.invalidate(); return _V::erase(first, last); }
+    void clear() { _V::clear(); _index.invalidate(); }
+    void resize(size_t n) { _V::resize(n); _index.invalidate(); }
+    void invalidate_index() { _index.invalidate(); }
   
     SubSpace operator()(size_t i) const
       {
@@ -54,42 +69,9 @@ class PackedBasis: public std::vector<SubSpace>
         return SubSpace(QN(),DMTK_ERROR,DMTK_ERROR);
       }
 
+    // Position of the subspace with quantum number qn, or -1.
     int get_index(const QN &qn) const
-      {
-// WARNING: MAY NEED MORE TESTING
-/*
-        PackedBasis::const_iterator iter;
-        int i = 0;
-        for(iter = begin(); iter != end(); iter++, i++) 
-          if((*iter).qn() == qn) return i;
-*/
-
-        int origin = 0;
-        int end = size() - 1;
-        int index = -1;
-
-        while(origin <= end){
-          int index_old = index;
-          index = (origin + end) / 2;
-
-          const SubSpace &s = _V::operator[](index);
-
-          if(s.qn() == qn) return index;
-          if(s.qn() > qn)
-            end = index;
-          else
-            origin = index;
-
-          if(index == index_old){
-            if(index == end)
-              end = end - 1;
-            else
-              origin = origin + 1;
-          }
-        }
-
-        return -1;
-      }
+      { return _index.find(static_cast<const _V&>(*this), qn); }
 
     size_t dim() const
       {
@@ -118,6 +100,7 @@ class PackedBasis: public std::vector<SubSpace>
 
       iterator iter;
       for(iter = begin(); iter != end(); iter++) (*iter).read(s);
+      _index.invalidate();   // the elements were read in place
     }
 
 };
