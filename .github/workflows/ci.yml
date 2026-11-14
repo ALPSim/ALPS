@@ -329,7 +329,7 @@ jobs:
         # In a container job, github.workspace is the host's path. GITHUB_WORKSPACE is the
         # container's, where the cache steps restore and save _build/ccache.
         echo "CCACHE_DIR=$GITHUB_WORKSPACE/_build/ccache" >> "$GITHUB_ENV"
-        { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
+        { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; ls /opt/nfft/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
         "$CXX" --version | head -1
     - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -338,11 +338,12 @@ jobs:
         path: _build/ccache
         key: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-
+    # The images provide NFFT3 in /opt/nfft (.github/ci-images/install.sh).
     - name: Build and test native code
       run: |
         cmake --preset dev -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
-          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DALPS_ENABLE_NFFT=ON
         cmake --build _build/ci
         ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Compiler cache statistics
