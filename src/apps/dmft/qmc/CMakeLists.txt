@@ -94,6 +94,9 @@ target_link_libraries(dmft PRIVATE dmft_qmc_impl interaction_expansion_impl)
 target_link_libraries(hirschfye PRIVATE dmft_qmc_impl)
 
 target_link_libraries(hybridization PRIVATE ALPS::cthyb)
+
+# Segment-picture CT-HYB solver (ALPS::cthyb_segment and ct-hyb-segment)
+add_subdirectory(ct-hyb-segment)
 target_link_libraries(interaction PRIVATE ALPS::ctint)
 
 if(ALPS_BUILD_TESTING)

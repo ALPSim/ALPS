@@ -13,97 +13,45 @@
  *
  *****************************************************************************/
 
-#include <ctime>
+// Usage: ct-hyb-segment parameters.ini [NAME=value ...]
+//        ct-hyb-segment --help
+// Results are written to sim.h5 in the working directory.
+#include <alps/solvers.hpp>
+#include <alps/params.hpp>
 #include "hyb.hpp"
-#include "hybevaluate.hpp"
-#include <boost/bind/bind.hpp>
-
+#include <iostream>
+#include <stdexcept>
 #ifdef ALPS_HAVE_MPI
-#include <alps/mc/mpiadapter.hpp>
-typedef alps::mcmpiadapter<hybridization> sim_type;
-#else
-typedef hybridization sim_type;
+#include <alps/utilities/mpi.hpp>
 #endif
-
-//stops the simulation if time > end_time or if signals received.
-bool stop_callback(const time_t end_time) {
-  static alps::signal signal;
-  return !signal.empty() || time(0) > end_time;
-}
-void master_final_tasks(const alps::results_type<hybridization>::type &results, const alps::parameters_type<hybridization>::type &parameters, const std::string &output_name);
-int global_mpi_rank;
 
 int main(int argc, char* argv[]){
-
 #ifdef ALPS_HAVE_MPI
-    //boot up MPI environment
-    MPI_Init(&argc, &argv);
+  // outside the try: destroyed while an exception unwinds, it calls MPI_Abort
+  // before the catch below can print the message. The catch aborts itself,
+  // since other ranks may be waiting in a collective.
+  alps::mpi::environment env(argc, argv);
 #endif
-
-  //read in command line options
-  alps::parameters_type<hybridization>::type parameters(argc, (const char**)argv, "/parameters");
-  sim_type::define_parameters(parameters);
-  if (parameters.help_requested(std::cout)) {
-    exit(0);
+  try {
+    alps::params parameters(argc, (const char**)argv, "/parameters");
+    hybridization::define_parameters(parameters);
+    if (parameters.help_requested(std::cout))
+      return 0;
+    alps::solvers::cthyb_segment(parameters, "sim.h5");
   }
-
-    try {
-      unsigned long max_time=parameters["MAX_TIME"];
-
-#ifndef ALPS_HAVE_MPI
-      global_mpi_rank=0;
-      sim_type s(parameters,global_mpi_rank);
-#else
-      alps::mpi::communicator c;
-      c.barrier();
-      global_mpi_rank=c.rank();
-      if (!global_mpi_rank) std::cout << "Parameters : " << std::endl << parameters << std::endl;
-      sim_type s(parameters, c);
-#endif
-      //run the simulation
-      s.run(boost::bind(&stop_callback, time(0)+max_time));
-
-      //on the master: collect MC results and store them in file, then postprocess
-      if (global_mpi_rank==0){
-        alps::results_type<hybridization>::type results = collect_results(s);
-        std::string output_path = parameters["cthyb.BASEPATH"].as<std::string>()+std::string("/simulation/results");
-        alps::save_results(results, parameters, "sim.h5", output_path); //"/simulation/results");
-        master_final_tasks(results, parameters, "sim.h5");
+  catch(std::exception& exc){
+    std::cerr<<exc.what()<<std::endl;
 #ifdef ALPS_HAVE_MPI
-      } else{ //on any slave: send back results to master.
-        collect_results(s);
-      }
-      c.barrier();
-      MPI_Finalize();
-#else
-    }
+    alps::mpi::environment::abort(255);
 #endif
-    }
-    catch(std::exception& exc){
-      std::cerr<<exc.what()<<std::endl;
-      return -1;
-    }
-    catch(...){
-      std::cerr << "Fatal Error: Unknown Exception!\n";
-      return -2;
-    }
-}
-
-
-void master_final_tasks(const alps::results_type<hybridization>::type &results,
-                        const alps::parameters_type<hybridization>::type &parameters,
-                        const std::string &output_name){
-  //do some post processing: collect Green functions and write
-  //them into hdf5 files; calls compute vertex at the very end
-
-  alps::hdf5::archive solver_output(output_name, "a");
-
-  evaluate_basics(results,parameters,solver_output);
-  evaluate_gtau(results,parameters,solver_output);
-  evaluate_freq(results,parameters,solver_output);
-  evaluate_legendre(results,parameters,solver_output);
-  evaluate_nnt(results,parameters,solver_output);
-  evaluate_nnw(results,parameters,solver_output);
-  evaluate_sector_statistics(results,parameters,solver_output);
-  evaluate_2p(results, parameters, solver_output);
+    return -1;
+  }
+  catch(...){
+    std::cerr << "Fatal Error: Unknown Exception!\n";
+#ifdef ALPS_HAVE_MPI
+    alps::mpi::environment::abort(255);
+#endif
+    return -2;
+  }
+  return 0;
 }
