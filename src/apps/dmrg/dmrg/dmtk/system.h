@@ -38,6 +38,10 @@
 #include "globals.h"
 #include "product.h"
 #include "signals.h"
+#include <sstream>
+#include <fstream>
+#include <iterator>
+#include "virtualdisk.h"
 #ifdef WITH_PTHREADS
 #include <pthread.h>
 #include <unistd.h>
@@ -118,6 +122,9 @@ class System
     CTimer _timer;
 
     bool _in_warmup;
+    bool _use_vdisk;
+    mutable VirtualDisk _disk;   // mutable: write_*() are const
+
     size_t dir;
     int _sweep;
     int iter;
@@ -249,6 +256,7 @@ class System
   
     System()
     : _in_warmup(true)
+    , _use_vdisk(false)
     , _sweep(1)
     , iter(1)
     , _use_hc(false)
@@ -291,6 +299,7 @@ class System
     System(const Hami<T> &_h, const Lattice& lattice, const char *the_name)
      : _lattice(lattice)
      , _in_warmup(true)
+     , _use_vdisk(false)
      , _sweep(1)
      , iter(1)
      , _use_hc(false)
@@ -453,6 +462,31 @@ class System
 
     System<T>& set_store_products(bool b) { _store_products = b; return *this; }
     bool store_products() const { return _store_products; }
+    System<T>& set_use_vdisk(bool b) { _use_vdisk = b; return *this; }
+    bool use_vdisk() const { return _use_vdisk; }
+
+    // Stage every in-memory file in tmp_files for its next commit().
+    void dump_vdisk() const
+    {
+      for(VirtualDisk::const_iterator it = _disk.begin(); it != _disk.end(); ++it){
+        const char *name = it->first.c_str();
+        std::ofstream out(tmp_files.get_write_filename(name), std::ios::out|std::ios::binary);
+        out.write(it->second.data(), it->second.size());
+        out.close();
+        if(!out) tmp_files.write_failed(name);
+      }
+    }
+
+    // Read files committed by tmp_files into memory, to resume from them.
+    void load_vdisk(const std::vector<std::string> &names)
+    {
+      for(size_t i = 0; i < names.size(); i++){
+        std::ifstream in(tmp_files.get_read_filename(names[i].c_str()), std::ios::in|std::ios::binary);
+        if(!in)
+          BOOST_THROW_EXCEPTION(std::runtime_error("could not read checkpoint file " + names[i]));
+        _disk[names[i]] = std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+      }
+    }
     System<T>& set_target_subspaces(bool b, int nsub = 1) { _target_subspaces = b; _nsub = nsub; return *this; }
     bool target_subspaces() const { return _target_subspaces; }
     System<T>& set_verbose(int b) { _verbose = b; return *this; }
@@ -526,66 +560,99 @@ class System
 
     // Streams
 
+    // Scratch file I/O: in memory (_disk) when _use_vdisk, else on disk via tmp_files.
+    // body receives a std::ostream& / std::istream& and does the actual (de)serialization.
+    template<class F>
+    bool write_file(const char *name, F &&body) const
+    {
+      if(_use_vdisk){
+        std::ostringstream out(std::ios::out|std::ios::binary);
+        body(out);
+        _disk[name] = out.str();
+        return true;
+      }
+      std::ofstream out(tmp_files.get_write_filename(name), std::ios::out|std::ios::binary);
+      if(!out){
+        cerr << "*** ERROR: Could not open file " << name << endl;
+        tmp_files.write_failed(name);
+        return false;
+      }
+      body(out);
+      out.close();
+      if(!out){ tmp_files.write_failed(name); return false; }
+      return true;
+    }
+
+    template<class F>
+    bool read_file(const char *name, F &&body)
+    {
+      if(_use_vdisk){
+        VirtualDisk::const_iterator it = _disk.find(name);
+        if(it == _disk.end()){
+          cerr << "*** ERROR: virtual file " << name << " not found" << endl;
+          return false;
+        }
+        std::istringstream in(it->second, std::ios::in|std::ios::binary);
+        body(in);
+        return true;
+      }
+      std::ifstream in(tmp_files.get_read_filename(name), std::ios::in|std::ios::binary);
+      if(!in){
+        cerr << "*** ERROR: Could not open file " << name << endl;
+        return false;
+      }
+      body(in);
+      return true;
+    }
+
     void write_status() const
     {
-      const char *file = tmp_files.get_filename("system.dat"); 
-      ofstream outputfile(file,std::ios::out|std::ios::binary);
-      if(!outputfile) {
-        cerr << "*** ERROR: Could not open file " << file << endl;
-        return;
-      }
-      outputfile.write((const char *)&_numsweeps, sizeof(size_t));
-      for(int i = 1; i <= _numsweeps; i++){
-        int l = _sweeps(0,i);
-        outputfile.write((const char *)&l, sizeof(int));
-        l = _sweeps(1,i);
-        outputfile.write((const char *)&l, sizeof(int));
-      }
-      outputfile.write((const char *)&_in_warmup, sizeof(bool));
-      outputfile.write((const char *)&_sweep, sizeof(int));
-      outputfile.write((const char *)&dir, sizeof(size_t));
-      outputfile.write((const char *)&iter, sizeof(int));
-      outputfile.write((const char *)&_ntargets, sizeof(int));
-/*
-      outputfile.write((const char *)&tmp_filenames.size(), sizeof(int));
-      std::map<std::string,std::string>::const_iterator miter;
-      for(miter = _tmp_filenams.begin(); miter != _tmp_filenames.end(); miter++){
-        outputfile.write((const char *)*miter; (*miter).size());
-      } 
-*/
-      qnt.write(outputfile);
-      qn.write(outputfile);
-
-      outputfile.close();
+      const char *file = "system.dat"; 
+      write_file(file, [&](std::ostream &outputfile){
+        outputfile.write((const char *)&_numsweeps, sizeof(size_t));
+        for(int i = 1; i <= _numsweeps; i++){
+          int l = _sweeps(0,i);
+          outputfile.write((const char *)&l, sizeof(int));
+          l = _sweeps(1,i);
+          outputfile.write((const char *)&l, sizeof(int));
+        }
+        outputfile.write((const char *)&_in_warmup, sizeof(bool));
+        outputfile.write((const char *)&_sweep, sizeof(int));
+        outputfile.write((const char *)&dir, sizeof(size_t));
+        outputfile.write((const char *)&iter, sizeof(int));
+        outputfile.write((const char *)&_ntargets, sizeof(int));
+        int nstates = _nstates;
+        outputfile.write((const char *)&nstates, sizeof(int));
+        qnt.write(outputfile);
+        qn.write(outputfile);
+      });
     }
 
     void read_status() 
     {
-      const char *file = tmp_files.get_filename("system.dat"); 
-      ifstream inputfile(file,std::ios::in|std::ios::binary);
-      if(!inputfile) {
-        cerr << "*** ERROR: Could not open file " << file << endl;
-        return;
-      }
-      inputfile.read((char *)&_numsweeps, sizeof(size_t));
-      _sweeps.resize(2,_numsweeps+1);
-      for(int i = 1; i <= _numsweeps; i++){
-        int l;
-        inputfile.read((char *)&l, sizeof(int));
-        _sweeps(0,i) = l;
-        inputfile.read((char *)&l, sizeof(int));
-        _sweeps(1,i) = l;
-      }
-      inputfile.read((char *)&_in_warmup, sizeof(bool));
-      inputfile.read((char *)&_sweep, sizeof(int));
-      inputfile.read((char *)&dir, sizeof(size_t));
-      inputfile.read((char *)&iter, sizeof(int));
-      inputfile.read((char *)&_ntargets, sizeof(int));
-      inputfile.read((char *)&_nstates, sizeof(int));
-      qnt.read(inputfile);
-      qn.read(inputfile);
-
-      inputfile.close();
+      const char *file = "system.dat"; 
+      bool ok = read_file(file, [&](std::istream &inputfile){
+        inputfile.read((char *)&_numsweeps, sizeof(size_t));
+        _sweeps.resize(2,_numsweeps+1);
+        for(int i = 1; i <= _numsweeps; i++){
+          int l;
+          inputfile.read((char *)&l, sizeof(int));
+          _sweeps(0,i) = l;
+          inputfile.read((char *)&l, sizeof(int));
+          _sweeps(1,i) = l;
+        }
+        inputfile.read((char *)&_in_warmup, sizeof(bool));
+        inputfile.read((char *)&_sweep, sizeof(int));
+        inputfile.read((char *)&dir, sizeof(size_t));
+        inputfile.read((char *)&iter, sizeof(int));
+        inputfile.read((char *)&_ntargets, sizeof(int));
+        int nstates;
+        inputfile.read((char *)&nstates, sizeof(int));
+        _nstates = nstates;
+        qnt.read(inputfile);
+        qn.read(inputfile);
+      });
+      if(ok) read_gs(gs,iter,dir == LEFT2RIGHT ? LEFT : RIGHT);
     }
 
     void write(std::ostream &s) const
@@ -602,8 +669,10 @@ class System
       s.write((const char *)&dir, sizeof(size_t));
       s.write((const char *)&iter, sizeof(int));
       s.write((const char *)&_ntargets, sizeof(int));
-      s.write((const char *)&_nstates, sizeof(int));
-      s.write((const char *)&_propagate_state.size(), sizeof(int));
+      int nstates = _nstates;
+      s.write((const char *)&nstates, sizeof(int));
+      int nprop = _propagate_state.size();
+      s.write((const char *)&nprop, sizeof(int));
       qnt.write(s);
       qn.write(s);
       gs.write(s);
@@ -636,6 +705,9 @@ class System
       s.read((char *)&dir, sizeof(size_t));
       s.read((char *)&iter, sizeof(int));
       s.read((char *)&_ntargets, sizeof(int));
+      int nstates;
+      s.read((char *)&nstates, sizeof(int));
+      _nstates = nstates;
       int nprop;
       s.read((char *)&nprop, sizeof(int));
       _propagate_state.resize(nprop);
@@ -664,32 +736,22 @@ class System
         snprintf(file, sizeof(file), "gs_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
-
-      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) {
-        cerr << "*** ERROR: Could not open file " << file << endl;
-        tmp_files.write_failed(file);
-      } else{
 #ifdef DMTK_DEBUG
-        cout << "WRITING GS " << file << endl;
+      cout << "WRITING GS " << file << endl;
 #endif // DMTK_DEBUG
-
+      write_file(file, [&](std::ostream &outputfile){
         gs.write(outputfile);
-  
         int _n = _target.size();
         outputfile.write((const char *)&_n, sizeof(int));
         for(int i = 0; i < _n; i++){
           _target[i].write(outputfile);
         }
-  
         _n = _propagate_state.size();
         outputfile.write((const char *)&_n, sizeof(int));
         for(int i = 0; i < _propagate_state.size(); i++){
           _propagate_state[i].write(outputfile);
         }
-        outputfile.close();
-        if(!outputfile) tmp_files.write_failed(file);
-      }
+      });
     }
 
     void read_gs(VectorState<T> &gs, int n, int position = RIGHT)
@@ -699,33 +761,24 @@ class System
         snprintf(file, sizeof(file), "gs_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "gs_%s_%i_r.dat",_name,n);
-
-      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile)
-        cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
 #ifdef DMTK_DEBUG
-        cout << "READING GS " << file << endl;
+      cout << "READING GS " << file << endl;
 #endif // DMTK_DEBUG
-
+      read_file(file, [&](std::istream &inputfile){
         gs.read(inputfile);
-  
         inputfile.read((char *)&_ntargets, sizeof(int));
         _target.resize(_ntargets);
         _target_weight.resize(_ntargets);
         for(int i = 0; i < _ntargets; i++){
           _target[i].read(inputfile);
         }
-  
         int nprop;
         inputfile.read((char *)&nprop, sizeof(int));
         _propagate_state.resize(nprop);
         for(int i = 0; i < _propagate_state.size(); i++){
           _propagate_state[i].read(inputfile);
         }
-
-        inputfile.close();
-      }
+      });
     }
 
     void write_rho(const BMatrix<T> &m, const Basis& basis, int n, int position) const
@@ -735,20 +788,13 @@ class System
         snprintf(file, sizeof(file), "rho_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "rho_%s_%i_r.dat",_name,n);
-
 #ifdef DMTK_DEBUG
       cout << "SAVING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) {
-        cerr << "*** ERROR: Could not open file " << file << endl;
-        tmp_files.write_failed(file);
-      } else{
+      write_file(file, [&](std::ostream &outputfile){
         basis.write(outputfile);
         m.write(outputfile);
-        outputfile.close();
-        if(!outputfile) tmp_files.write_failed(file);
-      }
+      });
     }
 
     void read_rho(BMatrix<T> &m, Basis &basis, int n, int position)
@@ -758,18 +804,13 @@ class System
         snprintf(file, sizeof(file), "rho_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "rho_%s_%i_r.dat",_name,n);
-
 #ifdef DMTK_DEBUG
       cout << "READING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile)
-        cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+      read_file(file, [&](std::istream &inputfile){
         basis.read(inputfile);
         m.read(inputfile);
-        inputfile.close();
-      }
+      });
     }
 
     void write_block(const Block<T> &b, int n, int position) const
@@ -779,19 +820,12 @@ class System
         snprintf(file, sizeof(file), "block_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "block_%s_%i_r.dat",_name,n);
-
 #ifdef DMTK_DEBUG
       cout << "SAVING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(tmp_files.get_write_filename(file),std::ios::out|std::ios::binary);
-      if(!outputfile) {
-        cerr << "*** ERROR: Could not open file " << file << endl;
-        tmp_files.write_failed(file);
-      } else{
+      write_file(file, [&](std::ostream &outputfile){
         b.write(outputfile);
-        outputfile.close();
-        if(!outputfile) tmp_files.write_failed(file);
-      }
+      });
     }
 
     void read_block(Block<T> &b, int n, int position)
@@ -809,17 +843,12 @@ class System
         snprintf(file, sizeof(file), "block_%s_%i_l.dat",_name,n);
       else
         snprintf(file, sizeof(file), "block_%s_%i_r.dat",_name,n);
-
 #ifdef DMTK_DEBUG
       cout << "READING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(tmp_files.get_read_filename(file),std::ios::in|std::ios::binary);
-      if(!inputfile)
-        cerr << "*** ERROR: Could not open file " << file << endl;
-      else{
+      read_file(file, [&](std::istream &inputfile){
         b.read(inputfile);
-        inputfile.close();
-      }
+      });
     }
 
 
