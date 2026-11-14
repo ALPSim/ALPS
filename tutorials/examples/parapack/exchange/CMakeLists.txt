@@ -21,3 +21,16 @@ add_executable(exchange main.C ising.C loop.C)
 target_link_libraries(exchange PRIVATE ALPS::alps)
 
 alps_add_test(exchange)
+
+# Under MPI, check the parallel exchange workers and the parallel Ising worker
+# against the exact Ising chain (see check_mpi.py).
+if(ALPS_BUILD_TESTING AND ALPS_ENABLE_MPI)
+  find_package(Python3 COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND AND MPIEXEC_EXECUTABLE)
+    add_test(NAME exchange_mpi
+      COMMAND Python3::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/check_mpi.py" "${CMAKE_CURRENT_SOURCE_DIR}"
+        "$<TARGET_FILE:exchange>" "${MPIEXEC_EXECUTABLE}" ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG})
+    set_tests_properties(exchange_mpi PROPERTIES PROCESSORS 4 TIMEOUT 300 LABELS "mpi"
+      ENVIRONMENT_MODIFICATION "ALPS_XML_PATH=set:${ALPS_DATA_DIR}/xml;OMP_NUM_THREADS=set:1")
+  endif()
+endif()

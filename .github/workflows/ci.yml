@@ -424,6 +424,13 @@ jobs:
           -DALPS_DIR="$PWD/_build/sdk/install/share/alps"
         cmake --build _build/consumer
         ctest --test-dir _build/consumer --output-on-failure --output-junit "$PWD/_build/ci/sdk.xml" --no-tests=error
+    - name: Check the parapack MPI tutorials against the installed SDK
+      run: |
+        cmake --install _build/sdk --component tutorials
+        cmake -S _build/sdk/install/share/alps/tutorials/examples -B _build/examples -DCMAKE_BUILD_TYPE=Release \
+          -DALPS_DIR="$PWD/_build/sdk/install/share/alps" -DMPIEXEC_PREFLAGS=--oversubscribe
+        cmake --build _build/examples --target exchange
+        ctest --test-dir _build/examples -R '^exchange_mpi$' --output-on-failure --output-junit "$PWD/_build/ci/tutorials-mpi.xml" --no-tests=error
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
