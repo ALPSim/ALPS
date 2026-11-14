@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include"hybfun.hpp"
+#include <sstream>
 
 // Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
 namespace cthyb_segment {
@@ -59,13 +60,22 @@ void hybfun::read_hybridization_function(const alps::params &p){
     if(p.exists("cthyb.DMFT_FRAMEWORK") && p["cthyb.DMFT_FRAMEWORK"]){//read in as green_function
       read_hdf5(ar,"/Delta");
     }
-    else{//plain hdf5
+    else if(ar.is_data("/Delta")){//plain hdf5: all flavors in one array
       std::vector<double> tmp(nflavor()*ntime());
       ar>>alps::make_pvp("/Delta",tmp);
       for(std::size_t j=0; j<nflavor(); j++)
         for(std::size_t i=0; i<ntime(); i++)
           operator()(i,j)=tmp[j*ntime()+i];
       tmp.clear();
+    }
+    else{//plain hdf5: one array /Delta_j per flavor, as ALPS' hybridization solver reads it
+      std::vector<double> tmp(ntime());
+      for(std::size_t j=0; j<nflavor(); j++){
+        std::stringstream path; path<<"/Delta_"<<j;
+        ar>>alps::make_pvp(path.str(),tmp);
+        for(std::size_t i=0; i<ntime(); i++)
+          operator()(i,j)=tmp[i];
+      }
     }
   }
   else{//read from text file
