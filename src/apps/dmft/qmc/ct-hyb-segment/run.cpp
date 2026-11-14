@@ -6,6 +6,7 @@
 #include "hyb.hpp"
 #include "hybevaluate.hpp"
 #include <alps/utilities/signal.hpp>
+#include <alps/utilities/copyright.hpp>
 #include <ctime>
 #include <iostream>
 #include <stdexcept>
@@ -65,8 +66,10 @@ void alps::solvers::cthyb_segment(alps::params const& input, std::string const& 
   global_mpi_rank=c.rank();
   sim_type s(parameters, c);
 #endif
-  if (global_mpi_rank==0)
+  if (global_mpi_rank==0) {
+    alps::print_copyright(std::cout, "cthyb_segment");
     std::cout << "Parameters : " << std::endl << parameters << std::endl;
+  }
 
   //run the simulation
   s.run([deadline] { return stop_requested(deadline); });

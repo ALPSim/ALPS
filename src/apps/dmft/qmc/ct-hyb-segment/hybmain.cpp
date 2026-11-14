@@ -22,6 +22,7 @@
 #include <alps/solvers.hpp>
 #include <alps/params.hpp>
 #include <alps/parameter_input.hpp>
+#include <alps/cli.hpp>
 #include "hyb.hpp"
 #include <cstring>
 #include <fstream>
@@ -47,6 +48,14 @@ bool is_input_output_call(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]){
+  if (alps::handle_cli_information(argc, argv, "cthyb_segment", [&] {
+        std::cout << "Usage: " << argv[0] << " parameters.ini [NAME=value ...]\n"
+                  << "       " << argv[0] << " input.h5 output.h5\n\n";
+        alps::params parameters;
+        cthyb_segment::hybridization::define_parameters(parameters);
+        parameters.print_help(std::cout);
+      }))
+    return 0;
 #ifdef ALPS_HAVE_MPI
   // outside the try: destroyed while an exception unwinds, it calls MPI_Abort
   // before the catch below can print the message. The catch aborts itself,
