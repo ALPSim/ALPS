@@ -29,7 +29,7 @@
 
 - [ ] Physical results match expected behaviour (describe briefly below)
 - [ ] Parameter files / input format changes are documented
-- [ ] Relevant tutorial or documentation updated
+- [ ] Relevant tutorial or documentation updated, including the website pages the "Website pages" check lists (in alpsim.github.io, or an issue opened there)
 
 <!-- Brief description of physical validation, if applicable: -->
 
