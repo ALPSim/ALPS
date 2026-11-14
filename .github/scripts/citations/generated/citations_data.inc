@@ -1,5 +1,40 @@
 // Generated from CITATION.cff and CITATIONS.yaml. Do not edit.
 static const citation_entry citation_entries[] = {
+  {"cthyb_segment",
+   "********************************************************************************\n"
+   "* Recommended citations for ALPS CT-HYB-SEGMENT impurity solver:               *\n"
+   "* Framework: [1]; Algorithm: [2], [3]; Implementation: [4]                     *\n"
+   "* [1] F. Alet et al., The ALPS project release 3.0: open source software for   *\n"
+   "*     strongly correlated systems, arXiv:2610.03884 (2026); preprint.          *\n"
+   "* [2] P. Werner et al., Physical Review Letters 97, 076405 (2006).             *\n"
+   "* [3] E. Gull et al., Reviews of Modern Physics 83, 349 (2011).                *\n"
+   "* [4] H. Hafermann, P. Werner, E. Gull, Computer Physics Communications 184,   *\n"
+   "*     1280 (2013).                                                             *\n"
+   "* This is a request for scientific credit, separate from the MIT license       *\n"
+   "* terms.                                                                       *\n"
+   "* Full references: --citations                                                 *\n"
+   "********************************************************************************\n"
+   "\n",
+   "Recommended citations for ALPS CT-HYB-SEGMENT impurity solver:\n"
+   "If ALPS contributes to published research, please cite the relevant algorithm,\n"
+   "implementation, and framework papers below.\n"
+   "  Framework: [1]\n"
+   "  Algorithm: [2], [3]\n"
+   "  Implementation: [4]\n"
+   "  [1] F. Alet et al., \"The ALPS project release 3.0: open source software for strongly\n"
+   "      correlated systems.\" arXiv:2610.03884 (2026). Preprint.\n"
+   "      https://doi.org/10.48550/arXiv.2610.03884\n"
+   "  [2] P. Werner et al., \"Continuous-Time Solver for Quantum Impurity Models.\" Physical\n"
+   "      Review Letters 97, 076405 (2006). https://doi.org/10.1103/PhysRevLett.97.076405\n"
+   "  [3] E. Gull et al., \"Continuous-Time Monte Carlo Methods for Quantum Impurity Models.\"\n"
+   "      Reviews of Modern Physics 83, 349–404 (2011).\n"
+   "      https://doi.org/10.1103/RevModPhys.83.349\n"
+   "  [4] H. Hafermann, P. Werner, E. Gull, \"Efficient implementation of the continuous-time\n"
+   "      hybridization expansion quantum impurity solver.\" Computer Physics Communications\n"
+   "      184, 1280–1286 (2013). https://doi.org/10.1016/j.cpc.2012.12.013\n"
+   "This is a request for scientific credit, separate from the MIT license terms.\n"
+   "\n",
+  },
   {"dirloop_sse",
    "********************************************************************************\n"
    "* Recommended citations for ALPS directed-loop stochastic series expansion:    *\n"

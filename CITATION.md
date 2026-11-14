@@ -33,6 +33,7 @@ The framework paper applies to every component. A paper serving several roles is
 | `dmft` | [metzner1989](#metzner1989), [georges1992](#georges1992), [georges1996](#georges1996) | [gull2011cpc](#gull2011cpc) | — |
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
 | `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc), [hafermann2013](#hafermann2013) | — |
+| `cthyb_segment` | [werner2006](#werner2006), [gull2011](#gull2011) | [hafermann2013](#hafermann2013) | — |
 | `hirschfye` | [hirschfye1986](#hirschfye1986) | [gull2011cpc](#gull2011cpc) | — |
 | `maxent` | [bryan1990](#bryan1990), [jarrell1996](#jarrell1996) | [levy2017maxent](#levy2017maxent) | — |
 

@@ -36,7 +36,12 @@
 import shutil
 import pyalps.mpi as mpi                # mpi library
 from pyalps.hdf5 import archive            # hdf5 interface
-import pyalps.cthyb as cthyb            # the solver module
+import os
+# ALPS_CTHYB_SOLVER=ct-hyb-segment runs the same parameters on CT-HYB-SEGMENT.
+if os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization') == 'ct-hyb-segment':
+  import pyalps.cthyb_segment_compat as cthyb
+else:
+  import pyalps.cthyb as cthyb            # the solver module
 from numpy import sqrt,cosh,sinh,exp,pi #some math
 from numpy import array,zeros,append
 ##################################################################################################################

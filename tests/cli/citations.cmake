@@ -33,7 +33,7 @@ if(ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
   set_tests_properties(citation_runtime_mpi PROPERTIES LABELS "citations;mpi" PROCESSORS 2 TIMEOUT 180)
 endif()
 foreach(app dmrg qwl dirloop_sse worm spinmc fulldiag sparsediag hirschfye loop
-    dmft hybridization interaction fulldiag_evaluate spinmc_evaluate checksign
+    dmft hybridization ct-hyb-segment interaction fulldiag_evaluate spinmc_evaluate checksign
     qwl_evaluate worm_evaluate simplemc pevaluate maxent)
   if(NOT TARGET ${app})
     continue()
@@ -41,6 +41,8 @@ foreach(app dmrg qwl dirloop_sse worm spinmc fulldiag sparsediag hirschfye loop
   string(REPLACE "_evaluate" "" component "${app}")
   if(app STREQUAL "loop")
     set(component looper)
+  elseif(app STREQUAL "ct-hyb-segment")
+    set(component cthyb_segment)
   elseif(app MATCHES "^(checksign|simplemc|pevaluate)$")
     set(component framework)
   endif()

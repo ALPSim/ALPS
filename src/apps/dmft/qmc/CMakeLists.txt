@@ -94,6 +94,9 @@ target_link_libraries(dmft PRIVATE dmft_qmc_impl interaction_expansion_impl)
 target_link_libraries(hirschfye PRIVATE dmft_qmc_impl)
 
 target_link_libraries(hybridization PRIVATE ALPS::cthyb)
+
+# Segment-picture CT-HYB solver (ALPS::cthyb_segment and ct-hyb-segment)
+add_subdirectory(ct-hyb-segment)
 target_link_libraries(interaction PRIVATE ALPS::ctint)
 
 if(ALPS_BUILD_TESTING)
@@ -136,6 +139,16 @@ if(ALPS_BUILD_TESTING)
     add_executable(dmft_ctint_thermalization_mpi dmft_ctint_thermalization_mpi.C)
     target_link_libraries(dmft_ctint_thermalization_mpi PRIVATE ALPS::ctint)
     alps_add_mpi_gtest(dmft_ctint_thermalization_mpi COMPONENT dmft RANKS 2 LABELS regression)
+  endif()
+
+  if(TARGET ALPS::cthyb_segment)
+    add_executable(dmft_cthyb_segment_exact dmft_cthyb_segment_exact.C)
+    target_link_libraries(dmft_cthyb_segment_exact PRIVATE ALPS::cthyb_segment)
+    if(NOT ALPS_ENABLE_MPI)
+      alps_add_gtest(dmft_cthyb_segment_exact COMPONENT dmft LABELS regression TIMEOUT 300)
+    else()
+      alps_add_mpi_gtest(dmft_cthyb_segment_exact COMPONENT dmft RANKS 2 LABELS regression TIMEOUT 300)
+    endif()
   endif()
 endif()
 

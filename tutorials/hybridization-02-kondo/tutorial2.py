@@ -36,7 +36,12 @@
 
 import pyalps.mpi as mpi          # MPI library
 from pyalps.hdf5 import archive       # hdf5 interface
-import pyalps.cthyb as cthyb      # the solver module
+import os
+# ALPS_CTHYB_SOLVER=ct-hyb-segment runs the same parameters on CT-HYB-SEGMENT.
+if os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization') == 'ct-hyb-segment':
+  import pyalps.cthyb_segment_compat as cthyb
+else:
+  import pyalps.cthyb as cthyb      # the solver module
 import matplotlib.pyplot as plt   # for plotting results
 from numpy import exp,log,sqrt,pi # some math
 
