@@ -33,7 +33,7 @@ K_(p){
   if(use_retarded_interaction_){
     double Kp0=K_.interpolate_deriv(0.0);//K'(0^+)
     U_.apply_shift(-2.*Kp0); //apply static shift caused by the retarded interaction
-    mu_.apply_shift(-Kp0);
+    mu_.apply_shift(+Kp0); //as documented (U -> U-2K'(0), mu -> mu+K'(0)) and as in the CPC version
   }
   
   extern int global_mpi_rank;
