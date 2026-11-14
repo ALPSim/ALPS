@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: MIT
 
 # The solver reads and writes Green's functions through ALPS::gf, which needs Eigen.
+# Like the Eigen components of src/alps, it is installed with its own export,
+# ALPSCthyb_segmentTargets, so that only consumers asking for it need Eigen.
+set_property(GLOBAL APPEND PROPERTY ALPS_EIGEN_COMPONENT_NAMES cthyb_segment)
 if(NOT TARGET ALPS::gf)
   message(STATUS "ALPS::gf is not built (Eigen not found): ct-hyb-segment is not built")
   return()
@@ -44,6 +47,13 @@ if(ALPS_ENABLE_NFFT)
   target_include_directories(alps_cthyb_segment PRIVATE ${NFFT3_INCLUDE_DIRS})
   target_link_libraries(alps_cthyb_segment PRIVATE ${NFFT3_LIBRARIES})
 endif()
+install(TARGETS alps_cthyb_segment EXPORT ALPSCthyb_segmentTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries)
+install(EXPORT ALPSCthyb_segmentTargets
+  NAMESPACE ALPS::
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/alps
+  COMPONENT build)
+set_property(GLOBAL APPEND PROPERTY ALPS_EIGEN_COMPONENTS cthyb_segment)
 
 add_executable(ct-hyb-segment hybmain.cpp)
 target_link_libraries(ct-hyb-segment PRIVATE ALPS::cthyb_segment)
