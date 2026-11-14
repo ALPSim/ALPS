@@ -108,6 +108,7 @@ enum MCMP_Tags {
   MCMP_work                        = 311,
   MCMP_run_work                    = 315,
   MCMP_summary                     = 320,
+  MCMP_task_idle                   = 321, // a task's local run has no work left
 
 // messages between main and slave runs
   MCMP_do_steps                    = 500
