@@ -142,12 +142,6 @@ void hybfun::read_hybridization_from_h5gf(const alps::params &p) {
     }
   }
 
-  {
-    std::ofstream Delta_text("/tmp/Delta.dat");
-    std::ofstream Deltaw_text("/tmp/Deltaw.dat");
-    Delta_text<<Delta;
-    Deltaw_text<<Delta_w;
-  }
 }
 
 std::ostream &operator<<(std::ostream &os, const hybfun &hyb){
