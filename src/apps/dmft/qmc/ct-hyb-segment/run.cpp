@@ -13,7 +13,12 @@
 #include <alps/mc/mpiadapter.hpp>
 #endif
 
+namespace cthyb_segment {
+int global_mpi_rank;
+}
+
 namespace {
+using namespace cthyb_segment;
 #ifdef ALPS_HAVE_MPI
 using sim_type = alps::mcmpiadapter<hybridization>;
 #else
@@ -43,8 +48,6 @@ void master_final_tasks(const alps::results_type<hybridization>::type &results,
   evaluate_2p(results, parameters, solver_output);
 }
 }
-
-int global_mpi_rank;
 
 void alps::solvers::cthyb_segment(alps::params const& input, std::string const& output_file) {
   alps::params parameters(input);

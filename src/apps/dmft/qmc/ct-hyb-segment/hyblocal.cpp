@@ -15,6 +15,10 @@
 
 #include"hyblocal.hpp"
 #include<algorithm>
+#include <iomanip>
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 
 local_configuration::local_configuration(const alps::params &p):
 U_(p),
@@ -613,7 +617,6 @@ void local_configuration::state_map_segment_insert(state_map &states, const segm
   states[s.t_end_]=current_state-index;//- for annihilator
 
 }
-#include<iomanip>
 void local_configuration::measure_sector_statistics(std::vector<double> &sector_statistics, double sign) const{//complexity: linear in n_orbitals_
   state_map states; //key is time, value is state
   //state map is organized such that an entry with time t and value s means that the impurity
@@ -652,3 +655,5 @@ void local_configuration::measure_sector_statistics(std::vector<double> &sector_
     sector_statistics[state+full_line_states]+=(beta_-tau)/beta_*sign;//don't forget the last interval
   }
 }
+
+}  // namespace cthyb_segment

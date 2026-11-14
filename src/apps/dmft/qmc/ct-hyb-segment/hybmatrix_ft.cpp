@@ -15,6 +15,9 @@
 
 #include "hybmatrix.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 void hybmatrix::measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi , std::vector<double> &Fwr, std::vector<double> &Fwi , const std::map<double,double> &F_prefactor, double sign) const{
   static std::vector<double> cdagger_times(size()); cdagger_times.resize(size());
   static std::vector<double> c_times(size()); c_times.resize(size());
@@ -119,5 +122,4 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
   }
 }
 
-
-
+}  // namespace cthyb_segment

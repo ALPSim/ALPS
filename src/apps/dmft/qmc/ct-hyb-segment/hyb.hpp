@@ -21,6 +21,9 @@
 #include "hyblocal.hpp"
 #include "hybconfig.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 
 #ifdef HYB_SIM_MAIN
 std::vector<int64_t> nacc,nprop;
@@ -187,4 +190,6 @@ std::ostream &operator<<(std::ostream &os, const hybridization &hyb);
 #define cwhite "\033[01;37m"
 #endif
 
+
+}  // namespace cthyb_segment
 #endif

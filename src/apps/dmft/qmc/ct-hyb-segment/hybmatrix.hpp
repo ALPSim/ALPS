@@ -20,6 +20,9 @@
 #include "hybfun.hpp"
 #include "hybblasmatrix.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //This is the hybridization matrix class responsible for computing determinant ratios and the like. Derived from a general blas matrix class that can handle elementary blas and lapack operations.
 
 //simple matrix that uses BLAS calls for rank one and matrix vector.
@@ -67,4 +70,6 @@ private:
 
 std::ostream &operator<<(std::ostream   &os, const hybmatrix &hyb_mat); 
 
+
+}  // namespace cthyb_segment
 #endif

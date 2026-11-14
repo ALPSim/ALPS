@@ -21,6 +21,9 @@
 #include"hybsegment.hpp"
 #include<set>
 #include<vector>
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 //this is the class that handles everything in connection with the local
 //impurity operators. It knows about segments, chemical potentials,
 //interactions, and so on.
@@ -99,4 +102,6 @@ std::ostream &operator<<(std::ostream &os, const local_configuration &local_conf
 #define cwhite "\033[01;37m"
 #endif
 
+
+}  // namespace cthyb_segment
 #endif

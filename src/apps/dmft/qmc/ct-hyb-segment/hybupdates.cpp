@@ -15,6 +15,9 @@
 #include"hyb.hpp"
 #include"hyblocal.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //this is the heart of the Monte Carlo procedure: we have the following updates:
 //1: change the zero order state, swap an empty orbital versus a filled one
 //2: shift an existing segment start- or end-point
@@ -358,3 +361,5 @@ void hybridization::spin_flip_update(int orbital){
     hyb_config.insert_segment(new_segment, orbital);
   }
 }
+
+}  // namespace cthyb_segment

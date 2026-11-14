@@ -14,6 +14,9 @@
 
 #include"hybconfig.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 hybridization_configuration::hybridization_configuration(const alps::params &p):
   Delta(p),
   hybmat_((int)(p["FLAVORS"]), p)
@@ -90,3 +93,5 @@ std::ostream &operator<<(std::ostream &os, const hybridization_configuration &hy
   }
   return os;
 }
+
+}  // namespace cthyb_segment

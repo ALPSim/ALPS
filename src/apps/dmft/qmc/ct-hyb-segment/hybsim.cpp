@@ -19,6 +19,9 @@
 #include <iomanip>
 #include"hyb.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 hybridization::hybridization(const alps::params &parms, int crank_)
   : alps::mcbase(parms, crank_),
   crank(crank_),
@@ -213,3 +216,5 @@ void hybridization::define_parameters(parameters_type & parameters) {
         .define<double>("tprime", 0.0, "Hopping element: next-nearest neighbor")
   ;
 }
+
+}  // namespace cthyb_segment

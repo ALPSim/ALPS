@@ -14,6 +14,9 @@
 
 #include"hybint.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 
 interaction_matrix::interaction_matrix(const alps::params &p){
   extern int global_mpi_rank;
@@ -88,3 +91,4 @@ std::ostream &operator<<(std::ostream &os, const chemical_potential &mu){
   return os;
 }
 
+}  // namespace cthyb_segment

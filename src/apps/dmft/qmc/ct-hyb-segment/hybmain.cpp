@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
 #endif
   try {
     alps::params parameters(argc, (const char**)argv, "/parameters");
-    hybridization::define_parameters(parameters);
+    cthyb_segment::hybridization::define_parameters(parameters);
     if (parameters.help_requested(std::cout))
       return 0;
     alps::solvers::cthyb_segment(parameters, "sim.h5");

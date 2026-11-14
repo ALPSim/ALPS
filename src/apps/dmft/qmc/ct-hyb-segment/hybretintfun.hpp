@@ -17,8 +17,12 @@
 #include <alps/params.hpp>
 #include <alps/hdf5.hpp>
 #include "./green_function.h"
+
 #ifndef HYB_RET_INT_FUN_HPP
 #define HYB_RET_INT_FUN_HPP
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 
 //container for the retarded interaction function
 class ret_int_fun : public green_function<double>{
@@ -57,4 +61,6 @@ std::ostream &operator<<(std::ostream &os, const ret_int_fun &K);
 #define cwhite "\033[01;37m"
 #endif
 
+
+}  // namespace cthyb_segment
 #endif

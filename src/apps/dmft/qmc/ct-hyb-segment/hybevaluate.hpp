@@ -20,6 +20,9 @@
 #include <alps/gf/fourier.hpp>
 #include <alps/mc/api.hpp>
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 void evaluate_basics(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
 void evaluate_gtau(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
 void evaluate_freq(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
@@ -42,5 +45,6 @@ struct jackson{//the Jackson kernel
 
 alps::gf::omega_sigma_gf_with_tail translate_Gw_to_h5gf(matsubara_green_function_t Gw,const alps::params &parms);
 alps::gf::itime_sigma_gf_with_tail translate_Gt_to_h5gf(itime_green_function_t Gtau, const alps::params &parms);
-#endif
 
+}  // namespace cthyb_segment
+#endif

@@ -15,6 +15,9 @@
 
 #include "hybmatrix.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //this was changed with update 51!
 //nomenclature: the c        is at the segment end  , so the time for c        is new_segment->t_end_
 //              the c_dagger is at the segment start, so the time for c_dagger is new_segment->t_start_
@@ -346,3 +349,4 @@ void hybmatrix::measure_Gl(std::vector<double> &Gl, std::vector<double> &Fl , co
   }
 }
 
+}  // namespace cthyb_segment

@@ -17,6 +17,9 @@
 #include"hyb.hpp"
 #include"hybevaluate.hpp"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 void evaluate_basics(const alps::accumulators::result_set &results,
                      const alps::params &parms,
                      alps::hdf5::archive &solver_output){
@@ -655,3 +658,5 @@ alps::gf::omega_sigma_gf_with_tail translate_Gw_to_h5gf(matsubara_green_function
   Gw_h5gf.set_tail(1, tail);
   return Gw_h5gf;
 }
+
+}  // namespace cthyb_segment

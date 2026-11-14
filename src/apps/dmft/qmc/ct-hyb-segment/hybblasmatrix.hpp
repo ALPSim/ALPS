@@ -14,6 +14,9 @@
 #pragma once
 #include "blasheader.h"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //This is the resizable square matrix class. Whoever adapted the version in ALPS f*ed it up badly: this matrix needs to have a memory size DIFFERENT from the current size, or we'll be asking for memory all the time!
 
 //simple matrix that uses BLAS calls for rank one and matrix vector.
@@ -310,3 +313,5 @@ inline std::ostream &operator<<(std::ostream &os, const blas_matrix &M){
 }
 
 std::ostream   &operator<<(std::ostream   &os, const blas_matrix &M); //forward declaration
+
+}  // namespace cthyb_segment

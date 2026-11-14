@@ -15,6 +15,9 @@
 #define HYB_SEG_HPP
 #include<fstream>
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //the struct 'segment' has a start and an end time and a comparison function.
 //segment describes a pair of operators in an orbital: t_start is the c^\dagger, t_end is the c operator.
 struct segment
@@ -29,4 +32,6 @@ struct segment
 
 std::ostream &operator<<(std::ostream &os, const segment &s);
 
+
+}  // namespace cthyb_segment
 #endif

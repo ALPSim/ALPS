@@ -20,6 +20,9 @@
 #include <alps/hdf5/vector.hpp>
 #include "./green_function.h"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //the interaction matrix keeps track of the impurity density-density interactions (other interactions are not possible in this code). Two general methods: either specify U (and optionally J and U'), or define a matrix and write it into a file, from where it is read in.
 class interaction_matrix{
 public:
@@ -90,4 +93,6 @@ private:
 std::ostream &operator<<(std::ostream &os, const interaction_matrix &U);
 std::ostream &operator<<(std::ostream &os, const chemical_potential &mu);
 
+
+}  // namespace cthyb_segment
 #endif

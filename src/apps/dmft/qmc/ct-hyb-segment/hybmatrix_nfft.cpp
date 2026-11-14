@@ -15,6 +15,9 @@
 #include "hybmatrix.hpp"
 #include "nfft3.h"
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //compute the hybridization weight change when an operator pair is inserted
 void hybmatrix::measure_Gw(std::vector<double> &Gwr, std::vector<double> &Gwi , std::vector<double> &Fwr, std::vector<double> &Fwi , const std::map<double,double> &F_prefactor, double sign) const{
   static std::vector<double> cdagger_times(size()); cdagger_times.resize(size());
@@ -365,3 +368,5 @@ void hybmatrix::measure_G2w(std::vector<std::complex<double> > &G2w, std::vector
  std::cout<<"result is: "<<M_tilde_nm[0*N_w_aux+0]<<" "<<M_tilde_nm[0*N_w_aux+1]<<" "<<M_tilde_nm[1*N_w_aux+0]<<" "<<M_tilde_nm[1*N_w_aux+1]<<" "<<std::endl;
 
  }*/
+
+}  // namespace cthyb_segment

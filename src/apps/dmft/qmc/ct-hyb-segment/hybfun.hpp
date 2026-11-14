@@ -22,6 +22,10 @@
 #ifndef HYB_FUN_HPP
 #define HYB_FUN_HPP
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
+
 //container for the hybridization function Delta(\tau) (historically: F(\tau) )
 class hybfun : public green_function<double>{
   public:
@@ -59,4 +63,6 @@ std::ostream &operator<<(std::ostream &os, const hybfun &hyb);
 #define cwhite "\033[01;37m"
 #endif
 
+
+}  // namespace cthyb_segment
 #endif

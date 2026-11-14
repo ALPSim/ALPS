@@ -17,6 +17,9 @@
 #include"hyb.hpp"
 #include<alps/numeric/vector_functions.hpp>
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 using alps::accumulators::max_bin_number;
 
 typedef alps::accumulators::FullBinningAccumulator<std::vector<double> > vec_obs_t;
@@ -404,3 +407,4 @@ void hybridization::accumulate_G2w(){
 }
 */
 
+}  // namespace cthyb_segment

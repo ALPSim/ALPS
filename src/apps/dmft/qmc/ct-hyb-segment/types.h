@@ -22,6 +22,9 @@
 //includes
 #include <vector>
 #include <complex>
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 /// the array (vector) type to store frequence dependent Green's functions and Weiss fields
 typedef std::vector<double> vector_type;
 /// two arrays are needed for a single site problem: one for up and one for down spins
@@ -77,4 +80,6 @@ struct hifreq_moments{
   std::vector<std::vector<std::vector<double> > >c2;
   std::vector<std::vector<std::vector<double> > >c3;
 };
+
+}  // namespace cthyb_segment
 #endif /*TYPES_H_*/

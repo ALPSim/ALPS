@@ -30,6 +30,9 @@
 #include <alps/hdf5/pointer.hpp>
 #include <alps/hdf5/complex.hpp>
 
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
@@ -267,4 +270,6 @@ void print_tau_green_functions(std::string const &basename, const int iteration_
                                const shape_t shape=nondiagonal, const std::string suffix="");
 void print_dressed_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
                                        const shape_t shape=nondiagonal, const std::string suffix="");
+
+}  // namespace cthyb_segment
 #endif

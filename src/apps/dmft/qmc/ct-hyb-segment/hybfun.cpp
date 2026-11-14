@@ -13,6 +13,9 @@
  *****************************************************************************/
 
 #include"hybfun.hpp"
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 //construct a hybridization function. ntime: number of time slices.
 //noffidag_orbitals: number of offdiagonal orbitals. ndiag_orbitals: number
 //of diagonal orbitals. 
@@ -165,3 +168,5 @@ double hybfun::interpolate(double time, int orbital) const{
 
   return sign*(operator()(n_lower,orbital) + (n-n_lower)*(operator()(n_lower+1,orbital)-operator()(n_lower,orbital)));
 }
+
+}  // namespace cthyb_segment

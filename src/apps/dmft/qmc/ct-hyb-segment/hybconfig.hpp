@@ -17,6 +17,9 @@
 #include"hybfun.hpp"
 #include"hybsegment.hpp"
 #include"hybmatrix.hpp"
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
 //this class knows everything to do with hybridization / bath operators.
 //determinants of hybridization matrices, rank one updates, and so on.
 //this is where \det \Delta is implemented.
@@ -45,5 +48,6 @@ private:
 };
 std::ostream &operator<<(std::ostream &os, const hybridization_configuration &hyb_config);
 
-#endif
 
+}  // namespace cthyb_segment
+#endif
