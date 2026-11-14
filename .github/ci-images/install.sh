@@ -2,6 +2,8 @@
 # Installs the CI build environment inside a ci-images Dockerfile build (as root).
 # PACKAGES: extra distribution packages (the matrix compilers); BOOST: a pinned Boost
 # version whose headers go into /opt/boost when the distribution's is too old.
+# NFFT3, which CT-HYB-SEGMENT can use (ALPS_ENABLE_NFFT), is packaged by few distributions
+# and is built into /opt/nfft everywhere, at the version pinned in dependencies.json.
 set -euxo pipefail
 . /etc/os-release
 python=python3
@@ -17,7 +19,7 @@ case $ID in
     apt-get install -y --no-install-recommends \
       ca-certificates curl git tar zstd xz-utils file build-essential gfortran ccache pkg-config \
       python3 python3-venv python3-dev libhdf5-dev libblas-dev liblapack-dev libsqlite3-dev \
-      libeigen3-dev libxml2-utils xsltproc $boost_pkg $PACKAGES
+      libeigen3-dev libfftw3-dev libxml2-utils xsltproc $boost_pkg $PACKAGES
     rm -rf /var/lib/apt/lists/*
     ;;
   rocky|almalinux|rhel|centos)
@@ -30,7 +32,7 @@ case $ID in
     dnf install -y --setopt=install_weak_deps=False \
       ca-certificates git tar zstd xz file gcc gcc-c++ gcc-gfortran make ccache pkgconf \
       python3.12 python3.12-devel hdf5-devel blas-devel lapack-devel sqlite-devel \
-      eigen3-devel libxslt libxml2 $boost_pkg $PACKAGES
+      eigen3-devel fftw-devel libxslt libxml2 $boost_pkg $PACKAGES
     dnf clean all
     ;;
   fedora)
@@ -42,7 +44,7 @@ case $ID in
     dnf install -y --setopt=install_weak_deps=False \
       ca-certificates git tar zstd xz file gcc gcc-c++ gcc-gfortran make ccache pkgconf \
       python3 python3-devel hdf5-devel flexiblas-devel sqlite-devel \
-      eigen3-devel libxslt libxml2 python3-numpy python3-h5py python3-lxml python3-packaging \
+      eigen3-devel fftw-devel libxslt libxml2 python3-numpy python3-h5py python3-lxml python3-packaging \
       python3-pyyaml python3-jsonschema python3-pytest $boost_pkg $PACKAGES
     dnf clean all
     venv_args=(--system-site-packages)
@@ -64,3 +66,7 @@ if [[ -n $BOOST ]]; then
   PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py "boost-$BOOST" /opt/boost
 fi
 mkdir -p /opt/boost
+
+PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py nfft-3.6.0 /opt/nfft
+echo /opt/nfft/lib > /etc/ld.so.conf.d/alps-nfft.conf
+ldconfig

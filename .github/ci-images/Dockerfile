@@ -3,6 +3,7 @@
 # compilers of its matrix entries, ALPS's native dependencies and a Python environment with
 # the build tools, so jobs start building at once. Boost's headers are installed from source
 # (pinned in .github/dependencies.json) where the distribution's is older than ALPS's minimum.
+# NFFT3 is built from source into /opt/nfft, also pinned there.
 ARG BASE
 FROM ${BASE}
 ARG PACKAGES=""
@@ -14,5 +15,5 @@ COPY .github/scripts/prepare_dependencies.py /tmp/ci/.github/scripts/
 COPY .github/dependencies.json /tmp/ci/.github/dependencies.json
 RUN PACKAGES="${PACKAGES}" BOOST="${BOOST}" bash /tmp/ci/.github/ci-images/install.sh && rm -rf /tmp/ci
 ENV PATH=/opt/ci-venv/bin:${PATH} \
-    CMAKE_PREFIX_PATH=/opt/boost \
+    CMAKE_PREFIX_PATH=/opt/boost:/opt/nfft \
     CMAKE_GENERATOR=Ninja

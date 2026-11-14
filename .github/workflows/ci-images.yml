@@ -63,7 +63,7 @@ jobs:
         docker build --pull -f .github/ci-images/Dockerfile \
           --build-arg BASE="$BASE" --build-arg PACKAGES="$PACKAGES" --build-arg BOOST="$BOOST" \
           -t "$TAG" .
-        docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3'
+        docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3; test -f /opt/nfft/include/nfft3.h; ldconfig -p | grep -q libnfft3'
     - name: Push
       if: github.ref == 'refs/heads/master'
       env:
