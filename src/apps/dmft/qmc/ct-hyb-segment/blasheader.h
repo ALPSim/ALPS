@@ -1,6 +1,8 @@
 //BLAS headers for accessing BLAS from C++.
 //Emanuel Gull, 2006 - 2007.
 //gull@itp.phys.ethz.ch
+// ALPS Project: https://alps.comp-phys.org/
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include<complex>
