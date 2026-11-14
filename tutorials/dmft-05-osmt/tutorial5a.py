@@ -11,6 +11,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ for u,j in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]:
               'N_MEAS'              : 2000,
               'N_HISTOGRAM_ORDERS'             : 50,
               'SEED'                : 0,
-              'SOLVER'              : 'hybridization',
+              'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 1,
               'SWEEPS'              : 10000,
