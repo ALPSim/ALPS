@@ -14,16 +14,37 @@
  *****************************************************************************/
 
 // Usage: ct-hyb-segment parameters.ini [NAME=value ...]
+//          results are written to sim.h5 in the working directory
+//        ct-hyb-segment input.h5 output.h5
+//          parameters (and input data) from an HDF5 or ALPS parameter file
+//          written by the ALPS DMFT loop; results go to output.h5
 //        ct-hyb-segment --help
-// Results are written to sim.h5 in the working directory.
 #include <alps/solvers.hpp>
 #include <alps/params.hpp>
+#include <alps/parameter_input.hpp>
 #include "hyb.hpp"
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #ifdef ALPS_HAVE_MPI
 #include <alps/utilities/mpi.hpp>
 #endif
+
+namespace {
+bool is_hdf5_file(const char* name) {
+  static const char signature[] = {char(137), 'H', 'D', 'F', '\r', '\n', char(26), '\n'};
+  char first[sizeof(signature)];
+  std::ifstream file(name, std::ios::binary);
+  return file.read(first, sizeof(first)) && std::memcmp(first, signature, sizeof(first)) == 0;
+}
+
+// The ALPS external-solver convention: exactly an input file and an output file.
+bool is_input_output_call(int argc, char* argv[]) {
+  return argc == 3 && argv[1][0] != '-' && !std::strchr(argv[1], '=')
+      && argv[2][0] != '-' && !std::strchr(argv[2], '=') && is_hdf5_file(argv[1]);
+}
+}
 
 int main(int argc, char* argv[]){
 #ifdef ALPS_HAVE_MPI
@@ -33,6 +54,10 @@ int main(int argc, char* argv[]){
   alps::mpi::environment env(argc, argv);
 #endif
   try {
+    if (is_input_output_call(argc, argv)) {
+      alps::solvers::cthyb_segment(alps::read_params_file(argv[1]), argv[2]);
+      return 0;
+    }
     alps::params parameters(argc, (const char**)argv, "/parameters");
     cthyb_segment::hybridization::define_parameters(parameters);
     if (parameters.help_requested(std::cout))
