@@ -46,6 +46,12 @@ if(Python_Interpreter_FOUND)
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(spinmc_cluster_magnetization PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
   endif()
+  if(TARGET dirloop_sse)
+    add_test(NAME dirloop_sse_cutoff_growth
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dirloop_sse_cutoff.py"
+        "$<TARGET_FILE:dirloop_sse>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(dirloop_sse_cutoff_growth PROPERTIES TIMEOUT 120 LABELS "cli")
+  endif()
   if(TARGET qwl AND TARGET qwl_evaluate AND ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
     add_test(NAME scheduler_qwl_runs_mpi
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_qwl_runs.py"
