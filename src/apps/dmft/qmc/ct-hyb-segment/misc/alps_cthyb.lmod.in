@@ -1,0 +1,15 @@
+#%Module1.0
+
+set     name        alps_cthyb
+set     root        @CMAKE_INSTALL_PREFIX@
+
+
+setenv      ALPS_CTHYB_DIR    $root
+setenv      ALPS_CTHYB_ROOT   $root
+setenv      ALPS_CTHYB_LIB    $root/lib
+setenv      ALPS_CTHYB_INC    $root/include
+setenv      ALPS_CTHYB_BIN    $root/bin
+
+prepend-path      PATH      $root/bin
+prepend-path      LD_LIBRARY_PATH $root/lib
+prepend-path      PYTHONPATH $root/lib/python
