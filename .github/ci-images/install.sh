@@ -1,10 +1,11 @@
 #!/bin/bash
 # Installs the CI build environment inside a ci-images Dockerfile build (as root).
 # PACKAGES: extra distribution packages (the matrix compilers); BOOST: a pinned Boost
-# version whose headers go into /opt/boost when the distribution's is too old.
-# NFFT3, which CT-HYB-SEGMENT can use (ALPS_ENABLE_NFFT), is packaged by few distributions
-# and is built into /opt/nfft everywhere, at the version pinned in dependencies.json.
+# version whose headers go into /opt/boost when the distribution's is too old; NFFT: the
+# pinned NFFT3 version, which CT-HYB-SEGMENT can use (ALPS_ENABLE_NFFT). Few distributions
+# package NFFT3, so it is built into /opt/nfft everywhere.
 set -euxo pipefail
+: "${NFFT:?NFFT must name a version pinned in dependencies.json}"
 . /etc/os-release
 python=python3
 venv_args=()
@@ -67,6 +68,6 @@ if [[ -n $BOOST ]]; then
 fi
 mkdir -p /opt/boost
 
-PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py nfft-3.6.0 /opt/nfft
+PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py "nfft-$NFFT" /opt/nfft
 echo /opt/nfft/lib > /etc/ld.so.conf.d/alps-nfft.conf
 ldconfig
