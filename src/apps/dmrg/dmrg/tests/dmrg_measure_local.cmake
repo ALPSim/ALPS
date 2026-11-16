@@ -1,6 +1,6 @@
-# MEASURE_LOCAL and MEASURE_CORRELATIONS of operators with several terms or a
-# coefficient (issue #304). Sx(i)*Sx(i) and Sx:Sx on the spin-1 chain have
-# terms that change Sz, such as S+S+.
+# MEASURE_LOCAL, MEASURE_CORRELATIONS and MEASURE_AVERAGE of operators with
+# several terms or a coefficient (issue #304). Sx(i)*Sx(i) and Sx:Sx on the
+# spin-1 chain have terms that change Sz, such as S+S+.
 # The reference values are sparsediag of the same input; each value has to
 # lie within 0.001 of it, given below as lower:upper bounds.
 file(REMOVE_RECURSE "${test_dir}")
@@ -46,6 +46,7 @@ MAXSTATES=100
   CONSERVED_QUANTUMNUMBERS="Sz"
   Sz_total=1
   MEASURE_LOCAL[sx2]="Sx(i)*Sx(i)"
+  MEASURE_AVERAGE[sx2sum]="Sx(i)*Sx(i)"
   MEASURE_CORRELATIONS[sxsx]="Sx:Sx"
 }
 ]=])
@@ -59,7 +60,8 @@ execute_process(COMMAND "${dmrg}" --write-xml parameters.in.xml
 #             exchange_xy -0.290123 -0.369372 -0.168166 -0.369372 -0.290123
 #             2*Sz 0.676394 -0.064401 0.388007 0.388007 -0.064401 0.676394
 #             double_occupancy 0.140755 0.230531 0.230531 0.140755
-#             Sx:Sx, rows i = 0..4 over j = 0..4, and Sx(i)*Sx(i) its diagonal:
+#             Sx:Sx, rows i = 0..4 over j = 0..4, and Sx(i)*Sx(i) its diagonal,
+#             which adds up to 3.144179:
 #               0.627272 -0.473753  0.181733 -0.131753  0.094694
 #              -0.473753  0.640855 -0.353629  0.155503 -0.131753
 #               0.181733 -0.353629  0.607925 -0.353629  0.181733
@@ -109,3 +111,12 @@ foreach(name ex exy twoSz docc sx2 sxsx)
     math(EXPR i "${i} + 1")
   endforeach()
 endforeach()
+
+file(READ "${test_dir}/parameters.task3.out.xml" result)
+string(REGEX MATCH "<SCALAR_AVERAGE name=\"sx2sum\"><MEAN>([^<]+)</MEAN>" found "${result}")
+if(NOT found)
+  message(FATAL_ERROR "sx2sum: no measurement in the result")
+endif()
+if(CMAKE_MATCH_1 LESS 3.1432 OR CMAKE_MATCH_1 GREATER 3.1452)
+  message(FATAL_ERROR "sx2sum = ${CMAKE_MATCH_1}, expected between 3.1432 and 3.1452")
+endif()

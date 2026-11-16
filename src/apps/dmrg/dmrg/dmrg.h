@@ -514,6 +514,7 @@ void DMRGTask<value_type>::dostep()
     if (has_bond_operator(ex.second)) {
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit)
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
       meas_terms += dmtk::BasicOp<value_type >(meas);
@@ -521,6 +522,7 @@ void DMRGTask<value_type>::dostep()
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit)
         build_site_operator(make_site_term(ex.second),*sit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
 //      meas_terms += dmtk::BasicOp<value_type >(meas);
