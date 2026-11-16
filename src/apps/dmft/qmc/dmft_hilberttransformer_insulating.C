@@ -59,3 +59,11 @@ TEST(DmftRegression, hilberttransformer_insulating_with_g0_input) {
   p["G0OMEGA_INPUT"] = "G0omega_input";
   EXPECT_THROW(GeneralFSHilbertTransformer(p, false).initial_G0(p), std::invalid_argument);
 }
+
+// The imaginary-time loop (OMEGA_LOOP = 0) reads its initial G0 from G0TAU_INPUT.
+TEST(DmftRegression, hilberttransformer_insulating_with_g0tau_input) {
+  alps::Parameters p = base_parameters();
+  p["INSULATING"] = 1;
+  p["G0TAU_INPUT"] = "G0tau_input";
+  EXPECT_THROW(SemicircleHilbertTransformer(p).initial_G0(p), std::invalid_argument);
+}
