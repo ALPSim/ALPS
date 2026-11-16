@@ -45,7 +45,6 @@ for u in [3.]:
                 'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
                 'N_HISTOGRAM_ORDERS' : 50,               # histogram size
                 'DOSFILE' : "DOS/DOS_Square_GRID4000", # specification of the file with density of states
-                'GENERAL_FOURIER_TRANSFORMER' : 1,  # Fourier transformer for a general bandstructure
                 'EPS_0' : 0,                        # potential shift for the flavor 0
                 'EPS_1' : 0,                        # potential shift for the flavor 1
                 'EPSSQ_0' : 4,                      # the second moment of the bandstructure for the flavor 0
