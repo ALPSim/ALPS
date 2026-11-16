@@ -50,14 +50,6 @@ public:
   void save(ODump& dump) const;
   void load(IDump& dump);
 
-  template<typename Archive>
-  void serialize(Archive & ar, const unsigned int) {
-    std::string start_str = to_simple_string(startt_);
-    std::string stop_str = to_simple_string(stopt_);
-    ar &  hosts_ & user_ & phase_ & start_str & stop_str;
-    startt_ = boost::posix_time::time_from_string(start_str);
-    stopt_ = boost::posix_time::time_from_string(stop_str);
-  }
   void save(hdf5::archive & ar) const;
   void load(hdf5::archive & ar);
 
@@ -127,10 +119,6 @@ public:
   void save (ODump& dp) const;
   void load (IDump& dp);
 
-  template<typename Archive>
-  void serialize(Archive & ar, const unsigned int) {
-    ar & clone_id_ & progress_ & phases_ & dumpfiles_ & worker_seed_ & disorder_seed_;
-  }
   void save(hdf5::archive & ar) const;
   void load(hdf5::archive & ar);
 

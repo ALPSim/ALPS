@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs the CI build environment inside a ci-images Dockerfile build (as root).
 # PACKAGES: extra distribution packages (the matrix compilers); BOOST: a pinned Boost
-# version to build into /opt/boost when the distribution's is too old.
+# version whose headers go into /opt/boost when the distribution's is too old.
 set -euxo pipefail
 . /etc/os-release
 python=python3
@@ -61,7 +61,6 @@ esac
 /opt/ci-venv/bin/python -c 'import numpy, h5py, lxml, yaml, jsonschema, pytest'
 
 if [[ -n $BOOST ]]; then
-  # Built with the distribution's default compiler: libstdc++'s ABI serves gcc and clang.
   PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py "boost-$BOOST" /opt/boost
 fi
 mkdir -p /opt/boost

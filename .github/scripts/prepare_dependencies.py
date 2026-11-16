@@ -1,6 +1,6 @@
 """Prepare pinned CI dependencies using official sources and reusable caches.
 
-CI builds selected Boost releases when the OS package is too old.
+CI installs the headers of selected Boost releases when the OS package is too old.
 No project-owned GitHub release assets are required.
 """
 from __future__ import annotations
@@ -49,7 +49,10 @@ def prepare_boost(version: str, destination: Path):
                 # checksum was verified against the pinned value above.
                 package.extractall(source)  # noqa: S202
         extracted, = source.iterdir()
-        subprocess.run(['bash', str(ROOT / '.github/scripts/build-boost.sh'), str(extracted), str(destination.resolve())], check=True)
+        # ALPS uses Boost's headers and CMake package files, and no compiled Boost library.
+        subprocess.run(['./bootstrap.sh'], cwd=extracted, check=True)
+        subprocess.run(['./b2', '-d0', f'--prefix={destination.resolve()}', '--with-headers', 'install'],
+                       cwd=extracted, check=True)
     stamp.write_text(fingerprint)
 
 
