@@ -448,10 +448,12 @@ jobs:
   macos:
     needs: changes
     if: needs.changes.outputs.macos_run == 'true'
-    runs-on: macos-15
+    # The VT Mac mini runs one throw-away macOS 15 VM per job. Fork pull requests,
+    # and every job while the repo variable VT_MACOS is 'off', use GitHub's macos-15.
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.VT_MACOS == 'off') && 'macos-15' || 'vt-macos' }}
     timeout-minutes: 90
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.VT_MACOS == 'off') && '2' || '4' }}
       CC: clang
       CXX: clang++
     steps:
