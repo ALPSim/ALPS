@@ -86,6 +86,14 @@ int main(int argc, char** argv)
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
+      // SYMMETRIZATION averages the two spins of every Green's function, which
+      // undoes any field and leaves the impurity and lattice sides inconsistent.
+      if (parms.value_or_default("SYMMETRIZATION",false)
+          && (static_cast<double>(parms.value_or_default("H",0.))!=0.
+              || static_cast<double>(parms.value_or_default("H_INIT",0.))!=0.))
+        throw std::invalid_argument("SYMMETRIZATION = true requires H = 0 and H_INIT = 0: symmetrization "
+                                    "averages the spins, so a field cannot act. For a magnetic field set "
+                                    "SYMMETRIZATION = false.");
       if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
         // Hirsch-Fye and CT-INT, built in or external, read G0 in Matsubara
