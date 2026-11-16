@@ -76,9 +76,12 @@ def prepare_boost(version: str, destination: Path):
 def prepare_nfft(version: str, destination: Path):
     def build(source, prefix):
         # The release archive carries its configure script. Only the library is
-        # needed; FFTW3 comes from the distribution.
+        # needed; FFTW3 comes from the distribution. Without CFLAGS, configure
+        # tunes for the build host's CPU; images are built on one machine and run
+        # on others, so keep the library portable.
         subprocess.run(['./configure', f'--prefix={prefix}', '--disable-examples',
-                        '--disable-applications', '--disable-julia'], cwd=source, check=True)
+                        '--disable-applications', '--disable-julia',
+                        '--enable-portable-binary'], cwd=source, check=True)
         subprocess.run(['make', f'-j{os.cpu_count() or 1}'], cwd=source, check=True)
         subprocess.run(['make', 'install'], cwd=source, check=True)
     url = f'https://github.com/NFFT/nfft/releases/download/{version}/nfft-{version}.tar.gz'
