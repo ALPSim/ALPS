@@ -342,6 +342,10 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
                                            const std::string& term, const std::vector<std::size_t>& sites) const
 {
   const typename basis_descriptor_type::constraints_type& constraints = basis_.get_basis().constraints();
+  const typename basis_descriptor_type::unevaluated_constraints_type& all = basis_.get_basis().all_constraints();
+  std::vector<std::string> qns;      // every fixed quantum number the term changes
+  std::vector<std::string> values;   // their <CONSTRAINT value=...>, e.g. Nup_total
+  std::ostringstream fixed;          // e.g. "Nup = Nup_total = 1, Ndown = Ndown_total = 1"
   for (std::size_t c=0;c<constraints.size();++c) {
     typename basis_descriptor_type::total_type change;
     for (std::size_t r=0;r<sites.size();++r) {
@@ -351,25 +355,33 @@ void hamiltonian_matrix<M,G>::check_sector(const state_type& state, const state_
         continue;
       change += get_quantumnumber(basis_[s][newstate[s]],k) - get_quantumnumber(basis_[s][state[s]],k);
     }
-    if (change!=typename basis_descriptor_type::total_type(0)) {
-      const std::string& qn=constraints[c].first;
-      std::string value;   // the <CONSTRAINT value=...> of the basis, e.g. Nup_total
-      const typename basis_descriptor_type::unevaluated_constraints_type& all = basis_.get_basis().all_constraints();
-      for (std::size_t a=0;a<all.size();++a)
-        if (all[a].first==qn)
-          value=boost::lexical_cast<std::string>(all[a].second);
-      std::ostringstream msg;
-      msg << term << " on site" << (sites.size()>1 ? "s" : "");
-      for (std::size_t r=0;r<sites.size();++r)
-        msg << " " << sites[r];
-      msg << " changes " << qn << ", which the basis fixes in this sector (" << qn << " = "
-          << value << " = " << constraints[c].second << "). Remove " << qn
-          << " from CONSERVED_QUANTUMNUMBERS and leave " << value
-          << " undefined to diagonalize the full space, or remove the parts of the term that change "
-          << qn << ".";
-      boost::throw_exception(std::runtime_error(msg.str()));
-    }
+    if (change==typename basis_descriptor_type::total_type(0))
+      continue;
+    const std::string& qn=constraints[c].first;
+    std::string value;
+    for (std::size_t a=0;a<all.size();++a)
+      if (all[a].first==qn)
+        value=boost::lexical_cast<std::string>(all[a].second);
+    fixed << (qns.empty() ? "" : ", ") << qn << " = " << value << " = " << constraints[c].second;
+    qns.push_back(qn);
+    if (!value.empty())
+      values.push_back(value);
   }
+  if (qns.empty())
+    return;
+  const std::string them = (qns.size()>1 ? "them" : "it");
+  std::ostringstream msg;
+  msg << term << " on site" << (sites.size()>1 ? "s" : "");
+  for (std::size_t r=0;r<sites.size();++r)
+    msg << " " << sites[r];
+  msg << " changes " << join_names(qns,"and") << ", which the basis fixes in this sector ("
+      << fixed.str() << "). To diagonalize the full space, do not fix " << join_names(qns,"or")
+      << ": leave " << them << " out of CONSERVED_QUANTUMNUMBERS";
+  if (!values.empty())
+    msg << " and do not set " << join_names(values,"or");
+  msg << ". If the term should conserve " << join_names(qns,"and") << ", find the parts that change "
+      << them << ".";
+  boost::throw_exception(std::runtime_error(msg.str()));
 }
 
 // Fill one n-site term on n-site group p. The local table (see nsiteoperator.h)
