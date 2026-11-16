@@ -14,6 +14,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 
 ### Fixed
 
+- `dmft` reads `INSULATING` as a boolean. It started the loop from the atomic G0 = 1/(iω + μ ± h) whenever the key was set, so `INSULATING = 0` did too. `INSULATING` together with `G0OMEGA_INPUT` or `G0TAU_INPUT` is an error; `INSULATING` used to override `G0OMEGA_INPUT` and was ignored next to `G0TAU_INPUT`.
 - Monte Carlo applications on the legacy scheduler (`spinmc`, `worm`, `qwl`) stop a run when its work is done instead of sweeping on until the scheduler's next check, which came 60 s later by default (`--Tmin`). A task with one run now takes exactly `SWEEPS` measurements, gives the same result to the last digit when repeated with the same `SEED`, and ends as soon as it is done. With several runs per task under MPI, the runs still share `SWEEPS` according to their speed, so only their total is fixed; their results are now merged in the order of the runs instead of the order of arrival. `spinmc` with `ERROR_LIMIT` tests the error every 100 sweeps.
 - A `qwl` task with several runs under MPI waits for all of its runs. It used to end when the progress of the runs added up to one, which stopped every run before it had stored its coefficients, or with only the fastest run's.
 - `worm` stops with an error when `MEASURE[Green Function]` is set. It has no working estimator for the Green's function and reported `Green's Function` as zeros with zero errors. `dirloop_sse` measures it.
