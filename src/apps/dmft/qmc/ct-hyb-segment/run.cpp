@@ -27,6 +27,15 @@ using sim_type = hybridization;
 #endif
 
 //stops the simulation if time > end_time or if signals received.
+// Prints the parameters that have a value. Alternative inputs (U or U_MATRIX, ...)
+// are defined without defaults, so the stream operator of alps::params would also
+// report the unused ones as missing, although the run is correctly specified.
+void print_parameters(std::ostream& out, alps::params const& parameters) {
+  out << "Parameters :" << std::endl;
+  for (alps::params::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+    if (!it->second.empty()) { out << "  " << it->first << " = "; print(out, it->second, true) << std::endl; }
+}
+
 bool stop_requested(std::time_t end_time) {
   static alps::signal signal;
   return !signal.empty() || std::time(nullptr) > end_time;
@@ -68,7 +77,7 @@ void alps::solvers::cthyb_segment(alps::params const& input, std::string const& 
 #endif
   if (global_mpi_rank==0) {
     alps::print_copyright(std::cout, "cthyb_segment");
-    std::cout << "Parameters : " << std::endl << parameters << std::endl;
+    print_parameters(std::cout, parameters);
   }
 
   //run the simulation

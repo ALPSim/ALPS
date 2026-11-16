@@ -14,6 +14,8 @@
 
 #include"hybfun.hpp"
 #include <sstream>
+#include <stdexcept>
+#include <string>
 
 // Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
 namespace cthyb_segment {
@@ -63,6 +65,9 @@ void hybfun::read_hybridization_function(const alps::params &p){
     else if(ar.is_data("/Delta")){//plain hdf5: all flavors in one array
       std::vector<double> tmp(nflavor()*ntime());
       ar>>alps::make_pvp("/Delta",tmp);
+      if(tmp.size()!=nflavor()*ntime())
+        throw std::invalid_argument("hybridization file "+fname+": /Delta has "+std::to_string(tmp.size())
+                                    +" values, expected FLAVORS*(N+1) = "+std::to_string(nflavor()*ntime()));
       for(std::size_t j=0; j<nflavor(); j++)
         for(std::size_t i=0; i<ntime(); i++)
           operator()(i,j)=tmp[j*ntime()+i];
@@ -73,6 +78,9 @@ void hybfun::read_hybridization_function(const alps::params &p){
       for(std::size_t j=0; j<nflavor(); j++){
         std::stringstream path; path<<"/Delta_"<<j;
         ar>>alps::make_pvp(path.str(),tmp);
+        if(tmp.size()!=ntime())
+          throw std::invalid_argument("hybridization file "+fname+": "+path.str()+" has "+std::to_string(tmp.size())
+                                      +" points, expected N+1 = "+std::to_string(ntime()));
         for(std::size_t i=0; i<ntime(); i++)
           operator()(i,j)=tmp[i];
       }
