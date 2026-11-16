@@ -174,7 +174,9 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
       double wn=(2.*w+1)*boost::math::constants::pi<double>()/beta;
       for(spin_t f=0; f<G_omega.nflavor(); ++f){
         Sigma(0,f)=1./G0_omega(w,f)-1./G_omega(w,f);
-        std::complex<double> zeta=std::complex<double>(mu-h,wn)-Sigma(0,f);
+        // Uniform field: flavor 0 sees mu-h and flavor 1 sees mu+h, as on the
+        // impurity side and in the AFM branch below.
+        std::complex<double> zeta=std::complex<double>(mu+(f%2 ? h : -h),wn)-Sigma(0,f);
         
         G_omega_new(0,f)=bandstruct->HilbertIntegral_PM(zeta,f);
         G0_omega(w,f)=1./(1./G_omega_new(0,f)+Sigma(0,f));
@@ -231,6 +233,16 @@ matsubara_green_function_t SemicircleFSHilbertTransformer::operator()(const mats
     for(unsigned i=0; i<G_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
       G0_omega(i,0) =1./(iw + mu - bandstruct.second_moment(0)*G_omega(i,0));
+    }
+  }
+  else if(!AFM){
+    // Without Neel order every flavor couples to its own G; the uniform field
+    // shifts flavor 0 by -h and flavor 1 by +h.
+    for(unsigned flavor=0;flavor<G_omega.nflavor();++flavor){
+      for(unsigned i=0; i<G_omega.nfreq(); i++) {
+        std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
+        G0_omega(i,flavor) =1./(iw + mu + (flavor%2 ? h : -h) - bandstruct.second_moment(flavor)*G_omega(i,flavor));
+      }
     }
   }
   else{
