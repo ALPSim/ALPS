@@ -1,161 +1,107 @@
 # Testing ALPS
 
-ALPS uses GoogleTest for C++ runtime tests, CTest for native execution, and
-pytest for Python. Native component tests live beside their implementation in
-`src/alps/<component>/tests`; Python tests live in `python/pyalps/tests`. Repository-wide
-integration, SDK, packaging and CI checks live here. The two language suites
-have independent entry points: passing CTest does not mean that the Python
-package was tested.
+C++ tests use GoogleTest and run through CTest; Python tests use pytest. Component
+tests live beside their code in `src/alps/<component>/tests`, Python tests in
+`python/pyalps/tests`, and repository-wide integration, installed-library,
+packaging and CI checks here. The two suites are independent: passing CTest says
+nothing about the Python package.
+
+## When to add a test
+
+A test earns its place when a real bug would make it fail. A bug fix adds the
+one test that fails without the fix; a new feature checks its result against an
+exact or independent value; a refactor adds none. A test that would only fail
+because the code changed, not because a result is wrong (a default value read
+back, one case per overload), is removed in review.
 
 ## Local workflows
 
-With the SDK prerequisites installed:
+With the prerequisites from [CONTRIBUTING.md](../CONTRIBUTING.md#prerequisites):
 
 ```sh
 cmake --preset dev
 cmake --build --preset dev --parallel 2
-ctest --preset dev
-ctest --preset dev -L hdf5
-ctest --preset dev -R Matrix
+ctest --preset dev                 # whole native suite
+ctest --preset dev -L hdf5         # by label
+ctest --preset dev -R Matrix       # by name
 ```
 
-`dev` omits applications. `default` includes application tests. `mpi` enables
-MPI, `extensive` enables graph and HDF5 type-matrix tests, `debug` builds
-applications and tests with assertions enabled, and `sanitizers` instruments a
-Debug build with AddressSanitizer and UndefinedBehaviorSanitizer.
-Build each preset before testing it. To exercise actual ranks:
+Presets: `dev` is the library only; `default` adds the applications; `mpi`
+enables MPI (`ctest --preset mpi -L '^mpi$'` runs the rank topologies);
+`debug` builds applications and tests with assertions on; `sanitizers` adds
+ASan and UBSan; `extensive` enables the graph and HDF5 type-matrix tests. Build
+a preset before testing it. GoogleTest is a test-only dependency, found if
+installed (>= 1.14) or fetched (pinned 1.18.0; offline:
+`-DFETCHCONTENT_SOURCE_DIR_GOOGLETEST=/path`).
 
-```sh
-cmake --preset mpi
-cmake --build --preset mpi --parallel 2
-ctest --preset mpi -L '^mpi$'
-```
-
-All test presets reject an empty selection. An unbuilt GoogleTest executable is
-reported as `NOT_BUILT`; a built executable with zero discovered cases fails
-discovery, even when other executables still contain tests.
-GoogleTest is a test-only dependency: CMake uses an installed GTest >= 1.14 or
-fetches the checksum-pinned 1.18.0 release. An offline source checkout can be
-selected with `-DFETCHCONTENT_SOURCE_DIR_GOOGLETEST=/path/to/googletest`.
-`ALPS_BUILD_TESTING=OFF` neither finds nor fetches GoogleTest, and it is never
-installed as part of the SDK.
-Tutorials using only the CMake process runner do not acquire GoogleTest either.
-
-Standalone numerical tutorials need no SDK or wheel:
-
-```sh
-python -m pip install numpy pytest
-python -m pytest tests/tutorials/test_bandstructure.py -q
-```
-
-After installing the SDK and pyalps as described in `CONTRIBUTING.md`:
+Native MaxEnt reference tests need NumPy and h5py in the CMake-selected
+Python. Python suites, after the editable install in CONTRIBUTING.md:
 
 ```sh
 python -m pytest python/pyalps/tests -q -rs
-python -m pytest tests/cmake -q -rs
-python -m pytest tests/ci tests/packaging -q
+python -m pytest tests/cmake -q -rs                            # installed-library consumers; needs ALPS_DIR
+ALPS_XML_BUILD="$PWD/_build/default" python -m pytest tests/cli -q   # XML CLI; needs xsltproc
+python -m pytest tests/ci tests/packaging -q                   # workflow and release helpers; Python >= 3.11
+python -m pytest tests/tutorials -q                            # standalone numerical tutorials; numpy only
 ```
 
-`tests/cmake` requires `ALPS_DIR`; it validates installed consumers, relocatability,
-and build configuration. `ALPS_TEST_CMAKE_ARGS` supplies a
-JSON array of dependency/toolchain arguments to its temporary projects. Keep
-the installed-SDK and Python checks pointed at the candidate build. Distribution
-CI additionally exercises repaired wheels and independently unpacked sdists.
+`PYALPS_TEST_DOWNSTREAM_EXPORT=1` adds the slower tests that compile Python
+extensions against the installed library; `tests/cmake` expects the MPI-disabled
+LP64 build of the `default` preset, and `ALPS_TEST_CMAKE_ARGS` passes a JSON
+array of toolchain arguments to its temporary projects. Read the skip reasons
+(`-rs`): a skipped case is not coverage. `python
+.github/scripts/validate_pyalps.py --output _build/validation --wheelhouse
+wheelhouse` records installed-wheel validation evidence (`--packaging`,
+`--downstream`, `--applications` add checks). Keep
+`python/pyalps/tests/fixtures/legacy_checkpoint.h5` frozen: regenerating it
+with the current library would lose the backward-compatibility check.
 
 ## Writing a C++ test
 
-Create an ordinary executable, link only the component being tested, then call
-`alps_add_gtest(target COMPONENT hdf5 LABELS compatibility)` from its test
-CMakeLists. Each GoogleTest case is discoverable through CTest; names include
-the component and executable to avoid collisions across generated type tests.
-Use `TIMEOUT` for a justified nondefault limit and `THREADS` for an OpenMP test.
-Group related cases in one executable when they share dependencies, labels and
-resource requirements. CTest still launches each discovered case independently.
-Keep separate targets for distinct MPI, stress-test or compiler requirements.
-Labels describe both ownership and purpose (`compatibility`, `integration`,
-`scientific`, `extensive`, `mpi`). `legacy_semantics` marks characterization of
-known legacy behavior that must not constrain a replacement implementation. GoogleTest execution alone does not imply a
-test is a scientific validation.
+Make an ordinary executable that links only the component under test and
+register it with `alps_add_gtest(target COMPONENT hdf5 LABELS compatibility)`
+in the test `CMakeLists.txt`; every case becomes a CTest entry. Group cases in
+one executable when they share dependencies and labels; keep separate targets
+for MPI, stress or compiler-specific tests. Labels: `compatibility`,
+`integration`, `scientific`, `extensive`, `mpi`, and `legacy_semantics` for
+characterisation of old behaviour that a replacement need not keep. `TIMEOUT`
+(default 60 s, MPI 120 s) and `THREADS` are set per target when justified.
 
-Use `alps::testing::TemporaryDirectory` for files. Cases in one executable may
-run concurrently in different processes, so an executable-level working
-directory is not enough to isolate filenames. Tests must not depend on ordering
-or prior test output. GoogleTest assertion failures remain active in Release
-builds; ordinary C `assert()` is unsuitable for test expectations.
+Cases in one executable may run concurrently, so use
+`alps::testing::TemporaryDirectory` for files and never depend on ordering or
+another case's output. Use GoogleTest assertions, not `assert()`, which Release
+builds compile out. Textual contracts use `StreamFixture`
+(`tests/support`) and compare inside the test, not by diffing printed output.
 
-MPI tests use `alps_add_mpi_gtest` and run as complete rank topologies. The shared
-main initializes MPI, combines rank exit statuses, and writes distinct XML
-reports. Every rank must enter matching collectives even after nonfatal assertion
-failures. Use CTest timeouts to bound deadlocks. The rank count is also declared
-as the CTest processor requirement; OpenMP and BLAS threads are bounded separately.
+MPI tests use `alps_add_mpi_gtest` and run as complete rank topologies; every
+rank must reach the same collectives even after a non-fatal assertion failure.
+See [mpi.md](mpi.md).
 
 ## Choosing assertions and reference data
 
-Prefer direct value assertions to printed numbers. For floating-point results,
-state the absolute/relative tolerance and its numerical or physical basis.
-Historical decimal fixtures migrated to assertions retain their original
-rounding bounds; those comparisons establish compatibility, not independent
-scientific correctness. Avoid broadening a tolerance just to pass a new platform.
-Floating-point equality and tolerance assertions reject NaNs; test intended
-nonfinite behavior explicitly.
+- Assert values directly. For floating point, state the tolerance and where it
+  comes from; do not widen a tolerance to pass a new platform. Tolerance
+  assertions reject NaN, so test intended non-finite behaviour explicitly.
+- Prefer analytic results, independent calculations and invariants
+  (normalisation, conservation) over values the code itself produced. A
+  writer/reader round trip can hide a shared bug; keep historical files too.
+- Seed stochastic tests and print the seed. Such a test reproduces one
+  trajectory; it does not validate error bars. New statistical validation
+  states its ensemble, autocorrelation treatment and false-failure probability.
+  Do not re-run a failed numerical test until it passes.
+- Fixture changes carry provenance and a behavioural explanation in the PR.
+- Skip with a named reason when an optional capability is missing. Do not add
+  permanently disabled tests; a quarantine names the reason, issue and owner.
 
-Combine reference values with analytic solutions, independent calculations and
-invariants such as normalization or conservation. A writer/reader round trip
-can hide a shared bug: retain historical files and raw-schema assertions too.
-Fixture changes require provenance and a behavioral explanation in the PR.
+Historical references migrated from the Boost.Test suites, the quirks kept
+pending a consolidation decision, and the per-component inventories are in
+[migration.md](migration.md), [mpi.md](mpi.md),
+[hdf5](../src/alps/hdf5/tests/README.md) and
+[graph](../src/alps/graph/tests/README.md).
 
-Seed stochastic regression tests and include the seed in diagnostics. These
-reproduce a particular trajectory; they do not validate uncertainty estimation
-in general. New statistical validation should document the ensemble,
-autocorrelation treatment, thresholds and combined false-failure probability.
-Do not retry failed numerical tests until they happen to pass.
+## CI
 
-Textual serialization contracts can use `StreamFixture`: it supplies an input
-fixture and compares captured output explicitly inside GoogleTest. Remaining
-model/lattice serialization transcripts are retained as compatibility evidence.
-They should be supplemented with semantic assertions when changing the underlying behavior.
-The remaining CMake process runner is for executable/CLI/tutorial contracts.
-
-## CI policy and evidence
-
-Every PR runs a fixed set of checks: static/packaging helpers and numerical tutorial references, Linux serial native and editable-Python tests, Clang MPI integration, macOS SDK consumers, native ASan/UBSan, and manylinux packaging. The stable aggregate `CI` check requires every job to succeed; select it in branch protection. No workflow-level path filters can leave that required check pending.
-
-Weekly compatibility checks cover compiler/dependency boundaries, C++20/C++23, extensive HDF5 tests, OpenMP, installed tutorials, MPI-enabled Python, Intel/newer macOS, and all three wheel families. Release tags run the same compatibility workflow, including distribution artifact validation, before publishing those exact files. Python 3.10, 3.11 and 3.12 exercise distinct wheel ABIs; newer interpreters test reuse of the abi3 wheel through binding, object-lifetime and package-loading checks. Fresh-runner smoke checks cover bindings and package loading. The identical C++ SDK consumers run once per wheel platform on Python 3.12. JUnit, CTest and per-rank MPI reports remain available as workflow artifacts. See [CI coverage](../CONTRIBUTING.md#ci-coverage) for the workflow entry points.
-
-Benchmarks remain separate from correctness gates. Existing timing programs
-are not claims of performance coverage. Introduce baselines only with a defined
-workload and controlled measurement environment; ordinary shared-runner wall
-times are diagnostic, not reliable regression thresholds.
-
-## Migration accounting
-
-The migration preserves existing executable identities where possible and
-expands Boost.Test typed cases into individually discovered GoogleTest cases.
-Counts before and after migration are therefore not directly comparable.
-Component migration notes record retained scenarios, reference provenance and
-historical behavior needing a consolidation decision:
-
-| Area | Contract and inventory |
-| --- | --- |
-| Numerics, containers, alea, legacy parameters, parapack | [Compatibility references](migration.md), including numerical quirks preserved for an explicit consolidation decision. |
-| HDF5 | [Schema, fixtures, generated types and resource opt-ins](../src/alps/hdf5/tests/README.md). |
-| Params | [Typed access, persistence and adapter contracts](../src/alps/params/tests/README.md). |
-| Graph | [Canonicalization, embedding and extensive-test inventory](../src/alps/graph/tests/README.md). |
-| MPI | [Rank topologies, assertions and remaining manual drivers](mpi.md). |
-| Model, lattice, XML, Osiris | Basis enumeration, sign classifications, coloring/parity and decoded dump values use [semantic assertions](migration.md#model-lattice-and-osiris-semantic-assertions). Remaining XML/symbolic transcripts retain exact compatibility checks. Dump files are isolated and the historical XDR fixture remains versioned. |
-| Utilities, CLI, portability and random | Direct API, wire-format, seeded sampling and platform assertions replace ad hoc mains or printed smoke output. |
-| DMFT, DMRG, MaxEnt | Native regression tests use GoogleTest; executable behavior stays under CTest. MaxEnt's Python scientific oracle is shared with its binding tests. |
-| Monte Carlo runners | The formerly unregistered scalar/vector examples check completion, stopping, collection and HDF5 persistence. Test counters are initialized; MPI scheduling is deterministic. |
-
-The obsolete experimental accumulator prototype tests have been removed.
-Benchmarks and remaining unregistered sources do not count toward executed coverage.
-
-Use named skips for unavailable optional capabilities or unsupported type
-combinations; skipped cases do not establish coverage. Do not add permanently
-disabled tests. Any necessary quarantine must name the
-reason, tracked issue and owner; CI must continue reporting the missing coverage.
-
-Native GoogleTest cases default to a 60-second timeout (the legacy output
-runner uses 600 seconds); MPI topologies default to 120 seconds. Tests that
-need more time on slow or instrumented builds can set `TIMEOUT` explicitly
-in their `alps_add_gtest` or `alps_add_mpi_gtest` registration.
+Pull requests report one aggregate `CI` check that selects the affected areas
+(see [CI coverage](../CONTRIBUTING.md#ci-coverage)); weekly and release runs
+cover the compatibility matrix. Timing programs are not correctness gates and
+shared-runner wall times are not regression thresholds.

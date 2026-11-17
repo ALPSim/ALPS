@@ -235,9 +235,9 @@ class BasicOp: public dmtk::BMatrix<T>
 //  Methods
 
     BasicOp& resize(const Basis &b) 
-      { BMatrix<T>::repack(b); _BMvector::clear(); init_blocks(); return *this; }
+      { BMatrix<T>::repack(b); this->clear(); init_blocks(); return *this; }
     BasicOp& resize(const PackedBasis &b) 
-      { BMatrix<T>::repack(b); _BMvector::clear(); init_blocks(); return *this; }
+      { BMatrix<T>::repack(b); this->clear(); init_blocks(); return *this; }
 
 
     BasicOp reshape(int qn_mask) const;
@@ -745,7 +745,7 @@ BasicOp<T>::bmatrix_from_matrix(const Matrix<T>& m)
   typename PackedBasis::iterator iter;
 
   typedef BMatrix<T> bm;
-  _BMvector::clear();
+  this->clear();
 
 /*
   for(iter = bm::subspace_begin(); iter != bm::subspace_end(); iter++){

@@ -105,7 +105,7 @@ ObservableSet MCSimulation::get_measurements(bool compactit) const
     // collect results
     for (unsigned int i=0;i<where_master.size();i++) {
       // receive dump from remote process, abort if error
-      IMPDump receive(MCMP_measurements);
+      IMPDump receive(where_master[i],MCMP_measurements);
       ObservableSet m;
       receive >> m;
       accumulate_measurements(all_measurements, m);
@@ -149,7 +149,7 @@ ObservableSet MCSimulation::get_and_remove_observable(const std::string& obsname
     // collect results
     for (unsigned int i=0;i<where_master.size();i++) {
       // receive dump from remote process, abort if error
-      IMPDump receive(MCMP_observable);
+      IMPDump receive(where_master[i],MCMP_observable);
       ObservableSet m;
       receive >> m;
       obs_set << m;
@@ -406,7 +406,7 @@ void MCSimulation::save(hdf5::archive & ar) const {
             OMPDump send;
             send.send(remote_runs, MCMP_get_measurements_and_infos);
             for (unsigned int i = 0; i < remote_runs.size(); ++i) {
-                IMPDump receive(MCMP_measurements_and_infos);
+                IMPDump receive(remote_runs[i],MCMP_measurements_and_infos);
                 ObservableSet measurements;
                 receive >> measurements;
                 all_measurements.push_back(make_pair(1, measurements));

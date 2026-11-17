@@ -49,7 +49,6 @@
 
 #include <alps/config.h>
 #include "parameters.h"
-#include <boost/serialization/vector.hpp>
 
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
@@ -83,10 +82,6 @@ public:
   /// replace '${FOO}' with the the content of environment variable FOO
   void replace_envvar();
 
-  /// support for Boost serialization
-  template <class ARCHIVE>
-  void serialize(ARCHIVE & ar, const unsigned int)
-  { ar & static_cast<super_type&>(*this); }
 };
 
 } // end namespace
