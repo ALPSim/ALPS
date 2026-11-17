@@ -54,7 +54,6 @@
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/optional/optional.hpp>
-#include <boost/serialization/vector.hpp>
 
 #include <vector>
 #include <numeric>
@@ -881,22 +880,6 @@ namespace alps {
                         // tau_opt_ = boost::none;
                     }
                     data_is_analyzed_ = true;
-                }
-
-                friend class boost::serialization::access;
-                template <typename Archive> void serialize(Archive & ar, const unsigned int version) {
-                    ar & count_;
-                    ar & binsize_;
-                    ar & max_bin_number_;
-                    ar & data_is_analyzed_;
-                    ar & jacknife_bins_valid_;
-                    ar & cannot_rebin_;
-                    ar & mean_;
-                    ar & error_;
-                    ar & variance_opt_;
-                    ar & tau_opt_;
-                    ar & values_;
-                    ar & jack_;
                 }
 
                 mutable uint64_t count_;

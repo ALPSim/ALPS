@@ -15,9 +15,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include <alps/numeric/numeric_cast.hpp>
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>
-
 namespace alps {
 namespace numeric {
 
@@ -442,13 +439,6 @@ namespace numeric {
    MemoryBlock& matrix<T, MemoryBlock>::get_values()
    {
        return this->values_;
-   }
-
-   template <typename T, typename MemoryBlock>
-   template<typename Archive>
-   inline void matrix<T, MemoryBlock>::serialize(Archive & ar, const unsigned int version)
-   {
-       ar & size1_ & size2_ & reserved_size1_ & values_;
    }
 
    } // end namespace numeric

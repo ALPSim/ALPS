@@ -160,45 +160,13 @@ Reuse build directories for ordinary edits. Machine-specific CMake settings belo
 
 ### Run the tests
 
-Native MaxEnt reference tests require NumPy and h5py in the CMake-selected Python interpreter (`python -m pip install numpy h5py`). The executable and Python binding share the same scientific validation.
-
-See [the testing guide](tests/README.md) for GoogleTest conventions, component selection, MPI, sanitizers, standalone tutorial checks, and CI coverage policy. For library-only iteration use the `dev` configure/build/test presets; the `default` preset below also builds applications.
-
-CTest runs the native suite only. After the SDK build, run:
-
 ```sh
-ctest --preset default
+ctest --preset default                       # native suite
+python -m pytest python/pyalps/tests -q -rs  # after the editable install above
 ```
 
-After the editable install above, test Python and installed-SDK consumers too:
-
-```sh
-python -m pip install "pytest>=8"
-PYALPS_TEST_DOWNSTREAM_EXPORT=1 CMAKE_BUILD_PARALLEL_LEVEL=2 \
-  python -m pytest python/pyalps/tests tests/cmake -q -rs
-```
-
-Keep `ALPS_DIR` and any dependency prefixes set. The downstream flag enables tests that compile Python extensions against the installed SDK and pyalps runtime. These checks compile additional small projects and take longer than import tests. `tests/cmake` assumes an MPI-disabled LP64 SDK for its consumer contracts; use the default SDK for this command. If custom toolchain arguments are needed by these temporary builds, `ALPS_TEST_CMAKE_ARGS` accepts a JSON array of CMake arguments.
-
-Read the skip reasons: MPI tests need additional MPI setup, and some wheel checks apply only to repaired distribution artifacts. A successful local run with skips does not exercise every CI configuration. For a quick iteration, select native tests with `ctest --preset default -R <pattern>` or Python tests with `python -m pytest <test-file> -q`.
-
-For XML CLI changes, install `xsltproc` (Ubuntu: `sudo apt-get install xsltproc`; Homebrew: `brew install libxslt` and add its `bin` directory to `PATH`), then run:
-
-```sh
-ALPS_XML_BUILD="$PWD/_build/default" python -m pytest tests/cli -q
-```
-
-These tests install and relocate the XML component before exercising transformations. Build/release helper changes also have tests under `tests/ci` and `tests/packaging`; release-version helpers require Python ≥ 3.11 and `packaging`.
-
-To retain installed-wheel validation evidence, run:
-
-```sh
-python .github/scripts/validate_pyalps.py --output _build/validation --wheelhouse wheelhouse
-```
-
-The runner records test reports, logs, source and binary hashes, dependency versions and timings. Add `--packaging` for packaging checks, `--downstream` for compiled consumers (requires the matching SDK, CMake, a compiler and nanobind), or `--applications` for six installed solver smoke workflows. The exact-diagonalization cases check the four-site Heisenberg ground-state energy; the short Monte Carlo and DMRG runs check finite results, not convergence.
-
-Historical checkpoint loading runs in the regular Python suite using `python/pyalps/tests/fixtures/legacy_checkpoint.h5`. Its adjacent C++ source records the historical serializer revision and reproduction instructions. Keep this fixture frozen during ALPSCore consolidation: a checkpoint regenerated with the current SDK would lose the backward-compatibility check. The retired Boost.Python comparison scripts remain available in Git history.
+[tests/README.md](tests/README.md) is the testing guide: presets and labels,
+the installed-library, CLI and packaging suites, and how to write a test.
 
 All tests must pass before submitting a pull request.
 
@@ -227,7 +195,7 @@ All tests must pass before submitting a pull request.
    docs: add Heisenberg chain tutorial
    ```
 
-4. **Add or update tests** for any changed behaviour. New simulation methods should include at least one regression test comparing output against a known result.
+4. **Add the test the change needs**, following [when to add a test](tests/README.md#when-to-add-a-test).
 
 ---
 
@@ -269,10 +237,8 @@ request review.
 
 2. Open a pull request against the `master` branch of `ALPSim/ALPS`.
 
-3. Fill in the pull request template, including:
-   - What problem this solves and why
-   - How to test the change
-   - Any known limitations or follow-up work
+3. Fill in the pull request template. It asks only for what a reviewer cannot
+   see in the diff.
 
 4. Ensure CI passes (build + tests on Linux and macOS).
 
@@ -465,10 +431,15 @@ use `skip-existing` to hide a version mismatch.
 
 ## Review process
 
-ALPS uses a consensus-based review model:
+[REVIEW.md](REVIEW.md) lists what reviewers look for in this repository and how
+findings are reported. The [maintainers table](https://alps.comp-phys.org/govern/maintainers/)
+on the ALPS website says who maintains each part of the code and who the core
+maintainers are. Reviewer time is the scarcest resource ALPS has, so how much
+review a change needs depends on what it touches:
 
-- Pull requests are reviewed by **maintainers** (at least one per simulation code) and **core maintainers**.
-- A pull request is accepted if all active reviewers approve, or if no objections are raised within **six weeks** of submission.
+- **Changes that cannot alter results** (documentation, tutorials, `CHANGELOG.md`, CI helper scripts, test-only changes, packaging metadata) need green CI and one approval from anyone with write access.
+- **Everything else** needs green CI and two approvals, at least one from a core maintainer. The maintainer of the affected code is requested as a reviewer and their comments are addressed; if they have not responded within two weeks, their silence does not block the merge.
+- A pull request with no reviewer activity for **six weeks** may be merged by a core maintainer if CI is green and no objections were raised.
 - Controversial changes can be escalated to the [Governing Council](https://alps.comp-phys.org/govern/).
 
 Core maintainers are responsible for validating that code compiles, tests pass, and results are physically correct. Please be responsive to review comments; PRs with no author activity for eight weeks may be closed.
@@ -483,7 +454,7 @@ If you are contributing a new simulation application or library, the Governing C
 
 - Target C++17.
 - Match the style of the surrounding code. ALPS does not enforce a single formatter, but keeps consistent conventions within each subdirectory.
-- Avoid undefined behaviour and compiler warnings. New code should compile cleanly with `-Wall -Wextra` on GCC and Clang.
+- Avoid undefined behaviour and compiler warnings. New code should compile cleanly with `-Wall -Wextra` on GCC and Clang; CI does not yet enforce this, so check locally when touching C++.
 - Prefer standard library and Boost facilities over hand-rolled implementations.
 
 ### Python

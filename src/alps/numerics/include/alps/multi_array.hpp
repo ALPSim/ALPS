@@ -18,6 +18,5 @@
 #include <alps/multi_array/io.hpp>
 #include <alps/multi_array/functions.hpp>
 #include <alps/multi_array/operators.hpp>
-#include <alps/multi_array/serialization.hpp>
 
 #endif // ALPS_MULTI_ARRAY_HPP

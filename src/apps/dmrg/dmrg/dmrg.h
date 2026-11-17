@@ -30,7 +30,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/archive/tmpdir.hpp>
 #include <boost/foreach.hpp>
 
 #include <optional>
