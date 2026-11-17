@@ -76,14 +76,3 @@ extern "C" void dgetrf_(const int *N, const int *NRHS, double *A, const int *LDA
 //extern "C" void zgetrf_(const int *N, const int *NRHS, std::complex<double> *A, const int *LDA, int *IPIV, int *INFO);
 extern "C" void zgetrf_(const int*, const int*, void*, const int*, int*, int*);
 }
-namespace vecLib{
-extern "C" void vvexp(double * /* y */,const double * /* x */,const int * /* n */);
-}
-namespace acml{
-extern "C" void vrda_exp(const int, double *, const double *);
-}
-namespace mkl{
-extern "C" void vdExp(const int, const double *, double *);
-extern "C" void vfExp(const int, const float *, float *);
-extern "C" void vzmul_(const int*, const std::complex<double>*, const std::complex<double> *, std::complex<double> *);
-}
