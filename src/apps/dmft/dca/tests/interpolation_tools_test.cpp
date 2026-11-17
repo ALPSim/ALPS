@@ -59,9 +59,6 @@ alps::params transformer_parameters(const std::string& dump) {
   p["dca.INITIAL_G0"] = "FREE";
   p["dca.AFM_SELFCONSISTENCY"] = false;
   p["dca.CO_SELFCONSISTENCY"] = false;
-  p["t_flavor"] = 0.;
-  p["dca.PHASE"] = false;
-  p["dca.IMBALANCE"] = false;
   p["dca.H_INIT"] = 0.;
   p["dca.H"] = 0.;
   p["dca.ETA1_INIT"] = 0.;
