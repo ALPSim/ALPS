@@ -90,9 +90,14 @@ MAXSTATES=20
 ]=])
 expect_refusal(pairs "A <SITETERM> changes N")
 
-# A field along z conserves Sz and is kept. h=0.6 moves the ground state
-# to Sz=1, so the energy differs from the field-free one: sparsediag
-# -3.5822404878
+# A field along z conserves Sz and is kept. The field lowers the Sz=1
+# sector by h, below Sz=0 once h exceeds the triplet gap, 0.3927. The
+# lowest energy in each sector at h=0.6 (sparsediag):
+#   Sz=0  -3.3749325987  (the same as at h=0)
+#   Sz=1  -3.5822404878  ground state
+#   Sz=2  -3.0316134998
+# For h below 0.3927 the ground state is the Sz=0 one, whose energy doesn't
+# depend on h, so the test could not tell whether the field was kept.
 file(WRITE "${test_dir}/zfield" [=[
 LATTICE="open chain lattice"
 MODEL="spin"
