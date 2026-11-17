@@ -45,7 +45,10 @@ if(GSL_FOUND)
     add_executable(sigma_interpolate_${kind} AuxiliaryPrograms/sigma_interpolate_${kind}.cpp)
     target_link_libraries(sigma_interpolate_${kind} PRIVATE alps_dca GSL::gsl)
   endforeach()
-  alps_install_applications(sigma_interpolate_normal sigma_interpolate_sc)
+  # Optional tools: installed, but not exported or bundled with the applications,
+  # whose set does not depend on optional dependencies.
+  install(TARGETS sigma_interpolate_normal sigma_interpolate_sc
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT applications)
 else()
   message(STATUS "GSL not found: sigma_interpolate_normal and sigma_interpolate_sc are not built")
 endif()

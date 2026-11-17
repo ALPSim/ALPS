@@ -36,6 +36,7 @@ import pyalps
 
 EXPECTED_BUNDLED_PROGRAMS = {
     "checksign",
+    "dca",
     "dirloop_sse",
     "dmft",
     "dmrg",

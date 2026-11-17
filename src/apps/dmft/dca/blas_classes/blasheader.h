@@ -7,11 +7,6 @@
 
 
 #include<complex>
-#ifdef NO_MY_BLAS_DEFS
-#include<boost/numeric/bindings/blas.hpp>
-#include<boost/numeric/bindings/lapack.hpp>
-#include<boost/numeric/bindings/lapack/driver/gesv.hpp>
-#else
 //function declaration for BLAS functions
 namespace blas{
 //matrix vector multiplication
@@ -92,4 +87,3 @@ extern "C" void vdExp(const int, const double *, double *);
 extern "C" void vfExp(const int, const float *, float *);
 extern "C" void vzmul_(const int*, const std::complex<double>*, const std::complex<double> *, std::complex<double> *);
 }
-#endif

@@ -601,9 +601,7 @@ namespace blas{
       int *ipiv=new int[size1_];
       int info;
       B.set_to_identity();
-#ifndef NO_MY_BLAS_DEFS
       using namespace lapack;
-#endif
       zgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);
       if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
       swap(B);
@@ -616,9 +614,7 @@ namespace blas{
       int *ipiv=new int[size1_];
       int info;
       B.set_to_identity();
-#ifndef NO_MY_BLAS_DEFS
       using namespace lapack;
-#endif
       dgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);
       if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
       swap(B);
