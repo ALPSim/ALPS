@@ -55,21 +55,35 @@ dump_location_(cluster_name_+"/L"+std::to_string(lattice_L_))
 }
 
 //Find the periodicity (i.e. the number of hops until we're back on the same site) in each direction
+//
+//n hops along the unit vector e_i return to the same cluster site if n e_i is a superlattice vector,
+//n e_i = sum_j c_j a_j with integer c_j. With A the matrix whose rows are the superlattice vectors a_j,
+//c_j = n (A^-1)_{ij}. The smallest such n is at most the number of cluster sites, the order of the
+//group of lattice translations modulo the superlattice. The basis is taken from the cluster definition,
+//which is available whether or not the tables were read from the dump file.
 void ClusterHelper::find_periodicity() {
-  periodicity_.clear();
-  periodicity_.resize(dimension(), 0.);
-  for (int k = 0; k < dimension(); k++) {
-    int n = 0;
-    bool done = false;
-    while (!done) {
-      n += 1;
-      for (int d = 0; d < dimension(); d++) {
-        if (n * reciprocal_basis_(k, d) > 2 * M_PI) {
-          done = true;
-        }
+  const int dim = dimension();
+  Matrix<double>::Type A(dim, dim);
+  for (int j = 0; j < dim; ++j)
+    for (int d = 0; d < dim; ++d)
+      A(j, d) = basis_vectors()[j][d];
+  const Matrix<double>::Type A_inv = Matrix<double>::inverse(A);
+  const int n_max = unit_cell_volume();
+  periodicity_.assign(dim, 0);
+  for (int i = 0; i < dim; ++i) {
+    for (int n = 1; n <= n_max && periodicity_[i] == 0; ++n) {
+      bool integer = true;
+      for (int j = 0; j < dim; ++j) {
+        const double c = n * A_inv(i, j);
+        integer = integer && std::abs(c - std::round(c)) < 1e-8;
       }
+      if (integer) periodicity_[i] = n;
     }
-    periodicity_[k] = n - 1;
+    if (periodicity_[i] == 0) {
+      std::stringstream message;
+      message << "cluster " << cluster_name_ << ": no periodicity found in direction " << i;
+      throw std::logic_error(message.str());
+    }
   }
 }
 

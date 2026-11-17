@@ -17,7 +17,7 @@
 //,"Betts2D-27A","Betts2D-27B","Betts2D-28A","Betts2D-28B","Betts2D-28C","Betts2D-28D","Betts2D-29A","Betts2D-29B","Betts2D-30A","Betts2D-30B","Betts2D-30C","Betts2D-30D","Betts2D-30G","Betts2D-31A","Betts2D-31B","Betts2D-32A","Betts2D-32B","Betts2D-32C","Betts2D-32D","Betts2D-32E"
 #define THREEDCLUSTERS1 "Kent3D-8A","Kent3D-8B","Kent3D-8C"
 
-//,"Kent3D-10A","Kent3D-10B","Kent3D-12A","Kent3D-12B","Kent3D-14A","Kent3D-14B","Kent3D-16C","Kent3D-16D","Kent3D-18A","Kent3D-18B","Kent3D-20A","Kent3D-20B","Kent3D-22A","Kent3D-22B","Kent3D-24C","Kent3D-24D","Kent3D-26A","Kent3D-26B","Kent3D-28C","Kent3D-28D","Kent3D-30A","Kent3D-30B","Kent3D-32C","Kent3D-32D","Kent3D-34A","Kent3D-34B","Kent3D-36A","Kent3D-36B","Kent3D-38A","Kent3D-38B","Kent3D-40A","Kent3D-40B","Kent3D-42A","Kent3D-42B","Kent3D-44A","Kent3D-44B","Kent3D-46A"
+//,"Kent3D-10A","Kent3D-10B","Kent3D-12A","Kent3D-12B","Kent3D-14A","Kent3D-14B","Kent3D-16C","Kent3D-16D","Kent3D-18A","Kent3D-18B","Kent3D-20A","Kent3D-20B","Kent3D-22A","Kent3D-22B","Kent3D-24C","Kent3D-24D","Kent3D-26A","Kent3D-26B","Kent3D-28A","Kent3D-28B","Kent3D-30A","Kent3D-30B","Kent3D-32A","Kent3D-32B","Kent3D-34A","Kent3D-34B","Kent3D-36A","Kent3D-36B","Kent3D-38A","Kent3D-38B","Kent3D-40A","Kent3D-40B","Kent3D-42A","Kent3D-42B","Kent3D-44A","Kent3D-44B","Kent3D-46A"
   void set_other_parameters(alps::params &p){
     p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
     p["dca.LATTICE_DUMP"] = test_dump_file();
@@ -164,3 +164,37 @@ TEST(ClusterHelper, DumpFileKeepsEachL){
   EXPECT_TRUE(ar.is_group("/Betts2D-4A/L8"));
   EXPECT_TRUE(ar.is_group("/Betts2D-4A/L12"));
 }
+
+// Periodicity: the number of hops along each lattice direction until the same
+// cluster site is reached again. The expected values are the smallest n for
+// which n e_i is an integer combination of the superlattice vectors. Betts3D-16E,
+// -24E and Fuchs3D-50B used to hang: their periodicity was searched for along the
+// reciprocal basis vectors, which never ends for a vector without a positive
+// component.
+struct periodicity_case { const char* lattice; int sites; std::vector<int> periodicity; };
+class ClusterPeriodicity : public ::testing::TestWithParam<periodicity_case> {};
+TEST_P(ClusterPeriodicity, HopsUntilTheSameSite){
+  const periodicity_case& c = GetParam();
+  alps::params p;
+  p["dca.LATTICE"]=c.lattice;
+  p["dca.SITES"]=c.sites;
+  p["dca.L"]=4;
+  set_other_parameters(p);
+  ClusterHelper CH(p);
+  for (std::size_t i = 0; i < c.periodicity.size(); ++i)
+    EXPECT_EQ(CH.periodicity(i), c.periodicity[i]) << "direction " << i;
+}
+INSTANTIATE_TEST_SUITE_P(Clusters, ClusterPeriodicity, ::testing::Values(
+    periodicity_case{"Betts2D-4A", 4, {2, 2}},
+    periodicity_case{"Betts2D-8A", 8, {4, 4}},
+    periodicity_case{"Betts2D-8C", 8, {8, 4}},
+    periodicity_case{"Betts2D-10A", 10, {10, 5}},
+    periodicity_case{"dimer", 2, {2, 1}},
+    periodicity_case{"Betts3D-16E", 16, {4, 4, 8}},
+    periodicity_case{"Betts3D-24E", 24, {6, 4, 12}},
+    periodicity_case{"Fuchs3D-50B", 50, {50, 10, 50}}),
+    [](const ::testing::TestParamInfo<periodicity_case>& info) {
+      std::string name = info.param.lattice;
+      for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
+      return name;
+    });
