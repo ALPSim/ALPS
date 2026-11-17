@@ -360,11 +360,11 @@ void ClusterHelper::extract_and_arrange_cluster_coordinates(){
 
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    for (std::size_t i=0; i<cluster_coordinates_.size1(); ++i) {
+    for (std::size_t i=0; i<cluster_coordinates_.rows(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
         std::size_t j = i;
         while (identify_sublattice(cluster_coordinates_, ++j)!=i%2) {};
-        for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d) {
+        for (std::size_t d=0; d<cluster_coordinates_.cols(); ++d) {
           double t=cluster_coordinates_(i,d);
           cluster_coordinates_(i,d) = cluster_coordinates_(j,d);
           cluster_coordinates_(j,d) = t;
@@ -395,9 +395,9 @@ void ClusterHelper::setup_tables(const alps::params &params)
   //find lattice integration weights (Simpson weights)
   find_integration_weights();
   
-  if (cluster_coordinates_.size1() != n_cluster_sites())
+  if (cluster_coordinates_.rows() != n_cluster_sites())
     throw std::logic_error("parameter SITES does not match cluster definition");
-  if (cluster_momenta_.size1() != n_cluster_sites())
+  if (cluster_momenta_.rows() != n_cluster_sites())
     throw std::logic_error("setup of cluster momenta table failed");
   symmetry_analysis(basis_, basis_inv_);
 #ifndef ALPS_HAVE_MPI
@@ -491,14 +491,14 @@ bool ClusterHelper::write() const{
     ar<<alps::make_pvp("/"+dump_location_+"/bipartite", bipartite_);
     ar<<alps::make_pvp("/"+dump_location_+"/epsilon", epsilon_);
     ar<<alps::make_pvp("/"+dump_location_+"/L", lattice_L_);
-    ar<<alps::make_pvp("/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
-    ar<<alps::make_pvp("/"+dump_location_+"/cluster_momenta", cluster_momenta_);
-    ar<<alps::make_pvp("/"+dump_location_+"/lattice_momenta", lattice_momenta_);
-    ar<<alps::make_pvp("/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
-    ar<<alps::make_pvp("/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar<<alps::make_pvp("/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
-    ar<<alps::make_pvp("/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar<<alps::make_pvp("/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/cluster_momenta", cluster_momenta_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/lattice_momenta", lattice_momenta_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    Matrix<double>::save(ar, "/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
+    Matrix<int>::save(ar, "/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    Matrix<int>::save(ar, "/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
     //the sets we need to do by hand:
     //site class set real space
@@ -522,14 +522,14 @@ bool ClusterHelper::read(){
     //write data to the 'tmpname' file
     ar>>alps::make_pvp("/"+dump_location_+"/bipartite", bipartite_);
     ar>>alps::make_pvp("/"+dump_location_+"/epsilon", *(const_cast<double*>(&epsilon_)));
-    ar>>alps::make_pvp("/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
-    ar>>alps::make_pvp("/"+dump_location_+"/cluster_momenta", cluster_momenta_);
-    ar>>alps::make_pvp("/"+dump_location_+"/lattice_momenta", lattice_momenta_);
-    ar>>alps::make_pvp("/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
-    ar>>alps::make_pvp("/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar>>alps::make_pvp("/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
-    ar>>alps::make_pvp("/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar>>alps::make_pvp("/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/cluster_momenta", cluster_momenta_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/lattice_momenta", lattice_momenta_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    Matrix<double>::load(ar, "/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
+    Matrix<int>::load(ar, "/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    Matrix<int>::load(ar, "/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
     read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space",dump_location_);
     read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space",dump_location_);
@@ -706,15 +706,15 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   /*if(alps::is_master())
    std::cout << "\n";*/
   /*std::cout << "symmetry table k space:\n";
-   for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
-   for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
+   for (unsigned int i=0; i<symmetry_table_k_space_.rows(); ++i) {
+   for (unsigned int j=0; j<symmetry_table_k_space_.cols(); ++j) {
    std::cout << symmetry_table_k_space_(i,j) << " ";
    }
    std::cout << std::endl;
    }
    std::cout << "symmetry table k space (with momenta):\n";
-   for (unsigned int i=0; i<symmetry_table_k_space_.size1(); ++i) {
-   for (unsigned int j=0; j<symmetry_table_k_space_.size2(); ++j) {
+   for (unsigned int i=0; i<symmetry_table_k_space_.rows(); ++i) {
+   for (unsigned int j=0; j<symmetry_table_k_space_.cols(); ++j) {
    std::cout << " (";
    for(std::size_t d=0;d<dimension();++d)
    std::cout<<cluster_momentum(symmetry_table_k_space_(i,j),d) << " ";
@@ -734,9 +734,9 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
 {
   //setup site equivalence classes
   site_class_set_type site_class_set;
-  for (unsigned int j=0; j<symmetry_table.size2(); ++j) {
+  for (unsigned int j=0; j<symmetry_table.cols(); ++j) {
     site_class_type s_class;
-    for (unsigned int i=0; i<symmetry_table.size1(); ++i) {
+    for (unsigned int i=0; i<symmetry_table.rows(); ++i) {
       s_class.insert(symmetry_table(i,j));
     }
     site_class_set.insert(s_class);
@@ -746,7 +746,7 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
   //The classes are the connected components of these relations, found with a union-find
   //over the n^2 pairs. (Merging overlapping classes pairwise until none overlap gives the
   //same classes, but took hours for clusters of a few hundred sites.)
-  const int n = symmetry_table.size2();
+  const int n = symmetry_table.cols();
   std::vector<int> parent(n*n);
   for (int p=0; p<n*n; ++p) parent[p] = p;
   std::function<int(int)> find = [&parent](int p) {
@@ -759,7 +759,7 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
   };
   for (int j1=0; j1<n; ++j1) {
     for (int j2=0; j2<n; ++j2) {
-      for (unsigned int i=0; i<symmetry_table.size1(); ++i)
+      for (unsigned int i=0; i<symmetry_table.rows(); ++i)
         unite(j1*n+j2, symmetry_table(i,j1)*n+symmetry_table(i,j2));
       if (paramagnet_) unite(j1*n+j2, j2*n+j1);
     }
@@ -801,13 +801,13 @@ bool ClusterHelper::inside_cluster(std::vector<double> v, const Matrix<double>::
 
 bool ClusterHelper::inside_reduced_brillouin_zone(std::vector<double> v) const
 {
-  for (std::size_t i=0; i<rbzone_boundaries_.size1(); ++i) {
+  for (std::size_t i=0; i<rbzone_boundaries_.rows(); ++i) {
     double norm = 0.;
-    for (std::size_t d=0; d<rbzone_boundaries_.size2(); ++d)
+    for (std::size_t d=0; d<rbzone_boundaries_.cols(); ++d)
       norm += rbzone_boundaries_(i,d)*rbzone_boundaries_(i,d);
     //norm = sqrt(norm);
     double projection = 0.;
-    for (std::size_t d=0; d<rbzone_boundaries_.size2(); ++d)
+    for (std::size_t d=0; d<rbzone_boundaries_.cols(); ++d)
       projection +=  v[d] * rbzone_boundaries_(i,d);
     projection /= norm;
     projection = round(projection);
@@ -821,16 +821,16 @@ bool ClusterHelper::inside_reduced_brillouin_zone(std::vector<double> v) const
 
 bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const std::vector<double>& v) const
 {
-  for (unsigned int i=0; i<m.size1(); ++i) {
+  for (unsigned int i=0; i<m.rows(); ++i) {
     bool equal = true;
-    for (unsigned int d=0; d<m.size2(); ++d)
+    for (unsigned int d=0; d<m.cols(); ++d)
       equal &= almost_equal(m(i,d), v[d]);
     if (equal)
       return false;
   }
-  m.resize_preserve_values(m.size1()+1, v.size());
-  for (unsigned int d=0; d<m.size2(); ++d)
-    m(m.size1()-1,d) = v[d];
+  m.conservativeResize(m.rows()+1, v.size());
+  for (unsigned int d=0; d<m.cols(); ++d)
+    m(m.rows()-1,d) = v[d];
   return true;
 }
 
@@ -839,16 +839,16 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const s
 bool ClusterHelper::append_column_no_duplicates(Matrix<int>::Type& m,
                                                 std::map<int, int>& smap) const
 {
-  for (unsigned int i=0; i<m.size1(); ++i) {
+  for (unsigned int i=0; i<m.rows(); ++i) {
     bool equal = true;
-    for (unsigned int d=0; d<m.size2(); ++d)
+    for (unsigned int d=0; d<m.cols(); ++d)
       equal &= m(i,d)==smap[d];
     if (equal)
       return false;
   }
-  m.resize_preserve_values(m.size1()+1, smap.size());
-  for (unsigned int d=0; d<m.size2(); ++d)
-    m(m.size1()-1,d) = smap[d];
+  m.conservativeResize(m.rows()+1, smap.size());
+  for (unsigned int d=0; d<m.cols(); ++d)
+    m(m.rows()-1,d) = smap[d];
   return true;
 }
 
@@ -874,9 +874,9 @@ std::vector<double> ClusterHelper::map_back_into_brillouin_zone(std::vector<doub
 }
 
 void ClusterHelper::write_hdf5(alps::hdf5::archive &ar, const std::string &p) const{
-  ar<<alps::make_pvp(p+"/cluster_coordinates", cluster_coordinates_);
-  ar<<alps::make_pvp(p+"/cluster_momenta", cluster_momenta_);
-  ar<<alps::make_pvp(p+"/lattice_momenta", lattice_momenta_);
+  Matrix<double>::save(ar, p+"/cluster_coordinates", cluster_coordinates_);
+  Matrix<double>::save(ar, p+"/cluster_momenta", cluster_momenta_);
+  Matrix<double>::save(ar, p+"/lattice_momenta", lattice_momenta_);
 }
 
 
@@ -931,8 +931,8 @@ int ClusterHelper::cluster_momentum_approximation(std::vector<double> v) const
       T(11,0) =  2*M_PI; T(11,1) = -2*M_PI; T(11,2) =  2*M_PI;
       T(12,0) =  2*M_PI; T(12,1) =  2*M_PI; T(12,2) = -2*M_PI;
   }
-  for (std::size_t i=0; i<cluster_momenta_.size1(); ++i) {
-    for (std::size_t t=0; t<T.size1(); ++t) {
+  for (std::size_t i=0; i<cluster_momenta_.rows(); ++i) {
+    for (std::size_t t=0; t<T.rows(); ++t) {
       for (int s=-1; s<=1; ++s) {
         std::vector<double> diff(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
@@ -958,9 +958,9 @@ int ClusterHelper::cluster_momentum_approximation(std::vector<double> v) const
 
 unsigned int ClusterHelper::identify_vertex(const std::vector<double>& v, const Matrix<double>::Type& coordinate_matrix) const
 {
-  for (unsigned int i=0; i<coordinate_matrix.size1(); ++i) {
+  for (unsigned int i=0; i<coordinate_matrix.rows(); ++i) {
     bool equal = true;
-    for (unsigned int d=0; d<coordinate_matrix.size2(); ++d)
+    for (unsigned int d=0; d<coordinate_matrix.cols(); ++d)
       equal &= almost_equal(v[d], coordinate_matrix(i,d));
     if (equal)
       return i;
@@ -973,7 +973,7 @@ unsigned int ClusterHelper::identify_vertex(const std::vector<double>& v, const 
 unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const
 {
   double sum=0;
-  for (std::size_t d=0; d<coordinate_matrix.size2(); ++d)
+  for (std::size_t d=0; d<coordinate_matrix.cols(); ++d)
     sum += coordinate_matrix(i,d);
   sum = round(sum);
   sum *= sum<0 ? -1 : 1;
@@ -1019,15 +1019,15 @@ bool ClusterHelper::operator==(const ClusterHelper &CH) const{
   if(paramagnet_!=CH.paramagnet_) return false;
   
   //compare double matrices
-  if(Matrix<double>::norm_1(cluster_coordinates_ - CH.cluster_coordinates_) > epsilon_) return false;
-  if(Matrix<double>::norm_1(lattice_momenta_ - CH.lattice_momenta_) > epsilon_) return false;
-  if(Matrix<double>::norm_1(reciprocal_basis_ - CH.reciprocal_basis_) > epsilon_) return false;
-  if(Matrix<double>::norm_1(reciprocal_basis_inv_ - CH.reciprocal_basis_inv_) > epsilon_) return false;
-  if(Matrix<double>::norm_1(rbzone_boundaries_ - CH.rbzone_boundaries_) > epsilon_) return false;
+  if(Matrix<double>::max_abs(cluster_coordinates_ - CH.cluster_coordinates_) > epsilon_) return false;
+  if(Matrix<double>::max_abs(lattice_momenta_ - CH.lattice_momenta_) > epsilon_) return false;
+  if(Matrix<double>::max_abs(reciprocal_basis_ - CH.reciprocal_basis_) > epsilon_) return false;
+  if(Matrix<double>::max_abs(reciprocal_basis_inv_ - CH.reciprocal_basis_inv_) > epsilon_) return false;
+  if(Matrix<double>::max_abs(rbzone_boundaries_ - CH.rbzone_boundaries_) > epsilon_) return false;
   
   //compare int matrices
-  if(Matrix<int>::norm_1(symmetry_table_k_space_ - CH.symmetry_table_k_space_) > epsilon_) return false;
-  if(Matrix<int>::norm_1(symmetry_table_real_space_ - CH.symmetry_table_real_space_) > epsilon_) return false;
+  if(Matrix<int>::max_abs(symmetry_table_k_space_ - CH.symmetry_table_k_space_) > epsilon_) return false;
+  if(Matrix<int>::max_abs(symmetry_table_real_space_ - CH.symmetry_table_real_space_) > epsilon_) return false;
   
   for(int i=0;i<periodicity_.size();++i){
     if(periodicity_[i]!=CH.periodicity_[i]) return false;

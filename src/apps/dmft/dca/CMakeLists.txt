@@ -22,8 +22,7 @@ add_library(alps_dca STATIC
 target_include_directories(alps_dca PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libcluster"
     "${CMAKE_CURRENT_SOURCE_DIR}/libselfconsistency"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver"
-    "${CMAKE_CURRENT_SOURCE_DIR}/blas_classes")
+    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver")
 target_link_libraries(alps_dca PUBLIC ALPS::alps ALPS::gf)
 # alps/gf/flagcheck.hpp asks consumers to choose its debug checks, as ALPS::gf does.
 target_compile_definitions(alps_dca PUBLIC
