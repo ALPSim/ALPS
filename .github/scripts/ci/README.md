@@ -1,6 +1,6 @@
 # CI change detection
 
-The PR workflow checks six areas defined in `areas.json`. `fingerprint.py`
+The CI workflow checks the areas defined in `areas.json`. `fingerprint.py`
 compares the complete PR diff against its base (master pushes pass no base, so
 every area runs unless its exact fingerprint already passed), then hashes each
 area's inputs, configuration, and runner image.

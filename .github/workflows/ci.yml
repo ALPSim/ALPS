@@ -17,7 +17,7 @@ permissions:
 # superseded master run can be cancelled: the next push tests what it skipped.
 concurrency:
   group: ci-${{ github.event.pull_request.number || (github.event_name == 'workflow_dispatch' && github.run_id) || github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+  cancel-in-progress: true
 jobs:
   changes:
     name: Select affected areas
