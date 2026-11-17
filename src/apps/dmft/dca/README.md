@@ -49,7 +49,7 @@ dca parameters.ini
 | `dca.LATTICE_DUMP` | HDF5 file (default `cluster.h5`) that caches the cluster tables, in the group `/<cluster>/L<dca.L>` |
 | `dca.AFM_SELFCONSISTENCY`, `dca.CO_SELFCONSISTENCY`, `sc.NAMBU` | Double unit cell (AFM or charge order) or Nambu frameworks |
 | `dca.G0_OMEGA_INPUT`, `dca.G0_OMEGA_OUTPUT` | Starting G0, and G0 written after each iteration to restart from |
-| `sc.MAX_IT`, `sc.SELFCONSISTENCY_CONVERGENCE` | Iteration limit and convergence criterion; reaching `sc.MAX_IT` first prints a warning |
+| `sc.MAX_IT`, `sc.SELFCONSISTENCY_CONVERGENCE` | Number of iterations, and the change of G at which to stop earlier |
 | `sc.WRITE_ITERATIONS` | Write the Green's functions of every iteration (default `true`) |
 | `sc.ADJUST_MU`, `sc.TARGET_DENSITY` | Adjust MU to reach a target density |
 | `solver.SOLVER` | Command that starts the impurity solver |
@@ -72,8 +72,9 @@ Each iteration also writes the Green's functions and self-energy as text
 (`G0_omega_<n>`, `G_omega_<n>`, `selfenergy_<n>`, ...) and to `Greens_<n>.h5`,
 unless `sc.WRITE_ITERATIONS` is `false`. dca prints the change of G in every
 iteration; it stops when the change is below `sc.SELFCONSISTENCY_CONVERGENCE`
-or after `sc.MAX_IT` iterations, with a warning, and exits normally in both
-cases. To continue a run, start dca again with `dca.G0_OMEGA_INPUT` set to the
+or after `sc.MAX_IT` iterations, which is the usual way to run it: run a fixed
+number of iterations and judge convergence afterwards. dca says which of the
+two ended the run. To continue a run, start dca again with `dca.G0_OMEGA_INPUT` set to the
 previous `dca.G0_OMEGA_OUTPUT`; dca refuses a G0 file computed for another
 `BETA`, `NMATSUBARA`, cluster or `FLAVORS`.
 

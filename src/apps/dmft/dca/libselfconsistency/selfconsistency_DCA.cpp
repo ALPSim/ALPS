@@ -126,9 +126,14 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     G0_omega=G0_omega_new;
     write_new_G0omega(G0_omega_new, g0_output_path);
   }
-  if(!converged && max_it>0)
-    std::cerr<<"WARNING: dca stopped after sc.MAX_IT="<<max_it<<" iterations; the last change of G, "<<change
-             <<", is above sc.SELFCONSISTENCY_CONVERGENCE="<<convergence_tolerance<<"."<<std::endl;
+  // Running a fixed number of iterations is the normal way to use dca;
+  // convergence is judged afterwards from the iterations written.
+  if(converged)
+    std::cout<<"dca stopped: the change of G, "<<change<<", is below sc.SELFCONSISTENCY_CONVERGENCE="
+             <<convergence_tolerance<<"."<<std::endl;
+  else if(max_it>0)
+    std::cout<<"dca stopped after sc.MAX_IT="<<max_it<<" iterations; the last change of G was "<<change
+             <<" (sc.SELFCONSISTENCY_CONVERGENCE="<<convergence_tolerance<<")."<<std::endl;
 }
 void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
   bool nambu=parms["sc.NAMBU"];
