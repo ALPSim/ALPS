@@ -29,9 +29,7 @@ include_directories(${CLUSTER_INCLUDE_DIR})
 include_directories(${SOLVER_INCLUDE_DIR})
 
 add_library (selfconsistency
-hilbert_transform.cpp        
 selfconsistency.cpp          
-#selfconsistency_CDMFT.cpp    selfconsistency_DCAPlus.cpp
 selfconsistency_DCA.cpp
 )
 

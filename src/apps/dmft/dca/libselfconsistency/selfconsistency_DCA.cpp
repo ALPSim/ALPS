@@ -15,6 +15,7 @@
 
 #include "cluster_transform.h"
 #include "impurity_solver.h"
+#include "selfconsistency.h"
 
 template<class GFW, class GFT> void print_all_green_functions(int iteration_ctr,
     const GFW &G0_omega,
@@ -132,7 +133,6 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
   }
 }
 void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
-  std::string cluster_loop=parms["SC_LOOP"];
   bool nambu=parms["sc.NAMBU"];
   bool afm_doublecell_framework=parms["dca.AFM_SELFCONSISTENCY"];
   bool co_doublecell_framework=parms["dca.CO_SELFCONSISTENCY"];
@@ -142,8 +142,6 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
   int n_orbital=parms["FLAVORS"];
   double beta=parms["BETA"];
 
-  if(cluster_loop!="DCA")
-    throw std::runtime_error("only DCA is defined at the moment as a cluster loop. set SC_LOOP to DCA.");
   //this dispatches the NAMBU (paramagnetic, superconducting) cluster framework
   if(nambu){
       std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;

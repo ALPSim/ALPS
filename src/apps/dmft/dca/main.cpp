@@ -10,8 +10,8 @@
 
 /* $Id$ */
 
-/// @file main.C
-/// @brief main program of the DMFT program
+/// @file main.cpp
+/// @brief main program of the DCA program
 #include <iostream>
 #include <fstream>
 
@@ -19,10 +19,6 @@
 
 #include "selfconsistency.h"
 
-/// @brief The DMFT main program
-void define_parameters(alps::params &p){
-  p.define<std::string>("SC_LOOP", "switch between SINGLE_SITE, DCA, and CDMFT");
-}
 void define_dca_parameters(alps::params &p);
 
 alps::params read_parameters_from_file(int argc, const char ** argv){
@@ -30,7 +26,6 @@ alps::params read_parameters_from_file(int argc, const char ** argv){
   define_selfconsistency_parameters(parms);
   define_solver_parameters(parms);
   define_dca_parameters(parms);
-  define_parameters(parms);
 
   if (parms.help_requested(std::cout)) {
     exit(0);
@@ -56,12 +51,7 @@ int main(int argc, char** argv)
     alps::params parms=read_parameters_from_file(argc, (const char **)argv);
     std::string param_file_name(argv[1]);
 
-    if(parms["SC_LOOP"].as<std::string>()=="SINGLE_SITE"){
-      perform_single_site_loop(param_file_name, parms);
-    }else if(parms["SC_LOOP"].as<std::string>()=="DCA"){
-      perform_cluster_loop(param_file_name, parms);
-    }else
-      throw std::invalid_argument("self-consistency loop: "+parms["SC_LOOP"].as<std::string>()+"unknown");
+    perform_cluster_loop(param_file_name, parms);
   }
   catch (std::exception& exc) {
     std::cerr<<exc.what()<<std::endl;
