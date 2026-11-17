@@ -65,6 +65,8 @@ if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@
   # Their libraries join the runtime targets, so that a consumer installing
   # the programs installs what they load. Only the runtime files are needed:
   # linking such a component still requires asking for it, and Eigen.
+  # Also tells consumers that this SDK lists them (pyalps checks for it).
+  set(ALPS_APPLICATION_COMPONENTS "@ALPS_APPLICATION_EIGEN_COMPONENTS@")
   foreach(_alps_component IN ITEMS @ALPS_APPLICATION_EIGEN_COMPONENTS@)
     _alps_component_export(${_alps_component} _alps_export)
     include("${_alps_export}")

@@ -54,6 +54,12 @@ find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alp
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
+# An SDK built from #404 alone has dca but does not list ALPS::gf, which dca
+# loads, among its runtime targets; the package would lack it.
+if(PYALPS_BUNDLE_APPLICATIONS AND TARGET ALPS::dca AND NOT DEFINED ALPS_APPLICATION_COMPONENTS)
+  message(FATAL_ERROR "This ALPS SDK does not list the libraries its applications load. "
+                      "Rebuild and reinstall the SDK from this source tree.")
+endif()
 get_target_property(_alps_library_type ALPS::alps TYPE)
 if(NOT _alps_library_type STREQUAL "SHARED_LIBRARY")
   message(FATAL_ERROR "pyalps requires a shared ALPS SDK so extensions share one ALPS runtime")
