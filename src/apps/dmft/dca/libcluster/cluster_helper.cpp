@@ -17,6 +17,9 @@
 #include <mpi.h>
 #endif
 
+#include <cmath>
+#include <unordered_map>
+
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 
@@ -131,9 +134,62 @@ void ClusterHelper::find_bipartite_cluster_momenta() {
   }
 }
 
+namespace {
+// Hash of the bucket indices of a momentum, for lattice_momentum_set.
+struct bucket_hash {
+  std::size_t operator()(const std::vector<long long> &key) const {
+    std::size_t h = 0;
+    for (long long k : key)
+      h ^= std::hash<long long>()(k) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+    return h;
+  }
+};
+}
+
+// The lattice momenta with their weights, without duplicates, in the order in
+// which they are first added. Two entries are duplicates if all their components
+// differ by less than epsilon, as in append_column_no_duplicates. Momenta are
+// kept in buckets of width epsilon in each coordinate, so a duplicate lies in
+// the same or a neighboring bucket: a lookup scans 3^d buckets, instead of all
+// momenta added so far, and adding N momenta costs O(N) instead of O(N^2).
+class ClusterHelper::lattice_momentum_set {
+public:
+  lattice_momentum_set(std::size_t dimension, double epsilon) : dimension_(dimension), epsilon_(epsilon) {}
+  void insert(const std::vector<double> &momw) {
+    std::vector<long long> key(dimension_);
+    for (std::size_t d = 0; d < dimension_; ++d)
+      key[d] = (long long)std::floor(momw[d] / epsilon_);
+    std::vector<long long> neighbor(dimension_);
+    std::size_t n_neighbors = 1;
+    for (std::size_t d = 0; d < dimension_; ++d) n_neighbors *= 3;
+    for (std::size_t n = 0; n < n_neighbors; ++n) {
+      std::size_t m = n;
+      for (std::size_t d = 0; d < dimension_; ++d, m /= 3)
+        neighbor[d] = key[d] + (long long)(m % 3) - 1;
+      auto bucket = buckets_.find(neighbor);
+      if (bucket == buckets_.end()) continue;
+      for (std::size_t index : bucket->second)
+        if (equal(momenta_[index], momw)) return;
+    }
+    buckets_[key].push_back(momenta_.size());
+    momenta_.push_back(momw);
+  }
+  const std::vector<std::vector<double> > &momenta() const { return momenta_; }
+private:
+  bool equal(const std::vector<double> &a, const std::vector<double> &b) const {
+    for (std::size_t d = 0; d < a.size(); ++d)
+      if (!(std::abs(a[d] - b[d]) < epsilon_)) return false;
+    return true;
+  }
+  std::size_t dimension_;
+  double epsilon_;
+  std::vector<std::vector<double> > momenta_;
+  std::unordered_map<std::vector<long long>, std::vector<std::size_t>, bucket_hash> buckets_;
+};
+
 void ClusterHelper::find_integration_weights() {
   //find lattice integration weights (Simpson weights)
-  std::vector<double> weights;
+  lattice_momentum_set lattice_momenta(dimension(), epsilon_);
   for(int i=0;i<cell_momenta().size();++i){
     //for (; itm != itm_end; ++itm) {
     std::vector<double> mom = cell_momenta()[i];
@@ -196,10 +252,14 @@ void ClusterHelper::find_integration_weights() {
       for (std::size_t d = 0; d < dimension(); ++d)
         momw[d] = momt[d];
       momw[dimension()] = weight;
-      //std::cout<<"appending momentum to lattice_momenta_, weight: "<<weight<<std::endl;
-      append_column_no_duplicates(lattice_momenta_, momw);
+      lattice_momenta.insert(momw);
     }
   }
+  const std::vector<std::vector<double> > &momenta = lattice_momenta.momenta();
+  lattice_momenta_.resize(momenta.size(), dimension() + 1);
+  for (std::size_t i = 0; i < momenta.size(); ++i)
+    for (std::size_t d = 0; d <= dimension(); ++d)
+      lattice_momenta_(i, d) = momenta[i][d];
 }
 
 void ClusterHelper::detect_if_bipartite() {

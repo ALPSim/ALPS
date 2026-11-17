@@ -110,6 +110,7 @@ private:
   double round(const double d) const;
   std::vector<double> round(std::vector<double> v) const;
   bool almost_equal(const double d1, const double d2) const { return std::abs(d1-d2)<epsilon_; }
+  class lattice_momentum_set;
   std::vector<double> matrix_vector_mult(const Matrix<double>::Type& M, const std::vector<double>& v) const;
   void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
   void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
