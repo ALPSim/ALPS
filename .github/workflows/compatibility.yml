@@ -9,6 +9,7 @@ permissions:
   packages: read   # CI images on ghcr.io (.github/ci-images)
 jobs:
   minimum:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     # Ubuntu 22.04 with gcc-11, Python 3.10 and Boost 1.76 (/opt/boost); see .github/ci-images.
     container:
@@ -50,6 +51,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   extensive:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
@@ -111,6 +113,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   cxx23:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
@@ -142,6 +145,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   mpi-python:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 90
     env:
@@ -185,6 +189,7 @@ jobs:
           _build/mpi/*.xml
           _build/ci/Testing/Temporary/**
   macos:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     env:
@@ -224,12 +229,13 @@ jobs:
         - macos-26
         - macos-15-intel
   packaging:
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     uses: ./.github/workflows/_wheels.yml
     with:
       full: true
   status:
     name: Compatibility
-    if: always()
+    if: always() && (github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS')
     needs:
     - minimum
     - extensive

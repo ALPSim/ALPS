@@ -26,6 +26,8 @@ env:
 jobs:
   image:
     name: alps-ci:${{ matrix.name }}
+    # Forks have no ift-vm runner, so their scheduled run would wait for one.
+    if: github.event_name != 'schedule' || github.repository == 'ALPSim/ALPS'
     runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 120
     strategy:

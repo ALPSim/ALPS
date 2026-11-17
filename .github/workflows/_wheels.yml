@@ -127,6 +127,8 @@ jobs:
       with:
         name: cibw-wheels-${{ matrix.plat.family }}
         path: ./wheelhouse/*.whl
+        # Later jobs of the same run use these; released wheels are on PyPI.
+        retention-days: 5
   build_sdist:
     name: Build source distribution
     needs:
@@ -158,6 +160,7 @@ jobs:
       with:
         name: cibw-sdist
         path: dist/*.tar.gz
+        retention-days: 5
   smoke_test:
     name: Installed wheels / ${{ matrix.os }} / Python ${{ matrix.python }}
     needs:
