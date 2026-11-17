@@ -227,27 +227,6 @@ void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_
   attach_bare_tail(G0_omega, h_init_, eta1_init_, eta2_init_);
 }
 
-template<typename GFW, typename GFT> void ClusterTransformer::initial_G0(GFW &G0_omega, GFT &G0_tau)const{
-  if(read_initial_G0(G0_omega)) return;
-
-  if(initial_g0_=="FREE")
-    compute_noninteracting_G0(G0_omega);
-  else if (initial_g0_=="ISOLATED")
-    compute_isolated_cluster_G0(G0_omega);
-  else
-    throw std::invalid_argument("choose FREE or ISOLATED as initial G0 parameters or provide an input hdf5 file");
-
-  {
-    alps::hdf5::archive ar(g0_input_path_, "w");
-    G0_omega.save(ar, "/G0");
-
-    std::ofstream G0_omega_input_file("G0_omega_input.dat"); G0_omega_input_file<<G0_omega;
-  }
-  {
-    alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
-    std::ofstream G0_tau_input_file("G0_tau_input.dat"); G0_tau_input_file<<G0_tau;
-  }
-}
 
 void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster) const{
   alps::gf::k_sigma_gf c1(G0.mesh2(), G0.mesh3());
@@ -1022,8 +1001,6 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
 }
 
 //create some instances for libcluster:
-template void ClusterTransformer::initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega, cluster_nambu_itime_kspace_gf &G0_tau)const;
-template void ClusterTransformer::initial_G0(cluster_matsubara_kspace_gf &G0_omega, cluster_itime_kspace_gf &G0_tau)const;
 
 void DoubleCellClusterTransformer::symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const{
 //  throw std::logic_error("Emanuel please implement the afm k-space symmetrization here");
@@ -1155,3 +1132,5 @@ cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_spa
   return G_rs;
 }
 
+template bool ClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const;
+template bool ClusterTransformer::read_initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const;
