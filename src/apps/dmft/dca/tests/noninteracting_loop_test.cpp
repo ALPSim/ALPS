@@ -410,6 +410,41 @@ TEST_P(BlockLoop, ConvergesToCoarseGrainedLatticeGreensFunction) {
   for (std::size_t i = 0; i < G_2.data().num_elements(); ++i)
     ASSERT_LT(std::abs(G_2.data().data()[i] - G0_1.data().data()[i]), 1e-12);
 
+  // Every element of every block, against the patch average of the 2x2
+  // lattice G over dca's lattice momenta, read from its cluster cache. Only
+  // that k grid is shared with dca; the dispersion and fields are the test's
+  // own. This checks the off-diagonal elements, whose sign the zone average
+  // below cannot see (it vanishes for the d-wave F).
+  {
+    alps::hdf5::archive ar((dir / "cluster.h5").string(), "r");
+    const std::string table = "/" + c.cluster.lattice + "/L" + std::to_string(c.cluster.L) + "/lattice_momenta";
+    int rows, columns;
+    ar[table + "/size1"] >> rows;
+    ar[table + "/size2"] >> columns;
+    ASSERT_EQ(columns, dim + 1);  // the momentum and its weight
+    std::vector<double> lattice(std::size_t(rows) * columns);
+    ar >> alps::make_pvp(table + "/values", lattice.data(), lattice.size());
+    for (alps::gf::matsubara_index w(0); w < n_matsubara; w += 7) {
+      const double omega = G_2.mesh1().points()[w()];
+      for (int K = 0; K < n_sites; K += stride()) {
+        for (int s = 0; s < 2; ++s) {
+          block reference = block::Zero();
+          double weight = 0.;
+          std::vector<double> k(dim);
+          for (int l = 0; l < rows; ++l) {
+            for (int d = 0; d < dim; ++d) k[d] = G_2.mesh2().points()(K, d) + lattice[l * columns + d];
+            const double w_l = lattice[l * columns + dim];
+            reference += w_l * inverse(k, omega, s, field).inverse();
+            weight += w_l;
+          }
+          reference /= weight;
+          ASSERT_LT((element(G_2, w, K, s) - reference).norm(), 1e-10 * reference.norm())
+              << "K=" << K << " w=" << w() << " spin " << s << "\n" << element(G_2, w, K, s) << "\nvs\n" << reference;
+        }
+      }
+    }
+  }
+
   const int m = reference_grid[dim];
   long n = 1;
   for (int d = 0; d < dim; ++d) n *= m;
@@ -469,5 +504,14 @@ INSTANTIATE_TEST_SUITE_P(
         if (ch == '-') ch = '_';
       return name;
     });
+
+// With the spin symmetrization off, a Nambu Zeeman field is allowed.
+TEST(LoopOptions, AllowsNambuFieldWithoutSpinSymmetrization) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "NambuField_unsymmetrized", 10, true,
+                               "sc.NAMBU = true\ndca.H = 0.3\nsc.SPIN_SYMMETRIZATION = false\n");
+  if (HasFailure()) return;
+  EXPECT_NE(read_file(dir / "dca.log").find("dca stopped: the change of G"), std::string::npos);
+}
 
 } // namespace
