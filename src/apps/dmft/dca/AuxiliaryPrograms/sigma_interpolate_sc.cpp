@@ -23,6 +23,7 @@ void define_parameters_commandline(alps::params &p){
   p.define<std::string>("sigma", "self energy file (in GFTools hdf5 format)");
   p.define<std::string>("path", "/Sigma","hdf5 path to self energy");
   p.define<std::string>("g0", "hdf5 path to the G0 obtained with the interpolated self-energy");
+  p.define<double>("mult_anomalous", 1., "factor applied to the interpolated anomalous self-energy");
   p.define<double>("mult-anomalous", 1.0, "multiply anomalous self energy by a factor of x");
 }
 void define_dca_parameters(alps::params &p);
@@ -71,7 +72,7 @@ std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, co
   return newyvalues;
 }
 
-int main(int argc, char **argv){
+void run(int argc, char **argv){
 
   alps::params p(argc, (const char**)argv);
   define_parameters_commandline(p);
@@ -85,13 +86,12 @@ int main(int argc, char **argv){
   define_parameters_pfile(parms_old);
   define_parameters_pfile(parms_new);
 
-  // Declare the supported options.
-  double mult_anomalous;
+  const double mult_anomalous=p["mult_anomalous"];
 
   //general error check
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
-  double h_old=parms_old["H"];
+  double h_old=parms_old["dca.H"];
   double eta1_old=parms_old["dca.ETA1"];
   double eta2_old=parms_old["dca.ETA2"];
   double nsites_old=parms_old["dca.SITES"];
@@ -99,7 +99,7 @@ int main(int argc, char **argv){
 
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
-  double h_new=parms_new["H"];
+  double h_new=parms_new["dca.H_INIT"];
   double eta1_new=parms_new["dca.ETA1_INIT"];
   double eta2_new=parms_new["dca.ETA2_INIT"];
   int nfreq_new=parms_new["NMATSUBARA"];
@@ -151,20 +151,22 @@ int main(int argc, char **argv){
   selfenergy_kspace_interp=selfenergy_orig;
 
   //interpolate for new temperature
-  double nfreq_max=std::max(nfreq_old, nfreq_new);
-  std::vector<double> matsubara_freqs_old(nfreq_max);
-  std::vector<double> matsubara_freqs_new(nfreq_max);
-  for(int i=0;i<nfreq_max;++i){
-    matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
-    matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
-  }
+  // The self-energy is given on the old frequencies and wanted on the new ones.
+  if(selfenergy_orig.mesh1().extent()!=nfreq_old)
+    throw std::invalid_argument("the self-energy has "+std::to_string(selfenergy_orig.mesh1().extent())
+                                +" Matsubara frequencies, but NMATSUBARA of the old parameter file is "
+                                +std::to_string(nfreq_old));
+  std::vector<double> matsubara_freqs_old(nfreq_old);
+  std::vector<double> matsubara_freqs_new(nfreq_new);
+  for(int i=0;i<nfreq_old;++i) matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
+  for(int i=0;i<nfreq_new;++i) matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
   
-  std::vector<double> sigma_real(nfreq_new);
-  std::vector<double> sigma_imag(nfreq_new);
+  std::vector<double> sigma_real(nfreq_old);
+  std::vector<double> sigma_imag(nfreq_old);
   for(alps::gf::momentum_index j(0);j<nsites_new;++j){
     for(alps::gf::index p(0);p<2;++p){
       for(alps::gf::index q(0);q<2;++q){
-        for(alps::gf::matsubara_index i(0);i<nfreq_new;++i){
+        for(alps::gf::matsubara_index i(0);i<nfreq_old;++i){
           sigma_real[i()]=selfenergy_kspace_interp(i,j,p,q).real();
           sigma_imag[i()]=selfenergy_kspace_interp(i,j,p,q).imag();
         }
@@ -199,5 +201,14 @@ int main(int argc, char **argv){
     green0_new    .save(ar, "/G0");
     green_new     .save(ar, "/G");
     selfenergy_new.save(ar, "/Sigma");
+  }
+}
+int main(int argc, char **argv){
+  try {
+    run(argc, argv);
+    return 0;
+  } catch (const std::exception& e) {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    return 1;
   }
 }
