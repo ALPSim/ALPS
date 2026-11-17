@@ -92,41 +92,51 @@ cluster_matsubara_kspace_gf load(const fs::path& file, const std::string& path) 
   return G;
 }
 
+// Run dca in the directory dir_name and return that directory.
+fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it = 10,
+                 bool write_iterations = true) {
+  const fs::path dir = fs::absolute(dir_name);
+  fs::remove_all(dir);
+  fs::create_directories(dir);
+  std::ofstream parms(dir / "params.ini");
+  parms << "BETA = " << beta << "\n"
+        << "MU = " << mu << "\n"
+        << "U = 0\n"
+        << "t = " << t << "\n"
+        << "tprime = " << c.tprime << "\n"
+        << "N = 128\n"
+        << "NMATSUBARA = " << n_matsubara << "\n"
+        << "FLAVORS = 2\n"
+        << "dca.LATTICE = " << c.lattice << "\n"
+        << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_DIR << "/" << c.library << "\n"
+        << "dca.SITES = " << c.sites << "\n"
+        << "dca.L = " << c.L << "\n"
+        << "dca.INITIAL_G0 = ISOLATED\n"
+        << "dca.G0_OMEGA_INPUT = G0_omega.h5\n"
+        << "dca.G0_OMEGA_OUTPUT = G0_omega.h5\n"
+        << "sc.MAX_IT = " << max_it << "\n"
+        << "sc.SELFCONSISTENCY_CONVERGENCE = 1e-8\n"
+        << "sc.WRITE_ITERATIONS = " << (write_iterations ? "true" : "false") << "\n"
+        << "solver.SOLVER = " << DCA_FREE_SOLVER << "\n"
+        << "solver.INFILE_H5GF = alps_solver_in.h5gf\n"
+        << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n";
+  parms.close();
+  const std::string command =
+      "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
+  EXPECT_EQ(std::system(command.c_str()), 0) << "dca failed, see " << (dir / "dca.log");
+  return dir;
+}
+
+std::string read_file(const fs::path& file) {
+  std::ifstream in(file);
+  std::stringstream text;
+  text << in.rdbuf();
+  return text.str();
+}
+
 class NoninteractingLoop : public ::testing::TestWithParam<cluster_case> {
 protected:
-  // Run dca in its own directory and return that directory.
-  fs::path run_dca() {
-    const cluster_case& c = GetParam();
-    const fs::path dir = fs::absolute(c.lattice);
-    fs::remove_all(dir);
-    fs::create_directories(dir);
-    std::ofstream parms(dir / "params.ini");
-    parms << "BETA = " << beta << "\n"
-          << "MU = " << mu << "\n"
-          << "U = 0\n"
-          << "t = " << t << "\n"
-          << "tprime = " << c.tprime << "\n"
-          << "N = 128\n"
-          << "NMATSUBARA = " << n_matsubara << "\n"
-          << "FLAVORS = 2\n"
-          << "dca.LATTICE = " << c.lattice << "\n"
-          << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_DIR << "/" << c.library << "\n"
-          << "dca.SITES = " << c.sites << "\n"
-          << "dca.L = " << c.L << "\n"
-          << "dca.INITIAL_G0 = ISOLATED\n"
-          << "dca.G0_OMEGA_INPUT = G0_omega.h5\n"
-          << "dca.G0_OMEGA_OUTPUT = G0_omega.h5\n"
-          << "sc.MAX_IT = 10\n"
-          << "sc.SELFCONSISTENCY_CONVERGENCE = 1e-8\n"
-          << "solver.SOLVER = " << DCA_FREE_SOLVER << "\n"
-          << "solver.INFILE_H5GF = alps_solver_in.h5gf\n"
-          << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n";
-    parms.close();
-    const std::string command =
-        "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
-    EXPECT_EQ(std::system(command.c_str()), 0) << "dca failed, see " << (dir / "dca.log");
-    return dir;
-  }
+  fs::path run_dca() { return ::run_dca(GetParam(), GetParam().lattice); }
 };
 
 TEST_P(NoninteractingLoop, ConvergesToCoarseGrainedLatticeGreensFunction) {
@@ -220,5 +230,33 @@ INSTANTIATE_TEST_SUITE_P(
         if (ch == '-') ch = '_';
       return name;
     });
+
+// The loop needs three iterations here. Stopping it earlier leaves a warning;
+// dca still exits normally, since a run for a fixed number of iterations is
+// checked for convergence afterwards.
+TEST(LoopOptions, WarnsWhenStoppedAtMaxIt) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "MaxIt_Betts2D-4A", 1);
+  if (HasFailure()) return;
+  EXPECT_TRUE(fs::exists(dir / "Greens_0.h5"));
+  EXPECT_FALSE(fs::exists(dir / "Greens_1.h5"));
+  EXPECT_NE(read_file(dir / "dca.log").find("WARNING: dca stopped after sc.MAX_IT=1 iterations"),
+            std::string::npos);
+}
+
+// sc.WRITE_ITERATIONS=false writes only the G0 to continue from; a converged
+// run has no warning.
+TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "NoIterationFiles_Betts2D-4A", 10, false);
+  if (HasFailure()) return;
+  EXPECT_TRUE(fs::exists(dir / "G0_omega.h5"));
+  EXPECT_FALSE(fs::exists(dir / "Greens_0.h5"));
+  EXPECT_FALSE(fs::exists(dir / "selfenergy_0"));
+  EXPECT_FALSE(fs::exists(dir / "G_omega"));
+  const std::string log = read_file(dir / "dca.log");
+  EXPECT_NE(log.find("iteration 2: change of G"), std::string::npos);
+  EXPECT_EQ(log.find("WARNING: dca stopped"), std::string::npos);
+}
 
 } // namespace

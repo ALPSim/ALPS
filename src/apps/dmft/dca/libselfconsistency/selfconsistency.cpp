@@ -24,4 +24,5 @@ void define_selfconsistency_parameters(alps::params &p){
   p.define<bool>("sc.ADJUST_MU", false, "set to true to find target density, rather than run for fixed mu");
   p.define<double>("sc.TARGET_DENSITY", "desired target density, see also sc.ADJUST_MU");
   p.define<bool>("sc.SPIN_SYMMETRIZATION", true, "symmetrize 'up' and 'down' spins after each solver call.");
+  p.define<bool>("sc.WRITE_ITERATIONS", true, "write the Green's functions and self-energies of each iteration to text files and Greens_<n>.h5");
 }
