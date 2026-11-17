@@ -125,6 +125,13 @@ if(ALPS_BUILD_TESTING)
   add_test(NAME dmft_rejects_atomic COMMAND dmft "${CMAKE_CURRENT_BINARY_DIR}/dmft_atomic/parm")
   set_tests_properties(dmft_rejects_atomic PROPERTIES LABELS "dmft;regression" TIMEOUT 60
     PASS_REGULAR_EXPRESSION "dmft no longer supports ATOMIC")
+  # Also in the imaginary-time loop with an external solver, before any solver runs.
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dmft_atomic_tau/parm"
+    "SOLVER = \"hybridization\"\nOMEGA_LOOP = 0\nMAX_IT = 1\nBETA = 4\nU = 2\nt = 0.5\nMU = 0\n"
+    "N = 50\nNMATSUBARA = 40\nATOMIC = 1\n")
+  add_test(NAME dmft_rejects_atomic_tau COMMAND dmft "${CMAKE_CURRENT_BINARY_DIR}/dmft_atomic_tau/parm")
+  set_tests_properties(dmft_rejects_atomic_tau PROPERTIES LABELS "dmft;regression" TIMEOUT 60
+    PASS_REGULAR_EXPRESSION "dmft no longer supports ATOMIC")
 
   add_executable(dmft_ctint_sz_results dmft_ctint_sz_results.C)
   target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)

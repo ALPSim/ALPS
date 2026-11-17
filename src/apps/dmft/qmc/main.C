@@ -84,6 +84,16 @@ int main(int argc, char** argv)
     parms["BASENAME"]=p.filename().string();
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
+    // ATOMIC made the built-in solver sample the atomic limit and ignore the
+    // bath in every iteration, while the loop built the self-energy and the
+    // next bath from the bath G0 (#347). It is no longer supported, in either
+    // loop or with any solver: external solvers would only receive it.
+    if (parms.defined("ATOMIC"))
+      throw std::invalid_argument("dmft no longer supports ATOMIC: it made the impurity solver "
+                                  "ignore the bath in every iteration, so the self-energy and "
+                                  "the self-consistency loop were wrong. Remove ATOMIC from the "
+                                  "parameter file.");
+
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.value_or_default("OMEGA_LOOP",false)){
@@ -136,14 +146,6 @@ int main(int argc, char** argv)
         // chosen by select_interaction_expansion (FLAVORS/SITES read as ints);
         // every other SOLVER value is handed to the external/hybridization
         // path. No solver is constructed-then-discarded.
-        // ATOMIC made the solver sample the atomic limit and ignore the bath
-        // in every iteration, while the loop built the self-energy and the
-        // next bath from the bath G0 (#347). It is no longer supported.
-        if (parms.defined("ATOMIC"))
-          throw std::invalid_argument("dmft no longer supports ATOMIC: it made the impurity solver "
-                                      "ignore the bath in every iteration, so the self-energy and "
-                                      "the self-consistency loop were wrong. Remove ATOMIC from the "
-                                      "parameter file.");
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Interaction Expansion") {
           const int flavors = static_cast<int>(parms.value_or_default("FLAVORS", 2));
