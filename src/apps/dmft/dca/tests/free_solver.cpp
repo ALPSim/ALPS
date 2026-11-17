@@ -8,6 +8,7 @@
 // reads G0 from solver.INFILE_H5GF and writes it as G to solver.OUTFILE_H5GF.
 
 #include <iostream>
+#include <string>
 #include <stdexcept>
 
 #include "alps/hdf5.hpp"
@@ -15,23 +16,41 @@
 
 #include "cluster_transform.h"
 
+namespace {
+// Copies G0 to G for one framework's Green's function types.
+template<class GFW, class GFT> void copy_g0(const std::string& infile, const std::string& outfile) {
+  GFW G_omega;
+  GFT G_tau;
+  {
+    alps::hdf5::archive in(infile, "r");
+    G_omega.load(in, "/G0");
+    G_tau.load(in, "/G0_tau");
+  }
+  alps::hdf5::archive out(outfile, "w");
+  G_omega.save(out, "/G_omega");
+  G_tau.save(out, "/G_tau");
+}
+}
+
 int main(int argc, char** argv) {
   try {
     if (argc < 2) throw std::invalid_argument("usage: free_solver <parameter file> [--MU=<mu>]");
     alps::params p(argv[1]);
     p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf", "input file");
     p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf", "output file");
+    const std::string infile = p["solver.INFILE_H5GF"], outfile = p["solver.OUTFILE_H5GF"];
 
-    cluster_matsubara_kspace_gf G_omega;
-    cluster_itime_kspace_gf G_tau;
+    // The normal-state G0 has the meshes (frequency, K, flavor); the double
+    // unit cell and Nambu G0 have a fourth, a 2x2 index.
+    int n_meshes;
     {
-      alps::hdf5::archive in(p["solver.INFILE_H5GF"].as<std::string>(), "r");
-      G_omega.load(in, "/G0");
-      G_tau.load(in, "/G0_tau");
+      alps::hdf5::archive in(infile, "r");
+      in["/G0/mesh/N"] >> n_meshes;
     }
-    alps::hdf5::archive out(p["solver.OUTFILE_H5GF"].as<std::string>(), "w");
-    G_omega.save(out, "/G_omega");
-    G_tau.save(out, "/G_tau");
+    if (n_meshes == 3)
+      copy_g0<cluster_matsubara_kspace_gf, cluster_itime_kspace_gf>(infile, outfile);
+    else
+      copy_g0<cluster_nambu_matsubara_kspace_gf, cluster_nambu_itime_kspace_gf>(infile, outfile);
   } catch (const std::exception& e) {
     std::cerr << "free_solver: " << e.what() << std::endl;
     return 1;

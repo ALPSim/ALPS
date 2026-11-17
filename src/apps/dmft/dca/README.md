@@ -94,7 +94,10 @@ run in the `dmft` test component. The end-to-end test runs `dca` at U=0 with a
 solver that returns G = G0 on one-site 2D and 3D clusters and on the 4-, 8- and
 16-site Betts clusters. It checks the isolated-cluster starting point, a zero
 self-energy, convergence at the coarse-grained lattice Green's function, and
-the local Green's function against an independent momentum integral. The bare
+the local Green's function against an independent momentum integral. The same
+checks run for the double unit cell (AFM and CO, on the bipartite 4-, 8- and
+16-site clusters) and Nambu (d-wave pairing field, 1 to 16 sites) frameworks,
+with the 2x2 lattice problem integrated independently. The bare
 tail test checks the high-frequency tails attached to G0 against G0 itself in
 the normal-state, double unit cell and Nambu frameworks.
 

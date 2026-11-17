@@ -25,6 +25,8 @@
 
 #include "gtest/gtest.h"
 
+#include <Eigen/Dense>
+
 #include "alps/hdf5.hpp"
 
 #include "cluster_transform.h"
@@ -85,8 +87,8 @@ std::vector<complex_t> local_green_function(const std::vector<double>& omegas, i
   return sum;
 }
 
-cluster_matsubara_kspace_gf load(const fs::path& file, const std::string& path) {
-  cluster_matsubara_kspace_gf G;
+template<class GF = cluster_matsubara_kspace_gf> GF load(const fs::path& file, const std::string& path) {
+  GF G;
   alps::hdf5::archive ar(file.string(), "r");
   G.load(ar, path);
   return G;
@@ -277,5 +279,195 @@ TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
         << field;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Double unit cell and Nambu frameworks. Their G carries a 2x2 index: for the
+// double unit cell, G(K, j, spin) is the block (K, K+Q) of the cluster
+// momenta K = 2i, K+Q = 2i+1; for Nambu, G(K, a, b) with a, b = particle,
+// hole. The loop is checked as for the normal state: G0 of iteration 0 is the
+// isolated cluster, the self-energy vanishes, the coarse-grained lattice G is
+// a fixed point after iteration 0, and the local G matches a Brillouin-zone
+// integral of the same 2x2 lattice problem.
+
+typedef cluster_nambu_matsubara_kspace_gf block_gf;
+typedef Eigen::Matrix2cd block;
+
+// Inverse lattice Green's functions, written out here independently.
+// Double unit cell: k and k+Q coupled by a field f (h/2 per spin for AFM,
+// the staggered chemical potential for CO).
+block double_cell_inverse(complex_t z, double eps_k, double eps_kq, double f) {
+  block g;
+  g << z - eps_k, f, f, z - eps_kq;
+  return g;
+}
+// Nambu: particle and hole coupled by the d-wave field eta (cos kx - cos ky).
+block nambu_inverse(double omega, double eps, double eta, const std::vector<double>& k) {
+  const double p = std::cos(k[0]) - std::cos(k[1]);
+  block g;
+  g << complex_t(mu - eps, omega), -p * eta, -p * eta, complex_t(-mu + eps, omega);
+  return g;
+}
+
+struct block_case {
+  cluster_case cluster;
+  std::string framework;  // "AFM", "CO" or "NAMBU"
+};
+std::ostream& operator<<(std::ostream& os, const block_case& c) {
+  return os << c.framework << "_" << c.cluster.lattice;
+}
+
+const double field_init = 0.4, field = 0.25;  // h, staggered mu or eta; initial and in the loop
+
+class BlockLoop : public ::testing::TestWithParam<block_case> {
+protected:
+  fs::path run() {
+    const block_case& c = GetParam();
+    std::ostringstream extra;
+    if (c.framework == "NAMBU")
+      extra << "sc.NAMBU = true\ndca.ETA1_INIT = " << field_init << "\ndca.ETA1 = " << field << "\n";
+    else if (c.framework == "AFM")
+      extra << "dca.AFM_SELFCONSISTENCY = true\ndca.H_INIT = " << field_init << "\ndca.H = " << field << "\n";
+    else
+      extra << "dca.CO_SELFCONSISTENCY = true\ndca.MU_STAG_INIT = " << field_init
+            << "\ndca.MU_STAG = " << field << "\n";
+    std::ostringstream name;
+    name << c;
+    std::string dir = name.str();
+    for (char& ch : dir)
+      if (ch == '-') ch = '_';
+    return run_dca(c.cluster, dir, 10, true, extra.str());
+  }
+  // The inverse lattice G at momentum k (and k+Q) for spin s, with field f.
+  block inverse(const std::vector<double>& k, double omega, int s, double f) const {
+    const block_case& c = GetParam();
+    if (c.framework == "NAMBU") return nambu_inverse(omega, epsilon(k, c.cluster.tprime), f, k);
+    std::vector<double> kq(k);
+    for (double& x : kq) x += M_PI;
+    const double coupling = c.framework == "AFM" ? (s == 0 ? 1. : -1.) * f / 2. : f;
+    return double_cell_inverse(complex_t(mu, omega), epsilon(k, c.cluster.tprime), epsilon(kq, c.cluster.tprime),
+                               coupling);
+  }
+  // The 2x2 block of G at cluster index K for spin s (double cell) or of the
+  // Nambu G at K (s ignored).
+  block element(const block_gf& G, alps::gf::matsubara_index w, int K, int s) const {
+    block b;
+    if (GetParam().framework == "NAMBU") {
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+          b(i, j) = G(w, alps::gf::momentum_index(K), alps::gf::index(i), alps::gf::index(j));
+    } else {
+      for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+          b(i, j) = G(w, alps::gf::momentum_index(K + i), alps::gf::index(j), alps::gf::index(s));
+    }
+    return b;
+  }
+  int stride() const { return GetParam().framework == "NAMBU" ? 1 : 2; }
+};
+
+TEST_P(BlockLoop, ConvergesToCoarseGrainedLatticeGreensFunction) {
+  const block_case& c = GetParam();
+  const int n_sites = c.cluster.sites, dim = c.cluster.dimension;
+  const fs::path dir = run();
+  if (HasFailure()) return;
+  for (int it = 0; it < 3; ++it)
+    ASSERT_TRUE(fs::exists(dir / ("Greens_" + std::to_string(it) + ".h5"))) << "iteration " << it;
+  ASSERT_FALSE(fs::exists(dir / "Greens_3.h5")) << "the loop did not stop at the fixed point";
+
+  // Iteration 0: the isolated cluster with the initial field.
+  const block_gf G0_isolated = load<block_gf>(dir / "Greens_0.h5", "/G0_komega");
+  ASSERT_EQ(G0_isolated.mesh2().extent(), n_sites);
+  for (int K = 0; K < n_sites; K += stride()) {
+    std::vector<double> k(dim);
+    for (int d = 0; d < dim; ++d) k[d] = G0_isolated.mesh2().points()(K, d);
+    if (stride() == 2) {
+      // dca pairs the cluster momenta 2i and 2i+1 as K and K+Q.
+      for (int d = 0; d < dim; ++d)
+        ASSERT_NEAR(std::remainder(G0_isolated.mesh2().points()(K + 1, d) - k[d] - M_PI, 2 * M_PI), 0., 1e-12)
+            << "cluster momenta " << K << " and " << K + 1 << " are not K and K+Q";
+    }
+    for (alps::gf::matsubara_index w(0); w < n_matsubara; ++w)
+      for (int s = 0; s < 2; ++s) {
+        const block expected = inverse(k, G0_isolated.mesh1().points()[w()], s, field_init).inverse();
+        ASSERT_LT((element(G0_isolated, w, K, s) - expected).norm(), 1e-12) << "K=" << K << " w=" << w();
+      }
+  }
+
+  // Without interaction, the self-energy vanishes.
+  for (int it = 0; it < 3; ++it) {
+    const fs::path file = dir / ("Greens_" + std::to_string(it) + ".h5");
+    const block_gf sigma = load<block_gf>(file, "/Sigma_komega");
+    double largest = 0.;
+    for (const complex_t* x = sigma.data().data(); x != sigma.data().data() + sigma.data().num_elements(); ++x)
+      largest = std::max(largest, std::abs(*x));
+    ASSERT_LT(largest, 1e-10) << "iteration " << it;
+  }
+
+  // From iteration 1 on, G0 = G is the coarse-grained lattice G with the loop's
+  // field, and its average over the cluster is the local lattice G.
+  const block_gf G0_1 = load<block_gf>(dir / "Greens_1.h5", "/G0_komega");
+  const block_gf G_2 = load<block_gf>(dir / "Greens_2.h5", "/G_komega");
+  for (std::size_t i = 0; i < G_2.data().num_elements(); ++i)
+    ASSERT_LT(std::abs(G_2.data().data()[i] - G0_1.data().data()[i]), 1e-12);
+
+  const int m = reference_grid[dim];
+  long n = 1;
+  for (int d = 0; d < dim; ++d) n *= m;
+  for (alps::gf::matsubara_index w(0); w < n_matsubara; w += 7) {
+    const double omega = G_2.mesh1().points()[w()];
+    for (int s = 0; s < 2; ++s) {
+      // Local G: the diagonal of the 2x2 lattice G averaged over the zone.
+      complex_t reference[2] = {0., 0.};
+      std::vector<double> k(dim);
+      for (long i = 0; i < n; ++i) {
+        long j = i;
+        for (int d = 0; d < dim; ++d, j /= m) k[d] = 2. * M_PI * (j % m + 0.5) / m;
+        const block g = inverse(k, omega, s, field).inverse();
+        reference[0] += g(0, 0);
+        reference[1] += g(1, 1);
+      }
+      complex_t local[2] = {0., 0.};
+      for (int K = 0; K < n_sites; K += stride()) {
+        const block b = element(G_2, w, K, s);
+        local[0] += b(0, 0);
+        local[1] += b(1, 1);
+      }
+      for (int a = 0; a < 2; ++a) {
+        reference[a] /= double(n);
+        local[a] /= double(n_sites / stride());  // the number of blocks
+      }
+      if (stride() == 2) {
+        // Diagonals of all blocks together cover every cluster momentum once.
+        const complex_t all = (local[0] + local[1]) / 2.;
+        EXPECT_LT(std::abs(all - reference[0]), 1e-8 * std::abs(reference[0])) << "w=" << w() << " spin " << s;
+      } else {
+        for (int a = 0; a < 2; ++a)
+          EXPECT_LT(std::abs(local[a] - reference[a]), 1e-8 * std::abs(reference[a]))
+              << "w=" << w() << " component " << a << ": " << local[a] << " vs " << reference[a];
+      }
+    }
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    Frameworks, BlockLoop,
+    ::testing::Values(
+        // Bipartite square-lattice clusters, which contain Q = (pi, pi)
+        block_case{cluster_case{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15}, "AFM"},
+        block_case{cluster_case{"Betts2D-8A", "cluster.xml", 8, 2, 24, -0.15}, "AFM"},
+        block_case{cluster_case{"Betts2D-16B", "cluster.xml", 16, 2, 16, -0.15}, "AFM"},
+        block_case{cluster_case{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15}, "CO"},
+        block_case{cluster_case{"Betts2D-8A", "cluster.xml", 8, 2, 24, -0.15}, "CO"},
+        // Nambu: d-wave pairing on the 1-, 4-, 8- and 16-site clusters
+        block_case{cluster_case{"Betts2D-1A", "cluster.xml", 1, 2, 64, -0.15}, "NAMBU"},
+        block_case{cluster_case{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15}, "NAMBU"},
+        block_case{cluster_case{"Betts2D-8A", "cluster.xml", 8, 2, 24, -0.15}, "NAMBU"},
+        block_case{cluster_case{"Betts2D-16B", "cluster.xml", 16, 2, 16, -0.15}, "NAMBU"}),
+    [](const ::testing::TestParamInfo<block_case>& info) {
+      std::string name = info.param.framework + "_" + info.param.cluster.lattice;
+      for (char& ch : name)
+        if (ch == '-') ch = '_';
+      return name;
+    });
 
 } // namespace
