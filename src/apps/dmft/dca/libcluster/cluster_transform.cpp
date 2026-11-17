@@ -123,7 +123,7 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
       }
     }
   }
-  attach_bare_tail(G0_omega);
+  attach_bare_tail(G0_omega, true);
   //print epsk
   std::ofstream epsk_file("epsk.dat");
   for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); ++kc) {
@@ -167,7 +167,7 @@ void DoubleCellClusterTransformer::compute_isolated_cluster_G0(double_cell_matsu
       }
     }
   }
-  attach_bare_tail(G0_omega, h_init_, mu_stag_init_);
+  attach_bare_tail(G0_omega, h_init_, mu_stag_init_, true);
 }
 
 void NambuClusterTransformer::compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{
@@ -195,7 +195,7 @@ void NambuClusterTransformer::compute_isolated_cluster_G0(cluster_nambu_matsubar
       G0_omega(freq, kc, alps::gf::index(1),alps::gf::index(1)) =  G0_omega_latt_inv[0]/G0omega_latt_inv_det;
     }
   }
-  attach_bare_tail(G0_omega, h_init_);
+  attach_bare_tail(G0_omega, h_init_, eta1_init_, eta2_init_, true);
 }
 void NormalStateClusterTransformer::compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{
   cluster_matsubara_kspace_gf zero_selfenergy(G0_omega);
@@ -213,7 +213,7 @@ void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_
   cluster_nambu_matsubara_kspace_gf zero_selfenergy(G0_omega);
   zero_selfenergy.initialize();
   matsubara_k_sum(G0_omega, zero_selfenergy,eta1_init_,eta2_init_,h_init_);
-  attach_bare_tail(G0_omega, h_init_);
+  attach_bare_tail(G0_omega, h_init_, eta1_init_, eta2_init_);
 }
 
 template<typename GFW, typename GFT> void ClusterTransformer::initial_G0(GFW &G0_omega, GFT &G0_tau)const{
@@ -238,45 +238,48 @@ template<typename GFW, typename GFT> void ClusterTransformer::initial_G0(GFW &G0
   }
 }
 
-void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0) const{
+void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster) const{
   alps::gf::k_sigma_gf c1(G0.mesh2(), G0.mesh3());
   alps::gf::k_sigma_gf c2(G0.mesh2(), G0.mesh3());
   alps::gf::k_sigma_gf c3(G0.mesh2(), G0.mesh3());
 
-  for(alps::gf::index f(0); f<n_flavors_; f++) {
-    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+  for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+    Eigen::Matrix<double,1,1> m1, m2;
+    bare_moments(k(), isolated_cluster,
+                 [&](int kl){ return Eigen::Matrix<double,1,1>::Constant(dispersion(k(),kl)-mu_); }, m1, m2);
+    for(alps::gf::index f(0); f<n_flavors_; f++) {
       c1(k,f) = 1.;
-      c2(k,f) = epsav_[k()] - mu_;
-      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_;
+      c2(k,f) = m1(0,0);
+      c3(k,f) = m2(0,0);
     }
   }
   G0.set_tail(1,c1);
   G0.set_tail(2,c2);
   G0.set_tail(3,c3);
 }
-void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const{
+void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster) const{
   alps::gf::k_sigma1_sigma2_gf c1(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G0.mesh2(), G0.mesh3(), G0.mesh4());
- c1.initialize(); c2.initialize(); c3.initialize();
 
   for(alps::gf::index spin(0); spin<2; ++spin) {
+    // the field that couples k and k+Q, as in matsubara_k_sum
+    const double field = (spin()==0 ? 1. : -1.)*h/2. + mu_stag;
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); k+=2) {
-      //the elements of the 1/iomega_n term
-      int spin_factor = spin()==0 ? 1 : -1;
-  
-      c1(k  ,alps::gf::index(0), spin) = 1.;
-      c1(k  ,alps::gf::index(1), spin) = 0.;
-
-      c1(k+1,alps::gf::index(0), spin) = 0.;
-      c1(k+1,alps::gf::index(1), spin) = 1.;
-
-     
-      c2(k  ,alps::gf::index(0), spin) =epsav_[k()  ] - mu_;
-      c2(k  ,alps::gf::index(1), spin) =mu_stag+spin_factor*h/2.;
-
-      c2(k+1,alps::gf::index(0), spin) =mu_stag+spin_factor*h/2.;
-      c2(k+1,alps::gf::index(1), spin) =epsav_[k()+1] - mu_;
+      Eigen::Matrix2d m1, m2;
+      bare_moments(k(), isolated_cluster, [&](int kl){
+          Eigen::Matrix2d H;
+          H << dispersion(k(),kl)-mu_, -field,
+               -field,                 dispersion(k()+1,kl)-mu_;
+          return H;
+        }, m1, m2);
+      for(int i=0; i<2; ++i){
+        for(int j=0; j<2; ++j){
+          c1(k+i, alps::gf::index(j), spin) = i==j ? 1. : 0.;
+          c2(k+i, alps::gf::index(j), spin) = m1(i,j);
+          c3(k+i, alps::gf::index(j), spin) = m2(i,j);
+        }
+      }
     }
   }
   G0.set_tail(1,c1);
@@ -664,7 +667,7 @@ void NambuClusterTransformer::dyson_get_green0(cluster_nambu_matsubara_kspace_gf
       G0(w,k,dn,dn) = g0_inv[0]/det_g0inv;
     }
   }
-  attach_bare_tail(G0, h_);
+  attach_bare_tail(G0, h_, eta1_, eta2_);
 }
 
 ///Compute the DMFT/DCA k-summation
@@ -869,6 +872,17 @@ void ClusterTransformer::compute_dispersion_weights(){
   dispersion_moments_[1] /= n_cluster_sites();
 }
 
+double ClusterTransformer::dispersion(int kc, int kl) const{
+  if (kl>=0) return epsilon_kckl_[kc][kl];
+  std::vector<double> K(dimension());
+  for (unsigned int d=0; d<dimension(); ++d)
+    K[d] = cluster_momentum(kc,d);
+  return epsilon(K);
+}
+double NambuClusterTransformer::dwave_prefactor(int kc, int kl) const{
+  if (kl>=0) return dwave_prefactor_kckl_[kc][kl];
+  return cos(cluster_momentum(kc,0)) - cos(cluster_momentum(kc,1));
+}
 double ClusterTransformer::epsilon(const std::vector<double> &k) const
 {
   double eps = -half_filling_;
@@ -892,18 +906,30 @@ double ClusterTransformer::epsilon(const std::vector<double> &k) const
   return eps;
 }
 
-///merge this with normal state one?
-void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h) const{
+void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h, double eta1, double eta2, bool isolated_cluster) const{
   alps::gf::k_sigma1_sigma2_gf c1(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G0.mesh2(), G0.mesh3(), G0.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G0.mesh2(), G0.mesh3(), G0.mesh4());
 
-  for(alps::gf::index f1(0); f1<n_flavors_; f1++) {
-    for(alps::gf::index f2(0); f2<n_flavors_; f2++) {
-      for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
-        c1(k,f1,f2) = f1()==f2()?1.:0.;
-        c2(k,f1,f2) = (f1()==0 && f2()==0)? epsav_[k()] - mu_ - h: (f1()==1 && f2()==1)? -(epsav_[k()] - mu_ + h):0.;
-        c3(k,f1,f2) = 0.;
+  const std::complex<double> eta(eta1, eta2);
+  for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+    Eigen::Matrix2cd m1, m2;
+    bare_moments(k(), isolated_cluster, [&](int kl){
+        // the Nambu Hamiltonian whose resolvent matsubara_k_sum computes
+        const double eps = dispersion(k(),kl) - mu_;
+        const double p = dwave_prefactor(k(),kl);
+        Eigen::Matrix2cd H;
+        H << eps - h,             p*eta,
+             p*std::conj(eta),   -eps - h;
+        return H;
+      }, m1, m2);
+    for(alps::gf::index f1(0); f1<2; f1++) {
+      for(alps::gf::index f2(0); f2<2; f2++) {
+        c1(k,f1,f2) = f1()==f2() ? 1. : 0.;
+        // The tails and G(tau) are real, so only real pairing fields
+        // (dca.ETA2=0) are represented; the imaginary part is dropped.
+        c2(k,f1,f2) = m1(f1(),f2()).real();
+        c3(k,f1,f2) = m2(f1(),f2()).real();
       }
     }
   }

@@ -11,6 +11,7 @@
 #pragma once
 
 #include <boost/multi_array.hpp>
+#include <Eigen/Dense>
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 
@@ -51,7 +52,6 @@ public:
   double epsilon(const std::vector<double> &k) const;
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
-  virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///attach the DCA cluster high frequency behavior for the interacting GF
   virtual void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
   virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
@@ -73,6 +73,28 @@ protected:
 
   ///compute the center of gravity of the bands etc (used for high frequency analysis)
   void compute_dispersion_weights();
+
+  ///the dispersion at cluster momentum kc plus lattice momentum kl; kl<0 means at the cluster momentum itself
+  double dispersion(int kc, int kl) const;
+  /// The moments m1=<H> and m2=<H^2> of the bare Hamiltonian H(kl) over the
+  /// coarse-graining patch of cluster momentum kc, with the weights of the
+  /// k-sum. The bare G0 = (<(iw - H - Sigma)^-1>^-1 + Sigma)^-1 then has the tail
+  /// 1/iw + m1/(iw)^2 + m2/(iw)^3 for any Sigma. For the isolated cluster,
+  /// H is taken at the cluster momentum only (hamiltonian(-1)).
+  template<class M, class F> void bare_moments(int kc, bool isolated_cluster, F hamiltonian, M &m1, M &m2) const{
+    if (isolated_cluster) {
+      m1 = hamiltonian(-1);
+      m2 = m1*m1;
+      return;
+    }
+    m1.setZero(); m2.setZero();
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+      const double w = weight_kl_[kl]/n_cluster_cells();
+      const M H = hamiltonian(kl);
+      m1 += w*H;
+      m2 += w*H*H;
+    }
+  }
 
 
   ///compute G0 from an atomic solution
@@ -136,7 +158,7 @@ public:
   void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
-  void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+  void attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster=false) const;
   ///attach the DCA cluster high frequency behavior for the interacting GF
   void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
 
@@ -279,7 +301,7 @@ public:
 
 private:
   ///attach a tail to the noninteracting GF
-  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
+  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
   ///attach a tail to the interacting GF
   void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
   ///perform the AFM symmetrization
@@ -348,7 +370,9 @@ public:
   virtual cluster_nambu_itime_realspace_gf nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
   virtual cluster_nambu_itime_kspace_gf nambu_transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
 
-  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h) const;
+  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h, double eta1, double eta2, bool isolated_cluster=false) const;
+  ///the d-wave form factor cos kx - cos ky at cluster momentum kc plus lattice momentum kl; kl<0 means at the cluster momentum itself
+  double dwave_prefactor(int kc, int kl) const;
   // TODO: h should also enter interacting tail
   void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
   void symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const;
