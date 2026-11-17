@@ -51,6 +51,17 @@ if(GSL_FOUND)
   install(TARGETS ${dca_tools}
     RUNTIME_DEPENDENCY_SET alps_runtime
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+  if(ALPS_BUILD_TESTING)
+    # Both tools, with fewer and more frequencies than the self-energy has.
+    add_executable(dca_interpolation_tools_test tests/interpolation_tools_test.cpp)
+    target_link_libraries(dca_interpolation_tools_test PRIVATE alps_dca)
+    target_compile_definitions(dca_interpolation_tools_test PRIVATE
+      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml"
+      DCA_INTERPOLATE_NORMAL="$<TARGET_FILE:sigma_interpolate_normal>"
+      DCA_INTERPOLATE_SC="$<TARGET_FILE:sigma_interpolate_sc>")
+    add_dependencies(dca_interpolation_tools_test ${dca_tools})
+    alps_add_gtest(dca_interpolation_tools_test COMPONENT dmft LABELS regression)
+  endif()
 endif()
 
 if(ALPS_BUILD_TESTING)
