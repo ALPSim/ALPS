@@ -30,7 +30,7 @@ protected:
     p["dca.L"] = 20;
     p["dca.LATTICE"] = "Betts2D-8A";
     p["dca.SITES"] = n_sites_;
-    p["dca.LATTICE_LIBRARY"] = "../../libcluster/cluster.xml";
+    p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
     p["dca.LATTICE_DUMP"] = "./cluster.h5";
     p["MU"] = mu_;
     p["t"] = 1.;

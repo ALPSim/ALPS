@@ -16,7 +16,7 @@
 
 //,"Kent3D-10A","Kent3D-10B","Kent3D-12A","Kent3D-12B","Kent3D-14A","Kent3D-14B","Kent3D-16C","Kent3D-16D","Kent3D-18A","Kent3D-18B","Kent3D-20A","Kent3D-20B","Kent3D-22A","Kent3D-22B","Kent3D-24C","Kent3D-24D","Kent3D-26A","Kent3D-26B","Kent3D-28C","Kent3D-28D","Kent3D-30A","Kent3D-30B","Kent3D-32C","Kent3D-32D","Kent3D-34A","Kent3D-34B","Kent3D-36A","Kent3D-36B","Kent3D-38A","Kent3D-38B","Kent3D-40A","Kent3D-40B","Kent3D-42A","Kent3D-42B","Kent3D-44A","Kent3D-44B","Kent3D-46A"
   void set_other_parameters(alps::params &p){
-    p["dca.LATTICE_LIBRARY"] = "../../libcluster/cluster.xml";
+    p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
     p["dca.LATTICE_DUMP"] = "./cluster.h5";
     p["MU"] = 0.;
     p["t"] = 1.;

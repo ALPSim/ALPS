@@ -8,9 +8,16 @@
  *****************************************************************************/
 
 #pragma once
+#include <cmath>
 #include <cstdlib>
 #include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
 #include <string>
+#include <boost/lexical_cast.hpp>
+#include "alps/hdf5.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/params.hpp"
 #include "alps/gf/fourier.hpp"
