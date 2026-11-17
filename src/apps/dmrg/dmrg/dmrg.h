@@ -99,6 +99,7 @@ private:
   
   void init();
   void use_temporary_directory();
+  void refuse_quantumnumber_changes(std::size_t first, std::string const& kind) const;
   dmtk::BasicOp<value_type > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
   void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &);
   void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
@@ -448,10 +449,13 @@ void DMRGTask<value_type>::dostep()
   // create site terms
   for (site_iterator it = sites().first ; it != sites().second ; ++it)
     build_site_operator(site_term(site_type(*it)),*it, hami);
+  refuse_quantumnumber_changes(0, "<SITETERM>");
 
   // create bond terms
+  std::size_t first_bond_term = hami.size();
   for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
     build_bond_operator(bond_term(bond_type(*it)),*it, hami);
+  refuse_quantumnumber_changes(first_bond_term, "<BONDTERM>");
 
   // create n-site terms on the n-site groups. The split depends only on the
   // group type and the site types, so do it once per combination.
@@ -1018,6 +1022,25 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
       real_t = op1;
     real_t.coef() = tit->template get<0>().value();
     this_hami += real_t;
+  }
+}
+
+// dmtk keeps every block Hamiltonian block diagonal in the quantum numbers of
+// the site basis, conserved or not, and drops a term that changes one of them
+// (issue #296). Refuse the Hamiltonian terms from index first on that do.
+template<class value_type>
+void
+DMRGTask<value_type>::refuse_quantumnumber_changes(std::size_t first, std::string const& kind) const
+{
+  for (std::size_t t = first; t < hami.size(); ++t) {
+    dmtk::QN dqn;
+    for (std::size_t o = 0; o < hami[t].size(); ++o)
+      dqn += hami[t][o].dqn;
+    for (std::size_t i = 0; i < dmtk::QN::max_index(); ++i)
+      if (dqn[i] != 0)
+        boost::throw_exception(std::runtime_error("A " + kind + " changes " + dmtk::QN::qn_name(i)
+          + ". dmrg supports only Hamiltonians that conserve every quantum number of the site basis;"
+          + " use fulldiag or sparsediag."));
   }
 }
 
