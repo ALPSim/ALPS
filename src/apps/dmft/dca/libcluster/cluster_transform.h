@@ -389,7 +389,7 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
                                                     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
   std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
       for (typename GF::mesh3_type::index_type flavor(0); flavor<G.mesh3().extent(); ++flavor) {
         typename GF::value_type av=0;
@@ -411,7 +411,7 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
                                                     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
   std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
       for (typename GF::mesh4_type::index_type flavor(0); flavor<G.mesh4().extent(); ++flavor) {
         typename GF::value_type av=0;

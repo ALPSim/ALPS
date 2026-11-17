@@ -396,9 +396,9 @@ void ClusterHelper::setup_tables(const alps::params &params)
   find_integration_weights();
   
   if (cluster_coordinates_.size1() != n_cluster_sites())
-    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
+    throw std::logic_error("parameter SITES does not match cluster definition");
   if (cluster_momenta_.size1() != n_cluster_sites())
-    boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
+    throw std::logic_error("setup of cluster momenta table failed");
   symmetry_analysis(basis_, basis_inv_);
 #ifndef ALPS_HAVE_MPI
   write();
@@ -613,7 +613,7 @@ std::vector<ClusterHelper::Matrix<double>::Type > ClusterHelper::setup_point_gro
       grsize = 48;
       break;
     default:
-      boost::throw_exception(std::logic_error("Only 1,2, or 3 dimensional clusters can be handled."));
+      throw std::logic_error("Only 1,2, or 3 dimensional clusters can be handled.");
       gr = gr1D;
       grsize = 0;
   }
@@ -659,7 +659,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     }
   }
   //setup equivalence classes of sites and site pairs
-  boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space_);
+  std::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space_);
   //setup symmetry table in k space
   for (unsigned int g=0; g<groups.size(); ++g) {
     std::map<int, int> vertexmap;
@@ -724,7 +724,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
    }*/
   
   //setup equivalence classes of sites and site pairs
-  boost::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space_);
+  std::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space_);
 }
 
 
@@ -950,7 +950,7 @@ int ClusterHelper::cluster_momentum_approximation(std::vector<double> v) const
       }
     }
   }
-  boost::throw_exception(std::logic_error("no cluster momentum approximation found"));
+  throw std::logic_error("no cluster momentum approximation found");
   return n_cluster_sites();
 }
 

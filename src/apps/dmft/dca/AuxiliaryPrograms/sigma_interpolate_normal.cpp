@@ -10,7 +10,6 @@
 #include<cmath>
 #include<cstdlib>
 
-#include "boost/program_options.hpp"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
