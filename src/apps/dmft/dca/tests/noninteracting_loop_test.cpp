@@ -231,21 +231,21 @@ INSTANTIATE_TEST_SUITE_P(
       return name;
     });
 
-// The loop needs three iterations here. Stopping it earlier leaves a warning;
-// dca still exits normally, since a run for a fixed number of iterations is
-// checked for convergence afterwards.
-TEST(LoopOptions, WarnsWhenStoppedAtMaxIt) {
+// The loop needs three iterations here. Stopped earlier by sc.MAX_IT, dca says
+// so and exits normally: a run for a fixed number of iterations is the usual
+// way to use it, and convergence is checked afterwards.
+TEST(LoopOptions, StopsAtMaxIt) {
   const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
   const fs::path dir = run_dca(c, "MaxIt_Betts2D-4A", 1);
   if (HasFailure()) return;
   EXPECT_TRUE(fs::exists(dir / "Greens_0.h5"));
   EXPECT_FALSE(fs::exists(dir / "Greens_1.h5"));
-  EXPECT_NE(read_file(dir / "dca.log").find("WARNING: dca stopped after sc.MAX_IT=1 iterations"),
+  EXPECT_NE(read_file(dir / "dca.log").find("dca stopped after sc.MAX_IT=1 iterations"),
             std::string::npos);
 }
 
 // sc.WRITE_ITERATIONS=false writes only the G0 to continue from; a converged
-// run has no warning.
+// run says that it converged.
 TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
   const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
   const fs::path dir = run_dca(c, "NoIterationFiles_Betts2D-4A", 10, false);
@@ -256,7 +256,8 @@ TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
   EXPECT_FALSE(fs::exists(dir / "G_omega"));
   const std::string log = read_file(dir / "dca.log");
   EXPECT_NE(log.find("iteration 2: change of G"), std::string::npos);
-  EXPECT_EQ(log.find("WARNING: dca stopped"), std::string::npos);
+  EXPECT_NE(log.find("dca stopped: the change of G"), std::string::npos);
+  EXPECT_EQ(log.find("sc.MAX_IT=10 iterations"), std::string::npos);
 }
 
 } // namespace
