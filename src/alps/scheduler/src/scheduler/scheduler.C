@@ -128,8 +128,10 @@ int Scheduler::run() // a slave scheduler
     if(theTask) {
       theTask->run();
       // tell the master that this task's local run is done, so that it checks
-      // the task now instead of at its next poll
-      if (own_task && !idle_sent && theTask->idle()) {
+      // the task now instead of at its next poll. A run that has not been
+      // started yet is idle too, but not done: the start message may still
+      // be on its way.
+      if (own_task && !idle_sent && theTask->run_done()) {
         OMPDump notice;
         notice.send(master, MCMP_task_idle);
         idle_sent = true;
