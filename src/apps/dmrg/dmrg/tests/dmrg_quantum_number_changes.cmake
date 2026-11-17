@@ -90,7 +90,9 @@ MAXSTATES=20
 ]=])
 expect_refusal(pairs "A <SITETERM> changes N")
 
-# A field along z conserves Sz and is kept: sparsediag -3.374932598688
+# A field along z conserves Sz and is kept. h=0.6 moves the ground state
+# to Sz=1, so the energy differs from the field-free one: sparsediag
+# -3.5822404878
 file(WRITE "${test_dir}/zfield" [=[
 LATTICE="open chain lattice"
 MODEL="spin"
@@ -99,7 +101,7 @@ L=8
 SWEEPS=4
 MAXSTATES=60
 NUMBER_EIGENVALUES=1
-{ Jz=1; Jxy=1; h=0.3; }
+{ Jz=1; Jxy=1; h=0.6; }
 ]=])
 run_dmrg(zfield)
 if(NOT status EQUAL 0)
@@ -107,7 +109,7 @@ if(NOT status EQUAL 0)
 endif()
 file(READ "${test_dir}/zfield.task1.out.xml" result)
 string(REGEX MATCH "<SCALAR_AVERAGE name=\"Energy\"><MEAN>([^<]+)</MEAN>" found "${result}")
-string(FIND "${CMAKE_MATCH_1}" "-3.37493" at)
+string(FIND "${CMAKE_MATCH_1}" "-3.58224" at)
 if(NOT found OR NOT at EQUAL 0)
-  message(FATAL_ERROR "Field along z: E0 = ${CMAKE_MATCH_1}, expected -3.37493...")
+  message(FATAL_ERROR "Field along z: E0 = ${CMAKE_MATCH_1}, expected -3.58224...")
 endif()
