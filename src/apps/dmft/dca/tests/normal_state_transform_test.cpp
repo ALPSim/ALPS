@@ -6,6 +6,8 @@
 #include "cluster_transform.h"
 #include "alps/params.hpp"
 #include<iostream>
+#include<cstdio>
+#include "alps/hdf5.hpp"
 
 class NormalStateTransformTest : public ::testing::Test{
 protected:
@@ -60,6 +62,33 @@ TEST_F(NormalStateTransformTest, MakeANormalStateTransformer){
 TEST_F(NormalStateTransformTest, ReadNonexistentInputFile){
   cluster_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));
   EXPECT_EQ(CT_->read_initial_G0(G0_init), false);
+}
+// A G0 input file from a run with other parameters is refused instead of
+// being used with the wrong meshes; one that fits is read.
+TEST_F(NormalStateTransformTest, ReadInitialG0ChecksTheMeshes){
+  const std::string file = test_dump_file() + ".G0.h5";
+  alps::params p; set_standard_parameters(p);
+  p["dca.G0_OMEGA_INPUT"] = file;
+  NormalStateClusterTransformer CT(p);
+  auto make_gf = [&](double beta, int n_freq, int n_flavors){
+    return cluster_matsubara_kspace_gf(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta, n_freq), CT.momentum_mesh(), alps::gf::index_mesh(n_flavors)));
+  };
+  auto write = [&](cluster_matsubara_kspace_gf G0){
+    CT.compute_isolated_cluster_G0(G0);
+    alps::hdf5::archive ar(file, "w");
+    G0.save(ar, "/G0");
+  };
+  cluster_matsubara_kspace_gf G0 = make_gf(beta_, n_freq_, 2);
+
+  write(make_gf(beta_, n_freq_+5, 2));
+  EXPECT_THROW(CT.read_initial_G0(G0), std::invalid_argument);
+  write(make_gf(2*beta_, n_freq_, 2));
+  EXPECT_THROW(CT.read_initial_G0(G0), std::invalid_argument);
+
+  write(make_gf(beta_, n_freq_, 2));
+  ASSERT_TRUE(CT.read_initial_G0(G0));
+  EXPECT_EQ(G0.mesh1().extent(), n_freq_);
+  std::remove(file.c_str());
 }
 TEST_F(NormalStateTransformTest, ComputeIsolatedClusterSolution){
   cluster_matsubara_kspace_gf G0_init(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_, n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(2)));

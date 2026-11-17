@@ -98,8 +98,19 @@ template<typename GF> bool ClusterTransformer::read_initial_G0(GF &G0_omega) con
     }
   }
 
-  alps::hdf5::archive ar(g0_input_path_);
-  G0_omega.load(ar, "/G0");
+  GF G0_file(G0_omega);
+  {
+    alps::hdf5::archive ar(g0_input_path_);
+    G0_file.load(ar, "/G0");
+  }
+  // load() takes the meshes from the file. A file left over from a run with
+  // another BETA, NMATSUBARA, cluster or number of flavors does not fit.
+  typedef typename GF::gf_type gf_type;
+  if (!(static_cast<const gf_type&>(G0_file).meshes() == static_cast<const gf_type&>(G0_omega).meshes()))
+    throw std::invalid_argument("The G0 in " + g0_input_path_ + " (dca.G0_OMEGA_INPUT) was computed for another"
+                                " BETA, NMATSUBARA, cluster or FLAVORS. Remove it to start from"
+                                " dca.INITIAL_G0, or point dca.G0_OMEGA_INPUT to another file.");
+  G0_omega = G0_file;
   if(G0_omega.max_tail_order()==2){
     //rationale: some version of the code did not set the 3rd coefficient. But we need it for the FT. So make sure that all input files can be used.
     std::cout<<"setting third order tail (currently unset) to zero"<<std::endl;
