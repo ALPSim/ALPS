@@ -1009,102 +1009,23 @@ void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_ks
 //  throw std::logic_error("Emanuel please implement the charge order k-space symmetrization here");
 }
 void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
+  const alps::gf::index K(0), KQ(1), up(0), dn(1);
   if (afm_symmetry_){
-  //std::ios_base::app
-  std::ofstream test_file("test",std::ios_base::app);
-  test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl;
-  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
-          //DD component
-          std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
-     
-         //OD component
-          std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;       
-//           if (w ==0 ){
-//            std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-//                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
-
-//            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-//                           <<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
-//                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
-//           }
-
-  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
-  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
-
-  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=-GKQ;
-  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=-GKQ;
-  
-     }
-    }
-   ;
+    // The AFM order distinguishes the spins; nothing is symmetrized.
   }else if(charge_order_symmetry_){
-#ifndef ALPS_HAVE_MPI
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-#else
-  int mpi_init; MPI_Initialized(&mpi_init);
-  if(mpi_init){
-  int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  if(rank==0){
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-  }
-  }else{
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-  }
-#endif
-
-
+    // Charge order: G is the same for both spins, and G(K,K+Q) = G(K+Q,K).
     for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
-         // Below was used for CO p-h case 
-         //DD component
-         // std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
-     
-         //OD component
-         // std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-         //                         +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-
-
-         //Less generic symmetry which works for both p-h and non-p-h cases
-            //DD component: only spin symmetrization
-            std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-                                     +G(w, kc  ,alps::gf::index(0), alps::gf::index(1)))/2.;
-            std::complex<double> GkQkQ=(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))
-                                        +G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))/2.;
-            //OD component Gup=Gdn, and Gkkq=Gkqk
-            std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-
-
-
-           
-
-           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=GkQkQ;
-           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=GkQkQ;
-
-           G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-           G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=GKQ;
-           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=GKQ;
-  
-     }
+      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
+        const std::complex<double> G_K_K   = (G(w, kc  , K , up) + G(w, kc  , K , dn))/2.;
+        const std::complex<double> G_KQ_KQ = (G(w, kc+1, KQ, up) + G(w, kc+1, KQ, dn))/2.;
+        const std::complex<double> G_K_KQ  = (G(w, kc  , KQ, up) + G(w, kc  , KQ, dn)
+                                            + G(w, kc+1, K , up) + G(w, kc+1, K , dn))/4.;
+        G(w, kc  , K , up) = G(w, kc  , K , dn) = G_K_K;
+        G(w, kc+1, KQ, up) = G(w, kc+1, KQ, dn) = G_KQ_KQ;
+        G(w, kc  , KQ, up) = G(w, kc  , KQ, dn) = G_K_KQ;
+        G(w, kc+1, K , up) = G(w, kc+1, K , dn) = G_K_KQ;
+      }
     }
-
-   ;
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
 cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_space(const double_cell_itime_kspace_gf& G) const{
