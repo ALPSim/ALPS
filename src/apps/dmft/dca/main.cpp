@@ -2,9 +2,10 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2014 by Emanuel Gull <gullc@comp-phys.org>
+ * Copyright (C) 2005-2026 by Emanuel Gull
  *
- * To be used with permission by the authors
+ * ALPS Project: https://alps.comp-phys.org/
+ * SPDX-License-Identifier: MIT
  *
  *****************************************************************************/
 
@@ -44,8 +45,8 @@ int main(int argc, char** argv)
     }
     std::cout << "#################################################"<<std::endl;
     std::cout << "### ALPS Dynamical Mean Field Framework.      ###"<<std::endl;
-    std::cout << "### Copyright Emanuel Gull, 2005 - 2016       ###"<<std::endl;
-    std::cout << "### To be used with permission by the authors ###"<<std::endl;
+    std::cout << "### Copyright Emanuel Gull, 2005 - 2026       ###"<<std::endl;
+    std::cout << "### Licensed under the MIT license            ###"<<std::endl;
     std::cout << "#################################################"<<std::endl;
 
     alps::params parms=read_parameters_from_file(argc, (const char **)argv);

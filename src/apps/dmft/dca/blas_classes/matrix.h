@@ -1,7 +1,11 @@
 /*********************************************************
- *  Emanuel Gull, 2006 - 2007
  *  BLAS Compatibility headers
  *  Square Matrix Class
+ * Copyright (C) 2005-2026 by Emanuel Gull
+ *
+ * ALPS Project: https://alps.comp-phys.org/
+ * SPDX-License-Identifier: MIT
+ *
  *********************************************************/
 #ifndef BLAS_MATRIX
 #define BLAS_MATRIX

@@ -1,3 +1,7 @@
+// Copyright (C) 2005-2026 by Emanuel Gull
+// ALPS Project: https://alps.comp-phys.org/
+// SPDX-License-Identifier: MIT
+
 #include "gtest/gtest.h"
 #include "cluster_transform.h"
 #include "alps/params.hpp"

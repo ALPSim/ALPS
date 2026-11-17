@@ -3,8 +3,11 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2007      by Sebastian Fuchs <fuchs@comp-phys.org>
- * Copyright (C) 2007-2015 by Emanuel Gull <egull@umich.edu>
+ * Copyright (C) 2005-2026 by Emanuel Gull
  *
+ *
+ * ALPS Project: https://alps.comp-phys.org/
+ * SPDX-License-Identifier: MIT
  *
  *****************************************************************************/
 

@@ -2,9 +2,10 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2016 by Emanuel Gull <egull@umich.edu>
+ * Copyright (C) 2005-2026 by Emanuel Gull
  *
- * To be used with permission by the authors
+ * ALPS Project: https://alps.comp-phys.org/
+ * SPDX-License-Identifier: MIT
  *
  *****************************************************************************/
 

@@ -1,5 +1,8 @@
+// Copyright (C) 2005-2026 by Emanuel Gull
+// ALPS Project: https://alps.comp-phys.org/
+// SPDX-License-Identifier: MIT
+
 //BLAS headers for accessing BLAS from C++.
-//Emanuel Gull, 2006 - 2007.
 //gull@itp.phys.ethz.ch
 
 
