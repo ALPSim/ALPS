@@ -84,34 +84,10 @@ public:
     }
     void exp( double c){
       //std::cout<<"exp-ing for c: "<<c<<std::endl;
-#ifdef VECLIB
-      //osx veclib exp
-      //for(int i=0;i<size_;++i){ values_[i]*=c; }
-      int one=1;
-      blas::dscal_(&size_,&c,values_,&one);
-      vecLib::vvexp(values_, values_, &size_); 
-#else
-#ifdef ACML
-      //amd acml rsvector exp
-      double scaled_values[size_];
-      for(int i=0;i<size_;++i){ scaled_values[i]=values_[i]*c; }
-      acml::vrda_exp(size_, scaled_values, values_);
-#else
-#ifdef MKL
-      //intel MKL rsvector exp
-      double scaled_values[size_];
-      memset(scaled_values, 0,sizeof(double)*size_);
-      int inc=1;
-      daxpy_(&size_, &c, values_, &inc, scaled_values, &inc);
-      mkl::vdExp(size_, scaled_values, values_);
-#else
       //pedestrian method
       for(int i=0;i<size_;++i){
         values_[i]=std::exp(c*values_[i]);
       }
-#endif
-#endif
-#endif
     }
     void exp(const double &c, const blas::rsvector &v){
       resize(v.size());

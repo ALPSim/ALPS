@@ -21,59 +21,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <sys/types.h>
-#ifdef USE_MATRIX_DISPATCH //use dispatch to tiny matrix functions for small matrices
-#undef __APPLE_CC__
-
-#include <boost/preprocessor/seq/elem.hpp>
-#include <boost/preprocessor/seq/for_each_product.hpp>
-#include <boost/preprocessor/seq/for_each.hpp>
-#include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/repetition/repeat.hpp>
-
-#define MSIZE_P (1)(2)(4) //use tiny matrix dispatcher for these sizes.
-#define MSIZE_Q (1)(2)(4)
-#define MSIZE_R (1)(2)(4)
-
-#define MLOOP(unused, product) \
-BOOST_PP_CAT(\
-BOOST_PP_CAT(\
-BOOST_PP_CAT(\
-BOOST_PP_CAT(\
-BOOST_PP_CAT(\
-void matmult_, BOOST_PP_SEQ_ELEM(0, product)\
-)\
-, _\
-)\
-, BOOST_PP_SEQ_ELEM(1, product)\
-)\
-, _\
-)\
-, BOOST_PP_SEQ_ELEM(2, product)\
-)(const double * A, const double * B, double * C);
-//that produces the function definitions:
-BOOST_PP_SEQ_FOR_EACH_PRODUCT(MLOOP, (MSIZE_P)(MSIZE_Q)(MSIZE_R))
-//macros that will be used in the switch statement.
-#define CASE_MACRO_R(ignored, nr, np_and_nq) \
-BOOST_PP_CAT( \
-BOOST_PP_CAT( \
-BOOST_PP_CAT( \
-BOOST_PP_CAT( \
-BOOST_PP_CAT( \
-case BOOST_PP_SEQ_ELEM(nr, MSIZE_R): matmult_ , BOOST_PP_SEQ_ELEM(BOOST_PP_SEQ_ELEM(0, np_and_nq),MSIZE_P) \
-), \
-_ \
-), \
-BOOST_PP_SEQ_ELEM(BOOST_PP_SEQ_ELEM(1, np_and_nq),MSIZE_Q)\
-), \
-_\
-),\
-BOOST_PP_SEQ_ELEM(nr, MSIZE_R)(values_, M2.values_, Mres.values_); break; \
-)
-#define CASE_MACRO_Q(ignored, nq, np) \
-case BOOST_PP_SEQ_ELEM(nq,MSIZE_Q): switch(size2_){ BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(MSIZE_R), CASE_MACRO_R, (np)(nq)) default: use_blas=true; } break;
-#define CASE_MACRO_P(ignored, np, ignored2) \
-case BOOST_PP_SEQ_ELEM(np,MSIZE_P): switch(Mres.size2_){ BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(MSIZE_Q), CASE_MACRO_Q, np) default: use_blas=true;} break;
-#endif
 namespace blas{
   //simple BLAS matrix that uses BLAS calls for rank one and matrix vector.
   //contains size 1 and size 2 that do not have to be the same.
@@ -464,7 +411,6 @@ namespace blas{
   };
   
   //this is crap!! reimplement!
-#ifndef USE_MATRIX_DISPATCH
   template<> inline void general_matrix<double>::matrix_right_multiply(const general_matrix<double> &M2,  general_matrix<double> &Mres, double beta) const{
     //call the BLAS routine for matrix matrix multiplication:
     //std::cerr<<"sizes are: "<<size1_<<" "<<Mres.size1()<<" "<<Mres.size2()<<std::endl;
@@ -496,23 +442,6 @@ namespace blas{
               &size2_, &beta, Mres.values_, &M2.size2_);
      }
   }
-#else
-  template<> inline void general_matrix<double>::matrix_right_multiply(const general_matrix<double> &M2,  general_matrix<double> &Mres, double beta) const{
-    //call the BLAS routine for matrix matrix multiplication:
-    assert(Mres.size1()==size1_);
-    assert(Mres.size2()==M2.size2());
-    assert(size2_==M2.size1());
-    bool use_blas=false;
-    switch(Mres.size1()){ //boost pp dispatcher for matrix multiplication - see also dispatcher.
-        BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(MSIZE_P), CASE_MACRO_P, )
-      default: use_blas=true; break;
-    }
-    if(use_blas){
-      dgemm_(&notrans, &notrans, &M2.size2_, &size1_, &size2_, &one_double, M2.values_, &M2.size2_, values_,
-             &size2_, &beta, Mres.values_, &M2.size2_);
-    }
-  }
-#endif //matrix dispatch
   template<> inline void general_matrix<std::complex<double> >::matrix_right_multiply(const general_matrix<std::complex<double> > &M2,  general_matrix<std::complex<double> >  &Mres, std::complex<double> beta) const{
     //call the BLAS routine for matrix matrix multiplication:
     /*assert(Mres.size1()==size1_);
