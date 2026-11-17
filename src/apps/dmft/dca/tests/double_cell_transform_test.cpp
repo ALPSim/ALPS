@@ -36,15 +36,12 @@ protected:
     p["U"] = 3.1415;
     p["V"] = 1.2;
     p["tprime"] = 0.;
-    p["t_flavor"] = 0.;
     p["BETA"] = beta_;
     p["FLAVORS"] = 2;
     p["NMATSUBARA"] = n_freq_;
     p["N"] = n_tau_;
     p["dca.AFM_SELFCONSISTENCY"]=true;
     p["dca.CO_SELFCONSISTENCY"]=false;
-    p["dca.PHASE"]=false;
-    p["dca.IMBALANCE"]=false;
     p["dca.G0_OMEGA_INPUT"]="/tmp/none";
     p["dca.G0_OMEGA_OUTPUT"]="/tmp/none";
     p["dca.INITIAL_G0"]="FREE";

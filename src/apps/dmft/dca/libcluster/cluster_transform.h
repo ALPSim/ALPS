@@ -49,10 +49,6 @@ public:
 
   ///dispersion relation for t and t' in 1, 2, and 3 d.
   double epsilon(const std::vector<double> &k) const;
-  ///mass imbalance spin-dependent dispersion
-  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
-  ///dispersion relation for a system with an additional phase
-  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
   virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
@@ -74,8 +70,6 @@ protected:
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   ///get epsilon(k) and the simpson integration weights on the BZ
   void compute_integration_weight_and_dispersion();
-  ///initialize the vector phi with phases
-  void setup_phase_vector(const alps::params &p);
 
   ///compute the center of gravity of the bands etc (used for high frequency analysis)
   void compute_dispersion_weights();
@@ -91,21 +85,18 @@ protected:
   ///chemical potential
   double mu_;
   double half_filling_;
-  ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
-  double t_, t2_,t_flavor_;
+  ///t is the basic energy unit of the hopping. t2 is the tprime.
+  double t_, t2_;
   double beta_;
   ///interaction is needed for high frequency information in the Fourier transform; same for the V
   double U_;
   double V_;
   int n_flavors_;
   int nfreq_;
-  bool use_phase_;
-  bool use_imbalance_;
 
-  ///dispersion, appropriately binned for cluster point, lattice point (belonging to cluster), and spin (ignored in nambu case)
-  boost::multi_array<double,3> epsilon_kckl_;
+  ///dispersion, binned by cluster momentum and lattice momentum (belonging to the cluster)
+  boost::multi_array<double,2> epsilon_kckl_;
   std::vector<double> weight_kl_;
-  std::vector<double> phi_;
 
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
@@ -249,7 +240,6 @@ public:
   DoubleCellClusterTransformer(const alps::params& params):
     ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
     mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]), afm_symmetry_(params["dca.AFM_SELFCONSISTENCY"]), charge_order_symmetry_(params["dca.CO_SELFCONSISTENCY"]){
-    if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
     if(afm_symmetry_ && mu_stag_!=0) throw std::invalid_argument("do not use staggered mu in AFM Self-consistency");
     if(charge_order_symmetry_ && h_!=0) throw std::invalid_argument("do not use magnetic field in CO Self-consistency");
   }
