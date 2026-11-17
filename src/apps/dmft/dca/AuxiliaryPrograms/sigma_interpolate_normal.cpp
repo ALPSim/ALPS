@@ -16,7 +16,6 @@
 
 #include "cluster.h"
 #include<Eigen/Dense>
-#include"blasheader.h"
 
 //take a vector and interpolate it using GSL in the middle, add constants to the back, and extrapolate parabolically for the first few frequencies if they are outside of the known interval
 std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues);
@@ -137,22 +136,16 @@ int main(int argc, char **argv){
 }
 
 std::vector<double> solve_parabola(const std::vector<double> &xvalues, const std::vector<double> &yvalues){
-  int size=3, one=1;
-  Eigen::Matrix< double , 3, 3> M;
-  M(0,0)=xvalues[0]*xvalues[0]; M(0,1)=xvalues[0]; M(0,2)=1;
-  M(1,0)=xvalues[1]*xvalues[1]; M(1,1)=xvalues[1]; M(1,2)=1;
-  M(2,0)=xvalues[2]*xvalues[2]; M(2,1)=xvalues[2]; M(2,2)=1;
-  
-  std::vector<double> Z(size);
-  Z[0]=yvalues[0]; Z[1]=yvalues[1]; Z[2]=yvalues[2];
-  
-  std::vector<int> ipiv(size);
-  int info=0;
+  Eigen::Matrix3d M;
+  M << xvalues[0]*xvalues[0], xvalues[0], 1,
+       xvalues[1]*xvalues[1], xvalues[1], 1,
+       xvalues[2]*xvalues[2], xvalues[2], 1;
+  const Eigen::Vector3d Z(yvalues[0], yvalues[1], yvalues[2]);
 
-  lapack::dgesv_(&size, &one, &(M(0,0)),&size, &(ipiv[0]), &(Z[0]), &size, &info);
-  if(info) throw std::runtime_error("dgesv info is nonzero.");
-  
-  return Z;
+  const Eigen::FullPivLU<Eigen::Matrix3d> lu(M);
+  if(!lu.isInvertible()) throw std::runtime_error("solve_parabola: the three x values are not distinct.");
+  const Eigen::Vector3d coefficients = lu.solve(Z);
+  return std::vector<double>(coefficients.data(), coefficients.data()+3);
 }
 double evaluate_parabola(const std::vector<double> coefficients, double xvalue){
   return coefficients[0]*xvalue*xvalue+coefficients[1]*xvalue+coefficients[2];
