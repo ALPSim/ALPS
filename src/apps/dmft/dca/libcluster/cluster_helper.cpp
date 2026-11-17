@@ -17,7 +17,10 @@
 #include <mpi.h>
 #endif
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
+#include <map>
 #include <unordered_map>
 
 #include "cluster_graph.h"
@@ -309,18 +312,32 @@ void ClusterHelper::compute_inverse_reciprocal_basis(){
 }
 void ClusterHelper::extract_and_arrange_cluster_coordinates(){
   int maxc=n_cluster_sites();
+  //The cluster sites lie in the parallelepiped spanned by the superlattice vectors. Scan the
+  //integer points of its bounding box, within the cube |c_d| <= maxc searched before: the cube
+  //has (2 maxc+1)^dimension points, which took minutes for clusters of a few hundred sites.
+  //The scan order, and hence the order of the sites found, is that of the full cube.
+  std::vector<int> lo(dimension(), 0), hi(dimension(), 0);
+  for (unsigned int d=0; d<dimension(); ++d) {
+    double low=0., high=0.;
+    for (unsigned int j=0; j<basis_vectors().size(); ++j) {
+      low += std::min(0., basis_vectors()[j][d]);
+      high += std::max(0., basis_vectors()[j][d]);
+    }
+    lo[d] = std::max(-maxc, (int)std::floor(low)-1);
+    hi[d] = std::min(maxc, (int)std::ceil(high)+1);
+  }
   std::vector<double> c(dimension());
   switch(dimension()) {
     case 1 :
-      for (int i=-maxc; i<=maxc; ++i) {
+      for (int i=lo[0]; i<=hi[0]; ++i) {
         c[0] = i;
         if (inside_cluster(c, basis_inv_))
           append_column_no_duplicates(cluster_coordinates_, c);
       }
       break;
     case 2:
-      for (int i=-maxc; i<=maxc; ++i) {
-        for (int j=-maxc; j<=maxc; ++j) {
+      for (int i=lo[0]; i<=hi[0]; ++i) {
+        for (int j=lo[1]; j<=hi[1]; ++j) {
           c[0] = i; c[1] = j;
           if (inside_cluster(c, basis_inv_))
             append_column_no_duplicates(cluster_coordinates_, c);
@@ -328,9 +345,9 @@ void ClusterHelper::extract_and_arrange_cluster_coordinates(){
       }
       break;
     case 3:
-      for (int i=-maxc; i<=maxc; ++i) {
-        for (int j=-maxc; j<=maxc; ++j) {
-          for (int k=-maxc; k<=maxc; ++k) {
+      for (int i=lo[0]; i<=hi[0]; ++i) {
+        for (int j=lo[1]; j<=hi[1]; ++j) {
+          for (int k=lo[2]; k<=hi[2]; ++k) {
             c[0] = i; c[1] = j; c[2]=k;
             if (inside_cluster(c, basis_inv_)) {
               append_column_no_duplicates(cluster_coordinates_, c);
@@ -724,56 +741,35 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
     }
     site_class_set.insert(s_class);
   }
-  //setup site pair equivalence classes
+  //setup site pair equivalence classes: a symmetry maps the pair (j1,j2) to
+  //(table(i,j1),table(i,j2)), and in the paramagnet (j1,j2) is also equivalent to (j2,j1).
+  //The classes are the connected components of these relations, found with a union-find
+  //over the n^2 pairs. (Merging overlapping classes pairwise until none overlap gives the
+  //same classes, but took hours for clusters of a few hundred sites.)
+  const int n = symmetry_table.size2();
+  std::vector<int> parent(n*n);
+  for (int p=0; p<n*n; ++p) parent[p] = p;
+  std::function<int(int)> find = [&parent](int p) {
+    while (parent[p] != p) { parent[p] = parent[parent[p]]; p = parent[p]; }
+    return p;
+  };
+  auto unite = [&parent, &find](int p, int q) {
+    p = find(p); q = find(q);
+    if (p != q) parent[std::max(p, q)] = std::min(p, q);
+  };
+  for (int j1=0; j1<n; ++j1) {
+    for (int j2=0; j2<n; ++j2) {
+      for (unsigned int i=0; i<symmetry_table.size1(); ++i)
+        unite(j1*n+j2, symmetry_table(i,j1)*n+symmetry_table(i,j2));
+      if (paramagnet_) unite(j1*n+j2, j2*n+j1);
+    }
+  }
+  std::map<int, pair_class_type> classes;
+  for (int j1=0; j1<n; ++j1)
+    for (int j2=0; j2<n; ++j2)
+      classes[find(j1*n+j2)].insert(pair_type(j1, j2));
   pair_class_set_type pair_class_set;
-  for (unsigned int j1=0; j1<symmetry_table.size2(); ++j1) {
-    for (unsigned int j2=0; j2<symmetry_table.size2(); ++j2) {
-      pair_class_type p_class;
-      for (unsigned int i=0; i<symmetry_table.size1(); ++i) {
-        p_class.insert(pair_type(symmetry_table(i,j1), symmetry_table(i,j2)));
-      }
-      pair_class_set.insert(p_class);
-    }
-  }
-  //reduce pair classes
-  bool reducible = true;
-  while (reducible) {
-    reducible = false;
-    pair_class_set_type inserted_class_set;
-    pair_class_set_type reduced_pair_class_set;
-    for (pair_class_set_type::const_iterator it_i1=pair_class_set.begin();
-         it_i1!=pair_class_set.end(); ++it_i1) {
-      if (inserted_class_set.find(*it_i1)==inserted_class_set.end()) {
-        pair_class_type red_p_class = *it_i1;
-        pair_class_set_type::const_iterator it_next = it_i1;
-        ++it_next;
-        for (pair_class_set_type::const_iterator it_i2=it_next;
-             it_i2!=pair_class_set.end(); ++it_i2) {
-          bool intersec = false;
-          for (pair_class_type::const_iterator it_j1=it_i1->begin();
-               it_j1!=it_i1->end(); ++it_j1) {
-            for (pair_class_type::const_iterator it_j2=it_i2->begin();it_j2!=it_i2->end(); ++it_j2) {
-              if (*it_j1==*it_j2 || (it_j1->first==it_j2->second && it_j1->second==it_j2->first&&paramagnet_)) {
-                intersec = true;
-                reducible = true;
-                break;
-              }
-            }
-            if (intersec)
-              break;
-          }
-          if (intersec) {
-            for (pair_class_type::const_iterator it_j2=it_i2->begin();
-                 it_j2!=it_i2->end(); ++it_j2)
-              red_p_class.insert(*it_j2);
-            inserted_class_set.insert(*it_i2);
-          }
-        }
-        reduced_pair_class_set.insert(red_p_class);
-      }
-    }
-    pair_class_set = reduced_pair_class_set;
-  }
+  for (const auto &c : classes) pair_class_set.insert(c.second);
   return std::pair<site_class_set_type, pair_class_set_type>(site_class_set, pair_class_set);
 }
 
