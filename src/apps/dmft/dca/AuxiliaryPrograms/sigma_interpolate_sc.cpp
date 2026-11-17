@@ -99,7 +99,7 @@ int main(int argc, char **argv){
   double eta1_old=parms_old["dca.ETA1"];
   double eta2_old=parms_old["dca.ETA2"];
   double nsites_old=parms_old["dca.SITES"];
-  int nfreq_old = parms_new["NMATSUBARA"];
+  int nfreq_old = parms_old["NMATSUBARA"];
 
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];

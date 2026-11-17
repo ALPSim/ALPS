@@ -53,7 +53,7 @@ int main(int argc, char **argv){
   double mu_old=parms_old["MU"];
   double h_old=parms_old["H"];
   double nsites_old=parms_old["dca.SITES"];
-  int nfreq_old = parms_new["NMATSUBARA"];
+  int nfreq_old = parms_old["NMATSUBARA"];
   
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
