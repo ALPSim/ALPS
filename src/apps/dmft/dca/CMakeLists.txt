@@ -59,4 +59,16 @@ if(ALPS_BUILD_TESTING)
       DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml")
     alps_add_gtest(dca_${test} COMPONENT dmft)
   endforeach()
+
+  # End-to-end test: dca runs its loop at U=0 with a solver that returns G = G0.
+  add_executable(dca_free_solver tests/free_solver.cpp)
+  target_link_libraries(dca_free_solver PRIVATE alps_dca)
+  add_executable(dca_noninteracting_loop_test tests/noninteracting_loop_test.cpp)
+  target_link_libraries(dca_noninteracting_loop_test PRIVATE alps_dca)
+  target_compile_definitions(dca_noninteracting_loop_test PRIVATE
+    DCA_EXECUTABLE="$<TARGET_FILE:dca>"
+    DCA_FREE_SOLVER="$<TARGET_FILE:dca_free_solver>"
+    DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
+  add_dependencies(dca_noninteracting_loop_test dca dca_free_solver)
+  alps_add_gtest(dca_noninteracting_loop_test COMPONENT dmft LABELS regression TIMEOUT 300)
 endif()

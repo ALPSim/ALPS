@@ -80,7 +80,12 @@ also cite their impurity solver.
 
 ## Tests
 
-The cluster geometry and transform tests run in the `dmft` test component:
+The cluster geometry and transform tests and an end-to-end test of the loop
+run in the `dmft` test component. The end-to-end test runs `dca` at U=0 with a
+solver that returns G = G0 on one-site 2D and 3D clusters and on the 4-, 8- and
+16-site Betts clusters. It checks the isolated-cluster starting point, a zero
+self-energy, convergence at the coarse-grained lattice Green's function, and
+the local Green's function against an independent momentum integral.
 
 ```sh
 ctest -L dmft -R dca_
