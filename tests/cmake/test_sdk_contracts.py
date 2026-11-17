@@ -146,6 +146,10 @@ def test_sdk_exports_installed_applications(tmp_path):
     assert len(paths) == 25
     assert len(set(paths)) == 25
     assert all(Path(path).is_file() for path in paths)
+    # Every library the applications load is a runtime target, so that
+    # consumers bundling the programs (pyalps) install it with them.
+    runtime = (tmp_path / "runtime-Release.txt").read_text().splitlines()
+    assert all(Path(path).is_file() for path in runtime)
 
 
 def test_sdk_exports_solver_libraries(tmp_path):
