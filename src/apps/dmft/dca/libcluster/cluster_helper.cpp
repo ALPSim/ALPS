@@ -37,7 +37,9 @@ alps_graph(params["dca.LATTICE"],params["dca.LATTICE_LIBRARY"],params["dca.L"]),
 paramagnet_(!params["dca.AFM_SELFCONSISTENCY"]),
 epsilon_(1e-9),
 hdf5_dump_name_(params["dca.LATTICE_DUMP"].as<std::string>()),
-cluster_name_(params["dca.LATTICE"].as<std::string>())
+cluster_name_(params["dca.LATTICE"].as<std::string>()),
+lattice_L_(params["dca.L"]),
+dump_location_(cluster_name_+"/L"+std::to_string(lattice_L_))
 {
   //check that the numer of sites is consistent between the 'SITES' parameter and what we get from the cluster.
   if (int(params["dca.SITES"]) != alps_graph::unit_cell_volume()){
@@ -453,25 +455,26 @@ void ClusterHelper::read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_
 bool ClusterHelper::write() const{
   std::cout<<"entering write for name: "<<hdf5_dump_name_<<" cluster name: "<<cluster_name_<<std::endl;
     alps::hdf5::archive ar(hdf5_dump_name_, "w");
-    if(ar.is_data("/"+cluster_name_+"/name")) return false; //already have a transformer there.
-    ar<<alps::make_pvp("/"+cluster_name_+"/name", cluster_name_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/bipartite", bipartite_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/epsilon", epsilon_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/cluster_coordinates", cluster_coordinates_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/cluster_momenta", cluster_momenta_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/lattice_momenta", lattice_momenta_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/reciprocal_basis", reciprocal_basis_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/rbzone_boundaries", rbzone_boundaries_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar<<alps::make_pvp("/"+cluster_name_+"/symmetry_table_real_space", symmetry_table_real_space_);
+    if(ar.is_data("/"+dump_location_+"/name")) return false; //already have a transformer there.
+    ar<<alps::make_pvp("/"+dump_location_+"/name", cluster_name_);
+    ar<<alps::make_pvp("/"+dump_location_+"/bipartite", bipartite_);
+    ar<<alps::make_pvp("/"+dump_location_+"/epsilon", epsilon_);
+    ar<<alps::make_pvp("/"+dump_location_+"/L", lattice_L_);
+    ar<<alps::make_pvp("/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
+    ar<<alps::make_pvp("/"+dump_location_+"/cluster_momenta", cluster_momenta_);
+    ar<<alps::make_pvp("/"+dump_location_+"/lattice_momenta", lattice_momenta_);
+    ar<<alps::make_pvp("/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
+    ar<<alps::make_pvp("/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar<<alps::make_pvp("/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
+    ar<<alps::make_pvp("/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    ar<<alps::make_pvp("/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
     //the sets we need to do by hand:
     //site class set real space
-    write_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space", cluster_name_);
-    write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space", cluster_name_);
-    write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space", cluster_name_);
-    write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space", cluster_name_);
+    write_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space", dump_location_);
+    write_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space", dump_location_);
+    write_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space", dump_location_);
+    write_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space", dump_location_);
     std::cout<<"exiting write for name: "<<hdf5_dump_name_<<" cluster name: "<<cluster_name_<<std::endl;
     return true;
 }
@@ -482,25 +485,25 @@ bool ClusterHelper::read(){
       if(!in_file.is_open()) return false;
     }
     alps::hdf5::archive ar(hdf5_dump_name_, "r");
-    if(!ar.is_data("/"+cluster_name_+"/name")) return false;
-    std::string name;     ar>>alps::make_pvp("/"+cluster_name_+"/name", name);
+    if(!ar.is_data("/"+dump_location_+"/name")) return false;
+    std::string name;     ar>>alps::make_pvp("/"+dump_location_+"/name", name);
     if(name!=cluster_name_) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+cluster_name_);
     //write data to the 'tmpname' file
-    ar>>alps::make_pvp("/"+cluster_name_+"/bipartite", bipartite_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/epsilon", *(const_cast<double*>(&epsilon_)));
-    ar>>alps::make_pvp("/"+cluster_name_+"/cluster_coordinates", cluster_coordinates_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/cluster_momenta", cluster_momenta_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/lattice_momenta", lattice_momenta_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/reciprocal_basis", reciprocal_basis_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/rbzone_boundaries", rbzone_boundaries_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/symmetry_table_k_space", symmetry_table_k_space_);
-    ar>>alps::make_pvp("/"+cluster_name_+"/symmetry_table_real_space", symmetry_table_real_space_);
+    ar>>alps::make_pvp("/"+dump_location_+"/bipartite", bipartite_);
+    ar>>alps::make_pvp("/"+dump_location_+"/epsilon", *(const_cast<double*>(&epsilon_)));
+    ar>>alps::make_pvp("/"+dump_location_+"/cluster_coordinates", cluster_coordinates_);
+    ar>>alps::make_pvp("/"+dump_location_+"/cluster_momenta", cluster_momenta_);
+    ar>>alps::make_pvp("/"+dump_location_+"/lattice_momenta", lattice_momenta_);
+    ar>>alps::make_pvp("/"+dump_location_+"/reciprocal_basis", reciprocal_basis_);
+    ar>>alps::make_pvp("/"+dump_location_+"/reciprocal_basis_inv", reciprocal_basis_inv_);
+    ar>>alps::make_pvp("/"+dump_location_+"/rbzone_boundaries", rbzone_boundaries_);
+    ar>>alps::make_pvp("/"+dump_location_+"/symmetry_table_k_space", symmetry_table_k_space_);
+    ar>>alps::make_pvp("/"+dump_location_+"/symmetry_table_real_space", symmetry_table_real_space_);
     
-    read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space",cluster_name_);
-    read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space",cluster_name_);
-    read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space",cluster_name_);
-    read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space",cluster_name_);
+    read_site_class_set(ar, site_class_set_real_space_, "site_class_set_real_space",dump_location_);
+    read_site_class_set(ar, site_class_set_k_space_, "site_class_set_k_space",dump_location_);
+    read_pair_class_set(ar, pair_class_set_real_space_, "pair_class_set_real_space",dump_location_);
+    read_pair_class_set(ar, pair_class_set_k_space_, "pair_class_set_k_space",dump_location_);
     return true; //success
 }
 

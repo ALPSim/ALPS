@@ -6,6 +6,8 @@
 #include "test_dump_file.h"
 #include "cluster_helper.h"
 #include "alps/params.hpp"
+#include "alps/hdf5.hpp"
+#include <cstdio>
 
 #define TWODCLUSTERS1 "Betts2D-1A","Betts2D-4A","Betts2D-8A","Betts2D-8C","Betts2D-9A","Betts2D-9B","Betts2D-10A","Betts2D-10B","Betts2D-11A","Betts2D-12A","Betts2D-12B","Betts2D-12D","Betts2D-13A","Betts2D-14A","Betts2D-14B","Betts2D-15A","Betts2D-15B","Betts2D-16A","Betts2D-16B"
 //,"Betts2D-16C","Betts2D-16D","Betts2D-16E","Betts2D-17A","Betts2D-17B","Betts2D-18A","Betts2D-18B","Betts2D-18C","Betts2D-18D","Betts2D-19A"
@@ -132,4 +134,33 @@ TEST(ClusterHelper, Periodicity4Site){
 
   EXPECT_EQ(CH.periodicity(0), 2);
   EXPECT_EQ(CH.periodicity(1), 2);
+}
+// The lattice momenta depend on dca.L. A dump file written for one L must not
+// supply the tables for another: each L is stored in its own group.
+TEST(ClusterHelper, DumpFileKeepsEachL){
+  auto params_for = [](int L, const std::string &dump) {
+    alps::params p;
+    p["dca.LATTICE"]="Betts2D-4A";
+    p["dca.SITES"]=4;
+    p["dca.L"]=L;
+    set_other_parameters(p);
+    p["dca.LATTICE_DUMP"]=dump;
+    return p;
+  };
+  const std::string shared = test_dump_file();
+  const std::string fresh = "./fresh_" + shared.substr(2);
+  std::remove(shared.c_str());
+  std::remove(fresh.c_str());
+
+  ClusterHelper L8(params_for(8, shared));             // computes L=8 and writes it
+  ClusterHelper L12_shared(params_for(12, shared));    // must not reuse the L=8 tables
+  ClusterHelper L12_fresh(params_for(12, fresh));
+  EXPECT_NE(L8.n_lattice_momenta(), L12_shared.n_lattice_momenta());
+  EXPECT_EQ(L12_shared, L12_fresh);
+
+  ClusterHelper L8_again(params_for(8, shared));       // reads the L=8 group back
+  EXPECT_EQ(L8, L8_again);
+  alps::hdf5::archive ar(shared, "r");
+  EXPECT_TRUE(ar.is_group("/Betts2D-4A/L8"));
+  EXPECT_TRUE(ar.is_group("/Betts2D-4A/L12"));
 }

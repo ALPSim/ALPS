@@ -153,6 +153,11 @@ private:
   const double epsilon_;
   const std::string hdf5_dump_name_;
   const std::string cluster_name_;
+  ///dca.L, the linear size of the lattice of clusters
+  const int lattice_L_;
+  ///group of the dump file holding this cluster: "<cluster name>/L<L>". The lattice momenta
+  ///depend on L, so each L has its own group, and changing dca.L never reuses another L's tables.
+  const std::string dump_location_;
 };
 
 
