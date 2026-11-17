@@ -81,3 +81,8 @@ components:
     name: ALPS maximum entropy analytic continuation (CQMP/Maxent)
     algorithm: [bryan1990, jarrell1996]
     implementation: [levy2017maxent]
+  dca:
+    name: ALPS dynamical cluster approximation
+    algorithm: [maier2005]
+    implementation: [gull2009dca, gull2013dca]
+    note: Cite the relevant impurity-solver references as well when using a solver through the DCA loop.
