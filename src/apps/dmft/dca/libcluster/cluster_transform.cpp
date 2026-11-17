@@ -10,7 +10,6 @@
 #include <iostream>
 #include <string>
 
-#include "alps/numeric/vector_functions.hpp"
 #include "alps/hdf5/vector.hpp"
 #include "alps/gf/fourier.hpp"
 #include "alps/params.hpp"
@@ -19,13 +18,7 @@
 
 void define_dca_parameters(alps::params &p){
   ClusterHelper::define_parameters(p);
-  p.define<double>("t_flavor", 0, "Hopping for mass imbalance for second orbital");
-  p.define<bool>("dca.IMBALANCE", false, "set to true for mass imbalance simulation");
-  p.define<bool>("dca.PHASE", false, "set to true for simulation with phase");
   p.define<bool>("sc.NAMBU", false, "set to true to simulate in nambu space.");
-  p.define<double>("dca.PHASE_0", 0, "Phase in direction 0 ");
-  p.define<double>("dca.PHASE_1", 0, "Phase in direction 1 ");
-  p.define<double>("dca.PHASE_2", 0, "Phase in direction 2 ");
   p.define<double>("dca.ETA1_INIT", 0, "d-wave initial bias field eta1");
   p.define<double>("dca.ETA2_INIT", 0, "d-wave initial bias field eta2");
   p.define<double>("dca.ETA1", 0, "d-wave bias field eta1");
@@ -40,16 +33,30 @@ void define_dca_parameters(alps::params &p){
   p.define<std::string>("dca.G0_OMEGA_OUTPUT", "Location of the output G0 file for continuing iterations");
   p.define<std::string>("dca.INITIAL_G0", "FREE", "choose ISOLATED or FREE for initial G0s");
 }
-ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelper(params),
+namespace {
+// dca.PHASE never took effect (the dispersion was set up before the phases),
+// and dca.IMBALANCE was averaged away by sc.SPIN_SYMMETRIZATION. Both were
+// removed; refuse parameter files that still turn them on rather than run
+// something else than they ask for.
+const alps::params& reject_removed_parameters(const alps::params& params){
+  for (const char* name : {"dca.PHASE", "dca.IMBALANCE"}) {
+    if (!params.supplied(name)) continue;
+    alps::params check(params);
+    check.define<bool>(name, false, "removed");
+    if (check[name].as<bool>())
+      throw std::invalid_argument(std::string(name) + " was removed from dca; remove it from the parameter file.");
+  }
+  return params;
+}
+}
+
+ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelper(reject_removed_parameters(params)),
     mu_(params["MU"]),
     half_filling_(0.),
     t_(params["t"]),
     t2_(params["tprime"]),
-    t_flavor_(params["t_flavor"]),
     n_flavors_(params["FLAVORS"]),
-    use_phase_(params["dca.PHASE"]),
-    use_imbalance_(params["dca.IMBALANCE"]),
-    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()][n_flavors_]),
+    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()]),
     weight_kl_(n_lattice_momenta()),
     nfreq_(params["NMATSUBARA"]),
     beta_(params["BETA"]),
@@ -60,7 +67,6 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
 {
   compute_integration_weight_and_dispersion();
   compute_dispersion_weights();
-  if(use_phase_) setup_phase_vector(params);
 }
 NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):ClusterTransformer(params),
     h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
@@ -111,7 +117,7 @@ void NormalStateClusterTransformer::compute_isolated_cluster_G0(cluster_matsubar
     for (alps::gf::momentum_index kc(0); kc<n_cluster_sites(); ++kc) {
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = cluster_momentum(kc(),d);
-      const std::complex<double> G0 = use_phase_?1./(iomega_n+mu_-epsilon_phi(k,phi_)):1./(iomega_n+mu_-epsilon(k));
+      const std::complex<double> G0 = 1./(iomega_n+mu_-epsilon(k));
       for (alps::gf::index flavor(0); flavor<n_flavors_; ++flavor) {
         G0_omega(freq, kc, flavor) = G0;
       }
@@ -670,7 +676,7 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           std::complex<double> zeta = iomega_n + mu_;
-          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_[kc()][kl][f()]-sigma(w, kc,  f));
+          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_[kc()][kl]-sigma(w, kc,  f));
         }
         G(w, kc, f) /= n_cluster_cells();
       }
@@ -731,10 +737,10 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
-          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl][spin()])-sigma(w, kc  , alps::gf::index(0), spin);
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl])-sigma(w, kc  , alps::gf::index(0), spin);
           Ginv(0,1)= spin_factor*h/2.+ mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
           Ginv(1,0)= spin_factor*h/2. +mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
-          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl][spin()])-sigma(w, kc+1, alps::gf::index(1), spin);
+          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl])-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
           G(w, kc  ,alps::gf::index(1), spin) += prefactor*Ginv(0,1);
@@ -806,10 +812,10 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu_ + h -epsilon_kckl_[kc()][kl][0]-sigma(w, kc, up,up),
+        {iomega_n + mu_ + h -epsilon_kckl_[kc()][kl]-sigma(w, kc, up,up),
           -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1, eta2),
           -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu_ + h +epsilon_kckl_[kc()][kl][0]-sigma(w, kc, dn,dn)};
+          iomega_n - mu_ + h +epsilon_kckl_[kc()][kl]-sigma(w, kc, dn,dn)};
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G(w, kc, up,up) += weight_kl_[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
         G(w, kc, up,dn) -= weight_kl_[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
@@ -833,9 +839,7 @@ void ClusterTransformer::compute_integration_weight_and_dispersion(){
     for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      for (unsigned int flavor=0; flavor<n_flavors_; ++flavor){
-        epsilon_kckl_[kc][kl][flavor]=use_imbalance_?epsilon_flavor(k,flavor):use_phase_?epsilon_phi(k,phi_):epsilon(k);
-      }
+      epsilon_kckl_[kc][kl]=epsilon(k);
     }
   }
   for (int kl=0; kl<n_lattice_momenta(); ++kl) {
@@ -887,49 +891,7 @@ double ClusterTransformer::epsilon(const std::vector<double> &k) const
   }
   return eps;
 }
-void ClusterTransformer::setup_phase_vector(const alps::params &p){
-  phi_.resize(dimension());
-  for(int i=0;i<dimension();++i){
-    std::stringstream phase_name; phase_name<<"dca.PHASE_"<<i;
-    phi_[i]=p[phase_name.str()];
-    phi_[i] = phi_[i]/periodicity(i);
-  }
-}
 
-//dispersion, evaluated with flavor dependent t_
-double ClusterTransformer::epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const
-{
-  double eps = -half_filling_;
-
-  if (flavor == 0){
-    for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_*cos(k[i]);
-  }
-  if (flavor == 1){
-    for (unsigned int i=0; i<dimension(); ++i)
-      eps -= 2*t_*t_flavor_*cos(k[i]);
-  }
-if (t2_!=0.) {
-    switch(dimension()) {
-    case 1 :
-      eps -= 2*t2_*cos(k[0]*2.);
-      break;
-    case 2 :
-      eps -= 4*t2_*cos(k[0])*cos(k[1]);
-      break;
-    case 3 :
-      eps -= 4*t2_*cos(k[0])*cos(k[1]);
-      eps -= 4*t2_*cos(k[1])*cos(k[2]);
-      eps -= 4*t2_*cos(k[0])*cos(k[2]);
-      break;
-    }
-  }
-  return eps;
-}
-double ClusterTransformer::epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const{
-  using namespace alps::numeric;
-  return epsilon(k+phi);
-}
 ///merge this with normal state one?
 void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h) const{
   alps::gf::k_sigma1_sigma2_gf c1(G0.mesh2(), G0.mesh3(), G0.mesh4());
