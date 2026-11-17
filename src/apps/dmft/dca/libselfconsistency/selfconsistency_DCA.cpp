@@ -147,6 +147,15 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
 
   //this dispatches the NAMBU (paramagnetic, superconducting) cluster framework
   if(nambu){
+      // In Nambu space, spin symmetrization imposes the particle-hole relations
+      // of a G without Zeeman field (Re G_dn,dn = -Re G_up,up, a real F). With
+      // a field it would remove the field's effect from G0 in every iteration,
+      // while the k-sum applies it.
+      const bool spin_symmetrize = parms["sc.SPIN_SYMMETRIZATION"];
+      const double h = parms["dca.H"], h_init = parms["dca.H_INIT"];
+      if(spin_symmetrize && (h!=0. || h_init!=0.))
+        throw std::invalid_argument("sc.NAMBU with a Zeeman field (dca.H or dca.H_INIT) needs sc.SPIN_SYMMETRIZATION = false:"
+                                    " the spin symmetrization assumes no field");
       std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
       NambuClusterTransformer T(parms);
       ImpuritySolver solver(solver_path,param_file_name, parms);

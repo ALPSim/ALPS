@@ -94,7 +94,8 @@ cluster_matsubara_kspace_gf load(const fs::path& file, const std::string& path) 
 
 // Run dca in the directory dir_name and return that directory.
 fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it = 10,
-                 bool write_iterations = true) {
+                 bool write_iterations = true, const std::string& extra_parameters = "",
+                 bool expect_success = true) {
   const fs::path dir = fs::absolute(dir_name);
   fs::remove_all(dir);
   fs::create_directories(dir);
@@ -119,11 +120,16 @@ fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it 
         << "sc.WRITE_ITERATIONS = " << (write_iterations ? "true" : "false") << "\n"
         << "solver.SOLVER = " << DCA_FREE_SOLVER << "\n"
         << "solver.INFILE_H5GF = alps_solver_in.h5gf\n"
-        << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n";
+        << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n"
+        << extra_parameters;
   parms.close();
   const std::string command =
       "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
-  EXPECT_EQ(std::system(command.c_str()), 0) << "dca failed, see " << (dir / "dca.log");
+  const int status = std::system(command.c_str());
+  if (expect_success)
+    EXPECT_EQ(status, 0) << "dca failed, see " << (dir / "dca.log");
+  else
+    EXPECT_NE(status, 0) << "dca did not fail, see " << (dir / "dca.log");
   return dir;
 }
 
@@ -258,6 +264,18 @@ TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
   EXPECT_NE(log.find("iteration 2: change of G"), std::string::npos);
   EXPECT_NE(log.find("dca stopped: the change of G"), std::string::npos);
   EXPECT_EQ(log.find("sc.MAX_IT=10 iterations"), std::string::npos);
+}
+
+// In Nambu space the spin symmetrization assumes no Zeeman field; with one,
+// dca refuses to run instead of removing the field from G0 in every iteration.
+TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  for (const char* field : {"dca.H", "dca.H_INIT"}) {
+    const fs::path dir = run_dca(c, std::string("NambuField_") + field, 10, true,
+                                 std::string("sc.NAMBU = true\n") + field + " = 0.3\n", false);
+    EXPECT_NE(read_file(dir / "dca.log").find("needs sc.SPIN_SYMMETRIZATION = false"), std::string::npos)
+        << field;
+  }
 }
 
 } // namespace
