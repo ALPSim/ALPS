@@ -142,6 +142,10 @@ private:
   dmrg_checkpoint::Cache checkpoint;
   bool in_sweeps = false;
 
+  // MEASURE_CORRELATIONS: for each value, the factor of each measured term
+  // that adds up to it
+  std::vector<std::vector<value_type> > correlation_terms;
+
   // SAVE_MPS: final state as tensors [left bond][local state][right bond]
   bool save_mps;
   std::vector<std::vector<value_type> > mps_tensors;
@@ -338,6 +342,25 @@ std::string simplify_name(const SiteOp &op)
   return term;
 }
 
+// Removes the terms that change a conserved quantum number. Their expectation
+// value is 0, and an additive dmtk operator, which takes one dqn for all its
+// terms, gives a wrong value for the others when it lies in a block of
+// several sites.
+template <class value_type>
+void drop_qn_changing_terms(dmtk::Hami<value_type>& h)
+{
+  dmtk::Hami<value_type> kept(h);
+  kept.clear();
+  for (std::size_t k = 0; k < h.size(); ++k) {
+    dmtk::QN dqn;
+    for (std::size_t i = 0; i < h[k].size(); ++i)
+      dqn += h[k][i].dqn;
+    if (dqn == dmtk::QN())
+      kept += h[k];
+  }
+  h = kept;
+}
+
 template<class value_type>
 void DMRGTask<value_type>::use_temporary_directory()
 {
@@ -463,27 +486,26 @@ void DMRGTask<value_type>::dostep()
   dmtk::Hami<value_type > meas_terms(hami);
   meas_terms.clear();
 
-  // calculate local measurements
+  // calculate local measurements: one entry per site or bond holding the sum
+  // of all terms of the operator with their coefficients (issue #304)
   BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     if (has_bond_operator(ex.second)) {
       int i=0;
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
         dmtk::Hami<value_type > meas;
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas;
+        drop_qn_changing_terms(meas);
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit) {
         dmtk::Hami<value_type > meas;
         build_site_operator(make_site_term(ex.second),*sit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas[0];
+        drop_qn_changing_terms(meas);
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
   }
@@ -495,6 +517,7 @@ void DMRGTask<value_type>::dostep()
     if (has_bond_operator(ex.second)) {
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit)
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
       meas_terms += dmtk::BasicOp<value_type >(meas);
@@ -502,6 +525,7 @@ void DMRGTask<value_type>::dostep()
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit)
         build_site_operator(make_site_term(ex.second),*sit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
 //      meas_terms += dmtk::BasicOp<value_type >(meas);
@@ -516,6 +540,7 @@ void DMRGTask<value_type>::dostep()
   std::vector<unsigned int> distance_mult = distance_multiplicities();
   
   // calculate correlations
+  correlation_terms.clear();
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     alps::SiteOperator ops1 = make_site_term(ex.second.first+"(i)");
@@ -526,27 +551,31 @@ void DMRGTask<value_type>::dostep()
     for (site_iterator sit1=this->sites().first; sit1!=this->sites().second ; ++sit1)
       for (site_iterator sit2=this->sites().first; sit2!=this->sites().second ; ++sit2) {
         std::size_t d = distance(*sit1,*sit2);
-        // loop over all terms in ops1 and ops2 as above where we loop over all terms in ops
-        // build terms like above
+        // Each term is measured on its own and save_results adds them up
+        // (issue #304). One additive operator for the pair would lose the
+        // terms that change the quantum numbers, such as S+S+ in Sx:Sx, when
+        // the pair lies in one block.
+        dmtk::Hami<value_type > meas;
+        std::vector<value_type> factors;
         if (*sit1 == *sit2) {
-          // create matrices for combined term
-          // use ops
-          dmtk::Hami<value_type > meas;
+          // a bare site operator: the factor carries its coefficient
           build_site_operator(ops,*sit1,meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += tmeas[0];
+          drop_qn_changing_terms(meas);
+          for (std::size_t k = 0; k < meas.size(); ++k) {
+            meas_terms += meas[k][0];
+            factors.push_back(meas[k].coef()/double(distance_mult[d]));
+          }
         }
         else {
-          // use ops1 and ops2
-          dmtk::Hami<value_type > meas;
+          // a product term is measured with its coefficient
           build_2site_operator(std::make_pair(ops1,ops2),std::pair<int,int>(*sit1,*sit2),meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += dmtk::BasicOp<value_type >(tmeas);
+          meas *= 1./double(distance_mult[d]);
+          for (std::size_t k = 0; k < meas.size(); ++k) {
+            meas_terms += dmtk::BasicOp<value_type >(meas[k]);
+            factors.push_back(1.);
+          }
         }
+        correlation_terms.push_back(factors);
     }
   }
   typename dmtk::Hami<value_type>::iterator iter;
@@ -683,11 +712,17 @@ DMRGTask<value_type>::save_results()
   }
   
   // correlations
+  std::size_t term_index = 0;
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     std::vector<value_type> av;
     for (int i=0; i<num_distances();++i){
-      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
-      av.push_back(real(iter++->value()));   
+      value_type sum = 0;
+      BOOST_FOREACH (value_type factor, correlation_terms[term_index]) {
+        cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
+        sum += factor*iter++->value();
+      }
+      ++term_index;
+      av.push_back(real(sum));
     }
     this->correlation_values[ex.first].push_back(av);
   }
