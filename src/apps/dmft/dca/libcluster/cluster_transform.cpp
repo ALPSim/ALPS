@@ -975,7 +975,7 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
 {
   //symmetrize the diagonal elements of G
   std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes_k_space(); itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes_k_space(); itc!=itc_end; itc++) {
     for (alps::gf::index f(0); f<2; ++f) {
       for (alps::gf::matsubara_index w(0); w<nfreq_; ++w) {
         std::complex<double> av=0;
@@ -1000,7 +1000,7 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
     else if(dwave >  1.e-5) dwave_prefactor[i]=1;
     else dwave_prefactor[i]=0.;
   }
-  for(boost::tie(itc, itc_end)=pair_classes_k_space(); itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes_k_space(); itc!=itc_end; itc++) {
     //std::cout<<"new symmetry: "<<std::endl;
     for (alps::gf::matsubara_index w(0); w<nfreq_; ++w) {
       std::complex<double> av01=0;

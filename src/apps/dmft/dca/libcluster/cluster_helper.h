@@ -14,7 +14,7 @@
 #pragma once
 
 #include <set>
-#include "boost/tuple/tuple.hpp"
+#include <tuple>
 
 #include "alps/params.hpp"
 #include "alps/hdf5/pointer.hpp"
