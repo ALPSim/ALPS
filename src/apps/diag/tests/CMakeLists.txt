@@ -25,3 +25,11 @@ add_test(NAME diag.field_expression_fulldiag
     -P "${CMAKE_CURRENT_SOURCE_DIR}/field_expression.cmake")
 set_tests_properties(diag.field_expression_fulldiag PROPERTIES LABELS "diag;cli"
   TIMEOUT 60 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+
+add_test(NAME diag.measure_operators_fulldiag
+  COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:fulldiag>"
+    "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
+    "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/measure_operators_fulldiag"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/measure_operators.cmake")
+set_tests_properties(diag.measure_operators_fulldiag PROPERTIES LABELS "diag"
+  TIMEOUT 60 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")

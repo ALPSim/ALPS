@@ -5,6 +5,7 @@
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
@@ -170,7 +171,17 @@ def test_alps_xml_matches_sdk_command(launcher, tmp_path, arguments):
     assert expected.returncode == 0, expected.stderr
     result = run(program="alps-xml", isolated=False, args=[*arguments, *map(str, files)])
     assert result.returncode == 0, result.stderr
-    assert result.stdout == expected.stdout
+    assert _same_html_meta(result.stdout) == _same_html_meta(expected.stdout)
+
+
+# libxslt >= 1.1.43 writes the HTML5 <meta charset> while lxml's bundled
+# libxslt may still write the http-equiv form; both declare the same charset.
+_HTTP_EQUIV_META = re.compile(
+    r'<meta http-equiv="Content-Type" content="text/html; charset=([^"]+)">', re.IGNORECASE)
+
+
+def _same_html_meta(text):
+    return _HTTP_EQUIV_META.sub(r'<meta charset="\1">', text)
 
 
 def test_exporter_stdin_and_stylesheet_override(launcher, tmp_path):
