@@ -50,13 +50,7 @@ endif()
 if(PYALPS_BUNDLE_APPLICATIONS)
   list(APPEND _alps_components applications)
 endif()
-set(_alps_optional_components)
-if(PYALPS_BUNDLE_APPLICATIONS)
-  # Applications built with Eigen (dca) link ALPS::gf, which has its own export.
-  list(APPEND _alps_optional_components gf)
-endif()
-find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components}
-  OPTIONAL_COMPONENTS ${_alps_optional_components})
+find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components})
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
@@ -121,13 +115,8 @@ install(TARGETS ${_pyalps_nanobind_runtime} RUNTIME_DEPENDENCY_SET pyalps_runtim
   LIBRARY DESTINATION pyalps/lib RUNTIME DESTINATION pyalps/bin)
 
 # Required libraries are bundled whether or not command-line programs are wanted.
+# With the applications, ALPS_RUNTIME_TARGETS includes the libraries they link.
 set(_pyalps_runtime_targets ${ALPS_RUNTIME_TARGETS})
-if(PYALPS_BUNDLE_APPLICATIONS AND TARGET ALPS::gf)
-  get_target_property(_alps_gf_type ALPS::gf TYPE)
-  if(_alps_gf_type STREQUAL "SHARED_LIBRARY")
-    list(APPEND _pyalps_runtime_targets ALPS::gf)
-  endif()
-endif()
 if(WIN32)
   # An unused import library need not appear in an extension's PE imports.
   # Install every component and include its dependencies in the DLL scan.
