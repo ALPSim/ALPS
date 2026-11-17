@@ -21,7 +21,7 @@
 
 #include "blasheader.h"
 #include "general_matrix.h"
-#include "dump.h"
+#include "alps/hdf5.hpp"
 
 #include "cluster_graph.h"
 
