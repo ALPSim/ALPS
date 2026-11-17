@@ -1,0 +1,24 @@
+include(FindPackageHandleStandardArgs)
+
+SET(INCLUDE_SEARCH_PATHS
+ $ENV{LIBCLUSTER_DIR}
+ ${LIBCLUSTER_DIR}
+ ${DMFT_DIR}/include
+ ${DMFT_DIR}/libcluster
+ ${CMAKE_SOURCE_DIR}/libcluster
+ ${CMAKE_SOURCE_DIR}/../libcluster
+ )
+SET(LIBRARY_SEARCH_PATHS
+ $ENV{LIBCLUSTER_DIR}
+ ${LIBCLUSTER_DIR}
+ ${DMFT_DIR}/lib
+ ${DMFT_DIR}/libcluster
+ ${CMAKE_SOURCE_DIR}/libcluster
+ ${CMAKE_SOURCE_DIR}/../libcluster
+ )
+
+
+FIND_PATH(CLUSTER_INCLUDE_DIR cluster.h PATHS ${INCLUDE_SEARCH_PATHS} DOC "Cluster transform include path")
+FIND_LIBRARY(CLUSTER_LIBRARIES cluster PATHS ${LIBRARY_SEARCH_PATHS} DOC "Cluster transform library path")
+
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cluster DEFAULT_MSG CLUSTER_INCLUDE_DIR CLUSTER_LIBRARIES)
