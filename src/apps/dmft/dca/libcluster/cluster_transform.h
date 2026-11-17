@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include <boost/multi_array.hpp>
 #include <Eigen/Dense>
 #include <fstream>
 #include "alps/gf/fourier.hpp"
@@ -33,6 +32,17 @@ typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail double_cell_itime_kspace_gf
 
 
 void define_dca_parameters(alps::params &p);
+
+/// A table of values at cluster momentum kc plus lattice momentum kl.
+class kckl_table{
+public:
+  kckl_table(int n_kc, int n_kl): n_kl_(n_kl), values_(std::size_t(n_kc)*n_kl, 0.){}
+  double &operator()(int kc, int kl){ return values_[std::size_t(kc)*n_kl_+kl]; }
+  double operator()(int kc, int kl) const{ return values_[std::size_t(kc)*n_kl_+kl]; }
+private:
+  int n_kl_;
+  std::vector<double> values_;
+};
 
 //The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
 class ClusterTransformer : public ClusterHelper
@@ -132,7 +142,7 @@ protected:
   int nfreq_;
 
   ///dispersion, binned by cluster momentum and lattice momentum (belonging to the cluster)
-  boost::multi_array<double,2> epsilon_kckl_;
+  kckl_table epsilon_kckl_;
   std::vector<double> weight_kl_;
 
   std::vector<double> epsav_;
@@ -429,7 +439,7 @@ private:
   ///superconducting bias field eta2
   double eta2_;
   ///buffered d-wave prefactor stored at the lattice momenta
-  boost::multi_array<double,2>  dwave_prefactor_kckl_;
+  kckl_table dwave_prefactor_kckl_;
 };
 
   

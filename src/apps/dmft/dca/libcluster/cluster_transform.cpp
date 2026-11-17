@@ -56,7 +56,7 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
     t_(params["t"]),
     t2_(params["tprime"]),
     n_flavors_(params["FLAVORS"]),
-    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()]),
+    epsilon_kckl_(n_cluster_sites(), n_lattice_momenta()),
     weight_kl_(n_lattice_momenta()),
     nfreq_(params["NMATSUBARA"]),
     beta_(params["BETA"]),
@@ -74,7 +74,7 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
     eta2_init_(params["dca.ETA2_INIT"]),
     eta1_(params["dca.ETA1"]),
     eta2_(params["dca.ETA2"]),
-    dwave_prefactor_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()])
+    dwave_prefactor_kckl_(n_cluster_sites(), n_lattice_momenta())
 {
   if(dimension()!=2) throw std::logic_error("careful. self consistency has d=2 symmetry factors built in! do you know what you're doing?");
 
@@ -83,7 +83,7 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      dwave_prefactor_kckl_[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+      dwave_prefactor_kckl_(kc,kl)= cos(k[0]) - cos(k[1]); //cos kx - cos ky
     }
   }
 }
@@ -669,7 +669,7 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           std::complex<double> zeta = iomega_n + mu_;
-          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_[kc()][kl]-sigma(w, kc,  f));
+          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_(kc(),kl)-sigma(w, kc,  f));
         }
         G(w, kc, f) /= n_cluster_cells();
       }
@@ -730,10 +730,10 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
-          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl])-sigma(w, kc  , alps::gf::index(0), spin);
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_(kc()  ,kl))-sigma(w, kc  , alps::gf::index(0), spin);
           Ginv(0,1)= spin_factor*h/2.+ mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
           Ginv(1,0)= spin_factor*h/2. +mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
-          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl])-sigma(w, kc+1, alps::gf::index(1), spin);
+          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_(kc()+1,kl))-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
           G(w, kc  ,alps::gf::index(1), spin) += prefactor*Ginv(0,1);
@@ -801,14 +801,14 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
       G(w, kc, dn,dn) = 0.;
       std::complex<double> iomega_n(0, (2.*w()+1.)*M_PI/beta_);
       for (int kl=0; kl<n_lattice_momenta(); ++kl) {
-        double prefactor=dwave_prefactor_kckl_[kc()][kl];
+        double prefactor=dwave_prefactor_kckl_(kc(),kl);
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu_ + h -epsilon_kckl_[kc()][kl]-sigma(w, kc, up,up),
+        {iomega_n + mu_ + h -epsilon_kckl_(kc(),kl)-sigma(w, kc, up,up),
           -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1, eta2),
           -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu_ + h +epsilon_kckl_[kc()][kl]-sigma(w, kc, dn,dn)};
+          iomega_n - mu_ + h +epsilon_kckl_(kc(),kl)-sigma(w, kc, dn,dn)};
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G(w, kc, up,up) += weight_kl_[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
         G(w, kc, up,dn) -= weight_kl_[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
@@ -832,7 +832,7 @@ void ClusterTransformer::compute_integration_weight_and_dispersion(){
     for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl_[kc][kl]=epsilon(k);
+      epsilon_kckl_(kc,kl)=epsilon(k);
     }
   }
   for (int kl=0; kl<n_lattice_momenta(); ++kl) {
@@ -863,14 +863,14 @@ void ClusterTransformer::compute_dispersion_weights(){
 }
 
 double ClusterTransformer::dispersion(int kc, int kl) const{
-  if (kl>=0) return epsilon_kckl_[kc][kl];
+  if (kl>=0) return epsilon_kckl_(kc,kl);
   std::vector<double> K(dimension());
   for (unsigned int d=0; d<dimension(); ++d)
     K[d] = cluster_momentum(kc,d);
   return epsilon(K);
 }
 double NambuClusterTransformer::dwave_prefactor(int kc, int kl) const{
-  if (kl>=0) return dwave_prefactor_kckl_[kc][kl];
+  if (kl>=0) return dwave_prefactor_kckl_(kc,kl);
   return cos(cluster_momentum(kc,0)) - cos(cluster_momentum(kc,1));
 }
 double ClusterTransformer::epsilon(const std::vector<double> &k) const
