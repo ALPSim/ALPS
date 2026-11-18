@@ -52,21 +52,6 @@ private:
 };
 
 /**
- * Estimate propagated variance by sampling the prior.
- *
- * @warning Not implemented
- */
-struct sampling_prop
-{
-    sampling_prop(size_t nsamples=1024) : nsamples_(nsamples) { }
-
-    size_t nsamples() const { return nsamples_; }
-
-private:
-    size_t nsamples_;
-};
-
-/**
  * Perform Jackknife rebatching.
  *
  * Jackknife is a rebatching method, which can operate on any distribution and
@@ -76,21 +61,6 @@ private:
  * @see alps::alea::jackknife
  */
 struct jackknife_prop { };
-
-/**
- * Perform non-parametric bootstrap rebatching.
- *
- * @warning Not implemented
- */
-struct bootstrap_prop
-{
-    bootstrap_prop(size_t nsamples=1024) : nsamples_(nsamples) { }
-
-    size_t nsamples() const { return nsamples_; }
-
-private:
-    size_t nsamples_;
-};
 
 /**
  * Given a function `f`, estimate its Jacobian `J[i,j] = df[i]/dx[j]`.

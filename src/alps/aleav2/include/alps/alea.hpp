@@ -91,9 +91,7 @@
  *   | -----------------|-------|--------|-----------|--------|
  *   | `no_prop`        | any   | -      | `mean()`  | 1      |
  *   | `linear_prop`    | Gauss | 1      | `var()`   | k      |
- *   | `sampling_prop`  | Gauss | 1/S    | `var()`   | S      |
  *   | `jackknife_prop` | any   | 1/b    | `batch()` | b      |
- *   | `bootstrap_prop` | any   | 1/S    | `batch()` | S      |
  *
  * Transformations must have one argument; functions of multiple random
  * variables (X,Y) can be realized by grouping the arguments together using
