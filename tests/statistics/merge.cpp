@@ -10,7 +10,6 @@
 #include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
 
 #include <cmath>
 #include <vector>
@@ -109,15 +108,11 @@ TEST_P(SplitMerge, AleaV2Autocorr)
         first << second_result;
         merged = first.finalize();
     };
-    if (GetParam() * 2 < n) {
-        // Known gap, to be closed with the engine repairs: an accumulator
-        // that takes a result with more levels than it has itself is left
-        // in a state it cannot be finalized from.
-        EXPECT_NONFATAL_FAILURE(EXPECT_NO_THROW(merge()), "throw");
-        return;
-    }
     ASSERT_NO_THROW(merge());
     expect_whole({merged.count(), merged.mean()[0], merged.stderror()[0]}, "ALEA v2 autocorr");
+    // Whichever of the two is the longer one, every level holds all samples.
+    for (std::size_t level = 0; level < merged.nlevel(); ++level)
+        EXPECT_EQ(merged.level(level).count(), n) << "level " << level;
 
     if (GetParam() * 2 == n) {
         // Split at a bin boundary of every level below the top: the per-level

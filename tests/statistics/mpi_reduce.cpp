@@ -11,6 +11,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -61,8 +62,10 @@ TEST(MpiReduce, AleaV2Autocorr)
 
     EXPECT_EQ(reduced.count(), s.length * s.size);
     EXPECT_NEAR(reduced.mean()[0], s.mean, 1e-13);
-    ASSERT_EQ(reduced.nlevel(), expected.nlevel());
-    for (std::size_t level = 0; level + 1 < expected.nlevel(); ++level)
+    // Merging one after the other adds levels as the count grows; the
+    // reduction keeps the levels of the longest run.
+    ASSERT_LE(reduced.nlevel(), expected.nlevel());
+    for (std::size_t level = 0; level + 1 < reduced.nlevel(); ++level)
         EXPECT_NEAR(expected.level(level).stderror()[0], reduced.level(level).stderror()[0],
                     1e-10 * expected.level(level).stderror()[0]) << "level " << level;
     expect_calibrated(reduced.stderror()[0], s);
@@ -86,6 +89,44 @@ TEST(MpiReduce, AleaV2Batch)
     EXPECT_NEAR(reduced.mean()[0], s.mean, 1e-13);
     EXPECT_NEAR(expected.stderror()[0], reduced.stderror()[0], 1e-10 * expected.stderror()[0]);
     expect_calibrated(reduced.stderror()[0], s);
+}
+
+// Ranks with runs of different lengths, as after a time limit: rank r holds
+// 2^(15 - 2r) samples, so the ranks differ in their number of levels and in
+// their batch sizes. No sample may be lost, at any level.
+TEST(MpiReduce, AleaV2UnequalRuns)
+{
+    using namespace alps::alea;
+    const slices s;
+    const auto length = [](std::size_t rank) { return std::size_t(1) << (15 - 2 * rank); };
+    std::size_t total_length = 0;
+    double sum = 0;
+    for (std::size_t rank = 0; rank < s.size; ++rank) {
+        total_length += length(rank);
+        sum = std::accumulate(s.begin(rank), s.begin(rank) + length(rank), sum);
+    }
+    autocorr_acc<double> autocorr(1);
+    batch_acc<double> batch(1);
+    for (std::size_t t = 0; t < length(s.comm.rank()); ++t) {
+        autocorr << s.begin(s.comm.rank())[t];
+        batch << s.begin(s.comm.rank())[t];
+    }
+    autocorr_result<double> autocorr_reduced = autocorr.finalize();
+    batch_result<double> batch_reduced = batch.finalize();
+    autocorr_reduced.reduce(mpi_reducer(s.comm, 0));
+    batch_reduced.reduce(mpi_reducer(s.comm, 0));
+    if (s.comm.rank() != 0)
+        return;
+
+    EXPECT_NEAR(autocorr_reduced.mean()[0], sum / total_length, 1e-13);
+    for (std::size_t level = 0; level < autocorr_reduced.nlevel(); ++level)
+        EXPECT_EQ(autocorr_reduced.level(level).count(), total_length) << "level " << level;
+    EXPECT_EQ(batch_reduced.count(), total_length);
+    EXPECT_NEAR(batch_reduced.mean()[0], sum / total_length, 1e-13);
+    // The longest run alone fills all 256 batches with 128 samples each. With
+    // the others appended, neighbours are added once.
+    EXPECT_EQ(batch_reduced.store().batch_size(), 256u);
+    EXPECT_EQ(batch_reduced.store().count()(0), 256u);
 }
 
 TEST(MpiReduce, Accumulators)

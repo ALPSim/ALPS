@@ -103,6 +103,15 @@ stretches of the series and kept the batch size of a single run. `batch_data`
 records the batch size, and the serialized result stores it as `@batch_size`.
 `tests/statistics/same_stream.cpp` and `merge.cpp` check this.
 
+Merging an `autocorr_result` into an `autocorr_acc` works for runs of different
+lengths. The imported code gave added levels the batch size of the lowest level
+and did not update the sample count, which left the accumulator unusable when
+the result had more levels, and left the samples of a shorter result out of the
+higher levels. Added levels now continue the hierarchy, and the samples of the
+shorter side enter the levels it lacks as one partial batch. The same holds for
+`autocorr_result::reduce`. `tests/statistics/merge.cpp` and `mpi_reduce.cpp`
+check that every level holds every sample.
+
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the
 addition:

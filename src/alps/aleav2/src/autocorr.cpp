@@ -84,16 +84,31 @@ template <typename T>
 autocorr_acc<T> &autocorr_acc<T>::operator<<(const autocorr_result<T> &other)
 {
     internal::check_valid(*this);
+    internal::check_valid(other);
+    if (size() != other.size())
+        throw size_mismatch();
 
-    // ensure we have enough levels to hold other data
-    for (size_t i = nlevel(); i < other.nlevel(); ++i)
-        level_.push_back(var_acc<T>(size_, batch_size_));
-
-    // merge the levels
-    // FIXME handle the highers other level by doing proper mergin
-    for (size_t i = 0; i != other.nlevel(); ++i)
+    // Levels that both have are merged batch by batch. Where this accumulator
+    // is the shorter one, its own samples reach the added levels as they do in
+    // a single run: when a batch below fills up, or when the result is taken.
+    const size_t other_nlevel = other.nlevel();
+    while (nlevel() < other_nlevel)
+        add_level();
+    for (size_t i = 0; i != other_nlevel; ++i)
         level_[i] << other.level(i);
 
+    // As in a single run, the highest level must be too large to fill up.
+    count_ += other.count();
+    while (count_ >= nextlevel_)
+        add_level();
+
+    // Levels above those of the result know nothing of its samples yet. They
+    // amount to less than one batch there, and enter as such.
+    if (nlevel() > other_nlevel) {
+        const column<T> sum = other.mean() * double(other.count());
+        level_[other_nlevel].add(make_adapter(sum), other.count(),
+                                 level_.data() + other_nlevel + 1);
+    }
     return *this;
 }
 
@@ -238,12 +253,21 @@ void autocorr_result<T>::reduce(const reducer &r, bool pre_commit, bool post_com
     internal::check_valid(*this);
 
     if (pre_commit) {
-        // initialize reduction: we may need to amend the number of levels
-        size_t needs_levels = r.get_max(nlevel());
-        for (size_t i = nlevel(); i != needs_levels; ++i)
-            level_.push_back(level_result_type(var_data<T>(size())));
+        // Bring all instances to the same number of levels. To the levels a
+        // shorter run lacks, its samples are less than one batch.
+        const size_t needs_levels = r.get_max(nlevel());
+        if (nlevel() < needs_levels) {
+            var_data<T> one_batch(size());
+            if (count() != 0) {
+                one_batch.data() = mean();
+                one_batch.data2().fill(0);
+                one_batch.count() = count();
+                one_batch.count2() = double(count()) * count();
+            }
+            const level_result_type all(one_batch);
+            level_.resize(needs_levels, all);
+        }
 
-        // TODO: figure out if this is statistically sound
         for (size_t i = 0; i != nlevel(); ++i)
             level_[i].reduce(r, true, false);
     }
