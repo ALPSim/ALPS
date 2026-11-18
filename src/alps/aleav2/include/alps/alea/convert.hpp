@@ -157,6 +157,7 @@ struct joiner<batch_result<T> >
         res.store().batch().topRows(first.size()) = first.store().batch();
         res.store().batch().bottomRows(second.size()) = second.store().batch();
         res.store().count() = first.store().count();
+        res.store().set_batch_size(first.store().batch_size());
         return res;
     }
 };

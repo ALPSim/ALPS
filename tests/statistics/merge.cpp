@@ -206,7 +206,8 @@ TEST(ManyRuns, AleaV2)
     }
     EXPECT_GE(autocorr_error / pooled_error, floor_);
     EXPECT_LE(autocorr_error / pooled_error, 1.05);
-    // Known gap, to be closed with the engine repairs: merged batches keep the
-    // length they had in one run, 32 samples, however many runs are merged.
-    EXPECT_NONFATAL_FAILURE(EXPECT_GE(batch_error / pooled_error, floor_), "floor_");
+    // Merged batches are appended and added pairwise: 256 batches of 256
+    // samples here, where one run alone has batches of 32.
+    EXPECT_GE(batch_error / pooled_error, floor_);
+    EXPECT_LE(batch_error / pooled_error, 1.05);
 }

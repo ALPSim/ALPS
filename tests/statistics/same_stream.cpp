@@ -13,6 +13,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -131,6 +132,59 @@ TEST_P(SameStream, AleaV2)
         expect_relative(binned_error(values, std::size_t(1) << level), binned_result.level(level).stderror()[0], 1e-10,
                         "binned error", level);
     }
+
+    // 256 batches of 256 consecutive samples each.
+    const batch_data<double> & batches = batch_result_.store();
+    ASSERT_EQ(batches.num_batches(), 256u);
+    EXPECT_EQ(batches.batch_size(), 256u);
+    for (std::size_t i = 0; i < 256; ++i) {
+        ASSERT_EQ(batches.count()(i), 256u);
+        const double sum = std::accumulate(values.begin() + 256 * i, values.begin() + 256 * (i + 1), 0.);
+        ASSERT_NEAR(batches.batch()(0, i), sum, 1e-11) << "batch " << i;
+    }
+    expect_relative(binned_error(values, 256), batch_result_.stderror()[0], 1e-10, "batch error");
+}
+
+// In the middle of a run the batches are still consecutive and of one length,
+// followed by the samples that do not fill a batch yet. A second run is
+// appended behind the first, and no sample is lost.
+TEST(Batches, AleaV2KeepsTimeOrderAndAppendsRuns)
+{
+    using namespace alps::alea;
+    const std::vector<double> values = ar1_series(seed, 0.5, 1300);
+    batch_acc<double> first(1, 8), second(1, 8);
+    for (std::size_t t = 0; t < 1000; ++t)
+        first << values[t];
+    for (std::size_t t = 1000; t < 1300; ++t)
+        second << values[t];
+
+    // 1000 samples in 8 batches: 7 of 128 and one of 104.
+    const batch_result<double> run = first.result();
+    EXPECT_EQ(run.store().batch_size(), 128u);
+    for (std::size_t i = 0; i < 8; ++i) {
+        const std::size_t begin = 128 * i, end = std::min<std::size_t>(begin + 128, 1000);
+        EXPECT_EQ(run.store().count()(i), end - begin);
+        EXPECT_NEAR(run.store().batch()(0, i), std::accumulate(values.begin() + begin, values.begin() + end, 0.), 1e-12);
+    }
+
+    // The second run has 4 batches of 64 and one of 44. Appended at the batch
+    // length of the first run, 128, there are ten batches for eight places
+    // (seven and two, and the left-over 104 and 44 samples pooled), so that
+    // neighbours are added: four batches of 256 and one of 276.
+    first << second.result();
+    const batch_result<double> merged = first.finalize();
+    EXPECT_EQ(merged.count(), 1300u);
+    EXPECT_NEAR(merged.mean()[0], sequential_mean(values), 1e-14);
+    EXPECT_EQ(merged.store().batch_size(), 256u);
+    const std::vector<std::uint64_t> counts = {256, 256, 256, 256, 276, 0, 0, 0};
+    for (std::size_t i = 0; i < 8; ++i)
+        EXPECT_EQ(merged.store().count()(i), counts[i]) << "batch " << i;
+    // The fourth holds the last full batch of the first run and the first 128
+    // samples of the second.
+    EXPECT_NEAR(merged.store().batch()(0, 3),
+                std::accumulate(values.begin() + 768, values.begin() + 896, 0.)
+                    + std::accumulate(values.begin() + 1000, values.begin() + 1128, 0.),
+                1e-12);
 }
 
 INSTANTIATE_TEST_SUITE_P(Streams, SameStream, ::testing::Values(0.0, 0.9));

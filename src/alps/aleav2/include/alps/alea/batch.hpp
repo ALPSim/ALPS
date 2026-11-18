@@ -7,7 +7,6 @@
 #include <alps/alea/core.hpp>
 #include <alps/alea/computed.hpp>
 #include <alps/alea/util.hpp>
-#include <alps/alea/internal/galois.hpp>
 #include <alps/alea/var_strategy.hpp>
 
 #include <memory>
@@ -35,6 +34,11 @@ namespace alps { namespace alea {
 
 /**
  * Representation of a time series in (compact) batches.
+ *
+ * Batches are stored in the order of the series. A full batch holds at least
+ * `batch_size()` samples; all full batches of a single run hold exactly that
+ * many. They are followed by at most one partial batch with fewer samples and
+ * then by empty batches.
  */
 template <typename T>
 class batch_data
@@ -60,9 +64,15 @@ public:
     /** Returns sample size (number of accumulated points) for each batch */
     const typename eigen<uint64_t>::row &count() const { return count_; }
 
+    /** Number of samples that make a batch full; 0 if not recorded */
+    uint64_t batch_size() const { return batch_size_; }
+
+    void set_batch_size(uint64_t batch_size) { batch_size_ = batch_size; }
+
 private:
     typename eigen<T>::matrix batch_;
     typename eigen<uint64_t>::row count_;
+    uint64_t batch_size_;
 };
 
 template <typename T>
@@ -75,7 +85,17 @@ extern template class batch_data<double>;
 extern template class batch_data<std::complex<double> >;
 
 /**
- * Accumulator which keeps track of batches of (consecutive) measurements
+ * Accumulator which keeps track of batches of (consecutive) measurements.
+ *
+ * Samples fill one batch after the other. Once `num_batches` batches of the
+ * current size are full, neighbouring batches are added pairwise and the batch
+ * size doubles. Batches therefore stay in the order of the series and have
+ * equal size, apart from one partial batch at the end. Two accumulators fed the
+ * same number of samples have the same batch boundaries.
+ *
+ * Merging a result appends its batches to those of the accumulator, as if the
+ * two series had been measured one after the other, after bringing both to the
+ * larger batch size. The partial batches of the two are pooled.
  */
 template <typename T>
 class batch_acc
@@ -114,7 +134,7 @@ public:
     /** Add computed vector to the accumulator */
     batch_acc& operator<<(const computed<T>& src){ add(src, 1); return *this; }
 
-    /** Merge partial result into accumulator */
+    /** Append the batches of a result to those of the accumulator */
     batch_acc &operator<<(const batch_result<T> &result);
 
     /** Returns sample size, i.e., total number of accumulated data points */
@@ -129,24 +149,18 @@ public:
     /** Return backend object used for storing estimands */
     const batch_data<T> &store() const { return *store_; }
 
-    const internal::galois_hopper &cursor() const { return cursor_; }
-
-    const typename eigen<uint64_t>::row &offset() const { return offset_; }
-
-    size_t current_batch_size() const { return base_size_ * cursor_.factor(); }
+    /** Number of samples that currently make a batch full */
+    uint64_t current_batch_size() const { return store_->batch_size(); }
 
 protected:
     void add(const computed<T> &source, uint64_t count);
-
-    void next_batch();
 
     void finalize_to(batch_result<T> &result);
 
 private:
     size_t size_, num_batches_, base_size_;
     std::unique_ptr< batch_data<value_type> > store_;
-    internal::galois_hopper cursor_;
-    typename eigen<uint64_t>::row offset_;
+    size_t cursor_;     // batch that receives the next sample
 };
 
 template <typename T>
@@ -224,7 +238,14 @@ public:
     /** Return backend object used for storing estimands */
     batch_data<T> &store() { return *store_; }
 
-    /** Collect measurements from different instances using sum-reducer */
+    /**
+     * Collect measurements from different instances using sum-reducer.
+     *
+     * The batches of the instances are appended in the order of the instances
+     * and brought back to the number of batches of this result. To bound the
+     * size of the reduction, each instance first reduces its own batches to
+     * about twice its share of that number.
+     */
     void reduce(const reducer &r) { reduce(r, true, true); }
 
     /** Convert result to a permanent format (write to disk etc.) */
@@ -241,6 +262,7 @@ protected:
 
 private:
     std::unique_ptr< batch_data<value_type> > store_;
+    size_t reduce_num_batches_ = 0;     // number of batches before a reduction
 
     friend class batch_acc<T>;
 };

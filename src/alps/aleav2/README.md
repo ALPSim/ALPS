@@ -49,7 +49,7 @@ The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYR
 | --- | --- | --- |
 | `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied |
 | `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied with the local changes listed below; `mpi.hpp` is installed only by MPI builds |
-| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` |
+| `alea/src/*.cpp` (13 files) | `src/` | Copied with the local changes listed below; `galois.cpp` removed |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied |
 | `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied, except that `core.hpp` gains an include (see below) |
 | `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp` |
@@ -90,6 +90,18 @@ qualifies, and is measured in batches of the lowest level. `converged()` reports
 whether the error has stopped growing with the batch size, by the rules of the
 ALPS 2 binning analysis. `tests/statistics/ar1_known_answers.cpp` checks all
 three.
+
+`batch_acc` keeps its batches in the order of the series and of equal size:
+samples fill one batch after the other, and when all are full, neighbours are
+added and the batch size doubles. The imported code reused the freed batches in
+an order given by a Galois sequence (`internal/galois.hpp`, removed with
+`src/galois.cpp` and `tests/galois.cpp`), which left batches of two sizes out of
+time order. Merging a result into an accumulator, and reducing results over MPI
+ranks, now appends the batches instead of adding them batch by batch, so the
+batches grow with the pooled statistics; the imported code mixed unrelated
+stretches of the series and kept the batch size of a single run. `batch_data`
+records the batch size, and the serialized result stores it as `@batch_size`.
+`tests/statistics/same_stream.cpp` and `merge.cpp` check this.
 
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the

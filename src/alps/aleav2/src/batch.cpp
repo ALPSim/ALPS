@@ -12,13 +12,145 @@
 
 #include <algorithm>
 #include <numeric>
+#include <stdexcept>
+#include <vector>
 
 namespace alps { namespace alea {
+
+namespace {
+
+/**
+ * The batches of a series as a list: full batches in order, and the samples
+ * left over at the end pooled into one partial batch.
+ */
+template <typename T>
+class batch_list
+{
+public:
+    batch_list(size_t size, uint64_t batch_size)
+        : batch_size_(batch_size)
+        , partial_(column<T>::Zero(size))
+        , partial_count_(0)
+    { }
+
+    /** Read the non-empty batches in the given range of columns */
+    batch_list(const batch_data<T> &data, size_t begin, size_t end)
+        : batch_list(data.size(), data.batch_size())
+    {
+        if (batch_size_ == 0) {
+            // Not recorded: the smallest batch is a full one.
+            for (size_t i = begin; i != end; ++i) {
+                if (data.count()(i) != 0 && (batch_size_ == 0 || data.count()(i) < batch_size_))
+                    batch_size_ = data.count()(i);
+            }
+            if (batch_size_ == 0)
+                batch_size_ = 1;
+        }
+        for (size_t i = begin; i != end; ++i)
+            add(data.batch().col(i), data.count()(i));
+    }
+
+    explicit batch_list(const batch_data<T> &data)
+        : batch_list(data, 0, data.num_batches())
+    { }
+
+    uint64_t batch_size() const { return batch_size_; }
+
+    size_t num_full() const { return full_.size(); }
+
+    void add(const column<T> &sum, uint64_t count)
+    {
+        if (count >= batch_size_) {
+            full_.push_back(sum);
+            count_.push_back(count);
+        } else if (count != 0) {
+            partial_ += sum;
+            partial_count_ += count;
+            promote();
+        }
+    }
+
+    void append(const batch_list &other)
+    {
+        for (size_t i = 0; i != other.full_.size(); ++i)
+            add(other.full_[i], other.count_[i]);
+        add(other.partial_, other.partial_count_);
+    }
+
+    /** Add neighbouring batches and double the batch size */
+    void coarsen()
+    {
+        const size_t pairs = full_.size() / 2;
+        for (size_t i = 0; i != pairs; ++i) {
+            full_[i] = full_[2 * i] + full_[2 * i + 1];
+            count_[i] = count_[2 * i] + count_[2 * i + 1];
+        }
+        if (full_.size() % 2 != 0) {
+            partial_ += full_.back();
+            partial_count_ += count_.back();
+        }
+        full_.resize(pairs);
+        count_.resize(pairs);
+        batch_size_ *= 2;
+        promote();
+    }
+
+    void coarsen_to(uint64_t batch_size)
+    {
+        while (batch_size_ < batch_size)
+            coarsen();
+        if (batch_size_ != batch_size)
+            throw std::invalid_argument("Batch sizes must differ by a power of two");
+    }
+
+    /** Coarsen until `store()` has room in the given number of batches */
+    void fit(size_t num_batches)
+    {
+        while (full_.size() > num_batches
+               || (full_.size() == num_batches && partial_count_ != 0))
+            coarsen();
+    }
+
+    /** Write to columns starting at `begin`; returns the number of full batches */
+    size_t store(batch_data<T> &data, size_t begin=0) const
+    {
+        for (size_t i = 0; i != full_.size(); ++i) {
+            data.batch().col(begin + i) = full_[i];
+            data.count()(begin + i) = count_[i];
+        }
+        if (partial_count_ != 0) {
+            data.batch().col(begin + full_.size()) = partial_;
+            data.count()(begin + full_.size()) = partial_count_;
+        }
+        data.set_batch_size(batch_size_);
+        return full_.size();
+    }
+
+private:
+    void promote()
+    {
+        if (partial_count_ < batch_size_)
+            return;
+        full_.push_back(partial_);
+        count_.push_back(partial_count_);
+        partial_.fill(0);
+        partial_count_ = 0;
+    }
+
+    uint64_t batch_size_;
+    std::vector<column<T> > full_;
+    std::vector<uint64_t> count_;
+    column<T> partial_;
+    uint64_t partial_count_;
+};
+
+}
 
 template <typename T>
 batch_data<T>::batch_data(size_t size, size_t num_batches)
     : batch_(size, num_batches)
     , count_(num_batches)
+    , batch_size_(0)
 {
     reset();
 }
@@ -40,15 +172,13 @@ batch_acc<T>::batch_acc(size_t size, size_t num_batches, uint64_t base_size)
     , num_batches_(num_batches)
     , base_size_(base_size)
     , store_(new batch_data<T>(size, num_batches))
-    , cursor_(num_batches)
-    , offset_(num_batches)
+    , cursor_(0)
 {
     if (num_batches % 2 != 0) {
         throw std::runtime_error("Number of batches must be even to allow "
                                  "for rebatching.");
     }
-    for (size_t i = 0; i != num_batches; ++i)
-        offset_[i] = i * base_size_;
+    store_->set_batch_size(base_size_);
 }
 
 template <typename T>
@@ -58,7 +188,6 @@ batch_acc<T>::batch_acc(const batch_acc &other)
     , base_size_(other.base_size_)
     , store_(other.store_ ? new batch_data<T>(*other.store_) : nullptr)
     , cursor_(other.cursor_)
-    , offset_(other.offset_)
 { }
 
 template <typename T>
@@ -69,21 +198,18 @@ batch_acc<T> &batch_acc<T>::operator=(const batch_acc &other)
     base_size_ = other.base_size_;
     store_.reset(other.store_ ? new batch_data<T>(*other.store_) : nullptr);
     cursor_ = other.cursor_;
-    offset_ = other.offset_;
     return *this;
 }
 
 template <typename T>
 void batch_acc<T>::reset()
 {
-    cursor_.reset();
-    for (size_t i = 0; i != num_batches_; ++i)
-        offset_[i] = i * base_size_;
-
+    cursor_ = 0;
     if (valid())
         store_->reset();
     else
         store_.reset(new batch_data<T>(size_, num_batches_));
+    store_->set_batch_size(base_size_);
 }
 
 template <typename T>
@@ -120,14 +246,19 @@ void batch_acc<T>::add(const computed<T> &source, uint64_t count)
 {
     internal::check_valid(*this);
 
-    // batch is full, move the cursor.
-    // Doing this before the addition ensures no empty batches.
-    if (store_->count()(cursor_.current()) >= current_batch_size())
-        next_batch();
+    // All batches are full: add neighbours to make room in the upper half.
+    if (cursor_ == num_batches_) {
+        batch_list<T> batches(*store_);
+        batches.coarsen();
+        store_->reset();
+        cursor_ = batches.store(*store_);
+    }
 
     // Since Eigen matrix are column-major, we can just pass the pointer
-    source.add_to(view<T>(store_->batch().col(cursor_.current()).data(), size()));
-    store_->count()(cursor_.current()) += count;
+    source.add_to(view<T>(store_->batch().col(cursor_).data(), size()));
+    store_->count()(cursor_) += count;
+    if (store_->count()(cursor_) >= store_->batch_size())
+        ++cursor_;
 }
 
 template <typename T>
@@ -136,36 +267,17 @@ batch_acc<T> &batch_acc<T>::operator<<(const batch_result<T> &other)
     internal::check_valid(*this);
     if (size() != other.size())
         throw size_mismatch();
-    // TODO this is not strictly speaking necessary when done properly
-    if (num_batches() != other.num_batches())
-        throw size_mismatch();
 
-    // FIXME: this is a terrible idea because it mixes two time series
-    batch_data<T> &other_store = const_cast<batch_data<T> &>(other.store());
-    store_->batch() += other_store.batch();
-    store_->count() += other_store.count();
+    batch_list<T> mine(*store_), theirs(other.store());
+    const uint64_t batch_size = std::max(mine.batch_size(), theirs.batch_size());
+    mine.coarsen_to(batch_size);
+    theirs.coarsen_to(batch_size);
+    mine.append(theirs);
+    mine.fit(num_batches_);
+
+    store_->reset();
+    cursor_ = mine.store(*store_);
     return *this;
-}
-
-template <typename T>
-void batch_acc<T>::next_batch()
-{
-    ++cursor_;
-    if (cursor_.merge_mode()) {
-        // merge counts
-        store_->count()(cursor_.merge_into()) += store_->count()(cursor_.current());
-        store_->count()(cursor_.current()) = 0;
-
-        // merge batches
-        store_->batch().col(cursor_.merge_into()) +=
-                                        store_->batch().col(cursor_.current());
-        store_->batch().col(cursor_.current()).fill(0);
-
-        // merge offsets
-        offset_(cursor_.merge_into()) = std::min(offset_(cursor_.merge_into()),
-                                                 offset_(cursor_.current()));
-        offset_(cursor_.current()) = count();
-    }
 }
 
 template <typename T>
@@ -262,9 +374,24 @@ column<typename bind<circular_var,T>::var_type> batch_result<T>::stderror() cons
 template <typename T>
 void batch_result<T>::reduce(const reducer &r, bool pre_commit, bool post_commit)
 {
-    // FIXME this is bad since it mixes bins
     internal::check_valid(*this);
+    const reducer_setup setup = r.get_setup();
+
+    // Each instance writes its batches to its own columns of a wider store, so
+    // that the sum over instances puts them side by side: `slots` columns for
+    // full batches and one for the partial batch.
     if (pre_commit) {
+        reduce_num_batches_ = num_batches();
+        size_t slots = reduce_num_batches_;
+        if (setup.count > 1)
+            slots = std::max<size_t>(2, std::min<size_t>(slots, 2 * slots / setup.count));
+
+        batch_list<T> mine(*store_);
+        mine.fit(slots);
+        mine.coarsen_to(r.get_max(mine.batch_size()));
+
+        store_.reset(new batch_data<T>(size(), setup.count * (slots + 1)));
+        mine.store(*store_, setup.pos * (slots + 1));
         r.reduce(view<T>(store_->batch().data(), store_->batch().size()));
         r.reduce(view<uint64_t>(store_->count().data(), store_->num_batches()));
     }
@@ -272,9 +399,14 @@ void batch_result<T>::reduce(const reducer &r, bool pre_commit, bool post_commit
         r.commit();
     }
     if (post_commit) {
-        reducer_setup setup = r.get_setup();
-        if (!setup.have_result)
+        if (setup.have_result) {
+            batch_list<T> all(*store_);
+            all.fit(reduce_num_batches_);
+            store_.reset(new batch_data<T>(size(), reduce_num_batches_));
+            all.store(*store_);
+        } else {
             store_.reset();   // free data
+        }
     }
 }
 
@@ -299,6 +431,7 @@ void serialize(serializer &s, const std::string &key, const batch_result<T> &sel
     // Serialize as 64-bit integers for consistency
     serialize(s, "@size", static_cast<uint64_t>(self.size()));
     serialize(s, "@num_batches", static_cast<uint64_t>(self.store().num_batches()));
+    serialize(s, "@batch_size", self.store().batch_size());
 
     s.enter("batch");
     serialize(s, "count", self.store().count());
@@ -318,11 +451,14 @@ void deserialize(deserializer &s, const std::string &key, batch_result<T> &self)
     internal::deserializer_sentry group(s, key);
 
     // first deserialize the fundamentals and make sure that the target fits
-    uint64_t new_size, new_nbatches;
+    uint64_t new_size, new_nbatches, new_batch_size;
     deserialize(s, "@size", new_size);
     deserialize(s, "@num_batches", new_nbatches);
+    deserialize(s, "@batch_size", new_batch_size);
     if (!self.valid() || self.size() != new_size || self.store().num_batches() != new_nbatches)
         self.store_.reset(new batch_data<T>(new_size, new_nbatches));
+
+    self.store().set_batch_size(new_batch_size);
 
     // deserialize data
     s.enter("batch");

@@ -63,6 +63,7 @@ batch_data<T> jackknife(const batch_data<T> &in, const transformer<T> &tf)
     }
 
     res.count() = in.count();
+    res.set_batch_size(in.batch_size());
 
     // Since sum_count and res.count().array() are unsigned values,
     // (res.count().array() - sum_count) would be an array with huge positive elements.

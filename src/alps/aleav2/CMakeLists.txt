@@ -11,7 +11,6 @@ add_library(alps_aleav2
   src/batch.cpp
   src/covariance.cpp
   src/fisher_f.cpp
-  src/galois.cpp
   src/mean.cpp
   src/model.cpp
   src/propagation.cpp
@@ -44,7 +43,6 @@ target_sources(alps_aleav2 PUBLIC
     include/alps/alea/fisher_f.hpp
     include/alps/alea/hdf5.hpp
     include/alps/alea/internal/format.hpp
-    include/alps/alea/internal/galois.hpp
     include/alps/alea/internal/joined.hpp
     include/alps/alea/internal/outer.hpp
     include/alps/alea/internal/pooling.hpp
