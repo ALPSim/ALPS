@@ -117,8 +117,6 @@ TEST(Hdf5RoundTrip, AccumulatorsResume)
     EXPECT_EQ(a["log"].autocorrelation<double>(), b["log"].autocorrelation<double>());
 }
 
-// ALEA v2 stores results; a running accumulator cannot be saved yet, so there
-// is no resume case for it.
 TEST(Hdf5RoundTrip, AleaV2Results)
 {
     using namespace alps::alea;
@@ -174,4 +172,63 @@ TEST(Hdf5RoundTrip, AleaV2Results)
     EXPECT_EQ(batch_saved.mean()[0], batch_loaded.mean()[0]);
     EXPECT_EQ(batch_saved.stderror()[0], batch_loaded.stderror()[0]);
     EXPECT_EQ(cov_saved.cov()(0, 1), cov_loaded.cov()(0, 1));
+}
+
+// The five ALEA v2 accumulators, saved in the middle of a run and continued
+// from the file, end bit for bit where the uninterrupted ones do.
+TEST(Hdf5RoundTrip, AleaV2Resume)
+{
+    using namespace alps::alea;
+    alps::testing::TemporaryDirectory temporary;
+    const std::string filename = (temporary.path() / "aleav2_state.h5").string();
+    mean_acc<double> mean(1), mean_resumed;
+    var_acc<double> var(1, 3), var_resumed;
+    cov_acc<double> cov(2), cov_resumed;
+    autocorr_acc<double> autocorr(1), autocorr_resumed;
+    batch_acc<double> batch(1, 16), batch_resumed;
+    statistics_test::ar1 source(9, 0.7);
+    for (std::size_t t = 0; t < total; ++t) {
+        if (t == first_part) {
+            {
+                alps::hdf5::archive archive(filename, "w");
+                hdf5_serializer serializer(archive, "/checkpoint");
+                mean.save_state(serializer, "mean");
+                var.save_state(serializer, "var");
+                cov.save_state(serializer, "cov");
+                autocorr.save_state(serializer, "autocorr");
+                batch.save_state(serializer, "batch");
+            }
+            alps::hdf5::archive archive(filename, "r");
+            hdf5_serializer serializer(archive, "/checkpoint");
+            mean_resumed.load_state(serializer, "mean");
+            var_resumed.load_state(serializer, "var");
+            cov_resumed.load_state(serializer, "cov");
+            autocorr_resumed.load_state(serializer, "autocorr");
+            batch_resumed.load_state(serializer, "batch");
+            // A state is not mistaken for one of another accumulator.
+            EXPECT_THROW(var_resumed.load_state(serializer, "batch"), std::runtime_error);
+        }
+        const double x = source();
+        const std::vector<double> pair = {x, x * x};
+        mean << x;
+        var << x;
+        cov << pair;
+        autocorr << x;
+        batch << x;
+        if (t >= first_part) {
+            mean_resumed << x;
+            var_resumed << x;
+            cov_resumed << pair;
+            autocorr_resumed << x;
+            batch_resumed << x;
+        }
+    }
+    EXPECT_TRUE(mean.finalize() == mean_resumed.finalize());
+    EXPECT_TRUE(var.finalize() == var_resumed.finalize());
+    EXPECT_TRUE(cov.finalize() == cov_resumed.finalize());
+    EXPECT_TRUE(autocorr.finalize() == autocorr_resumed.finalize());
+    const batch_result<double> batch_result_ = batch.finalize(), batch_resumed_result = batch_resumed.finalize();
+    EXPECT_TRUE(batch_result_ == batch_resumed_result);
+    EXPECT_EQ(batch_result_.store().batch_size(), batch_resumed_result.store().batch_size());
+    EXPECT_EQ(batch_result_.count(), total);
 }

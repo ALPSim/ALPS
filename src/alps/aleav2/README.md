@@ -112,6 +112,13 @@ shorter side enter the levels it lacks as one partial batch. The same holds for
 `autocorr_result::reduce`. `tests/statistics/merge.cpp` and `mpi_reduce.cpp`
 check that every level holds every sample.
 
+The five accumulators can be saved while running and continued later:
+`save_state` and `load_state` write and read everything, including unfinished
+batches, through the same serializers as results. A state carries a version
+(`@alea_state`) and the accumulator type, is refused by any other version, and
+is not a result format. `tests/statistics/hdf5_roundtrip.cpp` checks that a
+resumed run ends bit for bit where an uninterrupted one does.
+
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the
 addition:

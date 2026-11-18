@@ -168,6 +168,12 @@ public:
     /** Return backend object used for storing estimands */
     const cov_data<T,Strategy> &store() const { return *store_; }
 
+    /** Write the state of the running accumulator, to continue it later */
+    void save_state(serializer &s, const std::string &key) const;
+
+    /** Replace the accumulator by one written with `save_state` */
+    void load_state(deserializer &s, const std::string &key);
+
 protected:
     void add(const computed<T> &source, uint64_t count);
 

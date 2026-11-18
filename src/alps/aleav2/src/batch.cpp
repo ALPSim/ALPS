@@ -8,6 +8,7 @@
 #include <alps/alea/serialize.hpp>
 
 #include <alps/alea/internal/util.hpp>
+#include <alps/alea/internal/state.hpp>
 #include <alps/alea/internal/format.hpp>
 
 #include <algorithm>
@@ -302,6 +303,36 @@ void batch_acc<T>::finalize_to(batch_result<T> &result)
     internal::check_valid(*this);
     result.store_.reset();
     result.store_.swap(store_);
+}
+
+template <typename T>
+void batch_acc<T>::save_state(serializer &s, const std::string &key) const
+{
+    internal::check_valid(*this);
+    internal::serializer_sentry group(s, key);
+    internal::write_state_header(s, internal::STATE_BATCH);
+    serialize(s, "@size", static_cast<uint64_t>(size_));
+    serialize(s, "@num_batches", static_cast<uint64_t>(num_batches_));
+    serialize(s, "@base_size", static_cast<uint64_t>(base_size_));
+    serialize(s, "@batch_size", store_->batch_size());
+    serialize(s, "cursor", static_cast<uint64_t>(cursor_));
+    serialize(s, "count", store_->count());
+    serialize(s, "sum", store_->batch());
+}
+
+template <typename T>
+void batch_acc<T>::load_state(deserializer &s, const std::string &key)
+{
+    internal::deserializer_sentry group(s, key);
+    internal::read_state_header(s, internal::STATE_BATCH);
+    size_ = internal::read_uint(s, "@size");
+    num_batches_ = internal::read_uint(s, "@num_batches");
+    base_size_ = internal::read_uint(s, "@base_size");
+    store_.reset(new batch_data<T>(size_, num_batches_));
+    store_->set_batch_size(internal::read_uint(s, "@batch_size"));
+    cursor_ = internal::read_uint(s, "cursor");
+    deserialize(s, "count", store_->count());
+    deserialize(s, "sum", store_->batch());
 }
 
 template class batch_acc<double>;

@@ -46,6 +46,7 @@ target_sources(alps_aleav2 PUBLIC
     include/alps/alea/internal/joined.hpp
     include/alps/alea/internal/outer.hpp
     include/alps/alea/internal/pooling.hpp
+    include/alps/alea/internal/state.hpp
     include/alps/alea/internal/util.hpp
     include/alps/alea/mean.hpp
     include/alps/alea/plugin/stream_serializer.hpp

@@ -6,6 +6,7 @@
 #include <alps/alea/serialize.hpp>
 
 #include <alps/alea/internal/util.hpp>
+#include <alps/alea/internal/state.hpp>
 #include <alps/alea/internal/format.hpp>
 
 #include <cmath>
@@ -144,6 +145,44 @@ void autocorr_acc<T>::finalize_to(autocorr_result<T> &result)
 
     level_[nlevel() - 1].finalize_to(result.level_[nlevel() - 1], nullptr);
     level_.clear();     // signal invalidity
+}
+
+template <typename T>
+void autocorr_acc<T>::save_state(serializer &s, const std::string &key) const
+{
+    internal::check_valid(*this);
+    internal::serializer_sentry group(s, key);
+    internal::write_state_header(s, internal::STATE_AUTOCORR);
+    serialize(s, "@size", static_cast<uint64_t>(size_));
+    serialize(s, "@batch_size", static_cast<uint64_t>(batch_size_));
+    serialize(s, "@granularity", static_cast<uint64_t>(granularity_));
+    serialize(s, "@nlevel", static_cast<uint64_t>(nlevel()));
+    serialize(s, "count", static_cast<uint64_t>(count_));
+    serialize(s, "nextlevel", static_cast<uint64_t>(nextlevel_));
+
+    s.enter("level");
+    for (size_t i = 0; i != nlevel(); ++i)
+        level_[i].save_state(s, std::to_string(i));
+    s.exit();
+}
+
+template <typename T>
+void autocorr_acc<T>::load_state(deserializer &s, const std::string &key)
+{
+    internal::deserializer_sentry group(s, key);
+    internal::read_state_header(s, internal::STATE_AUTOCORR);
+    size_ = internal::read_uint(s, "@size");
+    batch_size_ = internal::read_uint(s, "@batch_size");
+    granularity_ = internal::read_uint(s, "@granularity");
+    const size_t new_nlevel = internal::read_uint(s, "@nlevel");
+    count_ = internal::read_uint(s, "count");
+    nextlevel_ = internal::read_uint(s, "nextlevel");
+
+    level_.assign(new_nlevel, level_acc_type(size_));
+    s.enter("level");
+    for (size_t i = 0; i != new_nlevel; ++i)
+        level_[i].load_state(s, std::to_string(i));
+    s.exit();
 }
 
 template class autocorr_acc<double>;

@@ -7,6 +7,7 @@
 #include <alps/alea/serialize.hpp>
 
 #include <alps/alea/internal/util.hpp>
+#include <alps/alea/internal/state.hpp>
 #include <alps/alea/internal/format.hpp>
 
 namespace alps { namespace alea {
@@ -201,6 +202,45 @@ void var_acc<T,Str>::add_bundle(var_acc<T,Str> *cascade)
         cascade->add(make_adapter(current_.sum()), current_.count(), cascade+1);
 
     current_.reset();
+}
+
+template <typename T, typename Str>
+void var_acc<T,Str>::save_state(serializer &s, const std::string &key) const
+{
+    internal::check_valid(*this);
+    internal::serializer_sentry group(s, key);
+    internal::write_state_header(s, internal::STATE_VAR);
+    serialize(s, "@size", static_cast<uint64_t>(size()));
+    serialize(s, "count", store_->count());
+    serialize(s, "count2", store_->count2());
+    serialize(s, "sum", store_->data());
+    serialize(s, "sum2", store_->data2());
+
+    // the batch that is being filled
+    s.enter("current");
+    serialize(s, "target", current_.target());
+    serialize(s, "count", current_.count());
+    serialize(s, "sum", current_.sum());
+    s.exit();
+}
+
+template <typename T, typename Str>
+void var_acc<T,Str>::load_state(deserializer &s, const std::string &key)
+{
+    internal::deserializer_sentry group(s, key);
+    internal::read_state_header(s, internal::STATE_VAR);
+    const size_t new_size = internal::read_uint(s, "@size");
+    store_.reset(new var_data<T,Str>(new_size));
+    deserialize(s, "count", store_->count());
+    deserialize(s, "count2", store_->count2());
+    deserialize(s, "sum", store_->data());
+    deserialize(s, "sum2", store_->data2());
+
+    s.enter("current");
+    current_ = bundle<T>(new_size, internal::read_uint(s, "target"));
+    deserialize(s, "count", current_.count());
+    deserialize(s, "sum", current_.sum());
+    s.exit();
 }
 
 template class var_acc<double>;

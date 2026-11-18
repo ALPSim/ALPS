@@ -8,6 +8,7 @@
 #include <alps/alea/serialize.hpp>
 
 #include <alps/alea/internal/util.hpp>
+#include <alps/alea/internal/state.hpp>
 #include <alps/alea/internal/format.hpp>
 
 namespace alps { namespace alea {
@@ -121,6 +122,28 @@ void mean_acc<T>::finalize_to(mean_result<T> &result)
     result.store_.reset();
     result.store_.swap(store_);
     result.store_->convert_to_mean();
+}
+
+template <typename T>
+void mean_acc<T>::save_state(serializer &s, const std::string &key) const
+{
+    internal::check_valid(*this);
+    internal::serializer_sentry group(s, key);
+    internal::write_state_header(s, internal::STATE_MEAN);
+    serialize(s, "@size", static_cast<uint64_t>(size_));
+    serialize(s, "count", store_->count());
+    serialize(s, "sum", store_->data());
+}
+
+template <typename T>
+void mean_acc<T>::load_state(deserializer &s, const std::string &key)
+{
+    internal::deserializer_sentry group(s, key);
+    internal::read_state_header(s, internal::STATE_MEAN);
+    size_ = internal::read_uint(s, "@size");
+    store_.reset(new mean_data<T>(size_));
+    deserialize(s, "count", store_->count());
+    deserialize(s, "sum", store_->data());
 }
 
 template class mean_acc<double>;
