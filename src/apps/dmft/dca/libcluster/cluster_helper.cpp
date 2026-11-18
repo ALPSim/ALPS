@@ -519,6 +519,8 @@ bool ClusterHelper::read(){
     if(!ar.is_data("/"+dump_location_+"/name")) return false;
     std::string name;     ar>>alps::make_pvp("/"+dump_location_+"/name", name);
     if(name!=cluster_name_) throw std::logic_error("reading cluster transformer with name: "+name+" for cluster: "+cluster_name_);
+    int L;                ar>>alps::make_pvp("/"+dump_location_+"/L", L);
+    if(L!=lattice_L_) throw std::logic_error("reading cluster transformer with dca.L="+std::to_string(L)+" for dca.L="+std::to_string(lattice_L_));
     //write data to the 'tmpname' file
     ar>>alps::make_pvp("/"+dump_location_+"/bipartite", bipartite_);
     ar>>alps::make_pvp("/"+dump_location_+"/epsilon", *(const_cast<double*>(&epsilon_)));
@@ -749,7 +751,7 @@ ClusterHelper::setup_classes(const Matrix<int>::Type& symmetry_table) const
   const int n = symmetry_table.size2();
   std::vector<int> parent(n*n);
   for (int p=0; p<n*n; ++p) parent[p] = p;
-  std::function<int(int)> find = [&parent](int p) {
+  auto find = [&parent](int p) {
     while (parent[p] != p) { parent[p] = parent[parent[p]]; p = parent[p]; }
     return p;
   };
