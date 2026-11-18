@@ -8,6 +8,9 @@
 #include <alps/alea/internal/util.hpp>
 #include <alps/alea/internal/format.hpp>
 
+#include <cmath>
+#include <limits>
+
 namespace alps { namespace alea {
 
 template <typename T>
@@ -154,62 +157,79 @@ uint64_t autocorr_result<T>::batch_size(size_t i) const
 }
 
 template <typename T>
-size_t autocorr_result<T>::find_level(uint64_t min_samples) const
+size_t autocorr_result<T>::find_level(uint64_t min_batches) const
 {
-    // TODO: this can be done in O(1)
-    for (unsigned i = nlevel(); i != 0; --i) {
-        if (level(i-1).count() / level(i-1).batch_size() >= min_samples)
+    for (size_t i = nlevel(); i != 0; --i) {
+        if (level(i-1).count() / level(i-1).batch_size() >= min_batches)
             return i - 1;
     }
     return 0;
 }
 
 template <typename T>
-double autocorr_result<T>::count2() const
+double autocorr_result<T>::count2(uint64_t min_batches) const
 {
-    size_t lvl = find_level(DEFAULT_MIN_SAMPLES);
-
-    return level_[lvl].count2();
+    return level_[find_level(min_batches)].count2();
 }
 
 template <typename T>
-column<typename autocorr_result<T>::var_type> autocorr_result<T>::var() const
+column<typename autocorr_result<T>::var_type> autocorr_result<T>::var(uint64_t min_batches) const
 {
-    size_t lvl = find_level(DEFAULT_MIN_SAMPLES);
-
     // The question is whether to return the ensemble variance or the batch
     // variance here.  We opt for the batch variance, because it makes
     // everything consistent with each other.
-    //return level_[lvl].batch_size() * level_[lvl].var();
-    return level_[lvl].var();
+    return level_[find_level(min_batches)].var();
 }
 
 template <typename T>
-column<typename autocorr_result<T>::var_type> autocorr_result<T>::stderror() const
+column<typename autocorr_result<T>::var_type> autocorr_result<T>::stderror(uint64_t min_batches) const
 {
-    size_t lvl = find_level(DEFAULT_MIN_SAMPLES);
-
-    return level_[lvl].stderror();
-}
-
-
-template <typename T>
-double autocorr_result<T>::observations() const
-{
-    size_t lvl = find_level(DEFAULT_MIN_SAMPLES);
-
-    return level_[lvl].observations();
+    return level_[find_level(min_batches)].stderror();
 }
 
 template <typename T>
-column<typename autocorr_result<T>::var_type> autocorr_result<T>::tau() const
+double autocorr_result<T>::observations(uint64_t min_batches) const
 {
-    size_t lvl = find_level(DEFAULT_MIN_SAMPLES);
+    return level_[find_level(min_batches)].observations();
+}
+
+template <typename T>
+column<typename autocorr_result<T>::var_type> autocorr_result<T>::tau(uint64_t min_batches) const
+{
+    const size_t lvl = find_level(min_batches);
+    if (lvl == 0)
+        return column<var_type>::Constant(size(), std::numeric_limits<double>::quiet_NaN());
+
     const column<var_type> &var0 = level_[0].var();
     const column<var_type> &varn = level_[lvl].var();
-    const double n = level_[lvl].batch_size();
+    const double n = double(level_[lvl].batch_size()) / level_[0].batch_size();
 
     return (0.5 * n * varn.array() / var0.array() - 0.5).matrix();
+}
+
+template <typename T>
+std::vector<error_convergence> autocorr_result<T>::converged(uint64_t min_batches) const
+{
+    const size_t range = 4;
+    const size_t lvl = find_level(min_batches);
+    if (lvl + 1 < range)
+        return std::vector<error_convergence>(size(), MAYBE_CONVERGED);
+
+    std::vector<error_convergence> conv(size(), CONVERGED);
+    const column<var_type> err = level_[lvl].stderror();
+    for (size_t i = lvl + 1 - range; i != lvl; ++i) {
+        const column<var_type> this_err = level_[i].stderror();
+        for (size_t k = 0; k != size(); ++k) {
+            const double ratio = std::abs(this_err[k]), full = std::abs(err[k]);
+            if (ratio >= full)
+                conv[k] = CONVERGED;
+            else if (ratio < 0.824 * full)
+                conv[k] = NOT_CONVERGED;
+            else if (ratio < 0.9 * full && conv[k] != NOT_CONVERGED)
+                conv[k] = MAYBE_CONVERGED;
+        }
+    }
+    return conv;
 }
 
 template <typename T>

@@ -10,7 +10,6 @@
 #include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
-#include <gtest/gtest-spi.h>
 
 #include <cmath>
 
@@ -126,19 +125,14 @@ TEST_P(Ar1KnownAnswers, Accumulators)
     EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
 }
 
-// ALEA v2 reports the error from the highest level with at least 1024
-// batches: batches of 256 samples here. That is what its numbers must match,
-// and at phi = 0.99 it is about 0.80 of the exact error.
+// ALEA v2 reports the error from the highest level with at least 128 batches:
+// batches of 2048 samples here.
 TEST_P(Ar1KnownAnswers, AleaV2)
 {
     const double phi = GetParam();
     const averages avg = aleav2(phi);
-    expect_calibrated(avg, phi, 256);
-    if (phi < 0.95)
-        EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
-    else
-        // Known gap, to be closed with the error rule of the engine repairs.
-        EXPECT_NONFATAL_FAILURE(EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor), "calibration_floor");
+    expect_calibrated(avg, phi, 2048);
+    EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
 }
 
 INSTANTIATE_TEST_SUITE_P(Phi, Ar1KnownAnswers, ::testing::Values(0.0, 0.5, 0.9, 0.99));
@@ -154,18 +148,35 @@ TEST(ShortRun, AleaDoesNotClaimConvergence)
     EXPECT_NE(binned.converged_errors(), alps::CONVERGED);
 }
 
-TEST(ShortRun, AleaV2DoesNotReportZeroTau)
+TEST(ShortRun, AleaV2DoesNotClaimConvergence)
 {
     alps::alea::autocorr_acc<double> binned(1);
     ar1 source(5, 0.9);
     for (int t = 0; t < 1000; ++t)
         binned << source();
     const alps::alea::autocorr_result<double> result = binned.finalize();
+    EXPECT_NE(result.converged()[0], alps::alea::CONVERGED);
+    // 250 batches of 4 samples: more than the naive error (0.031), still short
+    // of the exact one, and the flag says so.
+    EXPECT_GT(result.stderror()[0], 1.5 * result.level(0).stderror()[0]);
+    EXPECT_GT(result.tau()[0], 1);
+}
+
+// Below 256 samples no level above the lowest has 128 batches. Nothing is
+// known about the correlation, and tau must not read as zero.
+TEST(ShortRun, AleaV2HasNoTauWithoutBatches)
+{
+    alps::alea::autocorr_acc<double> binned(1);
+    ar1 source(5, 0.9);
+    for (int t = 0; t < 200; ++t)
+        binned << source();
+    const alps::alea::autocorr_result<double> result = binned.finalize();
     EXPECT_FALSE(result.tau_available());
-    // Known gap, to be closed with the engine repairs: with too few samples
-    // for any level the result is the naive error (0.031) with tau = 0.
-    EXPECT_NONFATAL_FAILURE(EXPECT_FALSE(std::isfinite(result.tau()[0])), "isfinite");
-    EXPECT_NONFATAL_FAILURE(EXPECT_GE(result.stderror()[0], 0.5 * ar1_exact_error(0.9, 1000)), "stderror");
+    EXPECT_TRUE(std::isnan(result.tau()[0]));
+    EXPECT_NE(result.converged()[0], alps::alea::CONVERGED);
+    // The minimum is a parameter: with 16 batches, level 3 qualifies.
+    EXPECT_TRUE(result.tau_available(16));
+    EXPECT_EQ(result.level(3).stderror()[0], result.stderror(16)[0]);
 }
 
 // The convergence flag separates a long run from a short one.
@@ -179,4 +190,16 @@ TEST(ConvergenceFlag, Alea)
         short_run << slow();
     EXPECT_EQ(long_run.converged_errors(), alps::CONVERGED);
     EXPECT_NE(short_run.converged_errors(), alps::CONVERGED);
+}
+
+TEST(ConvergenceFlag, AleaV2)
+{
+    alps::alea::autocorr_acc<double> long_run(1), short_run(1);
+    ar1 fast(11, 0.5), slow(12, 0.99);
+    for (std::size_t t = 0; t < n; ++t)
+        long_run << fast();
+    for (std::size_t t = 0; t < (std::size_t(1) << 14); ++t)
+        short_run << slow();
+    EXPECT_EQ(long_run.finalize().converged()[0], alps::alea::CONVERGED);
+    EXPECT_EQ(short_run.finalize().converged()[0], alps::alea::NOT_CONVERGED);
 }

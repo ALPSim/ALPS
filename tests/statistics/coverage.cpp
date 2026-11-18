@@ -86,8 +86,5 @@ TEST(Coverage, Correlated)
     expect_nominal(result.alea, "ALEA");
     expect_nominal(result.accumulators, "accumulators");
     expect_nominal(result.batch, "ALEA v2 batch");
-    // ALEA v2's default error comes from batches of only 32 samples here and
-    // is about 15% too small, which this test is not sharp enough to see; the
-    // calibration floor in ar1_known_answers.cpp is.
     expect_nominal(result.autocorr, "ALEA v2 autocorr");
 }

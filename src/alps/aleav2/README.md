@@ -81,6 +81,16 @@ entry instead of a relative matrix norm. `compare_test.cpp` adds regression
 coverage; the [test-support README](../../../tests/support/README.md) records
 the adaptation.
 
+`autocorr_result` takes its error, variance and autocorrelation time from the
+highest level with at least 128 batches instead of 1024, and the minimum is an
+argument (`stderror(min_batches)` and so on). With 1024, the batches were short
+enough to under-report the error of a strongly correlated series by 20% in the
+conformance tests. `tau()` is NaN, not zero, when no level above the lowest
+qualifies, and is measured in batches of the lowest level. `converged()` reports
+whether the error has stopped growing with the batch size, by the rules of the
+ALPS 2 binning analysis. `tests/statistics/ar1_known_answers.cpp` checks all
+three.
+
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the
 addition:

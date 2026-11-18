@@ -137,6 +137,9 @@ extern template class autocorr_acc<double>;
 extern template class autocorr_acc<std::complex<double> >;
 
 
+/** Outcome of the check whether an error estimate has converged */
+enum error_convergence { CONVERGED = 0, MAYBE_CONVERGED = 1, NOT_CONVERGED = 2 };
+
 /**
  * Result for the integrated autocorrelation time.
  *
@@ -163,25 +166,50 @@ public:
     uint64_t count() const { return level_[0].count(); }
 
     /** Returns sum of squared samples sizes */
-    double count2() const;
+    double count2(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
     /** Returns sample mean */
     const column<T> &mean() const { return level_[0].mean(); }
 
-    /** Returns bias-corrected sample variance */
-    column<var_type> var() const;
+    /**
+     * Returns bias-corrected sample variance.
+     *
+     * This and the following estimates are taken from the highest level that
+     * holds at least `min_batches` batches.
+     */
+    column<var_type> var(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
     /** Returns bias-corrected standard error of the mean */
-    column<var_type> stderror() const;
+    column<var_type> stderror(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
-    /** Returns integrated auto-correlation time */
-    column<var_type> tau() const;
+    /**
+     * Returns integrated auto-correlation time.
+     *
+     * If no level above the lowest holds `min_batches` batches, the run is too
+     * short to say anything about correlations and the result is NaN.
+     */
+    column<var_type> tau(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
     /** Returns number of observations consistent with var/stderror */
-    double observations() const;
+    double observations(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
     /** Is sample size sufficient to estimate integrated auto-correlation time? */
-    bool tau_available() const { return find_level(DEFAULT_MIN_SAMPLES) > 0; }
+    bool tau_available(uint64_t min_batches=DEFAULT_MIN_BATCHES) const
+    {
+        return find_level(min_batches) > 0;
+    }
+
+    /**
+     * Has the standard error stopped growing with the batch size?
+     *
+     * Compares the error at the chosen level with the errors at the three
+     * levels below it, lowest first: one that is at least as large gives
+     * `CONVERGED`, one below 0.824 of it `NOT_CONVERGED`, one below 0.9 of it
+     * `MAYBE_CONVERGED` unless already `NOT_CONVERGED`. With fewer than four
+     * levels to look at the answer is `MAYBE_CONVERGED`. These are the rules of
+     * the ALPS 2 binning analysis.
+     */
+    std::vector<error_convergence> converged(uint64_t min_batches=DEFAULT_MIN_BATCHES) const;
 
     /** Collect measurements from different instances using sum-reducer */
     void reduce(const reducer &r) { reduce(r, true, true); }
@@ -195,7 +223,8 @@ public:
     /** Write some info about the result to a stream */
     friend std::ostream &operator<< <>(std::ostream &, const autocorr_result &);
 
-    size_t find_level(uint64_t min_samples) const;
+    /** Highest level with at least `min_batches` batches, or 0 */
+    size_t find_level(uint64_t min_batches) const;
 
     uint64_t batch_size(size_t level) const;
 
@@ -208,8 +237,16 @@ public:
 protected:
     void reduce(const reducer &r, bool do_pre_commit, bool do_post_commit);
 
+    /**
+     * Minimum number of batches behind an error estimate.
+     *
+     * The relative uncertainty of an error from M batches is 1/sqrt(2(M-1)),
+     * about 6% here. A larger minimum makes that smaller, but uses shorter
+     * batches, which under-estimate the error of a correlated series.
+     */
+    const static uint64_t DEFAULT_MIN_BATCHES = 128;
+
 private:
-    const static size_t DEFAULT_MIN_SAMPLES = 1024;
     std::vector<level_result_type> level_;
 
     friend class autocorr_acc<T>;
