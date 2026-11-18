@@ -14,6 +14,7 @@ add_library(alps_aleav2
   src/mean.cpp
   src/model.cpp
   src/observables.cpp
+  src/observables_io.cpp
   src/propagation.cpp
   src/result.cpp
   src/testing.cpp
@@ -52,6 +53,7 @@ target_sources(alps_aleav2 PUBLIC
     include/alps/alea/internal/util.hpp
     include/alps/alea/mean.hpp
     include/alps/alea/observables.hpp
+    include/alps/alea/observables_io.hpp
     include/alps/alea/plugin/stream_serializer.hpp
     include/alps/alea/propagation.hpp
     include/alps/alea/result.hpp

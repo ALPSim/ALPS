@@ -49,6 +49,7 @@ struct reducer;
 class observable_result;
 class result_set;
 class observable_set;
+struct observables_access;
 
 /**
  * Declaration of an observable, for `observable_set << observable(name)`.
@@ -82,6 +83,7 @@ public:
     const std::string &name() const { return name_; }
 
 private:
+    friend struct observables_access;
     friend class accumulator;
     friend class observable_set;
     friend class observable_result;
@@ -116,9 +118,11 @@ public:
     /** Discard all samples */
     void reset();
 
+    struct impl;    // not part of the interface
+
 private:
+    friend struct observables_access;
     friend class observable_set;
-    struct impl;
     explicit accumulator(const observable &declaration);
     std::shared_ptr<impl> impl_;
 };
@@ -159,6 +163,7 @@ public:
     void merge(const result_set &other);
 
 private:
+    friend struct observables_access;
     struct impl;
     std::unique_ptr<impl> impl_;
 };
@@ -223,13 +228,15 @@ public:
     /** Name of the sign of a signed observable, or empty */
     const std::string &sign() const;
 
+    struct impl;    // not part of the interface
+
 private:
     friend class observable_set;
     friend class result_set;
     friend class accumulator;
     friend observable_result transform(const std::function<std::vector<double>(const std::vector<double> &)> &,
                             const std::vector<observable_result> &);
-    struct impl;
+    friend struct observables_access;
     std::shared_ptr<const impl> impl_;
 };
 
@@ -286,6 +293,7 @@ public:
     void reduce(const reducer &r);
 
 private:
+    friend struct observables_access;
     friend class observable_set;
     struct impl;
     std::unique_ptr<impl> impl_;

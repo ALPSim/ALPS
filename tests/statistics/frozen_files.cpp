@@ -6,6 +6,7 @@
 #include "fixtures/legacy_observables.hpp"
 
 #include <alps/alea.h>
+#include <alps/alea/observables_io.hpp>
 #include <alps/hdf5.hpp>
 
 #include <gtest/gtest.h>
@@ -86,4 +87,61 @@ TEST(FrozenFiles, TheFileHoldsTheKnownStream)
     EXPECT_EQ(run.at("h/count"), 20000);
     // Signed average 1.5, error 0.0127 at this length.
     EXPECT_NEAR(run.at("O/mean"), 1.5, 0.05);
+}
+
+// The reader of the observable layer returns the stored numbers of the same
+// file. It does not offer the binning analysis of 3.0 files (pyalps reads that
+// itself), so the two per-level errors are not compared.
+TEST(FrozenFiles, ObservableLayerReadsARun)
+{
+    alps::hdf5::archive archive(fixtures + "legacy_observables.h5", "r");
+    const alps::alea::result_set results = alps::alea::load_results(archive, "/run");
+    EXPECT_FALSE(results.has("Sign * O"));
+
+    statistics_test::numbers got;
+    const alps::alea::observable_result x = results["x"], s = results["s"], v = results["v"], o = results["O"];
+    got["x/count"] = x.count();
+    got["x/mean"] = x.mean();
+    got["x/error"] = x.error();
+    got["x/variance"] = x.variance_vector()[0];
+    got["x/tau"] = x.tau();
+    got["x/converged"] = x.converged();
+    got["x/bins"] = x.bin_means().size();
+    got["x/binsize"] = x.bin_size();
+    // The file of a running 3.0 simulation holds bin sums.
+    got["x/bin_first"] = x.bin_means().front()[0] * 256;
+    got["x/bin_last"] = x.bin_means().back()[0] * 256;
+    got["s/count"] = s.count();
+    got["s/mean"] = s.mean();
+    got["s/error"] = s.error();
+    got["v/count"] = v.count();
+    for (int i = 0; i < 2; ++i) {
+        got["v/mean/" + std::to_string(i)] = v.mean_vector()[i];
+        got["v/error/" + std::to_string(i)] = v.error_vector()[i];
+        got["v/tau/" + std::to_string(i)] = v.tau_vector()[i];
+    }
+    got["Sign/mean"] = results["Sign"].mean();
+    // ALEA reports the samples in full bins, 78 * 256, as the count of a
+    // signed observable. The file has the number of samples.
+    EXPECT_EQ(o.count(), 20000u);
+    got["O/mean"] = o.mean();
+    got["O/error"] = o.error();
+    got["h/count"] = results["h"].count();
+    for (int bin = 0; bin < 10; ++bin)
+        got["h/" + std::to_string(bin)] = results["h"].histogram()[bin];
+
+    statistics_test::numbers want = expected("run");
+    want.erase("x/error_level0");
+    want.erase("x/error_level3");
+    want.erase("O/count");
+    expect_equal(want, got);
+
+    // The stored bins serve functions of results, also for the signed one.
+    EXPECT_FALSE(s.has_bins());
+    EXPECT_NEAR((x * x).mean(), x.mean() * x.mean(), 1e-3);
+    EXPECT_NEAR((o * 2.0).error(), 2 * o.error(), 0.02 * o.error());
+
+    // Measurements of an earlier version cannot be continued, and say so.
+    alps::alea::observable_set set;
+    EXPECT_THROW(alps::alea::load_checkpoint(archive, "/run", set), std::runtime_error);
 }

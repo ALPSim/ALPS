@@ -55,6 +55,15 @@ the bins do not line up. The header does not include Eigen. It is declared in
 ALPS uses it yet; `tests/statistics/observables.cpp` holds it to the answers of
 the conformance tests. Observables are real-valued for now.
 
+[`<alps/alea/observables_io.hpp>`](include/alps/alea/observables_io.hpp) stores
+them: `save_results` writes the layout of [SCHEMA.md](SCHEMA.md), `load_results`
+reads it and the result files of ALPS 2 and 3.0, `save_checkpoint` and
+`load_checkpoint` let a simulation continue bit for bit, and `pack` and `unpack`
+carry results between processes. Results read from a file return the stored
+numbers and can enter functions of results when the file has bins; they cannot
+be merged or continued. `tests/statistics/observables_files.cpp` and
+`frozen_files.cpp` check this, the latter against a file written by ALEA.
+
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).

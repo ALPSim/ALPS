@@ -54,11 +54,18 @@ One group per observable, in the places results are stored today, for example
 | `variance/value` | unchanged | variance of a single sample |
 | `tau/value` | unchanged | integrated autocorrelation time; NaN if not available |
 | `labels` | unchanged | labels of vector components |
-| `timeseries/data`, `@binsize`, `@binningtype` | unchanged | equal-length, time-ordered bin means |
+| `timeseries/data`, `@binsize`, `@binningtype` | see below | equal-length, time-ordered bin means |
 | `@sign`, and the sibling `"<sign> * <name>"` | unchanged | signed observables |
 | `histogram`, `@min`, `@max`, `@stepsize` | unchanged | integer histograms |
 | `binning/binsize`, `binning/error` | new | error of the mean at each bin length |
 | `covariance/value` | new, optional | vector observables that ask for it |
+
+`timeseries/data` holds bin means. In 3.0 files it has two meanings: evaluated
+results (also those of ALPSCore) hold bin means there and either mark the
+group with `@cannotrebin` or do not record the bin length, while the
+observables a simulation writes while running hold bin sums together with
+`@binsize`. The reader tells the cases apart by `@alea_schema`,
+`@cannotrebin` and `@binsize`, as ALEA's `mcdata` did.
 
 No longer written, because they are internals of one implementation: `sum`,
 `sum2`, `timeseries/logbinning`, `timeseries/logbinning2`,
