@@ -65,7 +65,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   bool measure_in_matsubara=true;
   if(input.histogram_measurement)
     measure_in_matsubara=false;
-  std::vector<double> mean_order=results["PertOrder"].mean<std::vector<double> >();
+  std::vector<double> mean_order=results["PertOrder"].mean_vector();
   
   std::cout<<"average matrix size was: "<<std::endl;
   std::ofstream matrix_size("matrix_size", std::ios::app);
@@ -75,7 +75,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   }
   std::cout<<std::endl;
   matrix_size<<std::endl;
-  std::cout<<"average sign was: "<<results["Sign"].mean<double>()<<" error: "<<results["Sign"].error<double>()<<std::endl;
+  std::cout<<"average sign was: "<<results["Sign"].mean()<<" error: "<<results["Sign"].error()<<std::endl;
   //single particle Green function measurements
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_flavors);
   itime_green_function_t bare_green_itime(n_tau+1, n_site, n_flavors);

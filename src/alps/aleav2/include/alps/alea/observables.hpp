@@ -226,6 +226,12 @@ public:
     std::vector<std::vector<double> > bin_means() const;
 
     /**
+     * Covariance of the means of components `i` and `j`, at `[i][j]`, from the
+     * full bins. For a measured observable with bins.
+     */
+    std::vector<std::vector<double> > covariance() const;
+
+    /**
      * The binning analysis: the error of the mean of component `i` estimated
      * from bins of 1, 2, 4, ... samples. Empty without a binning analysis.
      */
@@ -294,6 +300,9 @@ public:
     const observable_result &operator[](const std::string &name) const;
 
     std::vector<std::string> names() const;
+
+    /** Add a result, such as a function of others, or replace the one of that name */
+    void insert(const std::string &name, const observable_result &result);
 
     /** The results of the given names only */
     result_set select(const std::vector<std::string> &names) const;

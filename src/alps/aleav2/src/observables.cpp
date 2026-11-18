@@ -168,6 +168,24 @@ std::vector<std::vector<double> > observable_result::bin_means() const
     return bins;
 }
 
+std::vector<std::vector<double> > observable_result::covariance() const
+{
+    const std::vector<std::vector<double> > bins = bin_means();
+    const size_t m = bins.size(), n = size();
+    if (m < 2)
+        throw std::runtime_error(quoted(impl_->declaration.name()) + " has fewer than two full bins");
+    std::vector<double> mean(n, 0.);
+    for (const std::vector<double> &bin : bins)
+        for (size_t k = 0; k != n; ++k)
+            mean[k] += bin[k] / m;
+    std::vector<std::vector<double> > cov(n, std::vector<double>(n, 0.));
+    for (const std::vector<double> &bin : bins)
+        for (size_t k = 0; k != n; ++k)
+            for (size_t l = 0; l != n; ++l)
+                cov[k][l] += (bin[k] - mean[k]) * (bin[l] - mean[l]) / (double(m) * (m - 1));
+    return cov;
+}
+
 std::vector<double> observable_result::binning_errors(std::size_t i) const
 {
     std::vector<double> errors;
@@ -446,6 +464,11 @@ std::vector<std::string> result_set::names() const
     for (const auto &named : impl_->results)
         names.push_back(named.first);
     return names;
+}
+
+void result_set::insert(const std::string &name, const observable_result &result)
+{
+    impl_->results[name] = result;
 }
 
 result_set result_set::select(const std::vector<std::string> &names) const

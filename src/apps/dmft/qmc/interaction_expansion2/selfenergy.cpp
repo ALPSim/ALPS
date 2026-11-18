@@ -286,14 +286,14 @@ void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardI
       std::stringstream Wk_real_name, Wk_imag_name;
       Wk_real_name  <<"Wk_real_"  <<z<<"_"<<k << "_" << k;
       Wk_imag_name  <<"Wk_imag_"  <<z<<"_"<<k << "_" << k;
-      std::vector<double> mean_real = results[Wk_real_name.str().c_str()].mean<std::vector<double> >();
-      std::vector<double> mean_imag = results[Wk_imag_name.str().c_str()].mean<std::vector<double> >();
+      std::vector<double> mean_real = results[Wk_real_name.str().c_str()].mean_vector();
+      std::vector<double> mean_imag = results[Wk_imag_name.str().c_str()].mean_vector();
       for(unsigned int w=0;w<n_matsubara;++w)
         Wk(w, k, k, z) = std::complex<double>(mean_real[w], mean_imag[w])/( beta*n_site);
       //for(unsigned int w=0;w<n_matsubara;++w)
       //  reduced_bare_green_matsubara(w, k, k, z) = bare_green_matsubara(w, k, k, z);
-      std::vector<double> error_real = results[Wk_real_name.str().c_str()].error<std::vector<double> >();
-      std::vector<double> error_imag = results[Wk_imag_name.str().c_str()].error<std::vector<double> >();
+      std::vector<double> error_real = results[Wk_real_name.str().c_str()].error_vector();
+      std::vector<double> error_imag = results[Wk_imag_name.str().c_str()].error_vector();
       for (unsigned int e=0; e<error_real.size(); ++e) {
         double ereal = error_real[e];
         double eimag = error_imag[e];
@@ -309,7 +309,7 @@ void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardI
       for(std::size_t w=0;w<n_matsubara;++w)
         green_matsubara_measured(w,k,k, z) = bare_green_matsubara(w,k,k,z) 
         - bare_green_matsubara(w,k,k,z) * bare_green_matsubara(w,k,k,z) * Wk(w,k,k,z);
-  std::vector<double> dens = results["densities"].mean<std::vector<double> >();
+  std::vector<double> dens = results["densities"].mean_vector();
   for (std::size_t z=0; z<n_flavors; ++z) 
     densities[z] = dens[z];
 }
@@ -340,8 +340,8 @@ void evaluate_selfenergy_measurement_itime_rs(const alps::results_type<HubbardIn
         std::stringstream W_name;
         W_name<<"W_"<<z<<"_"<<i<<"_"<<j;
         W_z_i_j[z][i][j].resize(n_self+1);
-        std::vector<double> tmp=results[W_name.  str().c_str()].mean<std::vector<double> >();
-        std::vector<double> errorvec = results[W_name.  str().c_str()].error<std::vector<double> >();
+        std::vector<double> tmp=results[W_name.  str().c_str()].mean_vector();
+        std::vector<double> errorvec = results[W_name.  str().c_str()].error_vector();
         for(int k=0;k<n_self+1;++k){
           W_z_i_j[z][i][j][k]=tmp[k];
           double error = errorvec[k];
@@ -375,13 +375,13 @@ void evaluate_selfenergy_measurement_itime_rs(const alps::results_type<HubbardIn
     }
   }
   if(n_flavors==2){  
-    double Sz_obs = results["Sz_0"].mean<double>();
-    double Sz_err = results["Sz_0"].error<double>();
+    double Sz_obs = results["Sz_0"].mean();
+    double Sz_err = results["Sz_0"].error();
     for(int i=1;i<n_site;i++) {
       std::stringstream Sz_name;
       Sz_name << "Sz_" << i;
-      double Sz_i_obs = results[Sz_name.str().c_str()].mean<double>();
-      double Sz_i_err = results[Sz_name.str().c_str()].error<double>();
+      double Sz_i_obs = results[Sz_name.str().c_str()].mean();
+      double Sz_i_err = results[Sz_name.str().c_str()].error();
       Sz_i_obs *= ((i%2==0) ? 1 : -1);
       Sz_obs += Sz_i_obs;
       Sz_err += Sz_i_err;

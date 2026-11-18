@@ -17,10 +17,9 @@
 #include <string>
 
 TEST(DmftRegression, ctint_sz_results_divided_by_sign) {
-  using alps::accumulators::FullBinningAccumulator;
-  alps::accumulators::accumulator_set measurements;
+  alps::alea::observable_set measurements;
   for (char const * name : {"Sign", "Sz_0", "Sz2_0", "Sz0_Sz0", "Sz_1", "density_0"})
-    measurements << FullBinningAccumulator<double>(name);
+    measurements << alps::alea::observable(name);
 
   // The samples repeat with period 4, which divides every bin, so the
   // jackknife bins are equal and the divided means are exact ratios.
@@ -36,19 +35,19 @@ TEST(DmftRegression, ctint_sz_results_divided_by_sign) {
     measurements["density_0"] << x * s;
   }
 
-  alps::accumulators::result_set results(measurements);
+  alps::alea::result_set results = measurements.results();
   ASSERT_EQ(results["Sz_1"].count(), 0u);
   divide_sz_results_by_sign(results, 2);
 
   // <s> = 1/2, <Sz s> = 1/8 and <Sz^2 s> = 3/16 over one period.
-  EXPECT_DOUBLE_EQ(results["Sign"].mean<double>(), 0.5);
-  EXPECT_DOUBLE_EQ(results["Sz_0"].mean<double>(), 0.25);
-  EXPECT_DOUBLE_EQ(results["Sz2_0"].mean<double>(), 0.375);
-  EXPECT_DOUBLE_EQ(results["Sz0_Sz0"].mean<double>(), 0.375);
+  EXPECT_DOUBLE_EQ(results["Sign"].mean(), 0.5);
+  EXPECT_DOUBLE_EQ(results["Sz_0"].mean(), 0.25);
+  EXPECT_DOUBLE_EQ(results["Sz2_0"].mean(), 0.375);
+  EXPECT_DOUBLE_EQ(results["Sz0_Sz0"].mean(), 0.375);
   EXPECT_EQ(results["Sz_0"].count(), static_cast<unsigned>(n));
   // Unmeasured Sz results and other observables are left alone.
   EXPECT_EQ(results["Sz_1"].count(), 0u);
-  EXPECT_DOUBLE_EQ(results["density_0"].mean<double>(), 0.125);
+  EXPECT_DOUBLE_EQ(results["density_0"].mean(), 0.125);
 
   std::string const file = "ctint_sz_results.h5";
   {

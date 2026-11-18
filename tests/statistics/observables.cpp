@@ -121,6 +121,26 @@ TEST(Observables, VectorLearnsItsSizeAndKeepsIt)
     EXPECT_THROW(v.mean(), std::logic_error);
 }
 
+// y = x + noise: the covariance of the means is ((1, 1), (1, 1.25)) / N, and
+// its diagonal is the squared error.
+TEST(Observables, CovarianceOfAVector)
+{
+    observable_set set;
+    set << observable("v");
+    statistics_test::normal xi(17);
+    for (std::size_t t = 0; t < n; ++t) {
+        const double x = xi();
+        set["v"] << std::vector<double>({x, x + 0.5 * xi()});
+    }
+    const observable_result v = set.results()["v"];
+    const std::vector<std::vector<double> > cov = v.covariance();
+    EXPECT_NEAR(cov[0][0] * n, 1.0, 0.3);
+    EXPECT_NEAR(cov[0][1] * n, 1.0, 0.3);
+    EXPECT_NEAR(cov[1][1] * n, 1.25, 0.35);
+    EXPECT_EQ(cov[0][1], cov[1][0]);
+    EXPECT_NEAR(std::sqrt(cov[1][1]), v.error_vector()[1], 1e-12);
+}
+
 // U = <x^4> / <x^2>^2 = 3 with error sqrt(24 / N), as in nonlinear.cpp. The
 // layer's answer is the textbook jackknife over its 128 bins, however the
 // expression is written.

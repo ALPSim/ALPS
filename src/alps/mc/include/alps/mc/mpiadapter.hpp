@@ -13,6 +13,7 @@
 #if defined(ALPS_HAVE_MPI)
 
 #include <alps/alea/mpi.hpp>
+#include <algorithm>
 #include <alps/alea/observables.hpp>
 #include <alps/mc/check_schedule.hpp>
 
@@ -79,23 +80,28 @@ namespace alps {
             }
 
             typename Base::results_type collect_results(typename Base::result_names_type const & names) const {
-                typename Base::result_names_type measured;
-                for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
+                // Every observable is measured on all ranks or on none.
+                typename Base::result_names_type measured, requested;
+                const typename Base::result_names_type all = this->result_names();
+                for(typename Base::result_names_type::const_iterator it = all.begin(); it != all.end(); ++it) {
                     size_t has_count=(this->measurements[*it].count() > 0);
                     const size_t sum_counts =
                             alps::mpi::all_reduce(communicator,
                                                   has_count,
                                                   std::plus<size_t>());
+                    const bool wanted = std::find(names.begin(), names.end(), *it) != names.end();
                     if (static_cast<int>(sum_counts) == communicator.size()) {
                         measured.push_back(*it);
-                    } else if (sum_counts > 0 && static_cast<int>(sum_counts) < communicator.size()) {
+                        if (wanted)
+                            requested.push_back(*it);
+                    } else if (wanted && sum_counts > 0) {
                         throw std::runtime_error(*it + " was measured on only some of the MPI processes.");
                     }
                 }
                 // Rank 0 gets the pooled results; the other ranks an empty set.
                 typename Base::results_type results = this->measurements.results().select(measured);
                 results.reduce(alps::alea::mpi_reducer(communicator, 0));
-                return results;
+                return communicator.rank() == 0 ? results.select(requested) : results;
             }
 
         protected:

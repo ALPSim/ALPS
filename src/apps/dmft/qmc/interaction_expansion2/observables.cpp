@@ -37,18 +37,17 @@ typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > cons
 void InteractionExpansion::initialize_observables(void) 
 {
   if(measurements.has("Sign")){
-    measurements.clear();
+    measurements = alps::alea::observable_set();
   }
-  using alps::accumulators::FullBinningAccumulator;
-  measurements << FullBinningAccumulator<double>("Sign");
-  measurements << FullBinningAccumulator<std::vector<double> >("PertOrder");
+  measurements << alps::alea::observable("Sign");
+  measurements << alps::alea::observable("PertOrder");
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
-          measurements << FullBinningAccumulator<std::vector<double> >(obs_name.str().c_str());
+          measurements << alps::alea::observable(obs_name.str().c_str());
         }
       }
     }
@@ -59,22 +58,22 @@ void InteractionExpansion::initialize_observables(void)
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
-        measurements << FullBinningAccumulator<std::vector<double> >(obs_name_real.str().c_str());
-        measurements << FullBinningAccumulator<std::vector<double> >(obs_name_imag.str().c_str());
+        measurements << alps::alea::observable(obs_name_real.str().c_str());
+        measurements << alps::alea::observable(obs_name_imag.str().c_str());
       }
     }
   }
-  measurements << FullBinningAccumulator<std::vector<double> >("densities");
+  measurements << alps::alea::observable("densities");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor)
-    measurements << FullBinningAccumulator<std::vector<double> >("densities_"+boost::lexical_cast<std::string>(flavor));
-  measurements << FullBinningAccumulator<double>("density_correlation");
-  measurements << FullBinningAccumulator<std::vector<double> >("n_i n_j");
+    measurements << alps::alea::observable("densities_"+boost::lexical_cast<std::string>(flavor));
+  measurements << alps::alea::observable("density_correlation");
+  measurements << alps::alea::observable("n_i n_j");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor){
     for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor;
       if (n_site>1) density_name<<"_"<<i;
-      measurements << FullBinningAccumulator<double>(density_name.str().c_str());
+      measurements << alps::alea::observable(density_name.str().c_str());
     }
   }
   for(unsigned int i=0;i<n_site;++i){
@@ -85,26 +84,25 @@ void InteractionExpansion::initialize_observables(void)
     // Measured as value times sign. NGS's signed observables divided their
     // mean by the mean sign; alps::solvers::ctint divides the results by the
     // "Sign" result with divide_sz_results_by_sign before saving them.
-    measurements << FullBinningAccumulator<double>(sz_name.str().c_str());
-    measurements << FullBinningAccumulator<double>(sz2_name.str().c_str());
-    measurements << FullBinningAccumulator<double>(sz0_szj_name.str().c_str());
+    measurements << alps::alea::observable(sz_name.str().c_str());
+    measurements << alps::alea::observable(sz2_name.str().c_str());
+    measurements << alps::alea::observable(sz0_szj_name.str().c_str());
   }
   //acceptance probabilities
-  measurements << FullBinningAccumulator<double>("VertexInsertion");
-  measurements << FullBinningAccumulator<double>("VertexRemoval");
-  measurements << FullBinningAccumulator<double>("MeasurementTime");
-  measurements << FullBinningAccumulator<double>("UpdateTime");
-  measurements << FullBinningAccumulator<double>("RecomputeTime");
+  measurements << alps::alea::observable("VertexInsertion");
+  measurements << alps::alea::observable("VertexRemoval");
+  measurements << alps::alea::observable("MeasurementTime");
+  measurements << alps::alea::observable("UpdateTime");
+  measurements << alps::alea::observable("RecomputeTime");
   measurements.reset();
 }
 
 
-void divide_sz_results_by_sign(alps::accumulators::result_set & results, unsigned int n_site)
+void divide_sz_results_by_sign(alps::alea::result_set & results, unsigned int n_site)
 {
   if(!results.has("Sign"))
     return;
-  // A copy, since dividing by a result adds jackknife bins to it.
-  alps::accumulators::result_wrapper const sign(results["Sign"]);
+  alps::alea::observable_result const sign(results["Sign"]);
   for(unsigned int i=0;i<n_site;++i){
     std::stringstream sz_name, sz2_name, sz0_szj_name;
     sz_name<<"Sz_"<<i;
@@ -115,7 +113,7 @@ void divide_sz_results_by_sign(alps::accumulators::result_set & results, unsigne
     // leaves out observables that no rank measured.
     for(std::string const & name : names)
       if(results.has(name) && results[name].count())
-        results[name] /= sign;
+        results.insert(name, results[name] / sign);
   }
 }
 

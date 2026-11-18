@@ -18,14 +18,15 @@
 
 using namespace alps::numeric;
 
-// NUM_BINS=0, the default, asks for the default number of bins, 128, as it
-// did with ALEA's observables. ALPSCore's accumulators would keep no
-// bins at all.
-  #define NUM_BINS_CONSTRUCTOR_ARG (NUM_BINS ? std::size_t(NUM_BINS) : std::size_t(128))
+// NUM_BINS=0, the default, asks for the default number of bins, 128. The
+// bins come in pairs, so an odd NUM_BINS is rounded up.
+#define NUM_BINS_CONSTRUCTOR_ARG (NUM_BINS ? std::size_t(NUM_BINS + NUM_BINS % 2) : std::size_t(128))
 
-typedef alps::accumulators::FullBinningAccumulator<std::vector<double> > vec_obs_t;
-typedef alps::accumulators::FullBinningAccumulator<double> obs_t;
-typedef alps::accumulators::NoBinningAccumulator<std::vector<double> > simple_vec_obs_t;
+namespace {
+alps::alea::observable vec_obs_t(const std::string &name, std::size_t bins) { return alps::alea::observable(name).bins(bins); }
+alps::alea::observable obs_t(const std::string &name, std::size_t bins) { return alps::alea::observable(name).bins(bins); }
+alps::alea::observable simple_vec_obs_t(const std::string &name) { return alps::alea::observable(name).without_bins(); }
+}
 
 void hybridization::create_measurements(){//called once in the constructor
 
