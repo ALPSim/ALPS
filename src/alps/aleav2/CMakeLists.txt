@@ -13,6 +13,7 @@ add_library(alps_aleav2
   src/fisher_f.cpp
   src/mean.cpp
   src/model.cpp
+  src/observables.cpp
   src/propagation.cpp
   src/result.cpp
   src/testing.cpp
@@ -37,6 +38,7 @@ target_sources(alps_aleav2 PUBLIC
     include/alps/alea/bundle.hpp
     include/alps/alea/complex_op.hpp
     include/alps/alea/computed.hpp
+    include/alps/alea/error_convergence.hpp
     include/alps/alea/convert.hpp
     include/alps/alea/core.hpp
     include/alps/alea/covariance.hpp
@@ -49,6 +51,7 @@ target_sources(alps_aleav2 PUBLIC
     include/alps/alea/internal/state.hpp
     include/alps/alea/internal/util.hpp
     include/alps/alea/mean.hpp
+    include/alps/alea/observables.hpp
     include/alps/alea/plugin/stream_serializer.hpp
     include/alps/alea/propagation.hpp
     include/alps/alea/result.hpp

@@ -6,7 +6,7 @@ if(NOT TARGET ALPS::aleav2)
 endif()
 
 foreach(name exact_moments same_stream ar1_known_answers coverage nonlinear vector_covariance
-             merge signed_ratio hdf5_roundtrip frozen_files)
+             merge signed_ratio hdf5_roundtrip frozen_files observables)
   add_executable(statistics_${name} ${name}.cpp)
   target_link_libraries(statistics_${name} PRIVATE ALPS::alps ALPS::aleav2)
   alps_add_gtest(statistics_${name} COMPONENT statistics TIMEOUT 120)

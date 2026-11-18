@@ -40,6 +40,21 @@ ranks through `<alps/alea/mpi.hpp>` and ALPSCore's `<alps/utilities/mpi.hpp>`
 from `ALPS::utilities`; `ALPS::aleav2` then links MPI. Serial builds install
 neither header.
 
+## Observables of a simulation
+
+[`<alps/alea/observables.hpp>`](include/alps/alea/observables.hpp) is ALPS code
+on top of the imported accumulators and is what a simulation is meant to use:
+sets of named observables (scalars and vectors, with a binning analysis and 128
+bins in time order unless declared without), signed observables, integer
+histograms, results with mean, error, autocorrelation time and convergence
+flag, functions of results by jackknife, merging of runs and reduction over MPI
+ranks. A function of results is always one jackknife over measured bins, also
+when it is built step by step, and is an error when an operand has no bins or
+the bins do not line up. The header does not include Eigen. It is declared in
+`<alps/alea/observables.hpp>` only, not through `<alps/alea.hpp>`. Nothing in
+ALPS uses it yet; `tests/statistics/observables.cpp` holds it to the answers of
+the conformance tests. Observables are real-valued for now.
+
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
@@ -118,6 +133,9 @@ batches, through the same serializers as results. A state carries a version
 (`@alea_state`) and the accumulator type, is refused by any other version, and
 is not a result format. `tests/statistics/hdf5_roundtrip.cpp` checks that a
 resumed run ends bit for bit where an uninterrupted one does.
+
+`propagation.hpp` no longer declares `sampling_prop` and `bootstrap_prop`. The
+imported code declared them without an implementation.
 
 Three imported headers relied on their includers for some declarations. Each
 now includes what it needs, so it compiles on its own, and a comment marks the

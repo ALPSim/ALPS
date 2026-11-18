@@ -5,6 +5,7 @@
 #include "streams.hpp"
 
 #include <alps/alea.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/accumulators.hpp>
 #include <alps/utilities/mpi.hpp>
 
@@ -127,6 +128,50 @@ TEST(MpiReduce, AleaV2UnequalRuns)
     // the others appended, neighbours are added once.
     EXPECT_EQ(batch_reduced.store().batch_size(), 256u);
     EXPECT_EQ(batch_reduced.store().count()(0), 256u);
+}
+
+// The observable layer: a set reduced over the ranks is the set of the runs
+// merged one after the other. Rank 0 has not measured "late" at all.
+TEST(MpiReduce, ObservableSet)
+{
+    using namespace alps::alea;
+    const slices s;
+    const auto fill_set = [&s](int rank) {
+        observable_set set;
+        set << observable("x") << observable("plain").without_bins() << observable("late") << histogram("h", 0, 1);
+        for (std::size_t t = 0; t < s.length; ++t) {
+            const double value = s.begin(rank)[t];
+            set["x"] << value;
+            set["plain"] << value;
+            set["h"] << (value > 0 ? 1 : 0);
+            if (rank != 0)
+                set["late"] << std::vector<double>({value, -value});
+        }
+        return set;
+    };
+    result_set reduced = fill_set(s.comm.rank()).results();
+    reduced.reduce(mpi_reducer(s.comm, 0));
+    if (s.comm.rank() != 0) {
+        EXPECT_TRUE(reduced.names().empty());
+        return;
+    }
+
+    observable_set serial = fill_set(0);
+    for (std::size_t rank = 1; rank < s.size; ++rank)
+        serial.merge(fill_set(rank).results());
+    const result_set expected = serial.results();
+
+    EXPECT_EQ(reduced["x"].count(), s.length * s.size);
+    EXPECT_NEAR(reduced["x"].mean(), s.mean, 1e-13);
+    EXPECT_NEAR(reduced["x"].error(), expected["x"].error(), 1e-10 * expected["x"].error());
+    expect_calibrated(reduced["x"].error(), s);
+    EXPECT_NEAR(reduced["plain"].error(), expected["plain"].error(), 1e-10 * expected["plain"].error());
+    EXPECT_EQ(reduced["h"].histogram(), expected["h"].histogram());
+    EXPECT_EQ(reduced["late"].count(), s.length * (s.size - 1));
+    EXPECT_NEAR(reduced["late"].mean_vector()[1], expected["late"].mean_vector()[1], 1e-13);
+    // The bins of the reduced set line up for a function of results.
+    const observable_result square = reduced["x"] * reduced["x"], expected_square = expected["x"] * expected["x"];
+    EXPECT_NEAR(square.error(), expected_square.error(), 1e-10 * expected_square.error());
 }
 
 TEST(MpiReduce, Accumulators)

@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include <alps/alea/error_convergence.hpp>
 #include <alps/alea/core.hpp>
 #include <alps/alea/util.hpp>
 #include <alps/alea/variance.hpp>
@@ -142,9 +143,6 @@ struct traits< autocorr_acc<T> >
 extern template class autocorr_acc<double>;
 extern template class autocorr_acc<std::complex<double> >;
 
-
-/** Outcome of the check whether an error estimate has converged */
-enum error_convergence { CONVERGED = 0, MAYBE_CONVERGED = 1, NOT_CONVERGED = 2 };
 
 /**
  * Result for the integrated autocorrelation time.
