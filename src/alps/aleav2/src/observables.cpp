@@ -16,11 +16,18 @@ namespace alps { namespace alea {
 observable::observable(const std::string &name)
     : name_(name)
     , num_bins_(128)
+    , components_(0)
     , with_bins_(true)
     , histogram_(false)
     , min_(0)
     , max_(0)
 { }
+
+observable &observable::components(std::size_t size)
+{
+    components_ = size;
+    return *this;
+}
 
 observable &observable::without_bins()
 {
@@ -336,6 +343,19 @@ void accumulator::add(const double *value, std::size_t size)
 
 std::uint64_t accumulator::count() const { return impl_->count(); }
 
+const std::string &accumulator::name() const { return impl_->declaration.name(); }
+
+observable_result accumulator::result() const
+{
+    if (!impl_->declaration.sign_.empty()) {
+        throw std::logic_error(quoted(name()) + " is signed by " + quoted(impl_->declaration.sign_)
+                               + "; its result comes from the results of its set");
+    }
+    observable_result out;
+    out.impl_ = impl_->make_result();
+    return out;
+}
+
 void accumulator::reset() { impl_->reset(); }
 
 // SETS
@@ -391,6 +411,20 @@ std::vector<std::string> observable_set::names() const
     return names;
 }
 
+void observable_set::insert(const std::string &name, const accumulator &observable)
+{
+    if (name.empty())
+        throw std::invalid_argument("An observable needs a name");
+    impl_->observables.erase(name);
+    impl_->observables.insert(std::make_pair(name, observable));
+}
+
+void observable_set::erase(const std::string &name)
+{
+    if (impl_->observables.erase(name) == 0)
+        throw std::out_of_range("There is no observable " + quoted(name));
+}
+
 void observable_set::reset()
 {
     for (auto &named : impl_->observables)
@@ -400,8 +434,10 @@ void observable_set::reset()
 result_set observable_set::results() const
 {
     std::map<std::string, std::shared_ptr<observable_result::impl> > parts;
-    for (const auto &named : impl_->observables)
+    for (const auto &named : impl_->observables) {
         parts[named.first] = named.second.impl_->make_result();
+        parts[named.first]->declaration.name_ = named.first;
+    }
     result_set out;
     out.impl_->link(parts);
     return out;
@@ -454,7 +490,7 @@ const observable_result &result_set::operator[](const std::string &name) const
 {
     const std::map<std::string, observable_result>::const_iterator found = impl_->results.find(name);
     if (found == impl_->results.end())
-        throw std::out_of_range("There is no observable_result " + quoted(name));
+        throw std::out_of_range("There is no result " + quoted(name));
     return found->second;
 }
 
@@ -469,6 +505,12 @@ std::vector<std::string> result_set::names() const
 void result_set::insert(const std::string &name, const observable_result &result)
 {
     impl_->results[name] = result;
+}
+
+void result_set::erase(const std::string &name)
+{
+    if (impl_->results.erase(name) == 0)
+        throw std::out_of_range("There is no result " + quoted(name));
 }
 
 result_set result_set::select(const std::vector<std::string> &names) const

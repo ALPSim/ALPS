@@ -216,10 +216,11 @@ struct accumulator::impl
     {
         if (size == new_size)
             return;
-        if (size != 0 || new_size == 0) {
+        const size_t expected = size != 0 ? size : declaration.components_;
+        if (new_size == 0 || (expected != 0 && expected != new_size)) {
             throw std::invalid_argument(
-                quoted(declaration.name()) + " has " + std::to_string(size) + " components, not "
-                + std::to_string(new_size));
+                quoted(declaration.name()) + " takes samples of " + std::to_string(expected)
+                + (expected == 1 ? " component, not " : " components, not ") + std::to_string(new_size));
         }
         size = new_size;
         if (declaration.with_bins_) {
@@ -317,10 +318,12 @@ struct observables_access
         result.impl_ = impl;
         return result;
     }
+    static std::string &name(observable &declaration) { return declaration.name_; }
     static std::string &sign(observable &declaration) { return declaration.sign_; }
     static const std::string &sign(const observable &declaration) { return declaration.sign_; }
     static std::vector<std::string> &labels(observable &declaration) { return declaration.labels_; }
     static const std::vector<std::string> &labels(const observable &declaration) { return declaration.labels_; }
+    static std::size_t &components(observable &declaration) { return declaration.components_; }
     static std::size_t &num_bins(observable &declaration) { return declaration.num_bins_; }
     static const std::size_t &num_bins(const observable &declaration) { return declaration.num_bins_; }
     static bool &with_bins(observable &declaration) { return declaration.with_bins_; }

@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -269,4 +270,36 @@ TEST(Observables, DeclarationsAndReset)
     set["x"] << std::vector<double>({1., 2.});
     EXPECT_EQ(set.results()["x"].size(), 2u);
     EXPECT_EQ(copy.results()["h"].histogram()[3], 1u);
+}
+
+// An observable outside a set, one fixed to numbers, and a set that shares
+// the observable it is given.
+TEST(Observables, HandlesAndFixedSizes)
+{
+    alps::alea::accumulator energy(observable("E").components(1));
+    energy << 1.0 << 3.0;
+    EXPECT_THROW(energy << std::vector<double>({1., 2.}), std::invalid_argument);
+    EXPECT_EQ(energy.result().mean(), 2.0);
+
+    observable_set set;
+    set.insert("energy", energy);
+    set["energy"] << 8.0;
+    EXPECT_EQ(energy.count(), 3u);
+    EXPECT_EQ(set.results()["energy"].mean(), 4.0);
+    set.erase("energy");
+    EXPECT_FALSE(set.has("energy"));
+    EXPECT_THROW(set.erase("energy"), std::out_of_range);
+    EXPECT_EQ(energy.result().mean(), 4.0);
+
+    result_set results;
+    results.insert("twice", energy.result() * 2.0);
+    results.insert("energy", energy.result());
+    EXPECT_NEAR(results.select({"twice"})["twice"].mean(), 8.0, 1e-13);
+    EXPECT_FALSE(results.select({"twice"}).has("energy"));
+    std::ostringstream printed;
+    printed << results["energy"];
+    EXPECT_EQ(printed.str().substr(0, 6), "4 +/- ");
+
+    alps::alea::accumulator density(observable("n").signed_by("Sign"));
+    EXPECT_THROW(density.result(), std::logic_error);
 }

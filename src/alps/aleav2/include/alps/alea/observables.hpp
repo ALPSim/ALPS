@@ -57,7 +57,7 @@ struct observables_access;
 /**
  * Declaration of an observable, for `observable_set << observable(name)`.
  *
- * The number of components is that of the first sample.
+ * The number of components is that of the first sample, unless it is fixed.
  */
 class observable
 {
@@ -80,6 +80,12 @@ public:
      */
     observable &signed_by(const std::string &sign);
 
+    /**
+     * Fix the number of components: 1 for an observable that takes numbers
+     * only. Without this it is that of the first sample.
+     */
+    observable &components(std::size_t size);
+
     /** Names of the components */
     observable &labels(const std::vector<std::string> &labels);
 
@@ -93,7 +99,7 @@ private:
     friend class result_set;
     std::string name_, sign_;
     std::vector<std::string> labels_;
-    std::size_t num_bins_;
+    std::size_t num_bins_, components_;
     bool with_bins_, histogram_;
     std::int64_t min_, max_;
     friend observable histogram(const std::string &, std::int64_t, std::int64_t);
@@ -103,11 +109,18 @@ private:
 observable histogram(const std::string &name, std::int64_t min, std::int64_t max);
 
 /**
- * One observable of a set, while it is being measured.
+ * One observable while it is being measured, usually as `set[name]`.
+ *
+ * This is a handle: a copy refers to the same observable.
  */
 class accumulator
 {
 public:
+    /** An observable outside a set */
+    explicit accumulator(const observable &declaration);
+
+    const std::string &name() const;
+
     /** Add a sample. A histogram counts the integer value given. */
     accumulator &operator<<(double value) { add(&value, 1); return *this; }
 
@@ -121,12 +134,17 @@ public:
     /** Discard all samples */
     void reset();
 
+    /**
+     * What has been measured so far. A signed observable has a result only
+     * as part of its set, which knows the sign.
+     */
+    observable_result result() const;
+
     struct impl;    // not part of the interface
 
 private:
     friend struct observables_access;
     friend class observable_set;
-    explicit accumulator(const observable &declaration);
     std::shared_ptr<impl> impl_;
 };
 
@@ -143,6 +161,15 @@ public:
 
     /** Declare an observable. Declaring a name twice is an error. */
     observable_set &operator<<(const observable &declaration);
+
+    /**
+     * Put an observable into the set under `name`, in place of any other of
+     * that name. The set and `observable` then refer to the same observable.
+     */
+    void insert(const std::string &name, const accumulator &observable);
+
+    /** Take an observable out of the set; an unknown name is an error */
+    void erase(const std::string &name);
 
     bool has(const std::string &name) const;
 
@@ -303,6 +330,9 @@ public:
 
     /** Add a result, such as a function of others, or replace the one of that name */
     void insert(const std::string &name, const observable_result &result);
+
+    /** Remove a result; an unknown name is an error */
+    void erase(const std::string &name);
 
     /** The results of the given names only */
     result_set select(const std::vector<std::string> &names) const;

@@ -32,6 +32,13 @@ void save_results(hdf5::archive &ar, const std::string &path, const result_set &
  */
 result_set load_results(hdf5::archive &ar, const std::string &path);
 
+/**
+ * One result in the group `group`, as `save_results` writes it. Of a signed
+ * observable this keeps mean and error; its samples are written with the set.
+ */
+void save_result(hdf5::archive &ar, const std::string &group, const observable_result &result);
+observable_result load_result(hdf5::archive &ar, const std::string &group);
+
 /** Write everything needed to continue measuring */
 void save_checkpoint(hdf5::archive &ar, const std::string &path, const observable_set &set);
 

@@ -173,8 +173,9 @@ impl_pointer read_plain(hdf5::archive &ar, const std::string &group, const std::
     }
 
     impl_pointer out(new observable_result::impl(declaration));
-    if (ar.is_data(group + "/count"))
-        ar[group + "/count"] >> out->count;
+    if (!ar.is_data(group + "/count"))
+        throw std::runtime_error("'" + group + "' does not hold a stored observable: it has no count");
+    ar[group + "/count"] >> out->count;
     if (out->count == 0 || !ar.is_data(group + "/mean/value")) {
         out->count = 0;
         return out;
@@ -309,7 +310,8 @@ void pack_declaration(byte_stream &out, const observable &declaration_)
     out << declaration.name() << access::sign(declaration) << static_cast<uint64_t>(access::labels(declaration).size());
     for (const std::string &label : access::labels(declaration))
         out << label;
-    out << static_cast<uint64_t>(access::num_bins(declaration)) << uint64_t(access::with_bins(declaration))
+    out << static_cast<uint64_t>(access::num_bins(declaration)) << static_cast<uint64_t>(access::components(declaration))
+        << uint64_t(access::with_bins(declaration))
         << uint64_t(access::is_histogram(declaration)) << access::min(declaration) << access::max(declaration);
 }
 
@@ -318,13 +320,14 @@ observable unpack_declaration(byte_stream &in)
     std::string name;
     in >> name;
     observable declaration(name);
-    uint64_t labels, num_bins, with_bins, is_histogram;
+    uint64_t labels, num_bins, components, with_bins, is_histogram;
     in >> access::sign(declaration) >> labels;
     access::labels(declaration).resize(labels);
     for (std::string &label : access::labels(declaration))
         in >> label;
-    in >> num_bins >> with_bins >> is_histogram >> access::min(declaration) >> access::max(declaration);
+    in >> num_bins >> components >> with_bins >> is_histogram >> access::min(declaration) >> access::max(declaration);
     access::num_bins(declaration) = num_bins;
+    access::components(declaration) = components;
     access::with_bins(declaration) = with_bins != 0;
     access::is_histogram(declaration) = is_histogram != 0;
     return declaration;
@@ -365,6 +368,27 @@ void save_results(hdf5::archive &ar, const std::string &path, const result_set &
         if (!named.second.labels().empty())
             ar[group + "/labels"] << named.second.labels();
     }
+}
+
+void save_result(hdf5::archive &ar, const std::string &group, const observable_result &result)
+{
+    const observable_result::impl &self = access::get(result);
+    if (access::sign(self.declaration).empty()) {
+        write_plain(ar, group, result);
+        return;
+    }
+    write_header(ar, group, result.size() <= 1 ? "scalar" : "vector");
+    ar[group + "/count"] << self.count;
+    if (self.count != 0)
+        write_statistics(ar, group, result);
+    if (!result.labels().empty())
+        ar[group + "/labels"] << result.labels();
+}
+
+observable_result load_result(hdf5::archive &ar, const std::string &group)
+{
+    const std::string name = hdf5_name_decode(group.substr(group.find_last_of('/') + 1));
+    return access::make_result(read_plain(ar, group, name));
 }
 
 result_set load_results(hdf5::archive &ar, const std::string &path)
@@ -420,6 +444,7 @@ void save_checkpoint(hdf5::archive &ar, const std::string &path, const observabl
                                              : access::with_bins(self.declaration) ? "binned" : "simple");
         ar[group + "/@sign"] << access::sign(declaration);
         ar[group + "/@bins"] << static_cast<uint64_t>(access::num_bins(declaration));
+        ar[group + "/@components"] << static_cast<uint64_t>(access::components(declaration));
         ar[group + "/@size"] << static_cast<uint64_t>(self.size);
         ar[group + "/@min"] << access::min(declaration);
         ar[group + "/@max"] << access::max(declaration);
@@ -456,10 +481,12 @@ void load_checkpoint(hdf5::archive &ar, const std::string &path, observable_set 
             continue;
         observable declaration(hdf5_name_decode(child));
         std::string kind;
-        uint64_t num_bins, size;
+        uint64_t num_bins, size, components;
         ar[group + "/@kind"] >> kind;
         ar[group + "/@sign"] >> access::sign(declaration);
         ar[group + "/@bins"] >> num_bins;
+        ar[group + "/@components"] >> components;
+        access::components(declaration) = components;
         ar[group + "/@size"] >> size;
         ar[group + "/@min"] >> access::min(declaration);
         ar[group + "/@max"] >> access::max(declaration);
@@ -497,7 +524,9 @@ std::string pack(const result_set &results)
         const observable_result::impl &self = access::get(named.second);
         if (self.stored)
             throw std::invalid_argument("'" + named.first + "' was read from a result file and cannot be packed");
-        pack_declaration(out, self.declaration);
+        observable declaration(self.declaration);
+        access::name(declaration) = named.first;
+        pack_declaration(out, declaration);
         out << static_cast<uint64_t>(self.size) << self.count << static_cast<uint64_t>(self.counts.size());
         for (uint64_t count : self.counts)
             out << count;
