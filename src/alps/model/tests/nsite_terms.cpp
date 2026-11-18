@@ -573,24 +573,129 @@ TEST(NSiteHamiltonian, TypedTermKeepsItsParameterDefaults) {
 }
 
 // The splitter replaces each site operator by a sign, so n(a)^2 used to act
-// as n(a), and sqrt(n(a)) as n(a).
-TEST(NSiteHamiltonian, PowersAndFunctionsOfSiteOperatorsThrow) {
+// as n(a), and sqrt(n(a)) as n(a). Functions of site operators are refused.
+TEST(NSiteHamiltonian, FunctionsOfSiteOperatorsThrow) {
   const char* g = "<GRAPH name=\"g\" vertices=\"2\"><NSITE><SITE id=\"1\"/><SITE id=\"2\"/></NSITE></GRAPH>";
-  Files f(g, "<HAMILTONIAN name=\"product\"><BASIS ref=\"fermion\"/>"
-             "<NSITETERM sites=\"a b\">n(a)*n(a)*n(b)</NSITETERM></HAMILTONIAN>"
-             "<HAMILTONIAN name=\"power\"><BASIS ref=\"fermion\"/>"
-             "<NSITETERM sites=\"a b\">n(a)^2*n(b)</NSITETERM></HAMILTONIAN>"
-             "<HAMILTONIAN name=\"function\"><BASIS ref=\"fermion\"/>"
+  Files f(g, "<HAMILTONIAN name=\"function\"><BASIS ref=\"fermion\"/>"
              "<NSITETERM sites=\"a b\">sqrt(n(a))*n(b)</NSITETERM></HAMILTONIAN>");
-  alps::Parameters p = sector(f.parms(), 2, 1);   // occupations (2,1) and (1,2)
-  p["GRAPH"] = "g"; p["MODEL"] = "product";
-  std::vector<double> e = spectrum(p);
-  ASSERT_EQ(e.size(), 2u);
-  EXPECT_NEAR(e[0], 2., 1e-14);
-  EXPECT_NEAR(e[1], 4., 1e-14);
-  for (const char* m : {"power", "function"}) {
-    p["MODEL"] = m;
-    EXPECT_THROW(spectrum(p), std::runtime_error) << m;
+  alps::Parameters p = sector(f.parms(), 2, 1);
+  p["GRAPH"] = "g"; p["MODEL"] = "function";
+  EXPECT_THROW(spectrum(p), std::runtime_error);
+}
+
+const char* three_site_group = "<GRAPH name=\"g\" vertices=\"3\">"
+  "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>";
+
+std::vector<std::vector<double> > dense_hamiltonian(const alps::Parameters& p) {
+  alps::hamiltonian_matrix<alps::numeric::matrix<double> > h(p);
+  const alps::numeric::matrix<double>& m = h.matrix();
+  std::vector<std::vector<double> > a(h.dimension(), std::vector<double>(h.dimension()));
+  for (std::size_t i = 0; i < h.dimension(); ++i)
+    for (std::size_t j = 0; j < h.dimension(); ++j)
+      a[i][j] = m(i, j);
+  return a;
+}
+
+// X^k is expanded to X*X*...*X: the Hamiltonian equals the one with the
+// product written out, element by element. Operators on one site do not
+// commute and fermions pick up signs, so (A+B)^2 must be AA + AB + BA + BB.
+TEST(NSiteHamiltonian, PowersOfSiteOperatorsAreExpanded) {
+  const std::string hop = "(cdag_up(a)*c_up(b) + cdag_up(b)*c_up(a))";
+  const std::string mixed = "(cdag_up(a)*c_up(c) + cdag_up(c)*c_up(a) + n_down(a)*n(b))";
+  const std::vector<std::pair<std::string, std::string> > cases = {
+    {"n(a)^2*n(b)", "n(a)*n(a)*n(b)"},
+    {"(n(a)*n(b))^2", "n(a)*n(b)*n(a)*n(b)"},
+    {"(n(a) + n(b))^2*n(c)", "(n(a)*n(a) + n(a)*n(b) + n(b)*n(a) + n(b)*n(b))*n(c)"},
+    {hop + "^2", hop + "*" + hop},
+    {mixed + "^3", mixed + "*" + mixed + "*" + mixed},
+    {"(K*n(a))^2*n(b)", "K*K*n(a)*n(a)*n(b)"},
+    {"n(a)^P*n(b)", "n(a)*n(a)*n(a)*n(b)"},
+    {"n(a)^0*n(b)", "n(b)"},
+    {"((n(a)^2 + n(b))^2)", "(n(a)*n(a) + n(b))*(n(a)*n(a) + n(b))"},
+    {"-2*n(a)^2*n(b) + n(c)^2", "-2*n(a)*n(a)*n(b) + n(c)*n(c)"},
+    {"(n(a)*n(b)/2)^2", "n(a)*n(b)*n(a)*n(b)/4"},
+  };
+  for (const auto& c : cases) {
+    Files f(three_site_group,
+            "<HAMILTONIAN name=\"power\"><BASIS ref=\"fermion\"/>"
+            "<NSITETERM sites=\"a b c\">" + c.first + "</NSITETERM></HAMILTONIAN>"
+            "<HAMILTONIAN name=\"product\"><BASIS ref=\"fermion\"/>"
+            "<NSITETERM sites=\"a b c\">" + c.second + "</NSITETERM></HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);   // 9 states, doubly occupied sites included
+    p["GRAPH"] = "g"; p["K"] = 1.7; p["P"] = 3;
+    p["MODEL"] = "product";
+    const std::vector<std::vector<double> > expected = dense_hamiltonian(p);
+    p["MODEL"] = "power";
+    const std::vector<std::vector<double> > found = dense_hamiltonian(p);
+    ASSERT_EQ(found.size(), expected.size()) << c.first;
+    double norm = 0;
+    for (std::size_t i = 0; i < expected.size(); ++i)
+      for (std::size_t j = 0; j < expected.size(); ++j) {
+        EXPECT_NEAR(found[i][j], expected[i][j], 1e-12) << c.first << " element " << i << "," << j;
+        norm += std::abs(expected[i][j]);
+      }
+    EXPECT_GT(norm, 0.) << c.first;
+  }
+}
+
+TEST(NSiteHamiltonian, PowersWithoutANonnegativeIntegerExponentThrow) {
+  for (const char* term : {"n(a)^0.5*n(b)", "n(a)^(-1)*n(b)", "n(a)^Q*n(b)", "2^n(a)*n(b)"}) {
+    Files f(three_site_group, "<HAMILTONIAN name=\"power\"><BASIS ref=\"fermion\"/>"
+            "<NSITETERM sites=\"a b c\">" + std::string(term) + "</NSITETERM></HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);
+    p["GRAPH"] = "g"; p["MODEL"] = "power"; p["Q"] = 1.5;
+    const std::string error = build_error(p);
+    EXPECT_NE(error.find("nonnegative integer"), std::string::npos) << term << ": " << error;
+  }
+}
+
+// Dividing by a site operator used to act as multiplying by it: 1/n(i) gave
+// n(i). Site, bond and n-site terms refuse it; numbers and parameters still
+// divide.
+TEST(NSiteHamiltonian, DivisionBySiteOperatorsThrows) {
+  const char* g = "<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
+                  "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>";
+  const std::vector<std::string> refused = {
+    "<SITETERM site=\"i\">1/n(i)</SITETERM>",
+    "<SITETERM site=\"i\">(1/n(i))^2</SITETERM>",
+    "<BONDTERM source=\"i\" target=\"j\">n(j)/n(i)</BONDTERM>",
+    "<BONDTERM source=\"i\" target=\"j\">K*(n(j)/n(i))</BONDTERM>",
+    "<NSITETERM sites=\"a b c\">1/n(a)*n(b)</NSITETERM>",
+    "<NSITETERM sites=\"a b c\">n(b)/n(a)</NSITETERM>",
+    "<NSITETERM sites=\"a b c\">K*(n(b)/n(a))</NSITETERM>",
+    "<NSITETERM sites=\"a b c\">(1/n(a) + 1)*n(b)</NSITETERM>",
+    "<NSITETERM sites=\"a b c\">(1/n(a))^2*n(b)</NSITETERM>",
+    "<NSITETERM sites=\"a b c\">n(a)/(n(b)*n(c))</NSITETERM>",
+  };
+  for (const std::string& term : refused) {
+    Files f(g, "<HAMILTONIAN name=\"divide\"><BASIS ref=\"fermion\"/>" + term + "</HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);
+    p["GRAPH"] = "g"; p["MODEL"] = "divide"; p["K"] = 2;
+    const std::string error = build_error(p);
+    EXPECT_NE(error.find("Cannot divide by a site operator"), std::string::npos) << term << ": " << error;
+  }
+
+  const std::vector<std::pair<std::string, std::string> > allowed = {
+    {"<SITETERM site=\"i\">n(i)/2</SITETERM>", "<SITETERM site=\"i\">0.5*n(i)</SITETERM>"},
+    {"<SITETERM site=\"i\">n(i)/J</SITETERM>", "<SITETERM site=\"i\">0.25*n(i)</SITETERM>"},
+    {"<BONDTERM source=\"i\" target=\"j\">n(i)*n(j)/J</BONDTERM>",
+     "<BONDTERM source=\"i\" target=\"j\">0.25*n(i)*n(j)</BONDTERM>"},
+    {"<NSITETERM sites=\"a b c\">n(a)*n(b)/J</NSITETERM>", "<NSITETERM sites=\"a b c\">0.25*n(a)*n(b)</NSITETERM>"},
+    {"<NSITETERM sites=\"a b c\">n(a)*n(b)*n(c)/2</NSITETERM>",
+     "<NSITETERM sites=\"a b c\">0.5*n(a)*n(b)*n(c)</NSITETERM>"},
+  };
+  for (const auto& c : allowed) {
+    Files f(g, "<HAMILTONIAN name=\"divide\"><BASIS ref=\"fermion\"/>" + c.first + "</HAMILTONIAN>"
+               "<HAMILTONIAN name=\"multiply\"><BASIS ref=\"fermion\"/>" + c.second + "</HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);
+    p["GRAPH"] = "g"; p["J"] = 4;
+    p["MODEL"] = "multiply";
+    const std::vector<double> expected = spectrum(p);
+    p["MODEL"] = "divide";
+    const std::vector<double> found = spectrum(p);
+    ASSERT_EQ(found.size(), expected.size()) << c.first;
+    for (std::size_t i = 0; i < expected.size(); ++i)
+      EXPECT_NEAR(found[i], expected[i], 1e-12) << c.first;
   }
 }
 
@@ -881,4 +986,25 @@ TEST(NSiteBoson, NoCutoffWarningForFermions) {
   testing::internal::CaptureStderr();
   spectrum(p);
   EXPECT_EQ(testing::internal::GetCapturedStderr(), "");
+}
+
+// A division inside a library operator used to be accepted and act as a
+// product, because the operator's simplified text had lost the "/".
+TEST(NSiteHamiltonian, DivisionInsideLibraryOperatorsThrows) {
+  const char* g = "<GRAPH name=\"g\" vertices=\"3\"><EDGE source=\"1\" target=\"2\"/>"
+                  "<NSITE><SITE id=\"1\"/><SITE id=\"2\"/><SITE id=\"3\"/></NSITE></GRAPH>";
+  const std::vector<std::pair<std::string, std::string> > refused = {
+    {"<SITEOPERATOR name=\"invn\" site=\"x\">1/n(x)</SITEOPERATOR>",
+     "<NSITETERM sites=\"a b c\">invn(a)*n(b)</NSITETERM>"},
+    {"<SITEOPERATOR name=\"invn\" site=\"x\">1/n(x)</SITEOPERATOR>", "<SITETERM site=\"i\">invn(i)</SITETERM>"},
+    {"<BONDOPERATOR name=\"ratio\" source=\"x\" target=\"y\">n(y)/n(x)</BONDOPERATOR>",
+     "<BONDTERM source=\"i\" target=\"j\">ratio(i,j)</BONDTERM>"},
+  };
+  for (const auto& c : refused) {
+    Files f(g, c.first + "<HAMILTONIAN name=\"divide\"><BASIS ref=\"fermion\"/>" + c.second + "</HAMILTONIAN>");
+    alps::Parameters p = sector(f.parms(), 2, 1);
+    p["GRAPH"] = "g"; p["MODEL"] = "divide";
+    const std::string error = build_error(p);
+    EXPECT_NE(error.find("Cannot divide by a site operator"), std::string::npos) << c.second << ": " << error;
+  }
 }

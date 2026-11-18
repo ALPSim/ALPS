@@ -40,15 +40,17 @@ jobs:
     needs:
     - check_version
     - build_sdist
-    runs-on: ${{ matrix.plat.os }}
+    # Fork pull requests, and every job while the repo variable IFT_RUNNERS is 'off',
+    # run on GitHub's machines instead of the IFT runner VMs.
+    runs-on: ${{ (matrix.plat.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.plat.os }}
     timeout-minutes: 120
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || '4' }}
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ matrix.plat.family == 'macos' && '2' || (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && '4' || '16' }}
     strategy:
       fail-fast: false
       matrix:
-        plat: ${{ fromJSON(inputs.full && '[{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"manylinux"},{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"musllinux"},{"os":"macos-15","target":"15.0","arch":"arm64","family":"macos"}]'
-          || '[{"os":"ubuntu-24.04","target":"","arch":"x86_64","family":"manylinux"}]') }}
+        plat: ${{ fromJSON(inputs.full && '[{"os":"ift-vm","target":"","arch":"x86_64","family":"manylinux"},{"os":"ift-vm","target":"","arch":"x86_64","family":"musllinux"},{"os":"macos-15","target":"15.0","arch":"arm64","family":"macos"}]'
+          || '[{"os":"ift-vm","target":"","arch":"x86_64","family":"manylinux"}]') }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
@@ -63,14 +65,6 @@ jobs:
       shell: bash
       run: |
         python -c 'import json, os; m=json.load(open(".github/dependencies.json")); f=open(os.environ["GITHUB_ENV"], "a"); print("CIBW_MANYLINUX_X86_64_IMAGE="+m["manylinux_image"], file=f); print("CIBW_MUSLLINUX_X86_64_IMAGE="+m["musllinux_image"], file=f)'
-    - name: Restore wheel Boost build
-      id: boost-cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: _build/boost-install
-        key: wheel-boost-manylinux-${{ hashFiles('.github/dependencies.json', '.github/scripts/build-boost.sh',
-          '.github/scripts/prepare_dependencies.py') }}
-      if: matrix.plat.family == 'manylinux'
     - name: Restore compiler cache
       id: compiler-cache
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -90,20 +84,9 @@ jobs:
       env:
         CIBW_ARCHS: ${{ matrix.plat.arch }}
         CIBW_BUILD: ${{ inputs.full && 'cp3{10,11,12,13,14}' || 'cp3{10,11,12,14}' }}-${{ matrix.plat.family == 'macos' && 'macosx' || matrix.plat.family }}*
-        CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/boost-install:/project/_build/boost-install"
-          --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache" --volume "${{ github.workspace
-          }}/_build/wheel-reports:/project/_build/wheel-reports"'
+        CIBW_CONTAINER_ENGINE: 'docker; create_args: --volume "${{ github.workspace }}/_build/ccache:/project/_build/ccache"
+          --volume "${{ github.workspace }}/_build/wheel-reports:/project/_build/wheel-reports"'
         MACOSX_DEPLOYMENT_TARGET: ${{ matrix.plat.target }}
-    - name: Save completed Boost build even if wheel tests fail
-      if: >-
-        always() && !cancelled() && matrix.plat.family == 'manylinux' &&
-        steps.boost-cache.outcome == 'success' && steps.boost-cache.outputs.cache-hit != 'true' &&
-        hashFiles('_build/boost-install/.alps-boost-sha256') != '' &&
-        (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
-      uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: _build/boost-install
-        key: ${{ steps.boost-cache.outputs.cache-primary-key }}
     - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       if: runner.os == 'macOS'
       with:
@@ -180,12 +163,12 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ (matrix.os == 'ift-vm' && (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off')) && 'ubuntu-24.04' || matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(inputs.full && '["ubuntu-24.04","macos-15","macos-26"]' || '["ubuntu-24.04"]') }}
+        os: ${{ fromJSON(inputs.full && '["ift-vm","macos-15","macos-26"]' || '["ift-vm"]') }}
         python: ${{ fromJSON(inputs.full && '["3.10","3.11","3.12","3.13","3.14"]' || '["3.10","3.11","3.12","3.14"]') }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -224,7 +207,7 @@ jobs:
     needs:
     - check_version
     - build_wheels
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 30
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

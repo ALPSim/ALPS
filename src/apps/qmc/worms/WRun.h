@@ -170,7 +170,6 @@ private:
                                     
   // measurements
   void make_meas();
-  void measure_green();
   inline void measure() {
     if(--measurements_done==0) {
       measurements_done=skip_measurements;
@@ -230,6 +229,7 @@ private:
   std::vector<double> site_hamiltonian(const site_descriptor&);
   void print_hamiltonian();
   void create_observables();
+  void measure_winding_numbers();
 
   //- data ---------------------------------------------------
 
@@ -270,7 +270,6 @@ private:
   { return kinks[i].empty() ?  initial_state_[i] : kinks[i].rbegin()->state(); }
   kinkvector_type kinks;
   std::vector<state_type> initial_state_;
-  std::valarray<double> green;
   std::vector<int> chain_number;
     
   alps::property_map<alps::bond_type_t,graph_type,int>::type bond_type;

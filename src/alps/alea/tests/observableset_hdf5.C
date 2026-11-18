@@ -18,6 +18,7 @@
 #include <boost/random.hpp>
 #include "observable_checks.hpp"
 #include <cmath>
+#include <valarray>
 
 namespace {
 void expect_measurements(const alps::ObservableSet& measurement)
@@ -118,5 +119,34 @@ TEST(ObservableSetHdf5, RestoresEmptyAndPopulatedSets)
         alps::hdf5::archive archive(filename, "r");
         archive["/test/0/result"] >> measurement;
         expect_measurements(measurement);
+    }
+}
+
+TEST(ObservableSetHdf5, MergesRunWithoutMeasurements)
+{
+    alps::testing::TemporaryDirectory temporary;
+    const auto filename = (temporary.path() / "runs.h5").string();
+    {
+        alps::ObservableSet measured, unmeasured;
+        measured << alps::RealVectorObservable("Vector");
+        unmeasured << alps::RealVectorObservable("Vector");
+        const std::valarray<double> value = {1., 2.};
+        for (int i = 0; i < 16; ++i) measured["Vector"] << value;
+        alps::hdf5::archive archive(filename, "a");
+        archive["/measured"] << measured;
+        archive["/unmeasured"] << unmeasured;
+    }
+    for (bool unmeasured_first : {false, true}) {
+        SCOPED_TRACE(::testing::Message() << "unmeasured first " << unmeasured_first);
+        alps::ObservableSet measured, unmeasured;
+        alps::hdf5::archive archive(filename, "r");
+        archive["/measured"] >> measured;
+        archive["/unmeasured"] >> unmeasured;
+        alps::ObservableSet& merged = unmeasured_first ? unmeasured : measured;
+        merged << (unmeasured_first ? measured : unmeasured);
+        const alps::RealVectorObsevaluator vector = merged["Vector"];
+        EXPECT_EQ(vector.count(), 16u);
+        ASSERT_EQ(vector.mean().size(), 2u);
+        EXPECT_DOUBLE_EQ(vector.mean()[1], 2.);
     }
 }

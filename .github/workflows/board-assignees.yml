@@ -1,0 +1,41 @@
+name: Board assignees
+
+# Assigns each issue on the project board to the person whose name its card
+# is under, so dropping a card from Bucket onto a name assigns that person
+# (.github/scripts/board_assignees.py). Workflows can't be triggered by changes
+# on an organization project, so this runs on a schedule. Unassigning yourself
+# on the issue sticks; moving a card back to Bucket leaves its assignees as
+# they are.
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Only print what would change
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: board-assignees
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # BOARD_TOKEN reads the org project (GITHUB_TOKEN can't); GITHUB_TOKEN
+      # assigns, since BOARD_TOKEN only reads this repository.
+      - name: Assign issues to their card's owner
+        env:
+          BOARD_TOKEN: ${{ secrets.BOARD_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+        run: python .github/scripts/board_assignees.py

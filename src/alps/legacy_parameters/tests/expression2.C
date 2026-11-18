@@ -38,3 +38,24 @@ TEST(ExpressionSimplification, CombinesLikeTermsAndPreservesValues) {
     EXPECT_EQ(rendered.str(), canonical[i]);
   }
 }
+
+// Simplifying used to turn x/(2*y) into 2*x*y, and printing 1/x gave x. The
+// model code prints simplified terms and parses them again, so both the value
+// and the printed text must keep the division.
+TEST(ExpressionSimplification, KeepsDivisionBySymbols) {
+  alps::Parameters params;
+  params["x"] = 3;
+  params["y"] = 5;
+  for (const char *input : {"1/x", "y/x", "x/(2*y)", "x*x/(2*y)", "-1/x", "y/2"}) {
+    SCOPED_TRACE(input);
+    alps::Expression expression(input);
+    const auto expected = alps::evaluate<double>(expression, alps::ParameterEvaluator(params));
+    expression.simplify();
+    EXPECT_DOUBLE_EQ(alps::evaluate<double>(expression, alps::ParameterEvaluator(params)), expected);
+    std::ostringstream rendered;
+    rendered << expression;
+    alps::Expression reparsed(rendered.str());
+    EXPECT_DOUBLE_EQ(alps::evaluate<double>(reparsed, alps::ParameterEvaluator(params)), expected)
+        << rendered.str();
+  }
+}

@@ -47,7 +47,8 @@ Worker::Worker(const ProcessList& w,const alps::Parameters&  myparms,int32_t n)
     engine_ptr(rng_factory.create(rng_name())),
     random(*engine_ptr, boost::uniform_real<>()),
     random_01(*engine_ptr, boost::uniform_real<>()),
-    started(false)
+    started(false),
+    done_(false)
 {
   if( node<0||(node>=(int32_t)where.size()&&where.size()!=0))
     boost::throw_exception(std::logic_error("illegal node number " + boost::lexical_cast<std::string,int>(n)+" in Worker::Worker"));
@@ -68,7 +69,8 @@ Worker::Worker(const alps::Parameters&  myparms,int32_t n)
     engine_ptr(rng_factory.create(rng_name())),
     random(*engine_ptr, boost::uniform_real<>()),
     random_01(*engine_ptr, boost::uniform_real<>()),
-    started(false)
+    started(false),
+    done_(false)
 {
   if( node<0||(node>=(int32_t)where.size()&&where.size()!=0))
     boost::throw_exception(std::logic_error("illegal node number " + boost::lexical_cast<std::string,int>(n)+" in Worker::Worker"));
@@ -197,6 +199,7 @@ void Worker::start_worker()
   if(node==0) 
     info.start(work_phase()); // store info about starting
   started=true;
+  done_=false;
   start(); // user start
   // TODO: start all slaves
   // TODO: start thread
@@ -204,9 +207,16 @@ void Worker::start_worker()
 
                 
 // do some work
+// A run stops stepping once its work is done, so it performs the same number
+// of steps however often the scheduler asks whether the task is finished. It
+// resumes only if it is started again or its parameters change.
 void Worker::run()
 {
-  if(started)
+  if (!started || done_)
+    return;
+  if (work_done() >= 1.)
+    done_ = true;
+  else
     dostep();
 }
 
@@ -329,6 +339,7 @@ std::string Worker::work_phase()
 
 void Worker::set_parameters(const alps::Parameters& p)
 {
+  done_=false; // more work may have been asked for, for example a larger SWEEPS
   for (Parameters::const_iterator it = p.begin(); it != p.end(); ++it) {
     if(it->key() != "SEED" && 
       !same_values(simplify_value(parms[it->key()],parms),simplify_value(it->value(),p),1e-6)) {

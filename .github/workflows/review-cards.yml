@@ -8,7 +8,8 @@ name: PR cards
 #
 # pull_request_target so PRs from forks get the token too. The script always
 # comes from the default branch; the PR's code is never checked out. Reviews on
-# fork PRs get no secrets, so the schedule catches those.
+# fork PRs get no secrets, so review-cards-forks.yml updates the cards after
+# this run finishes; the schedule catches anything that misses.
 on:
   pull_request_target:
     types: [opened, edited, reopened, closed, ready_for_review, review_requested, review_request_removed]
@@ -50,11 +51,11 @@ jobs:
           GH_TOKEN: ${{ secrets.BOARD_TOKEN }}
           PR: ${{ github.event.pull_request.number || inputs.pr }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
-        # Reviews on fork PRs get no secrets; the schedule picks those up, so
-        # skip quietly instead of showing a red check on the contributor's PR.
+        # Reviews on fork PRs get no secrets; review-cards-forks.yml picks those
+        # up, so skip quietly instead of showing a red check on the contributor's PR.
         run: |
           if [ -z "$GH_TOKEN" ]; then
-            echo "No BOARD_TOKEN for this event; the scheduled run will update the cards."
+            echo "No BOARD_TOKEN for this event; PR cards after fork reviews will update the cards."
             exit 0
           fi
           python .github/scripts/review_cards.py

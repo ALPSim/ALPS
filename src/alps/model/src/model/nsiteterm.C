@@ -66,6 +66,7 @@ void alps::NSiteOperator::substitute_operators(const ModelLibrary& m, const Para
 {
   OperatorSubstitution<std::complex<double> > subs(m, p, sites());
   Expression e(term());
+  refuse_operator_in_denominator(e, sites());
   e.partial_evaluate(subs);
   e.simplify();
   // Print with full precision: lexical_cast uses the stream default of 6

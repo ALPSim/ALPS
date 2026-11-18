@@ -55,7 +55,35 @@ def model_library(hamiltonian_xml):
     return "<MODELS>\n" + body + "\n" + hamiltonian_xml + "\n</MODELS>\n"
 
 
-def run(lattice_xml, hamiltonian_xml, params, program="fulldiag", keep=False):
+def run_mps(lattice_xml, hamiltonian_xml, params):
+    """dmrg with SAVE_MPS=1 (ALPSim/ALPS#216): (energies, MPS).
+
+    MPS: dict with "tensors" (numpy [left bond, local state, right bond], one
+    per site), "site_type" and "site_basis" ({type: {quantum number: values of
+    each local state}}), as written to /mps of the task's HDF5 file."""
+    out = {}
+    energies = run(lattice_xml, hamiltonian_xml, dict(params, SAVE_MPS=1), program="dmrg", _h5=out)
+    return energies, out
+
+
+def _read_mps(path):
+    import h5py
+    import numpy as np
+    with h5py.File(path, "r") as f:
+        if "mps" not in f:
+            raise RuntimeError("no /mps in the dmrg output: this dmrg lacks SAVE_MPS (ALPSim/ALPS#216)")
+        m = f["mps"]
+        tensors = []
+        for i in range(int(m["length"][()])):
+            t = m["tensors"][str(i)]
+            tensors.append(np.array(t["values"]).reshape(tuple(int(n) for n in np.array(t["shape"]))))
+        basis = {int(t): {q: np.array(m["site_basis"][t][q]) for q in m["site_basis"][t]}
+                 for t in m["site_basis"]}
+        return {"tensors": tensors, "site_type": [int(t) for t in np.array(m["site_type"])],
+                "site_basis": basis, "center": int(m["center"][()])}
+
+
+def run(lattice_xml, hamiltonian_xml, params, program="fulldiag", keep=False, _h5=None):
     tmp = tempfile.mkdtemp(prefix="ms_")
     try:
         with open(os.path.join(tmp, "lattices.xml"), "w") as f:
@@ -81,6 +109,8 @@ def run(lattice_xml, hamiltonian_xml, params, program="fulldiag", keep=False):
         if not files:
             raise RuntimeError("no task output:\n" + out.stdout[-800:] + out.stderr[-800:])
         xml = open(os.path.join(tmp, files[0])).read()
+        if _h5 is not None:
+            _h5.update(_read_mps(os.path.join(tmp, files[0].replace(".out.xml", ".out.h5"))))
         return sorted(float(x) for x in _E.findall(xml))
     finally:
         if not keep:

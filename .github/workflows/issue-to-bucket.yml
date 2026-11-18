@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   bucket:
@@ -26,3 +27,19 @@ jobs:
           # Project 5, its Owner field and the Bucket option, by ID so renames don't break this.
           gh project item-edit --id "$item" --project-id PVT_kwDOClreF84BpeQ0 \
             --field-id PVTSSF_lADOClreF84BpeQ0zhn8nwk --single-select-option-id 478ea68c
+
+      # P0 (most urgent) to P3 (least urgent). New issues default to P2 unless
+      # one of P0-P3 was already set when the issue was opened.
+      - name: Default the priority label to P2
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          HAS_PRIORITY: ${{ contains(github.event.issue.labels.*.name, 'P0') || contains(github.event.issue.labels.*.name, 'P1') || contains(github.event.issue.labels.*.name, 'P2') || contains(github.event.issue.labels.*.name, 'P3') }}
+        run: |
+          if [ "$HAS_PRIORITY" = "true" ]; then
+            echo "#$ISSUE_NUMBER already has a priority label"
+            exit 0
+          fi
+          gh issue edit "$ISSUE_NUMBER" --add-label P2

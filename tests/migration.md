@@ -65,8 +65,7 @@ independently of the current reader.
 
 ## Coverage boundaries
 
-Timing programs and Alea `dumpbench.C` are benchmarks. The unregistered
-`binned_data.C` refers to an absent header and provides no coverage. Remaining
+Alea `dumpbench.C` is a benchmark. Remaining
 manual MPI drivers and restart gaps are described in [the MPI guide](mpi.md).
 Component guides record [HDF5 schema/type coverage](../src/alps/hdf5/tests/README.md),
 [parameter contracts](../src/alps/params/tests/README.md) and

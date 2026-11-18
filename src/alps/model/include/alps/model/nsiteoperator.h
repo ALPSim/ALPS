@@ -42,9 +42,11 @@
 #include <alps/parameter.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
+#include <cmath>
 #include <limits>
 #include <map>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -156,6 +158,20 @@ private:
   }
 
   mutable std::unordered_map<std::size_t, row_type> rows_;
+};
+
+
+// One product of an n-site term, coef * O_0 * O_1 * ... * O_{n-1} in role
+// order, with the fermion sign of that reordering folded into coef. ops[r] is
+// the string of site operators on role r, e.g. "cdag_up(i)*c_up(i)", or empty
+// for the identity.
+template <class T>
+struct nsite_product
+{
+  T coef;
+  std::vector<std::string> ops;
+  bool odd;           // an odd number of fermionic operators
+  std::string text;   // the product as written, for error messages
 };
 
 
@@ -285,6 +301,11 @@ public:
 
   void substitute_operators(const ModelLibrary& m, const Parameters& p = Parameters());
 
+  // The term as a sum of products, one string of site operators per role.
+  template <class T, class I>
+  std::vector<nsite_product<T> > split(const std::vector<SiteBasisDescriptor<I> >& bases,
+                                       const Parameters& p = Parameters()) const;
+
   // Local table on sites with the given site bases (one per role).
   template <class T, class I>
   nsite_matrix<T> matrix(const std::vector<SiteBasisDescriptor<I> >& bases,
@@ -321,8 +342,83 @@ private:
 };
 
 
+// Writes each power X^k of a factor that contains a site operator as the
+// product X*X*...*X (k factors, 1 for k = 0) and multiplies out, so
+// (A+B)^2 becomes A*A + A*B + B*A + B*B with the operators in their written
+// order. The splitter replaces each site operator by a sign, so a power left
+// in place would apply the operator once and raise only the sign. The
+// exponent must evaluate to a nonnegative integer. Parentheses around a
+// single product, which flatten() keeps, are removed so that powers inside
+// them are found: ((n(i)^2 + n(j))^2). Expects a flattened expression
+// without divisions by site operators.
+template <class T>
+expression::Expression<T> expand_site_powers(const expression::Expression<T>& ex,
+                                             const std::vector<std::string>& sites, const Parameters& p)
+{
+  typedef expression::Term<T> term_type;
+  typedef typename term_type::factor_iterator factor_iterator;
+  std::vector<term_type> todo(ex.terms().first, ex.terms().second);
+  expression::Expression<T> result;
+  // a term is either kept or rewritten; a rewritten term is flattened and
+  // checked again
+  for (std::size_t t = 0; t < todo.size(); ++t) {
+    const term_type term = todo[t];
+    factor_iterator found = term.factors().second;
+    for (factor_iterator f = term.factors().first; f != term.factors().second && found == term.factors().second; ++f)
+      if (!f->unit_power() || f->is_single_term())
+        for (std::size_t r = 0; r < sites.size(); ++r)
+          if (f->depends_on(sites[r]))
+            found = f;
+    if (found == term.factors().second) {
+      result += term;
+      continue;
+    }
+
+    term_type rewritten;
+    if (term.is_negative())
+      rewritten.negate();
+    if (found->unit_power()) {
+      // (X) with X a single product: splice in the factors of X
+      for (factor_iterator f = term.factors().first; f != term.factors().second; ++f) {
+        if (f != found) {
+          rewritten *= *f;
+          continue;
+        }
+        const term_type inner = f->term();
+        if (inner.is_negative())
+          rewritten.negate();
+        for (factor_iterator g = inner.factors().first; g != inner.factors().second; ++g)
+          rewritten *= *g;
+      }
+    } else {
+      expression::ParameterEvaluator<T> eval(p);
+      expression::SimpleFactor<T> exponent(found->power());
+      double k = -1.;
+      if (exponent.can_evaluate(eval, true))
+        k = expression::evaluate_helper<T>::real(exponent.value(eval, true));
+      if (k < 0. || k != std::floor(k))
+        throw std::runtime_error("n-site term " + expression_text(term)
+          + ": the power " + expression_text(*found) + " of a site operator needs an exponent "
+          "that is a nonnegative integer");
+      for (factor_iterator f = term.factors().first; f != term.factors().second; ++f) {
+        if (f != found)
+          rewritten *= *f;
+        else if (k == 0.)
+          rewritten *= expression::Factor<T>(T(1.));
+        else
+          for (int i = 0; i < int(k); ++i)
+            rewritten *= expression::Factor<T>(static_cast<const expression::SimpleFactor<T>&>(*f));
+      }
+    }
+    expression::Expression<T> flat(rewritten);
+    flat.flatten();
+    todo.insert(todo.end(), flat.terms().first, flat.terms().second);
+  }
+  return result;
+}
+
 template <class T, class I>
-nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >& b, const Parameters& p) const
+std::vector<nsite_product<T> > NSiteOperator::split(const std::vector<SiteBasisDescriptor<I> >& b, const Parameters& p) const
 {
   typedef typename expression_value_type_traits<T>::value_type value_type;
 
@@ -331,6 +427,59 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
     boost::throw_exception(std::runtime_error("n-site term with " + boost::lexical_cast<std::string>(n)
       + " sites applied to a group of " + boost::lexical_cast<std::string>(b.size()) + " sites"));
 
+  std::vector<SiteBasisDescriptor<I> > bases(b);
+  Parameters parms(p);
+  for (std::size_t r = 0; r < n; ++r)
+    bases[r].set_parameters(p);
+  for (std::size_t r = 0; r < n; ++r)
+    parms.copy_undefined(bases[r].get_parameters());
+
+  // parse expression and store it as sum of terms
+  expression::Expression<value_type> parsed(term());
+  parsed.flatten();
+  refuse_operator_in_denominator(parsed, sites());
+  expression::Expression<value_type> ex = expand_site_powers(parsed, sites(), parms);
+  ex.simplify();
+  // expand_site_powers leaves no power of a site operator; a power that got
+  // through would be applied as the operator itself
+  for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit)
+    for (typename expression::Term<value_type>::factor_iterator f = tit->factors().first; f != tit->factors().second; ++f)
+      if (!f->unit_power())
+        for (std::size_t r = 0; r < n; ++r)
+          if (f->depends_on(sites()[r]))
+            throw std::runtime_error("n-site term: the power " + expression_text(*f)
+              + " of a site operator could not be expanded; write the product out, e.g. n(i)*n(i) for n(i)^2");
+
+  std::vector<nsite_product<T> > products;
+  for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
+    NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms, boost::lexical_cast<std::string>(*tit));
+    expression::Term<value_type> term(*tit);
+    term.partial_evaluate(splitter);
+    term.simplify();
+    if (!numeric::is_nonzero(term))
+      continue;
+    if (boost::is_arithmetic<T>::value || is_complex<T>::value)
+      if (!can_evaluate(boost::lexical_cast<std::string>(term)))
+        boost::throw_exception(std::runtime_error("Cannot evaluate expression " + boost::lexical_cast<std::string>(term)));
+    nsite_product<T> prod;
+    prod.coef = evaluate<T>(term);
+    if (!numeric::is_nonzero(prod.coef))
+      continue;
+    for (std::size_t r = 0; r < n; ++r)
+      prod.ops.push_back(splitter.used(r) ? expression_text(splitter.site_operators(r)) : std::string());
+    prod.odd = splitter.odd();
+    prod.text = expression_text(*tit);
+    products.push_back(prod);
+  }
+  return products;
+}
+
+template <class T, class I>
+nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >& b, const Parameters& p) const
+{
+  std::vector<nsite_product<T> > products = split<T>(b, p);
+
+  const std::size_t n = num_sites();
   std::vector<SiteBasisDescriptor<I> > bases(b);
   Parameters parms(p);
   for (std::size_t r = 0; r < n; ++r)
@@ -360,44 +509,20 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
     configurations *= mat.dims[r];
   }
 
-  // parse expression and store it as sum of terms
-  expression::Expression<value_type> ex(term());
-  ex.flatten();
-  ex.simplify();
-
   // single-site operators already built, by (role, operator string)
   std::map<std::pair<std::size_t, std::string>, int> built;
-  for (typename expression::Expression<value_type>::term_iterator tit = ex.terms().first; tit != ex.terms().second; ++tit) {
-    NSiteOperatorSplitter<I, value_type> splitter(bases, sites(), parms, boost::lexical_cast<std::string>(*tit));
-    expression::Term<value_type> term(*tit);
-    // The splitter replaces each site operator by a sign, so under a power
-    // the operator would be applied once and only the sign raised.
-    for (typename expression::Term<value_type>::factor_iterator f = term.factors().first; f != term.factors().second; ++f)
-      if (!f->unit_power())
-        for (std::size_t r = 0; r < n; ++r)
-          if (f->depends_on(sites()[r]))
-            boost::throw_exception(std::runtime_error("n-site term: powers of site operators are not supported in "
-              + boost::lexical_cast<std::string>(*f) + "; write the product out, e.g. n(i)*n(i) for n(i)^2"));
-    term.partial_evaluate(splitter);
-    term.simplify();
-    if (!numeric::is_nonzero(term))
-      continue;
-    if (boost::is_arithmetic<T>::value || is_complex<T>::value)
-      if (!can_evaluate(boost::lexical_cast<std::string>(term)))
-        boost::throw_exception(std::runtime_error("Cannot evaluate expression " + boost::lexical_cast<std::string>(term)));
+  for (std::size_t t = 0; t < products.size(); ++t) {
     typename nsite_matrix<T>::product_type prod;
-    prod.coef = evaluate<T>(term);
-    if (!numeric::is_nonzero(prod.coef))
-      continue;
+    prod.coef = products[t].coef;
 
     bool zero = false;
     std::map<std::string, half_integer<int> > change;   // total over the roles
     for (std::size_t r = 0; r < n && !zero; ++r) {
-      if (!splitter.used(r)) {
+      if (products[t].ops[r].empty()) {
         prod.ops.push_back(-1);
         continue;
       }
-      std::pair<std::size_t, std::string> key(r, boost::lexical_cast<std::string>(splitter.site_operators(r)));
+      std::pair<std::size_t, std::string> key(r, products[t].ops[r]);
       std::map<std::pair<std::size_t, std::string>, int>::const_iterator it = built.find(key);
       if (it == built.end()) {
         multi_array<std::pair<T, bool>, 2> m = SiteOperator(key.second, sites()[r]).template matrix<T, I>(bases[r], parms);
@@ -423,15 +548,48 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
     }
     if (zero)
       continue;
-    if (splitter.odd())
+    if (products[t].odd)
       boost::throw_exception(std::runtime_error("n-site term contains an odd number of fermion operators: "
-                                                + boost::lexical_cast<std::string>(*tit)));
+                                                + products[t].text));
     for (std::map<std::string, half_integer<int> >::const_iterator c = change.begin(); c != change.end(); ++c)
       if (c->second != half_integer<int>(0))
         mat.nonconserved.insert(c->first);
     mat.products.push_back(prod);
   }
   return mat;
+}
+
+// A term that changes a quantum number whose range is capped by a parameter
+// (e.g. a boson N with max="Nmax") gives results that depend on that cutoff:
+// matrix elements that would leave the range are dropped. Returns a warning
+// saying so, or an empty string. Fixed ranges (fermion 0..1) and ranges set by
+// another quantum number (Sz in -S..S) are physical, not a cutoff.
+template <class I>
+std::string nsite_cutoff_warning(const std::set<std::string>& nonconserved,
+                                 const std::vector<SiteBasisDescriptor<I> >& bases, const Parameters& p)
+{
+  for (std::size_t r = 0; r < bases.size(); ++r) {
+    SiteBasisDescriptor<I> b = bases[r];
+    b.set_parameters(p);
+    for (std::size_t q = 0; q < b.size(); ++q) {
+      if (!nonconserved.count(b[q].name()) || can_evaluate(b[q].max_expression()))
+        continue;
+      bool set_by_quantumnumber = false;
+      for (std::size_t o = 0; o < b.size(); ++o)
+        if (o != q && b[q].depends_on(b[o].name()))
+          set_by_quantumnumber = true;
+      if (set_by_quantumnumber)
+        continue;
+      std::ostringstream msg;
+      msg << "Warning: an <NSITETERM> changes the total " << b[q].name()
+          << ", whose local range is cut off at " << b[q].name() << " <= "
+          << b[q].max_expression() << " = " << b[q].max() << ". Matrix elements "
+          << "that would exceed the cutoff are dropped, so results depend on it; "
+          << "check convergence in " << b[q].max_expression() << ".\n";
+      return msg.str();
+    }
+  }
+  return std::string();
 }
 
 } // namespace alps

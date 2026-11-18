@@ -1,0 +1,23 @@
+1. ladders, dmrg vs fulldiag (ground state)
+  2x2 demo K=0.5 (1,1)                         max|dE| 5.3e-15  E0 -3.3597011665
+  2x3 open U=8 K=0.7 (2,2)                     max|dE| 7.1e-15  E0 -5.3669606044
+  2x3 open U=8 K=0.7 (3,2)                     max|dE| 2.2e-13  E0 -3.4189803903
+  2x3 periodic U=8 K=0.9 (3,2)                 max|dE| 1.4e-14  E0 -5.0117188128
+  2x4 open U=8 K=1.1 (3,2)                     max|dE| 4.9e-14  E0 -7.8586086456
+  2x4 open U=8 K=1.1 (3,3)                     max|dE| 3.9e-13  E0 -5.6019556305
+2. random 2-body and 3-body fermion terms vs dense JW (E0, E1)
+  6 sites, sector (1,1)                        max|dE| 4.4e-15  E0 -6.3249583371
+  6 sites, sector (2,1)                        max|dE| 1.8e-14  E0 -9.3268308972
+  6 sites, sector (3,2)                        max|dE| 8.9e-15  E0 -15.9045105124
+  6 sites, sector (3,3)                        max|dE| 7.1e-15  E0 -17.4538532381
+  6 sites, sector (4,2)                        max|dE| 1.1e-14  E0 -16.7924619556
+3. bosonic Moore-Read, dmrg vs dense (E0, gap)
+  N=6 2S=4 (Moore-Read ground state)           max|dE| 1.1e-13  E0 -7.7e-16 gap 5.703896
+  N=8 2S=6 (Moore-Read ground state)           max|dE| 2.7e-12  E0 -1.6e-15 gap 5.025037
+4. 2x6 ladder, dmrg vs sparsediag
+  2x6 open U=8 K=1.1 (4,4), 400 states         max|dE| 3.2e-09  E0 -13.3426010596  sparsediag 10s dmrg 7s
+5. refusals and warnings
+  N-changing term, N conserved, refused        yes
+  N-changing term, N not conserved, refused    yes
+  Nmax cutoff warning in fulldiag              yes
+ALL OK

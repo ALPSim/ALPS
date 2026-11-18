@@ -30,7 +30,6 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/archive/tmpdir.hpp>
 #include <boost/foreach.hpp>
 
 #include <optional>
@@ -105,6 +104,9 @@ private:
   void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
   void build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
                             std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami);
+  void build_nsite_operator(std::vector<alps::nsite_product<value_type> > const& products,
+                                alps::NSiteOperator const& op, alps::nsite_group const& p, dmtk::Hami<value_type > &this_hami);
+  std::vector<alps::nsite_product<value_type> > split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p);
  
   void save_results(); 
   void extract_mps();
@@ -120,6 +122,8 @@ private:
   dmtk::Hami<value_type > hami;
   dmtk::Lattice lattice;
   std::vector<dmtk::Block<value_type > > site_block;
+  // site operators (by site type and name) whose matrix is zero
+  std::map<std::pair<int,std::string>,bool> zero_site_operator;
   
   int num_eigenvalues;
   int verbose;
@@ -136,6 +140,10 @@ private:
   // Failed runs keep their files and a rerun resumes from them
   dmrg_checkpoint::Cache checkpoint;
   bool in_sweeps = false;
+
+  // MEASURE_CORRELATIONS: for each value, the factor of each measured term
+  // that adds up to it
+  std::vector<std::vector<value_type> > correlation_terms;
 
   // SAVE_MPS: final state as tensors [left bond][local state][right bond]
   bool save_mps;
@@ -181,7 +189,7 @@ template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const std::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
   , alps::graph_helper<>(parms) 
-  , alps::model_helper<>(*this,parms)
+  , alps::model_helper<>(*this,parms,false,true)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
   init();
@@ -191,7 +199,7 @@ template<class value_type>
 DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
   : alps::scheduler::Task(w,p) 
   , alps::graph_helper<>(parms) 
-  , alps::model_helper<>(*this,parms)
+  , alps::model_helper<>(*this,parms,false,true)
   , alps::EigenvectorMeasurements<value_type >(*this)
 {
   init();
@@ -333,6 +341,25 @@ std::string simplify_name(const SiteOp &op)
   return term;
 }
 
+// Removes the terms that change a conserved quantum number. Their expectation
+// value is 0, and an additive dmtk operator, which takes one dqn for all its
+// terms, gives a wrong value for the others when it lies in a block of
+// several sites.
+template <class value_type>
+void drop_qn_changing_terms(dmtk::Hami<value_type>& h)
+{
+  dmtk::Hami<value_type> kept(h);
+  kept.clear();
+  for (std::size_t k = 0; k < h.size(); ++k) {
+    dmtk::QN dqn;
+    for (std::size_t i = 0; i < h[k].size(); ++i)
+      dqn += h[k][i].dqn;
+    if (dqn == dmtk::QN())
+      kept += h[k];
+  }
+  h = kept;
+}
+
 template<class value_type>
 void DMRGTask<value_type>::use_temporary_directory()
 {
@@ -426,6 +453,23 @@ void DMRGTask<value_type>::dostep()
   for (bond_iterator it = bonds().first ; it != bonds().second ; ++it)
     build_bond_operator(bond_term(bond_type(*it)),*it, hami);
 
+  // create n-site terms on the n-site groups. The split depends only on the
+  // group type and the site types, so do it once per combination.
+  typedef std::pair<unsigned int,std::vector<int> > nsite_group_key;
+  std::map<nsite_group_key,std::vector<alps::nsite_product<value_type> > > split_cache;
+  for (std::size_t q = 0; q < nsite_groups().size(); ++q) {
+    alps::nsite_group const& p = nsite_groups()[q];
+    alps::NSiteOperator term = model().nsite_term(p.type);
+    if (term.term().empty())
+      continue;
+    nsite_group_key key(p.type,std::vector<int>());
+    for (std::size_t r = 0; r < p.sites.size(); ++r)
+      key.second.push_back(site_type(p.sites[r]));
+    if (split_cache.find(key) == split_cache.end())
+      split_cache[key] = split_nsite_operator(term, p);
+    build_nsite_operator(split_cache[key], term, p, hami);
+  }
+
 //-------------------------------------------------------------
 
   if (verbose)
@@ -438,27 +482,26 @@ void DMRGTask<value_type>::dostep()
   dmtk::Hami<value_type > meas_terms(hami);
   meas_terms.clear();
 
-  // calculate local measurements
+  // calculate local measurements: one entry per site or bond holding the sum
+  // of all terms of the operator with their coefficients (issue #304)
   BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     if (has_bond_operator(ex.second)) {
       int i=0;
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
         dmtk::Hami<value_type > meas;
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas;
+        drop_qn_changing_terms(meas);
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(i)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit) {
         dmtk::Hami<value_type > meas;
         build_site_operator(make_site_term(ex.second),*sit,meas);
-        dmtk::Term<value_type > tmeas = meas[0];
-//        tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
-//        meas_terms += dmtk::BasicOp<value_type >(tmeas);
-        meas_terms += tmeas[0];
+        drop_qn_changing_terms(meas);
+        meas.set_name((ex.first+"["+boost::lexical_cast<std::string>(*sit)+"]").c_str());
+        meas_terms += dmtk::BasicOp<value_type >(meas);
       }
     }
   }
@@ -470,6 +513,7 @@ void DMRGTask<value_type>::dostep()
     if (has_bond_operator(ex.second)) {
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit)
         build_bond_operator(get_bond_operator(ex.second,parms),*bit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
       meas_terms += dmtk::BasicOp<value_type >(meas);
@@ -477,6 +521,7 @@ void DMRGTask<value_type>::dostep()
     else {
       for (site_iterator sit=sites().first; sit!=sites().second;++sit)
         build_site_operator(make_site_term(ex.second),*sit,meas);
+      drop_qn_changing_terms(meas);
       meas.set_name(ex.first.c_str());
 //meas.set_name(meas.description().c_str());
 //      meas_terms += dmtk::BasicOp<value_type >(meas);
@@ -491,6 +536,7 @@ void DMRGTask<value_type>::dostep()
   std::vector<unsigned int> distance_mult = distance_multiplicities();
   
   // calculate correlations
+  correlation_terms.clear();
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     alps::SiteOperator ops1 = make_site_term(ex.second.first+"(i)");
@@ -501,27 +547,31 @@ void DMRGTask<value_type>::dostep()
     for (site_iterator sit1=this->sites().first; sit1!=this->sites().second ; ++sit1)
       for (site_iterator sit2=this->sites().first; sit2!=this->sites().second ; ++sit2) {
         std::size_t d = distance(*sit1,*sit2);
-        // loop over all terms in ops1 and ops2 as above where we loop over all terms in ops
-        // build terms like above
+        // Each term is measured on its own and save_results adds them up
+        // (issue #304). One additive operator for the pair would lose the
+        // terms that change the quantum numbers, such as S+S+ in Sx:Sx, when
+        // the pair lies in one block.
+        dmtk::Hami<value_type > meas;
+        std::vector<value_type> factors;
         if (*sit1 == *sit2) {
-          // create matrices for combined term
-          // use ops
-          dmtk::Hami<value_type > meas;
+          // a bare site operator: the factor carries its coefficient
           build_site_operator(ops,*sit1,meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += tmeas[0];
+          drop_qn_changing_terms(meas);
+          for (std::size_t k = 0; k < meas.size(); ++k) {
+            meas_terms += meas[k][0];
+            factors.push_back(meas[k].coef()/double(distance_mult[d]));
+          }
         }
         else {
-          // use ops1 and ops2
-          dmtk::Hami<value_type > meas;
+          // a product term is measured with its coefficient
           build_2site_operator(std::make_pair(ops1,ops2),std::pair<int,int>(*sit1,*sit2),meas);
-          dmtk::Term<value_type > tmeas = meas[0];
-          tmeas *= 1./double(distance_mult[d]);
-//          tmeas.set_name((ex.first+"["+boost::lexical_cast<std::string>(d)+"]").c_str());
-          meas_terms += dmtk::BasicOp<value_type >(tmeas);
+          meas *= 1./double(distance_mult[d]);
+          for (std::size_t k = 0; k < meas.size(); ++k) {
+            meas_terms += dmtk::BasicOp<value_type >(meas[k]);
+            factors.push_back(1.);
+          }
         }
+        correlation_terms.push_back(factors);
     }
   }
   typename dmtk::Hami<value_type>::iterator iter;
@@ -658,11 +708,17 @@ DMRGTask<value_type>::save_results()
   }
   
   // correlations
+  std::size_t term_index = 0;
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     std::vector<value_type> av;
     for (int i=0; i<num_distances();++i){
-      cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
-      av.push_back(real(iter++->value()));   
+      value_type sum = 0;
+      BOOST_FOREACH (value_type factor, correlation_terms[term_index]) {
+        cout << iter->name() << " " << iter->description() << " " << iter->value() << endl;
+        sum += factor*iter++->value();
+      }
+      ++term_index;
+      av.push_back(real(sum));
     }
     this->correlation_values[ex.first].push_back(av);
   }
@@ -965,4 +1021,70 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
   }
 }
 
+// Split an n-site term into products of site operators (nsiteoperator.h).
+// A term with an odd number of fermion operators is refused (building the
+// local table checks it), and so is a term that changes the total of any
+// quantum number, conserved or not: dmrg gives wrong energies for those.
+template<class value_type>
+std::vector<alps::nsite_product<value_type> >
+DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::nsite_group const& p)
+{
+  std::vector<alps::SiteBasisDescriptor<short> > bases;
+  for (std::size_t r = 0; r < p.sites.size(); ++r)
+    bases.push_back(basis().site_basis(site_type(p.sites[r])));
+  alps::nsite_matrix<value_type> mat = op.template matrix<value_type>(bases,parms);
+  if (!mat.nonconserved.empty())
+    throw std::runtime_error("<NSITETERM> on n-site groups of type "
+      + std::to_string(p.type) + " changes the total " + *mat.nonconserved.begin()
+      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag.");
+  return op.template split<value_type>(bases,parms);
+}
 
+// One dmtk term per product of the n-site term: coef * O_0 * O_1 * ... in
+// role order, one site operator per site of the group. dmtk reorders the
+// operators by site with the fermion sign (Hami::reorder_terms). A constant
+// (a product without site operators) is the identity on the first site.
+template<class value_type>
+void
+DMRGTask<value_type>::build_nsite_operator(std::vector<alps::nsite_product<value_type> > const& products,
+                                               alps::NSiteOperator const& op, alps::nsite_group const& p, dmtk::Hami<value_type > &this_hami)
+{
+  for (std::size_t t = 0; t < products.size(); ++t) {
+    dmtk::Term<value_type > real_t;
+    bool zero = false;
+    for (std::size_t r = 0; r < p.sites.size() && !zero; ++r) {
+      if (products[t].ops[r].empty())
+        continue;
+      int type = site_type(p.sites[r]);
+      alps::SiteOperator siteop(products[t].ops[r],op.sites()[r]);
+      std::string name = simplify_name(siteop);
+      std::pair<int,std::string> key(type,name);
+      if (zero_site_operator.find(key) == zero_site_operator.end()) {
+        boost::multi_array<value_type,2> m = alps::get_matrix(value_type(),siteop,site_basis(type),parms,true);
+        bool z = true;
+        for (std::size_t i = 0; i < m.shape()[0] && z; ++i)
+          for (std::size_t j = 0; j < m.shape()[1] && z; ++j)
+            if (std::abs(m[i][j]) > 1.e-10)
+              z = false;
+        zero_site_operator[key] = z;
+      }
+      if (zero_site_operator[key]) {
+        zero = true;
+        break;
+      }
+      dmtk::BasicOp<value_type > op1 = create_site_operator(name,siteop,type);
+      op1.set_site(p.sites[r]);
+      real_t = real_t*op1;
+    }
+    if (zero)
+      continue;
+    if (real_t.size() == 0) {
+      alps::SiteOperator ident("1",op.sites()[0]);
+      dmtk::BasicOp<value_type > op1 = create_site_operator(simplify_name(ident),ident,site_type(p.sites[0]));
+      op1.set_site(p.sites[0]);
+      real_t = op1;
+    }
+    real_t.coef() = products[t].coef;
+    this_hami += real_t;
+  }
+}

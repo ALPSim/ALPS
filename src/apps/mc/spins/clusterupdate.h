@@ -21,6 +21,7 @@
 #include <boost/random/uniform_int.hpp>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 template <class Graph, class MomentMap, class RNG, class CouplingMap, class SpinFactorMap>
 update_info_type cluster_update(const Graph& graph, MomentMap& moment,
@@ -70,7 +71,12 @@ update_info_type cluster_update(const Graph& graph, MomentMap& moment,
       } 
     }
     // step iii.b)
-    update_info.m2_ += moment[vertex].project(update)*spinfactor_[vertex];
+    // The projections of the spins of a cluster on the reflection axis all
+    // have the same sign across ferromagnetic bonds and alternate across
+    // antiferromagnetic ones. The sum of the absolute values is therefore the
+    // uniform moment of a ferromagnetic cluster and the staggered moment of an
+    // antiferromagnetic one.
+    update_info.m2_ += std::abs(moment[vertex].project(update))*spinfactor_[vertex];
     moment[vertex].update(update);
   }
   return update_info;
