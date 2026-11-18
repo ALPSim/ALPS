@@ -40,11 +40,11 @@ ising_sim::ising_sim(parameters_type const & params)
     for(int i = 0; i < length; ++i)
         spins[i] = (random() < 0.5 ? 1 : -1);
     measurements
-        << alps::accumulators::FullBinningAccumulator<double>("Energy")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetization")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
-        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Correlations")
+        << alps::alea::observable("Energy")
+        << alps::alea::observable("Magnetization")
+        << alps::alea::observable("Magnetization^2")
+        << alps::alea::observable("Magnetization^4")
+        << alps::alea::observable("Correlations")
     ;
 }
 
@@ -100,10 +100,7 @@ bool ising_sim::run(boost::function<bool ()> const & stop_callback) {
 
 // implement a nice keys(m) function
 ising_sim::result_names_type ising_sim::result_names() const {
-    result_names_type names;
-    for(accumulators_type::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
-        names.push_back(it->first);
-    return names;
+    return measurements.names();
 }
 
 ising_sim::result_names_type ising_sim::unsaved_result_names() const {
@@ -115,10 +112,7 @@ ising_sim::results_type ising_sim::collect_results() const {
 }
 
 ising_sim::results_type ising_sim::collect_results(result_names_type const & names) const {
-    results_type partial_results;
-    for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-        partial_results.insert(*it, measurements[*it].result());
-    return partial_results;
+    return measurements.results().select(names);
 }
 
 void ising_sim::save(std::filesystem::path const & filename) const {

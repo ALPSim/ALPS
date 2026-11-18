@@ -137,7 +137,7 @@ NB_MODULE(pyngsbase_c, m) {
             nb::rv_policy::reference_internal)
         .def_prop_ro(
             "measurements",
-            [](alps::mcbase & self) -> alps::accumulators::accumulator_set & {
+            [](alps::mcbase & self) -> alps::alea::observable_set & {
                 return self.*(&alps::mcbase_members::measurements);
             },
             nb::rv_policy::reference_internal)

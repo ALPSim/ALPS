@@ -921,12 +921,12 @@ def test_samples_that_do_not_fit_are_value_errors():
 
     vector = ngs.createRealVectorObservable("Correlations")
     vector << np.array([1.0, 2.0])
-    with pytest.raises(ValueError, match="same size") as raised:
+    with pytest.raises(ValueError, match="2 components, not 3") as raised:
         vector << np.array([1.0, 2.0, 3.0])
     assert "\n" not in str(raised.value)
 
     scalar = ngs.createRealObservable("Energy")
-    with pytest.raises(ValueError, match="cannot convert") as raised:
+    with pytest.raises(ValueError, match="1 component, not 2") as raised:
         scalar << np.array([1.0, 2.0])
     assert "\n" not in str(raised.value)
 

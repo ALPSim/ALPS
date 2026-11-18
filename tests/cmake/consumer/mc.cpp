@@ -10,7 +10,7 @@ namespace {
 class counting_sim : public alps::mcbase {
   public:
     explicit counting_sim(parameters_type const & parameters) : alps::mcbase(parameters) {
-        measurements << alps::accumulators::FullBinningAccumulator<double>("x");
+        measurements << alps::alea::observable("x");
     }
     void update() override { value_ = random(); }
     void measure() override { measurements["x"] << value_; ++sweeps_; }
@@ -35,6 +35,6 @@ int main() {
     std::remove("mc_contract.h5");
     const alps::results_type<counting_sim>::type reloaded = alps::collect_results(restored);
     if (results["x"].count() != 1024 || reloaded["x"].count() != 1024
-        || reloaded["x"].mean<double>() != results["x"].mean<double>())
+        || reloaded["x"].mean() != results["x"].mean())
         throw std::runtime_error("mc checkpoint round trip failed");
 }

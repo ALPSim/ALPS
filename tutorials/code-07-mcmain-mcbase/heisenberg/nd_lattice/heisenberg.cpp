@@ -39,11 +39,11 @@ heisenberg_sim::heisenberg_sim(parameters_type const & parms, std::size_t seed_o
         spins[*site_it] = random_spin();
     }
     measurements
-        << alps::accumulators::FullBinningAccumulator<double>("Energy")
-        << alps::accumulators::FullBinningAccumulator<std::vector<double> >("Magnetization")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^2")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetization^4")
-        << alps::accumulators::FullBinningAccumulator<double>("Magnetic Susceptibility")
+        << alps::alea::observable("Energy")
+        << alps::alea::observable("Magnetization")
+        << alps::alea::observable("Magnetization^2")
+        << alps::alea::observable("Magnetization^4")
+        << alps::alea::observable("Magnetic Susceptibility")
     ;
 }
 

@@ -21,18 +21,23 @@
 #include <alps/config.h>
 #include <boost/cstdint.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <limits>
 #include <stdexcept>
 #include <vector>
 
 namespace {
 
-// The covariance matrix of a vector observable's mean, from its bins.
+// The covariance matrix of a vector observable's mean, from its bins. A run
+// too short for two bins has none; it is stored as NaN.
 boost::numeric::ublas::matrix<double> covariance(alps::alea::observable_result const &result, bool)
 {
-  std::vector<std::vector<double> > const values = result.covariance();
-  boost::numeric::ublas::matrix<double> cov(values.size(), values.size());
-  for (std::size_t k = 0; k < values.size(); ++k)
-    for (std::size_t l = 0; l < values.size(); ++l) cov(k, l) = values[k][l];
+  std::size_t const n = result.size();
+  std::vector<std::vector<double> > const values = result.bin_means().size() < 2
+    ? std::vector<std::vector<double> >(n, std::vector<double>(n, std::numeric_limits<double>::quiet_NaN()))
+    : result.covariance();
+  boost::numeric::ublas::matrix<double> cov(n, n);
+  for (std::size_t k = 0; k < n; ++k)
+    for (std::size_t l = 0; l < n; ++l) cov(k, l) = values[k][l];
   return cov;
 }
 

@@ -18,7 +18,7 @@
 #include <alps/hdf5/vector.hpp>
 
 #include <alps/params.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/ngs/numeric.hpp>
 
 #include <boost/function.hpp>
@@ -32,13 +32,13 @@
 
 class ising_sim {
 
-    typedef alps::accumulators::accumulator_set accumulators_type;
+    typedef alps::alea::observable_set accumulators_type;
 
     public:
 
         typedef alps::params parameters_type;
         typedef std::vector<std::string> result_names_type;
-        typedef alps::accumulators::result_set results_type;
+        typedef alps::alea::result_set results_type;
 
         ising_sim(parameters_type const & params);
 

@@ -451,6 +451,11 @@ class Hdf5Loader:
                                 bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
                                 scale *=2
                             d.y = bins2
+                        elif "binning" in children and "error" in self.h5f.list_children(path+'/binning'):
+                            # ALPS 3.1 stores the analysis itself: the error of the
+                            # mean from bins of 1, 2, 4, ... samples.
+                            if verbose: log("Loading"+ m)
+                            d.y = np.array(self.h5f[path+'/binning/error'])
                         elif "error_bins" in children:
                             # ALPSCore's accumulators store the analysis itself: the
                             # error estimate at each binning level, from bins of one sample.

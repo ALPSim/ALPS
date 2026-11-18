@@ -5,7 +5,7 @@
 #include "ising.hpp"
 
 #include <alps/hdf5/archive.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 
 #include <algorithm>
 
@@ -13,7 +13,7 @@ ising_sim::ising_sim(parameters_type const & parameters,
                      std::size_t seed_offset)
     : alps::mcbase(parameters, seed_offset),
       total_sweeps_(static_cast<std::size_t>(parameters["SWEEPS"].as<int>())) {
-    measurements << alps::accumulators::FullBinningAccumulator<double>("Magnetization");
+    measurements << alps::alea::observable("Magnetization");
 }
 
 // The exported constructor defines the parameters before constructing.

@@ -27,24 +27,25 @@ def test_historical_checkpoint_remains_readable():
         archive.set_context("/rng")
         rng.load(archive)
         np.testing.assert_array_equal([rng() for _ in range(8)], archive["/expected_rng"])
+        # The observables of a run of an earlier version are read as results.
+        # They cannot be continued, and loading them to do so says that.
         observables = ngs.observables()
-        observables.load(archive, "/observables")
-        for name, path, mean, next_sample in (
-            ("Energy", "/result", 31.5, 64.),
-            ("Correlations", "/vector_result", [31.5, 63.], np.array([64., 128.])),
+        with pytest.raises(RuntimeError, match="start a new run"):
+            observables.load(archive, "/observables")
+        assert len(observables) == 0
+        measured = ngs.results()
+        measured.load(archive, "/observables")
+        for name, path, mean in (
+            ("Energy", "/result", 31.5),
+            ("Correlations", "/vector_result", [31.5, 63.]),
         ):
             restored = ngs.result()
             archive.set_context(path)
             restored.load(archive)
-            measured = ngs.observable2result(observables[name])
-            for value in (restored, measured):
+            for value in (restored, measured[name]):
                 assert value.count == 64
                 np.testing.assert_array_equal(value.mean, mean)
                 np.testing.assert_array_equal(value.error, archive[path + "/mean/error"])
-            observables[name] << next_sample
-            continued = ngs.observable2result(observables[name])
-            assert continued.count == 65
-            np.testing.assert_array_equal(continued.mean, np.array(mean) * 64 / 63)
 
 
 def result(vector=False, offset=0):

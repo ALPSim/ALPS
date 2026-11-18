@@ -27,84 +27,93 @@
  * DEALINGS IN THE SOFTWARE.                                                       *
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-// pyngsobservable_c: pyalps.ngs.observable, an accumulator of ALPSCore's
-// accumulators library (alps::accumulators::accumulator_wrapper).
+// pyngsobservable_c: pyalps.ngs.observable, an observable of
+// <alps/alea/observables.hpp> (alps::alea::accumulator).
+
 #define PY_ARRAY_UNIQUE_SYMBOL pyngsobservable_PyArrayHandle
+
 #include <alps/hdf5/archive.hpp>
 #include "accumulator_handles.hpp"
 #include "archive_savable.hpp"
+
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
-#include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 namespace nb = nanobind;
+
 #include <cstdint>
 #include <exception>
-#include <memory>
 #include <string>
 #include <vector>
-namespace acc = alps::accumulators;
+
+namespace alea = alps::alea;
+
 namespace {
+
 // Appends a sample. One that does not fit the observable, such as a vector of
-// another size, is a ValueError, without the C++ stack trace that ALPSCore's
-// messages end with.
-template <typename T> void append_sample(acc::accumulator_wrapper & self, T const & sample) {
+// another size, is a ValueError.
+void append_sample(alea::accumulator & self, double const * values, std::size_t size) {
     try {
-        self << sample;
+        self.add(values, size);
     } catch (std::exception const & error) {
-        std::string message = error.what();
-        throw nb::value_error(message.substr(0, message.find("\nIn ")).c_str());
+        throw nb::value_error(error.what());
     }
 }
-void observable_append(acc::accumulator_wrapper & self, nb::object const & data) {
+
+void observable_append(alea::accumulator & self, nb::object const & data) {
     if (nb::isinstance<nb::int_>(data) || nb::isinstance<nb::float_>(data)) {
-        append_sample(self, nb::cast<double>(data));
+        double const value = nb::cast<double>(data);
+        append_sample(self, &value, 1);
         return;
     }
-    std::vector<double> values;
     try {
         auto array = nb::cast<nb::ndarray<double const, nb::c_contig>>(data);
-        values.assign(array.data(), array.data() + array.size());
+        append_sample(self, array.data(), array.size());
     } catch (nb::cast_error const &) {
         throw nb::type_error("observable samples must be numeric scalars or contiguous float64 arrays");
     }
-    append_sample(self, values);
 }
-void observable_load(acc::accumulator_wrapper & self, alps::hdf5::archive & ar, std::string const & path) {
-    std::string current = ar.get_context();
-    ar.set_context(path);
-    try {
-        self.load(ar);
-    } catch (...) {
-        ar.set_context(current);
-        throw;
-    }
-    ar.set_context(current);
+
+// Replaces the measurements of `self` by those stored at `path`, for every
+// reference to the observable.
+void observable_load(alea::accumulator & self, alps::hdf5::archive & ar, std::string const & path) {
+    alea::observable_set const loaded = pyalps::load_at<alea::observable_set>(ar, path);
+    pyalps::need(loaded, self.name());
+    alea::observable_set mine = pyalps::alone(self);
+    self.reset();
+    mine.merge(loaded.results().select({self.name()}));
 }
+
 } // namespace
+
 NB_MODULE(pyngsobservable_c, m) {
-    m.def("createRealObservable", &pyalps::full_binning<double>,
+    m.def("createRealObservable", &pyalps::real_observable,
           nb::arg("name"), nb::arg("binnum") = 0);
-    m.def("createRealVectorObservable", &pyalps::full_binning<std::vector<double>>,
+    m.def("createRealVectorObservable", &pyalps::real_vector_observable,
           nb::arg("name"), nb::arg("binnum") = 0);
-    nb::class_<acc::accumulator_wrapper>(m, "observable")
+
+    nb::class_<alea::accumulator>(m, "observable")
         .def("append",          &observable_append)
         // obs << value appends and returns obs so it chains. Bound in
         // C++ (rv_policy::none returns the existing wrapper) instead of
         // the former ngs.py monkeypatch onto the extension type, which
         // would break if nanobind ever marks its types immutable.
         .def("__lshift__",
-             [](acc::accumulator_wrapper & self, nb::object const & data) -> acc::accumulator_wrapper & {
+             [](alea::accumulator & self, nb::object const & data) -> alea::accumulator & {
                  observable_append(self, data);
                  return self;
              },
              nb::rv_policy::none)
-        .def_prop_ro("count", [](acc::accumulator_wrapper const & self) { return self.count(); })
-        .def("merge",           [](acc::accumulator_wrapper & self, acc::accumulator_wrapper const & other) {
-                                    self.merge(other);
+        .def_prop_ro("count", [](alea::accumulator const & self) { return self.count(); })
+        // Appends the measurements of an independent run.
+        .def("merge",           [](alea::accumulator & self, alea::accumulator const & other) {
+                                    alea::observable_set mine = pyalps::alone(self), theirs;
+                                    theirs.insert(self.name(), other);
+                                    mine.merge(theirs.results());
                                 })
-        .def("save",            [](acc::accumulator_wrapper const & self, alps::hdf5::archive & ar) {
-                                    self.save(ar);
+        // The state to continue from, as a set of this one observable.
+        .def("save",            [](alea::accumulator const & self, alps::hdf5::archive & ar) {
+                                    pyalps::alone(self).save(ar);
                                 })
         .def("load",            &observable_load)
         // Mirrors the legacy Boost.Python module, which (oddly, but

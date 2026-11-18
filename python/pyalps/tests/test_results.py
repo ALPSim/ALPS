@@ -1,4 +1,4 @@
-"""Arithmetic and functions of pyalps.ngs results, which wrap ALPSCore's.
+"""Arithmetic and functions of pyalps.ngs results.
 
 These checks replace those of the retired pyalps.pyngsaccumulator_c on the NGS
 accumulators. Constant samples give an independent analytic value.
@@ -81,3 +81,20 @@ def test_binning_analysis_reports_an_error_and_a_count():
     assert result.mean == pytest.approx(0.5, abs=1e-9)
     assert result.error > 0.0
     assert isinstance(str(result), str) and str(result)
+
+
+def test_saved_results_carry_their_binning_analysis(tmp_path):
+    import pyalps
+
+    values = np.linspace(0.0, 1.0, 1024)
+    results = ngs.results()
+    results["Energy"] = samples(values)
+    filename = str(tmp_path / "run.out.h5")
+    with pyalps.hdf5.archive(filename, "w") as archive:
+        ngs.saveResults(results, ngs.params({"L": 4}), archive, "/simulation/results")
+    (dataset,), = pyalps.loadBinningAnalysis([filename], what="Energy")
+    # Bins of one sample give the naive error; the levels with at least two bins follow.
+    assert dataset.y[0] == pytest.approx(np.std(values, ddof=1) / np.sqrt(1024), rel=1e-12)
+    assert len(dataset.y) == 10 and dataset.props["L"] == 4
+    (measurement,), = pyalps.loadMeasurements([filename], what="Energy")
+    assert measurement.y[0].mean == pytest.approx(0.5)
