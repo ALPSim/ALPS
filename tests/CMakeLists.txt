@@ -19,6 +19,7 @@
 add_subdirectory(integration/hdf5)
 add_subdirectory(integration/params)
 add_subdirectory(portability)
+add_subdirectory(statistics)
 if(ALPS_BUILD_APPLICATIONS)
   add_subdirectory(cli)
 endif()
