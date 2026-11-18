@@ -7,7 +7,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -64,26 +63,6 @@ averages alea(double phi) {
     return avg;
 }
 
-averages accumulators(double phi) {
-    namespace acc = alps::accumulators;
-    averages avg;
-    for (int r = 0; r < replicas; ++r) {
-        acc::accumulator_set set;
-        set << acc::NoBinningAccumulator<double>("simple") << acc::LogBinningAccumulator<double>("binned");
-        ar1 source(1000003u * r + 17, phi);
-        for (std::size_t t = 0; t < n; ++t) {
-            const double x = source();
-            set["simple"] << x;
-            set["binned"] << x;
-        }
-        const acc::result_set results(set);
-        avg.naive += results["simple"].error<double>() / replicas;
-        avg.error += results["binned"].error<double>() / replicas;
-        avg.tau += results["binned"].autocorrelation<double>() / replicas;
-    }
-    return avg;
-}
-
 averages aleav2(double phi) {
     averages avg;
     for (int r = 0; r < replicas; ++r) {
@@ -107,20 +86,12 @@ class Ar1KnownAnswers : public ::testing::TestWithParam<double> {};
 
 }
 
-// ALEA and alps::accumulators report the error from 128 to 255 bins: bins of
+// ALEA reports the error from 128 to 255 bins: bins of
 // 2048 samples here.
 TEST_P(Ar1KnownAnswers, Alea)
 {
     const double phi = GetParam();
     const averages avg = alea(phi);
-    expect_calibrated(avg, phi, 2048);
-    EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
-}
-
-TEST_P(Ar1KnownAnswers, Accumulators)
-{
-    const double phi = GetParam();
-    const averages avg = accumulators(phi);
     expect_calibrated(avg, phi, 2048);
     EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
 }

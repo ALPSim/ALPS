@@ -7,7 +7,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -44,22 +43,6 @@ TEST(Nonlinear, Alea)
     const alps::RealObsevaluator ea(a), eb(b);
     const alps::RealObsevaluator u = eb / (ea * ea);
     expect_ratio(u.mean(), u.error(), "ALEA");
-}
-
-TEST(Nonlinear, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    acc::accumulator_set set;
-    set << acc::FullBinningAccumulator<double>("A") << acc::FullBinningAccumulator<double>("B");
-    statistics_test::normal xi(424242);
-    for (std::size_t t = 0; t < n; ++t) {
-        const double x = xi();
-        set["A"] << x * x;
-        set["B"] << x * x * x * x;
-    }
-    const acc::result_set results(set);
-    const acc::result_wrapper u = results["B"] / (results["A"] * results["A"]);
-    expect_ratio(u.mean<double>(), u.error<double>(), "accumulators");
 }
 
 TEST(Nonlinear, AleaV2)

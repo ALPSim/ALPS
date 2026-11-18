@@ -2,10 +2,6 @@
 # ALPS::aleav2, ALEA v2: the ALEA library of the ALPS Core Libraries, copied from
 # ALPSCore. ALPS's own ALEA, the default, is in ../alea.
 # README.md records the source commit, the local changes and the license.
-if(NOT ALPS_HAVE_EIGEN)
-  return()
-endif()
-
 add_library(alps_aleav2
   src/autocorr.cpp
   src/batch.cpp
@@ -75,7 +71,9 @@ if(ALPS_ENABLE_MPI)
   # It includes alps/utilities/mpi.hpp, which only MPI builds install.
   target_sources(alps_aleav2 PUBLIC FILE_SET alea_headers FILES include/alps/alea/mpi.hpp)
 endif()
-alps_install_alpscore_component(alps_aleav2 aleav2)
+# ALPS::alps links it, so it is installed with the SDK targets in ../CMakeLists.txt.
+install(FILES COPYRIGHT.TXT LICENSE.TXT
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/aleav2" COMPONENT libraries)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

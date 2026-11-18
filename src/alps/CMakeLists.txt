@@ -122,18 +122,18 @@ target_sources(alps_configuration INTERFACE
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
-# Some components copied from ALPSCore need Eigen, which the rest of ALPS does
-# not. They are built only when Eigen 3.3 or newer is found. The lookup names no
-# version: Eigen 5's version file rejects a "3.3" request, and Eigen 3's rejects
-# a range reaching past 3.x. ALPSConfig.cmake repeats it for consumers.
-set_property(GLOBAL PROPERTY ALPS_EIGEN_COMPONENT_NAMES aleav2 gf)
-find_package(Eigen3 CONFIG QUIET)
-if(Eigen3_FOUND AND NOT Eigen3_VERSION VERSION_LESS 3.3)
-  set(ALPS_HAVE_EIGEN TRUE)
-else()
-  set(ALPS_HAVE_EIGEN FALSE)
-  message(STATUS "Eigen 3.3 or newer not found: ALPS::aleav2 and ALPS::gf are not built")
+# The statistics of Monte Carlo observables, ALPS::aleav2, need Eigen 3.3 or
+# newer, and ALPS::alps links them. The lookup names no version: Eigen 5's
+# version file rejects a "3.3" request, and Eigen 3's rejects a range reaching
+# past 3.x. ALPSConfig.cmake repeats it for consumers.
+# ALPS::gf has its own export and is asked for as a component.
+set_property(GLOBAL PROPERTY ALPS_EIGEN_COMPONENT_NAMES gf)
+# GLOBAL: include.mk is generated in another directory and flattens the target.
+find_package(Eigen3 CONFIG REQUIRED GLOBAL)
+if(Eigen3_VERSION VERSION_LESS 3.3)
+  message(FATAL_ERROR "ALPS requires Eigen 3.3 or newer; found ${Eigen3_VERSION}")
 endif()
+set(ALPS_HAVE_EIGEN TRUE)
 
 # Install a component copied from ALPSCore with its own export, ALPS<Name>Targets,
 # so that only consumers asking for it need Eigen, and with ALPSCore's notices.
@@ -173,10 +173,10 @@ foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plott
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
-                                  ALPS::xml ALPS::cli ALPS::accumulators ALPS::mc)
+                                  ALPS::xml ALPS::cli ALPS::aleav2 ALPS::mc)
 
 target_link_libraries(alps_headers INTERFACE alps_configuration
-  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::accumulators;ALPS::mc;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::aleav2;ALPS::mc;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
 if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
@@ -184,7 +184,7 @@ endif()
 # The one list of SDK targets. ALPSConfig.cmake derives its component names and
 # runtime targets from it, so adding a module here is the only edit needed.
 set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
-                     alps_xml alps_cli alps_accumulators alps_mc alps_headers alps_configuration
+                     alps_xml alps_cli alps_aleav2 alps_accumulators alps_mc alps_headers alps_configuration
                      alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers)
 set(sdk_components "")
 set(sdk_runtime_targets "")

@@ -34,7 +34,7 @@ else()
     return()
   endif()
   if(EXPECT_APPLICATIONS)
-    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli accumulators mc)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli aleav2 mc)
     set(application_paths "")
     foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
       string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
@@ -42,15 +42,14 @@ else()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
   else()
-    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli accumulators mc numerics numeric_io numeric_xml)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli aleav2 mc numerics numeric_io numeric_xml)
   endif()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
   endif()
-  # ALEA v2 and GF are built only with Eigen; an SDK that installed one must provide it.
-  if(EXISTS "${ALPS_DIR}/ALPSAleav2Targets.cmake")
-    find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
-  endif()
+  # ALPSCore's accumulators: installed for codes outside ALPS, which does not link them.
+  find_package(ALPS CONFIG REQUIRED COMPONENTS accumulators)
+  # GF has its own export; an SDK that installed it must provide it.
   if(EXISTS "${ALPS_DIR}/ALPSGfTargets.cmake")
     find_package(ALPS CONFIG REQUIRED COMPONENTS gf)
   endif()
@@ -195,18 +194,17 @@ foreach(component IN ITEMS xml cli)
   add_component_contract(${component} ${component}.cpp
     "ALPS::alps|ALPS::params|ALPS::hdf5|HDF5::|MPI::|${numerical_dependencies}")
 endforeach()
-add_component_contract(accumulators accumulators.cpp
-  "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
 add_component_contract(mc mc.cpp "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
 add_contract(sdk main.cpp ALPS::alps)
 add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
-if(TARGET ALPS::aleav2)
-  add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
-  add_header_contract(aleav2)
-endif()
+add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
+add_header_contract(aleav2)
+# ALPSCore's accumulators: nothing in ALPS links them.
+add_component_contract(accumulators accumulators.cpp
+  "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
 add_header_contract(accumulators)
 # The Python compatibility headers of ALPS::mc need pyalps.
 add_header_contract(mc ONLY "^alps/(mc/[a-z0-9_]+|progress_callback)\\.hpp$")
@@ -254,13 +252,13 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract accumulators_contract mc_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract aleav2_contract mc_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   if(ALPS_LEGACY_API)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
       "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   endif()
-  foreach(component IN ITEMS aleav2 gf)
+  foreach(component IN ITEMS aleav2 gf accumulators)
     if(TARGET ALPS::${component})
       set_tests_properties(${component}_contract PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")

@@ -4,7 +4,6 @@
 // exact, so a change of normalisation in any library fails here first.
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -47,28 +46,6 @@ TEST(ExactMoments, Alea)
     EXPECT_EQ(vector.mean()[0], mean);
     EXPECT_EQ(vector.mean()[1], 2 * mean);
     EXPECT_DOUBLE_EQ(vector.error(0)[1], 2 * std::sqrt(42.0 / 49.0));
-}
-
-TEST(ExactMoments, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    acc::accumulator_set set;
-    set << acc::NoBinningAccumulator<double>("simple")
-        << acc::FullBinningAccumulator<double>("binned")
-        << acc::NoBinningAccumulator<std::vector<double> >("vector");
-    for (int t = 1; t <= n; ++t) {
-        set["simple"] << double(t);
-        set["binned"] << double(t);
-        set["vector"] << std::vector<double>({double(t), 2. * t});
-    }
-    const acc::result_set results(set);
-    EXPECT_EQ(results["simple"].count(), 8u);
-    EXPECT_EQ(results["simple"].mean<double>(), mean);
-    EXPECT_DOUBLE_EQ(results["simple"].error<double>(), naive_error);
-    EXPECT_EQ(results["binned"].count(), 8u);
-    EXPECT_EQ(results["binned"].mean<double>(), mean);
-    EXPECT_EQ(results["vector"].mean<std::vector<double> >()[1], 2 * mean);
-    EXPECT_DOUBLE_EQ(results["vector"].error<std::vector<double> >()[1], 2 * naive_error);
 }
 
 TEST(ExactMoments, AleaV2)

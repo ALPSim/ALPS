@@ -1,8 +1,9 @@
 # Result schema for Monte Carlo observables
 
-Status: draft for review. Nothing in the tree writes this schema yet. It is the
-target that the consolidation of the statistics code works towards, and the
-conformance tests in `tests/statistics` are written against it.
+Status: `alps::mcbase` simulations, the CT-HYB and CT-INT solvers and
+`pyalps.ngs` write this schema. The scheduler and parapack applications still
+write the layout of 3.0 and follow. The conformance tests in `tests/statistics`
+are written against it.
 
 ALPS has three implementations of Monte Carlo statistics today: the legacy
 classes behind `<alps/alea.h>`, `alps::accumulators`, and this directory. They
@@ -35,7 +36,7 @@ This file defines that layout and the rules the implementation follows.
    compatibility promise between minor releases.
 7. **One vocabulary.** The legacy class names are not kept as aliases.
 8. **Sizes are learned at the first sample,** as with legacy vector
-   observables.
+   observables, unless the declaration fixes them.
 
 ## Results
 
@@ -86,7 +87,8 @@ Restart state is stored beside the results, not inside them:
 
 - `/simulation/realizations/0/clones/<n>/checkpoint/<name>` for scheduler and
   parapack clones,
-- `/checkpoint/measurements/<name>` for `alps::mcbase` simulations.
+- `/simulation/realizations/0/clones/0/measurements/<name>` for `alps::mcbase`
+  simulations.
 
 Each group carries `@alea_state` (an integer version) and the accumulator type.
 A checkpoint is read only by the minor version that wrote it; anything else is

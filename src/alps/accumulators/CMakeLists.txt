@@ -1,7 +1,7 @@
 # Accumulators source ownership.
 # ALPS::accumulators: the accumulators library of the ALPS Core Libraries,
 # copied from ALPSCore. README.md records the source commit, the local changes
-# and the license.
+# and the license. Nothing in ALPS links it; it is kept for codes outside ALPS.
 add_library(alps_accumulators
   src/accumulator_wrapper.cpp
   src/mpi.cpp

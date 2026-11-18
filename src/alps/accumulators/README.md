@@ -6,14 +6,20 @@ with `<alps/accumulators.hpp>` and `<alps/accumulators/*.hpp>`. It is copied
 from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
 (2026-09-25).
 
-It replaces ALPS's own NGS accumulators (`alps::accumulator`,
-`<alps/ngs/accumulator/*.hpp>`) and the NGS observables over ALEA
-(`alps::mcobservables`, `<alps/ngs/mcobservables.hpp>`). ALEA itself,
-`<alps/alea.h>` in `alea/`, is unchanged.
+Nothing in ALPS uses it: ALPS measures with the observables of
+`<alps/alea/observables.hpp>` ([ALEA v2](../aleav2/README.md)). It is kept for
+codes outside ALPS that were written against ALPSCore's accumulators, and is
+built, installed and tested on its own so that it can be removed in one step
+later: this directory, its entries in `../CMakeLists.txt`, its consumer
+contract in `tests/cmake/consumer/`, its tests in CI, the
+`ALPS_ACCUMULATOR_*` macros in `cmake/config/config.hpp.in` and the four
+ALPSCore headers of `alps/numeric/` that only it uses (`boost_array_functions`,
+`check_size`, `rectangularize` and `scalar`).
 
 ## Building and linking
 
-`ALPS::accumulators` is always built and is part of `ALPS::alps`. It needs
+`ALPS::accumulators` is always built and installed with the SDK, but
+`ALPS::alps` does not link it; link it yourself. It needs
 `ALPS::utilities`, `ALPS::hdf5` and the headers of `ALPS::numerics`, but not
 BLAS or LAPACK:
 

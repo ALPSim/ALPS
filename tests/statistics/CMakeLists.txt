@@ -1,9 +1,6 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 # Statistics against exact values, on the same input for every statistics
-# library in the tree: ALEA, alps::accumulators and ALEA v2.
-if(NOT TARGET ALPS::aleav2)
-  return()
-endif()
+# library in the tree: ALEA and ALEA v2.
 
 foreach(name exact_moments same_stream ar1_known_answers coverage nonlinear vector_covariance
              merge signed_ratio hdf5_roundtrip frozen_files observables observables_files)

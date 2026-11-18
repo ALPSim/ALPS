@@ -7,20 +7,20 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/params.hpp>
 #include <alps/utilities/encode.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/parser/xslt_path.h>
 #include <alps/osiris/xdrdump.h>
 #include <alps/numeric/functional.hpp>
 #include <filesystem>
 #include <vector>
 
-template<class Accumulator> bool check_accumulator() {
-    alps::accumulators::accumulator_set measurements;
-    measurements << Accumulator("x");
+bool check_observable(alps::alea::observable const & declaration) {
+    alps::alea::observable_set measurements;
+    measurements << declaration;
     for (double value : {1.0, 2.0, 3.0})
         measurements["x"] << value;
-    const alps::accumulators::result_set results(measurements);
-    return results["x"].count() == 3 && results["x"].mean<double>() == 2.0;
+    const alps::alea::result_set results = measurements.results();
+    return results["x"].count() == 3 && results["x"].mean() == 2.0;
 }
 
 int main(int argc, char** argv) {
@@ -57,8 +57,6 @@ int main(int argc, char** argv) {
     input["/values"] >> actual;
     return actual == expected && checkpoint_value == 42 && int(parameters["count"]) == 3
         && (range.min)() == 2 && (range.max)() == 5
-        && check_accumulator<alps::accumulators::MeanAccumulator<double>>()
-        && check_accumulator<alps::accumulators::NoBinningAccumulator<double>>()
-        && check_accumulator<alps::accumulators::LogBinningAccumulator<double>>()
-        && check_accumulator<alps::accumulators::FullBinningAccumulator<double>>() ? 0 : 1;
+        && check_observable(alps::alea::observable("x"))
+        && check_observable(alps::alea::observable("x").without_bins()) ? 0 : 1;
 }

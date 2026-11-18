@@ -7,7 +7,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 #include <alps/hdf5.hpp>
 #include <alps/testing/temporary_directory.hpp>
 
@@ -86,35 +85,6 @@ TEST(Hdf5RoundTrip, AleaResume)
     for (unsigned bin = 0; bin < a.bin_number(); ++bin)
         EXPECT_EQ(a.bin_value(bin), b.bin_value(bin)) << "bin " << bin;
     EXPECT_EQ(whole.get<alps::SimpleRealObservable>("s").error(), resumed.get<alps::SimpleRealObservable>("s").error());
-}
-
-TEST(Hdf5RoundTrip, AccumulatorsResume)
-{
-    namespace acc = alps::accumulators;
-    alps::testing::TemporaryDirectory temporary;
-    const std::vector<double> values = statistics_test::ar1_series(9, 0.7, total);
-    acc::accumulator_set whole, part;
-    for (acc::accumulator_set * set : {&whole, &part})
-        *set << acc::NoBinningAccumulator<double>("simple") << acc::LogBinningAccumulator<double>("log")
-             << acc::FullBinningAccumulator<double>("full");
-    const char * names[] = {"simple", "log", "full"};
-    for (std::size_t t = 0; t < total; ++t)
-        for (const char * name : names) {
-            whole[name] << values[t];
-            if (t < first_part)
-                part[name] << values[t];
-        }
-    acc::accumulator_set resumed = reload(part, (temporary.path() / "accumulators.h5").string());
-    for (std::size_t t = first_part; t < total; ++t)
-        for (const char * name : names)
-            resumed[name] << values[t];
-    const acc::result_set a(whole), b(resumed);
-    for (const char * name : names) {
-        EXPECT_EQ(a[name].count(), b[name].count()) << name;
-        EXPECT_EQ(a[name].mean<double>(), b[name].mean<double>()) << name;
-        EXPECT_EQ(a[name].error<double>(), b[name].error<double>()) << name;
-    }
-    EXPECT_EQ(a["log"].autocorrelation<double>(), b["log"].autocorrelation<double>());
 }
 
 TEST(Hdf5RoundTrip, AleaV2Results)

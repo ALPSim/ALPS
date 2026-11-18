@@ -17,6 +17,8 @@ endif()
 block(SCOPE_FOR VARIABLES PROPAGATE ALPS_FOUND ALPS_NOT_FOUND_MESSAGE)
   find_dependency(Threads)
   find_dependency(Boost 1.76 CONFIG)
+  # No version: see src/alps/CMakeLists.txt.
+  find_dependency(Eigen3 CONFIG)
   set(HDF5_USE_STATIC_LIBRARIES "@HDF5_USE_STATIC_LIBRARIES@")
   find_dependency(HDF5 @ALPS_HDF5_MIN_VERSION@ MODULE COMPONENTS C)
   if(@ALPS_ENABLE_MPI@)
@@ -56,8 +58,7 @@ if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@
   set(ALPS_APPLICATION_TARGETS "@ALPS_APPLICATION_TARGETS@")
   set(ALPS_applications_FOUND TRUE)
 endif()
-# Components that need Eigen are built only when it was found, and each has its
-# own export, so only their consumers need Eigen. See src/alps/CMakeLists.txt.
+# ALPS::gf has its own export. See src/alps/CMakeLists.txt.
 set(_alps_eigen_built "@ALPS_EIGEN_COMPONENTS@")
 # ALPS::cthyb_segment links ALPS::gf, whose export must be loaded first.
 if("cthyb_segment" IN_LIST ALPS_FIND_COMPONENTS AND NOT "gf" IN_LIST ALPS_FIND_COMPONENTS)

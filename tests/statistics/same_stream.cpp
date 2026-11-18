@@ -8,7 +8,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -78,28 +77,6 @@ TEST_P(SameStream, Alea)
             sum += values[512 * b + i];
         ASSERT_NEAR(sum, binned.bin_value(b), 1e-11) << "bin " << b;
     }
-}
-
-TEST_P(SameStream, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    acc::accumulator_set set;
-    set << acc::NoBinningAccumulator<double>("simple") << acc::LogBinningAccumulator<double>("log")
-        << acc::FullBinningAccumulator<double>("full");
-    for (double value : values) {
-        set["simple"] << value;
-        set["log"] << value;
-        set["full"] << value;
-    }
-    const acc::result_set results(set);
-    for (const char * name : {"simple", "log", "full"}) {
-        EXPECT_EQ(results[name].count(), n) << name;
-        EXPECT_NEAR(results[name].mean<double>(), mean, 1e-13) << name;
-    }
-    expect_relative(binned_error(values, 1), results["simple"].error<double>(), 1e-11, "naive error");
-    // The default error is the textbook value from 128 to 255 bins: 256
-    // samples per bin here.
-    expect_relative(binned_error(values, 512), results["log"].error<double>(), 1e-10, "binned error");
 }
 
 TEST_P(SameStream, AleaV2)

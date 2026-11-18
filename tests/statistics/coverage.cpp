@@ -8,7 +8,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -29,29 +28,23 @@ struct counts {
 };
 
 struct coverage {
-    counts alea, accumulators, batch, autocorr;
+    counts alea, batch, autocorr;
 };
 
 coverage run(double phi) {
-    namespace acc = alps::accumulators;
     coverage result;
     for (int r = 0; r < streams; ++r) {
         alps::RealObservable alea("x");
-        acc::accumulator_set set;
-        set << acc::LogBinningAccumulator<double>("x");
         alps::alea::batch_acc<double> batch(1);
         alps::alea::autocorr_acc<double> autocorr(1);
         statistics_test::ar1 source(7919u * r + 1, phi);
         for (std::size_t t = 0; t < n; ++t) {
             const double x = source();
             alea << x;
-            set["x"] << x;
             batch << x;
             autocorr << x;
         }
         result.alea.add(alea.mean(), alea.error());
-        const acc::result_set results(set);
-        result.accumulators.add(results["x"].mean<double>(), results["x"].error<double>());
         const alps::alea::batch_result<double> batch_result = batch.finalize();
         result.batch.add(batch_result.mean()[0], batch_result.stderror()[0]);
         const alps::alea::autocorr_result<double> autocorr_result = autocorr.finalize();
@@ -75,7 +68,6 @@ TEST(Coverage, Uncorrelated)
 {
     const coverage result = run(0.0);
     expect_nominal(result.alea, "ALEA");
-    expect_nominal(result.accumulators, "accumulators");
     expect_nominal(result.batch, "ALEA v2 batch");
     expect_nominal(result.autocorr, "ALEA v2 autocorr");
 }
@@ -84,7 +76,6 @@ TEST(Coverage, Correlated)
 {
     const coverage result = run(0.9);
     expect_nominal(result.alea, "ALEA");
-    expect_nominal(result.accumulators, "accumulators");
     expect_nominal(result.batch, "ALEA v2 batch");
     expect_nominal(result.autocorr, "ALEA v2 autocorr");
 }

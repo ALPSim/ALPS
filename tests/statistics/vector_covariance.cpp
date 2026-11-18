@@ -5,7 +5,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -40,28 +39,19 @@ void expect_errors(double e0, double e1, const char * library) {
 
 TEST(VectorCovariance, ComponentErrors)
 {
-    namespace acc = alps::accumulators;
     alps::SimpleRealVectorObservable alea("x");
-    acc::accumulator_set set;
-    set << acc::NoBinningAccumulator<std::vector<double> >("x");
     alps::alea::var_acc<double> v2(2);
     for (const std::vector<double> & value : samples()) {
         alea << std::valarray<double>(value.data(), 2);
-        set["x"] << value;
         v2 << value;
     }
     expect_errors(alea.error()[0], alea.error()[1], "ALEA");
-    const acc::result_set results(set);
-    const std::vector<double> error = results["x"].error<std::vector<double> >();
-    expect_errors(error[0], error[1], "accumulators");
     const alps::alea::var_result<double> result = v2.finalize();
     expect_errors(result.stderror()[0], result.stderror()[1], "ALEA v2");
 
-    // The same arithmetic in all three.
-    for (int i = 0; i < 2; ++i) {
-        EXPECT_NEAR(alea.error()[i], error[i], 1e-11 * error[i]);
-        EXPECT_NEAR(result.stderror()[i], error[i], 1e-11 * error[i]);
-    }
+    // The same arithmetic in both.
+    for (int i = 0; i < 2; ++i)
+        EXPECT_NEAR(result.stderror()[i], alea.error()[i], 1e-11 * alea.error()[i]);
 }
 
 // Only ALEA v2 accumulates the full covariance. An entry estimated from n

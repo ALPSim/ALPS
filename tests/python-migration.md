@@ -22,7 +22,7 @@ to `python/pyalps/tests`):
 | Scalar/vector arithmetic, slices, copies and formatting | `mcdata_test.py`, `test_checkpoint_contracts.py`, `test_conversion_contracts.py`; historical values and correctness assertions replace rounded fingerprints. |
 | Observable conversions and timeseries | `test_conversion_contracts.py`, `test_binding_surface.py`; integer convergence arrays, scalar/vector timeseries from archives, array layout acceptance and analytic timeseries statistics. |
 | Signed-byte storage and rectangular/container conversions | `test_archive_dtypes.py`, `pyhdf5io_test.py`; dtype/shape assertions, exact large integers, empty-dictionary overwrite, readonly/Fortran/strided arrays. |
-| Additional max-num-binning math | `test_results.py::test_functions_match_numpy` checks constant-bin analytic values for scalar and vector results of ALPSCore's full-binning accumulators, which replaced the NGS accumulators. |
+| Additional max-num-binning math | `test_results.py::test_functions_match_numpy` checks constant-bin analytic values for scalar and vector results of the observables of `<alps/alea/observables.hpp>`, which replaced the NGS accumulators. |
 | Parameter values, ownership and persistence | `pyparams_test.py`, `test_binding_surface.py`, `test_checkpoint_contracts.py`; mutation, metadata, arrays and integer boundaries. |
 | Historical checkpoint reads and RNG continuation | `test_checkpoint_contracts.py::test_historical_checkpoint_remains_readable` consumes immutable native-serializer bytes; `test_legacy_results.py` exercises historical application archives. |
 

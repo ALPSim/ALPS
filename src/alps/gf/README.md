@@ -13,10 +13,8 @@ in namespace `alps::numerics`.
 ## Building and linking
 
 GF needs [Eigen](https://eigen.tuxfamily.org) 3.3 or newer, like
-[ALEA v2](../aleav2/README.md); it was tested with Eigen 5.0.1. ALPS builds `ALPS::gf`
-only when CMake finds Eigen, and reports otherwise during configuration. Set
-`CMAKE_DISABLE_FIND_PACKAGE_Eigen3=ON` to leave it out. An installed SDK
-provides it as a separate component:
+[ALEA v2](../aleav2/README.md); it was tested with Eigen 5.0.1. ALPS as a
+whole requires Eigen. An installed SDK provides GF as a separate component:
 
 ```cmake
 find_package(ALPS CONFIG REQUIRED COMPONENTS gf)

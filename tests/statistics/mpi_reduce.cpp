@@ -6,7 +6,6 @@
 
 #include <alps/alea.hpp>
 #include <alps/alea/observables.hpp>
-#include <alps/accumulators.hpp>
 #include <alps/utilities/mpi.hpp>
 
 #include <gtest/gtest.h>
@@ -180,33 +179,6 @@ TEST(MpiReduce, ObservableSet)
     // The bins of the reduced set line up for a function of results.
     const observable_result square = reduced["x"] * reduced["x"], expected_square = expected["x"] * expected["x"];
     EXPECT_NEAR(1.0, square.error() / expected_square.error(), 0.2);
-}
-
-TEST(MpiReduce, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    const slices s;
-    const auto fill_set = [&s](int rank) {
-        acc::accumulator_set set;
-        set << acc::LogBinningAccumulator<double>("x");
-        for (std::size_t t = 0; t < s.length; ++t)
-            set["x"] << s.begin(rank)[t];
-        return set;
-    };
-    acc::accumulator_set reduced = fill_set(s.comm.rank());
-    reduced["x"].collective_merge(s.comm, 0);
-    if (s.comm.rank() != 0)
-        return;
-
-    acc::accumulator_set serial = fill_set(0);
-    for (std::size_t rank = 1; rank < s.size; ++rank)
-        serial.merge(fill_set(rank));
-    const acc::result_set expected(serial), results(reduced);
-
-    EXPECT_EQ(results["x"].count(), s.length * s.size);
-    EXPECT_NEAR(results["x"].mean<double>(), s.mean, 1e-13);
-    EXPECT_NEAR(expected["x"].error<double>(), results["x"].error<double>(), 1e-10 * expected["x"].error<double>());
-    expect_calibrated(results["x"].error<double>(), s);
 }
 
 // A set's results are reduced in place unless something else holds them; then

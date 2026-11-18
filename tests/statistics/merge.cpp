@@ -7,7 +7,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea.hpp>
-#include <alps/accumulators.hpp>
 
 #include <gtest/gtest.h>
 
@@ -68,19 +67,6 @@ TEST_P(SplitMerge, Alea)
         EXPECT_NEAR(merged.mean(), mean, 0.1 * exact);
         EXPECT_NEAR(1.0, merged.error() / exact, 0.3);
     }
-}
-
-TEST_P(SplitMerge, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    acc::accumulator_set first, second;
-    first << acc::LogBinningAccumulator<double>("x");
-    second << acc::LogBinningAccumulator<double>("x");
-    for (std::size_t t = 0; t < n; ++t)
-        (t < GetParam() ? first : second)["x"] << values[t];
-    first.merge(second);
-    const acc::result_set results(first);
-    expect_whole({results["x"].count(), results["x"].mean<double>(), results["x"].error<double>()}, "accumulators");
 }
 
 TEST_P(SplitMerge, AleaV2Batch)
@@ -155,26 +141,6 @@ TEST(ManyRuns, Alea)
             pooled << run;
         }
         error += alps::RealObsevaluator(pooled["x"]).error() / replicas;
-    }
-    EXPECT_GE(error / pooled_error, floor_);
-    EXPECT_LE(error / pooled_error, 1.05);
-}
-
-TEST(ManyRuns, Accumulators)
-{
-    namespace acc = alps::accumulators;
-    double error = 0;
-    for (int r = 0; r < replicas; ++r) {
-        acc::accumulator_set pooled;
-        pooled << acc::LogBinningAccumulator<double>("x");
-        for (int k = 0; k < runs; ++k) {
-            acc::accumulator_set run;
-            run << acc::LogBinningAccumulator<double>("x");
-            for (double value : ar1_series(run_seed(r, k), slow, run_length))
-                run["x"] << value;
-            pooled.merge(run);
-        }
-        error += acc::result_set(pooled)["x"].error<double>() / replicas;
     }
     EXPECT_GE(error / pooled_error, floor_);
     EXPECT_LE(error / pooled_error, 1.05);
