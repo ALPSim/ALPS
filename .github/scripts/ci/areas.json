@@ -80,6 +80,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
+        "tests/statistics/**",
         "tests/support/**"
       ],
       "strip_comments": true
@@ -95,6 +96,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
+        "tests/statistics/**",
         "tests/support/**"
       ],
       "strip_comments": true
@@ -110,6 +112,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
+        "tests/statistics/**",
         "tests/support/**"
       ],
       "strip_comments": true
@@ -125,6 +128,7 @@
         "tests/cmake/**",
         "tests/integration/**",
         "tests/portability/**",
+        "tests/statistics/**",
         "tests/support/**"
       ],
       "strip_comments": true

@@ -610,10 +610,15 @@ jobs:
         cmake --preset sanitizers -B _build/sanitizers \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
-        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset params_hdf5 params_plain_group osiris_dump_serialization mc_runner
+        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset params_hdf5 params_plain_group osiris_dump_serialization mc_runner accumulators_save_load2
     - name: Run instrumented native tests
       run: ctest --test-dir _build/sanitizers -R '^[^.]+\.(runtime_correctness|hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|params_hdf5|params_plain_group|osiris_dump_serialization|mc_runner)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
+    # This test aborted once on master without a diagnosis. Repeating it under
+    # the sanitizers is meant to locate the fault, in the accumulators or below.
+    - name: Repeat the accumulator save and load test
+      run: ctest --test-dir _build/sanitizers -R '^[^.]+\.accumulators_save_load2\.'
+        --repeat until-fail:50 --output-on-failure --no-tests=error
     - name: Summarize sanitizer tests
       if: always()
       run: python .github/scripts/junit_summary.py _build/sanitizers/ctest.xml
