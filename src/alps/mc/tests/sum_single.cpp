@@ -23,8 +23,8 @@ class my_sim_type : public alps::mcbase {
             , total_count(params["COUNT"])
 
         {
-            measurements << alps::accumulators::FullBinningAccumulator<double>("SValue")
-                         << alps::accumulators::FullBinningAccumulator<std::vector<double> >("VValue");
+            measurements << alps::alea::observable("SValue")
+                         << alps::alea::observable("VValue");
         }
 
         // if not compiled with mpi alps::mpi::communicator does not exists, 
@@ -33,8 +33,8 @@ class my_sim_type : public alps::mcbase {
             : alps::mcbase(params, comm)
             , total_count(params["COUNT"])
         {
-            measurements << alps::accumulators::FullBinningAccumulator<double>("SValue")
-                         << alps::accumulators::FullBinningAccumulator<std::vector<double> >("VValue");
+            measurements << alps::alea::observable("SValue")
+                         << alps::alea::observable("VValue");
         }
 
         // do the calculation in this function

@@ -24,8 +24,8 @@ class sum_simulation : public alps::mcbase {
 public:
     sum_simulation(parameters_type const& parameters, std::size_t seed_offset = 42)
         : alps::mcbase(parameters, seed_offset), total_(parameters["COUNT"]) {
-        measurements << alps::accumulators::FullBinningAccumulator<double>("SValue")
-                     << alps::accumulators::FullBinningAccumulator<std::vector<double>>("VValue");
+        measurements << alps::alea::observable("SValue")
+                     << alps::alea::observable("VValue");
     }
     static parameters_type& define_parameters(parameters_type& parameters) {
         return alps::mcbase::define_parameters(parameters)

@@ -11,7 +11,7 @@
 #include "alps/utilities/mpi.hpp"
 
 #include <alps/utilities/boost_mpi.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/params.hpp>
  
 #include "gtest/gtest.h"
@@ -24,7 +24,7 @@ class sim1 : public alps::mcbase {
             nsweeps(p["nsweeps"]), 
             count(0) 
         {
-            measurements << alps::accumulators::FullBinningAccumulator<std::vector<double> >("e1");
+            measurements << alps::alea::observable("e1");
         }
  
         void update() { 

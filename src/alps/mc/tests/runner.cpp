@@ -43,9 +43,9 @@ TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
     const double expected = simulation.sum / simulation.count;
     EXPECT_EQ(results["SValue"].count(), 256u);
     // Only floating-point accumulation order differs from the explicit sum.
-    EXPECT_NEAR(results["SValue"].mean<double>(), expected, 1e-12);
-    EXPECT_TRUE(std::isfinite(results["SValue"].error<double>()));
-    const auto vector = results["VValue"].mean<std::vector<double>>();
+    EXPECT_NEAR(results["SValue"].mean(), expected, 1e-12);
+    EXPECT_TRUE(std::isfinite(results["SValue"].error()));
+    const auto vector = results["VValue"].mean_vector();
     ASSERT_EQ(vector.size(), 3u);
     for (double value : vector) EXPECT_NEAR(value, expected, 1e-12);
     EXPECT_GE(expected, std::exp(-1.));
@@ -55,11 +55,11 @@ TEST(MonteCarloRunner, CompletesAndPersistsScalarAndVectorResults) {
     const auto filename = (directory.path() / "results.h5").string();
     alps::save_results(results, parameters, filename, "/simulation/results");
     alps::hdf5::archive archive(filename);
-    alps::accumulators::result_set restored;
+    alps::alea::result_set restored;
     archive["/simulation/results"] >> restored;
     EXPECT_EQ(restored["SValue"].count(), results["SValue"].count());
-    EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
-    EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
+    EXPECT_DOUBLE_EQ(restored["SValue"].mean(), results["SValue"].mean());
+    EXPECT_EQ(restored["VValue"].mean_vector(), vector);
 }
 
 TEST(MonteCarloRunner, RejectsACheckpointOfTheNgsMcbase) {

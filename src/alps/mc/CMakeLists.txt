@@ -2,7 +2,7 @@
 # ALPSCore; see the README. It is part of ALPS::alps.
 add_library(alps_mc src/api.cpp src/mcbase.cpp src/stop_callback.cpp)
 target_link_libraries(alps_mc PUBLIC ALPS::configuration ALPS::utilities ALPS::hdf5
-  ALPS::params ALPS::accumulators)
+  ALPS::params ALPS::aleav2)
 if(ALPS_ENABLE_MPI)
   target_link_libraries(alps_mc PUBLIC MPI::MPI_CXX)
 endif()

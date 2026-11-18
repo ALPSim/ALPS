@@ -5,6 +5,7 @@
 #include "observables_impl.hpp"
 
 #include <memory>
+#include <ostream>
 #include <vector>
 
 namespace alps { namespace alea {
@@ -445,6 +446,55 @@ std::vector<std::string> result_set::names() const
     for (const auto &named : impl_->results)
         names.push_back(named.first);
     return names;
+}
+
+result_set result_set::select(const std::vector<std::string> &names) const
+{
+    result_set out;
+    for (const std::string &name : names)
+        out.impl_->results[name] = (*this)[name];
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const observable_result &result)
+{
+    if (result.count() == 0)
+        return out << "no measurements";
+    std::vector<double> mean, error, tau;
+    std::vector<error_convergence> converged;
+    try {
+        mean = result.mean_vector();
+        error = result.error_vector();
+        tau = result.tau_vector();
+        converged = result.converged_vector();
+    } catch (const std::logic_error &) {
+        const std::vector<std::uint64_t> &counts = result.histogram();
+        out << "[";
+        for (size_t i = 0; i != counts.size(); ++i)
+            out << (i ? ", " : "") << counts[i];
+        return out << "]";
+    }
+    if (mean.size() != 1)
+        out << "[";
+    for (size_t i = 0; i != mean.size(); ++i) {
+        out << (i ? ", " : "") << mean[i] << " +/- " << error[i];
+        if (tau[i] == tau[i])
+            out << " (tau = " << tau[i] << ")";
+        if (converged[i] == MAYBE_CONVERGED)
+            out << " WARNING: check error convergence";
+        if (converged[i] == NOT_CONVERGED)
+            out << " WARNING: ERRORS NOT CONVERGED!!!";
+    }
+    if (mean.size() != 1)
+        out << "]";
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const result_set &results)
+{
+    for (const std::string &name : results.names())
+        out << name << ": " << results[name] << "\n";
+    return out;
 }
 
 namespace {

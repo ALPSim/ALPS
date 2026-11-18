@@ -8,22 +8,16 @@
 
 namespace alps {
 
-    namespace detail {
-        template<typename R, typename P> void save_results_impl(R const & results, P const & params, std::string const & filename, std::string const & path) {
-            if (results.size()) {
-                hdf5::archive ar(filename, "w");
-                ar["/parameters"] << params;
-                ar[path] << results;
-            }
-        }
+    void save_results(alps::alea::result_set const & results, params const & params, std::string const & filename, std::string const & path) {
+        if (results.names().empty())
+            return;
+        hdf5::archive ar(filename, "w");
+        ar["/parameters"] << params;
+        ar[path] << results;
     }
 
-    void save_results(alps::accumulators::result_set const & results, params const & params, std::string const & filename, std::string const & path) {
-        detail::save_results_impl(results, params, filename, path);
-    }
-
-    void save_results(alps::accumulators::accumulator_set const & observables, params const & params, std::string const & filename, std::string const & path) {
-        detail::save_results_impl(observables, params, filename, path);
+    void save_results(alps::alea::observable_set const & observables, params const & params, std::string const & filename, std::string const & path) {
+        save_results(observables.results(), params, filename, path);
     }
 
 }

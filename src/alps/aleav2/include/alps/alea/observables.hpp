@@ -20,7 +20,7 @@
  *
  *     alps::alea::result_set results = measurements.results();
  *     double e = results["Energy"].mean(), de = results["Energy"].error();
- *     alps::alea::result c = results["Energy"] * results["Energy"];
+ *     alps::alea::observable_result e2 = results["Energy"] * results["Energy"];
  *
  * An observable keeps a binning analysis, for its error and autocorrelation
  * time, and a fixed number of bins of equal length in time order, for
@@ -38,9 +38,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace alps { namespace hdf5 { class archive; } }
 
 namespace alps { namespace alea {
 
@@ -161,6 +164,13 @@ public:
      * bins are appended. Observables this set does not have are added.
      */
     void merge(const result_set &other);
+
+    /**
+     * For `archive[path] << set` and `archive[path] >> set`: the checkpoint of
+     * `save_checkpoint` and `load_checkpoint` in <alps/alea/observables_io.hpp>.
+     */
+    void save(hdf5::archive &ar) const;
+    void load(hdf5::archive &ar);
 
 private:
     friend struct observables_access;
@@ -285,6 +295,16 @@ public:
 
     std::vector<std::string> names() const;
 
+    /** The results of the given names only */
+    result_set select(const std::vector<std::string> &names) const;
+
+    /**
+     * For `archive[path] << results` and `archive[path] >> results`: the files
+     * of `save_results` and `load_results` in <alps/alea/observables_io.hpp>.
+     */
+    void save(hdf5::archive &ar) const;
+    void load(hdf5::archive &ar);
+
     /**
      * Collect the results of all instances of a parallel run, as `merge` does
      * for one run after the other. All instances must have declared the same
@@ -300,5 +320,11 @@ private:
     struct impl;
     std::unique_ptr<impl> impl_;
 };
+
+/** "mean +/- error", with the autocorrelation time and a warning if the error has not converged */
+std::ostream &operator<<(std::ostream &out, const observable_result &result);
+
+/** One line per result: "name: mean +/- error" */
+std::ostream &operator<<(std::ostream &out, const result_set &results);
 
 }} /* namespace alps::alea */

@@ -6,7 +6,7 @@
 #include <alps/mc/mcbase.hpp>
 #include <alps/mc/mpiadapter.hpp>
 #include <alps/mc/api.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/params.hpp>
 #include <alps/mc/stop_callback.hpp>
  
@@ -19,8 +19,8 @@ class sim1 : public alps::mcbase {
             count(0) 
         {
             measurements 
-                << alps::accumulators::FullBinningAccumulator<double>("sign") 
-                << alps::accumulators::FullBinningAccumulator<double>("x*sign");
+                << alps::alea::observable("sign") 
+                << alps::alea::observable("x*sign");
         }
  
         void update() { count++; }

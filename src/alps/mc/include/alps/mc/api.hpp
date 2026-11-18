@@ -7,7 +7,7 @@
 
 #include <alps/config.hpp>
 #include <alps/params.hpp>
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
 
 #include <string>
 
@@ -49,8 +49,8 @@ namespace alps {
         return s.fraction_completed();
     }
 
-    void save_results(alps::accumulators::accumulator_set const & observables, params const & params, std::string const & filename, std::string const & path);
-    void save_results(alps::accumulators::result_set const & results, params const & params, std::string const & filename, std::string const & path);
+    void save_results(alps::alea::observable_set const & observables, params const & params, std::string const & filename, std::string const & path);
+    void save_results(alps::alea::result_set const & results, params const & params, std::string const & filename, std::string const & path);
 
     template<typename C, typename P> void broadcast(C const & c, P & p, int r = 0) {
         p.broadcast(c, r);

@@ -7,7 +7,8 @@
 
 #include <boost/function.hpp>
 
-#include <alps/accumulators.hpp>
+#include <alps/alea/observables.hpp>
+#include <alps/hdf5/archive.hpp>
 #include <alps/params.hpp>
 #include "random01.hpp"
 
@@ -21,14 +22,14 @@ namespace alps {
 
         protected:
 
-            typedef alps::accumulators::accumulator_set observable_collection_type;
+            typedef alps::alea::observable_set observable_collection_type;
 
         public:
 
             typedef alps::params parameters_type;
             typedef std::vector<std::string> result_names_type;
 
-            typedef alps::accumulators::result_set results_type;
+            typedef alps::alea::result_set results_type;
 
             mcbase(parameters_type const & parms, std::size_t seed_offset = 0);
             // ALPS addition: simulations, including Python subclasses bound

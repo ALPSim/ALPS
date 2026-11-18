@@ -45,21 +45,21 @@ TEST(ParallelMonteCarloRunner, CollectsAllRanksAndPersistsResults) {
     if (world.rank() == 0) {
         const double expected = sum / (128 * world.size());
         EXPECT_EQ(results["SValue"].count(), 128u * world.size());
-        EXPECT_NEAR(results["SValue"].mean<double>(), expected, 1e-12);
-        EXPECT_TRUE(std::isfinite(results["SValue"].error<double>()));
-        const auto vector = results["VValue"].mean<std::vector<double>>();
+        EXPECT_NEAR(results["SValue"].mean(), expected, 1e-12);
+        EXPECT_TRUE(std::isfinite(results["SValue"].error()));
+        const auto vector = results["VValue"].mean_vector();
         ASSERT_EQ(vector.size(), 3u);
         for (double value : vector) EXPECT_NEAR(value, expected, 1e-12);
-        EXPECT_NEAR((results["SValue"] + 1.).mean<double>(), expected + 1., 1e-12);
-        EXPECT_NEAR((results["SValue"] + results["SValue"]).mean<double>(), 2. * expected, 1e-12);
+        EXPECT_NEAR((results["SValue"] + 1.).mean(), expected + 1., 1e-12);
+        EXPECT_NEAR((results["SValue"] + results["SValue"]).mean(), 2. * expected, 1e-12);
         alps::testing::TemporaryDirectory directory;
         const auto filename = (directory.path() / "results.h5").string();
         alps::save_results(results, parameters, filename, "/simulation/results");
         alps::hdf5::archive archive(filename);
-        alps::accumulators::result_set restored;
+        alps::alea::result_set restored;
         archive["/simulation/results"] >> restored;
-        EXPECT_DOUBLE_EQ(restored["SValue"].mean<double>(), results["SValue"].mean<double>());
-        EXPECT_EQ(restored["VValue"].mean<std::vector<double>>(), vector);
+        EXPECT_DOUBLE_EQ(restored["SValue"].mean(), results["SValue"].mean());
+        EXPECT_EQ(restored["VValue"].mean_vector(), vector);
     }
 }
 

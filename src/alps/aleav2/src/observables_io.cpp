@@ -551,4 +551,12 @@ result_set unpack(const std::string &bytes)
     return out;
 }
 
+void observable_set::save(hdf5::archive &ar) const { save_checkpoint(ar, ar.get_context(), *this); }
+
+void observable_set::load(hdf5::archive &ar) { load_checkpoint(ar, ar.get_context(), *this); }
+
+void result_set::save(hdf5::archive &ar) const { save_results(ar, ar.get_context(), *this); }
+
+void result_set::load(hdf5::archive &ar) { *this = load_results(ar, ar.get_context()); }
+
 }} /* namespace alps::alea */

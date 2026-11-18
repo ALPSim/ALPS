@@ -5,7 +5,7 @@
 base class `alps::mcbase`, its MPI adapter `alps::mcmpiadapter`,
 `alps::check_schedule`, `alps::stop_callback`, `alps::random01` and the
 functions of `<alps/mc/api.hpp>`, in `<alps/mc/*.hpp>`, with sources in `src/`
-and tests in `tests/`. Its observables are ALPSCore's accumulators. It is
+and tests in `tests/`. Its observables are those of `<alps/alea/observables.hpp>`. It is
 copied from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
 (2026-09-25). `ALPS::alps` links it, and the SDK installs it.
 

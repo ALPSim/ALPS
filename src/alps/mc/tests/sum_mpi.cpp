@@ -27,9 +27,9 @@ class my_sim_type : public alps::mcbase {
 
         void init()
         {
-            measurements << alps::accumulators::FullBinningAccumulator<double>("SValue")
-                         << alps::accumulators::FullBinningAccumulator<double_vector_type>("VValue")
-                         << alps::accumulators::NoBinningAccumulator<double_vector_type>("VValue1");
+            measurements << alps::alea::observable("SValue")
+                         << alps::alea::observable("VValue")
+                         << alps::alea::observable("VValue1").without_bins();
         }
 
         my_sim_type(parameters_type const & params, std::size_t seed_offset = 42)
@@ -102,13 +102,13 @@ TEST(mc, sum_mpi){
 
             const double expected_mean=1.5;
             const double expected_err=(1./12)/sqrt(results["SValue"].count()-1);
-            EXPECT_NEAR(expected_mean, results["SValue"].mean<double>(), 1.E-2) << "Scalar (FullBinning) mean is incorrect";
-            EXPECT_NEAR(expected_err, results["SValue"].error<double>(), 1.E-2) << "Scalar (FullBinning) error is incorrect";
+            EXPECT_NEAR(expected_mean, results["SValue"].mean(), 1.E-2) << "Scalar (FullBinning) mean is incorrect";
+            EXPECT_NEAR(expected_err, results["SValue"].error(), 1.E-2) << "Scalar (FullBinning) error is incorrect";
 
             // Test using NoBinningAccumulator
             {
-                const my_sim_type::double_vector_type& vv_mean=results["VValue1"].mean<my_sim_type::double_vector_type>();
-                const my_sim_type::double_vector_type& vv_err=results["VValue1"].error<my_sim_type::double_vector_type>();
+                const my_sim_type::double_vector_type& vv_mean=results["VValue1"].mean_vector();
+                const my_sim_type::double_vector_type& vv_err=results["VValue1"].error_vector();
                 EXPECT_EQ(my_sim_type::VSIZE+0, vv_mean.size());
                 for (unsigned int i=0; i<my_sim_type::VSIZE; ++i) {
                     EXPECT_NEAR(expected_mean, vv_mean[i], 1.E-2) << "Vector (NoBinning) mean is incorrect at #" << i;
@@ -118,8 +118,8 @@ TEST(mc, sum_mpi){
 
             // Test using FullBinningAccumulator
             {
-                const my_sim_type::double_vector_type& vv_mean=results["VValue"].mean<my_sim_type::double_vector_type>();
-                const my_sim_type::double_vector_type& vv_err=results["VValue"].error<my_sim_type::double_vector_type>();
+                const my_sim_type::double_vector_type& vv_mean=results["VValue"].mean_vector();
+                const my_sim_type::double_vector_type& vv_err=results["VValue"].error_vector();
                 EXPECT_EQ(my_sim_type::VSIZE+0, vv_mean.size());
                 for (unsigned int i=0; i<my_sim_type::VSIZE; ++i) {
                     EXPECT_NEAR(expected_mean, vv_mean[i], 1.E-2)  << "Vector (FullBinning) mean is incorrect at #" << i;

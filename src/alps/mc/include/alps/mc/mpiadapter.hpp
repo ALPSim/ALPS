@@ -12,7 +12,8 @@
 
 #if defined(ALPS_HAVE_MPI)
 
-#include <alps/accumulators/mpi.hpp>
+#include <alps/alea/mpi.hpp>
+#include <alps/alea/observables.hpp>
 #include <alps/mc/check_schedule.hpp>
 
 namespace alps {
@@ -78,7 +79,7 @@ namespace alps {
             }
 
             typename Base::results_type collect_results(typename Base::result_names_type const & names) const {
-                typename Base::results_type partial_results;
+                typename Base::result_names_type measured;
                 for(typename Base::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it) {
                     size_t has_count=(this->measurements[*it].count() > 0);
                     const size_t sum_counts =
@@ -86,14 +87,15 @@ namespace alps {
                                                   has_count,
                                                   std::plus<size_t>());
                     if (static_cast<int>(sum_counts) == communicator.size()) {
-                        typename Base::observable_collection_type::value_type merged = this->measurements[*it];
-                        merged.collective_merge(communicator, 0);
-                        partial_results.insert(*it, merged.result());
+                        measured.push_back(*it);
                     } else if (sum_counts > 0 && static_cast<int>(sum_counts) < communicator.size()) {
                         throw std::runtime_error(*it + " was measured on only some of the MPI processes.");
                     }
                 }
-                return partial_results;
+                // Rank 0 gets the pooled results; the other ranks an empty set.
+                typename Base::results_type results = this->measurements.results().select(measured);
+                results.reduce(alps::alea::mpi_reducer(communicator, 0));
+                return results;
             }
 
         protected:
