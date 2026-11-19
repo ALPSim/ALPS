@@ -66,7 +66,7 @@ TEST_F(NormalStateTransformTest, ReadNonexistentInputFile){
 // A G0 input file from a run with other parameters is refused instead of
 // being used with the wrong meshes; one that fits is read.
 TEST_F(NormalStateTransformTest, ReadInitialG0ChecksTheMeshes){
-  const std::string file = test_dump_file() + ".G0.h5";
+  const std::string file = "./NormalStateTransformTest_ReadInitialG0ChecksTheMeshes.G0.h5";
   alps::params p; set_standard_parameters(p);
   p["dca.G0_OMEGA_INPUT"] = file;
   NormalStateClusterTransformer CT(p);
