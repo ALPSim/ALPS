@@ -73,7 +73,10 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
   int n_flavor=parms.value_or_default("FLAVORS", 2);
   itime_green_function_t G0_tau(n_time+1, n_flavor);
   
-  if (parms.defined("G0TAU_INPUT") && parms["G0TAU_INPUT"].length()>0) {
+  const bool g0_input = parms.defined("G0TAU_INPUT") && parms["G0TAU_INPUT"].length()>0;
+  if (g0_input && static_cast<bool>(parms.value_or_default("INSULATING", false)))
+    throw std::invalid_argument("INSULATING and G0TAU_INPUT both set the initial G0; set only one.");
+  if (g0_input) {
     std::cout<<"reading initial G0_tau"<<std::endl;
     std::ifstream check(parms["G0TAU_INPUT"].c_str());
     if(!check.is_open()) {
@@ -122,7 +125,12 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
   double h = static_cast<double>(parms.value_or_default("H",0.));
   matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
 
-  if (parms.defined("INSULATING")) {
+  const bool insulating = parms.value_or_default("INSULATING", false);
+  const bool g0_input = parms.defined("G0OMEGA_INPUT") && parms["G0OMEGA_INPUT"].length()>0;
+  if (insulating && g0_input)
+    throw std::invalid_argument("INSULATING and G0OMEGA_INPUT both set the initial G0; set only one.");
+
+  if (insulating) {
     std::cout<<"calculating insulating initial G0_omega"<<std::endl;
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
@@ -132,7 +140,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
       }
     }
   }
-  else if (parms.defined("G0OMEGA_INPUT") && parms["G0OMEGA_INPUT"].length()>0) {
+  else if (g0_input) {
     std::cout<<"reading initial G0_omega"<<std::endl;
     std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
     if(!check.is_open()) {
