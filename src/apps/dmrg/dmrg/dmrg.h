@@ -89,10 +89,21 @@ private:
 
   alps::SiteOperator make_site_term(std::string x)
   {
+    const std::string expression = x;
     if (x[x.size()-1]!=')')
       x += "(i)";
     alps::SiteOperator op(x,"i");
     substitute_operators(op,parms);
+    // An operator on another site, such as Sz(j) in Sz(i)*Sz(j), stays in the
+    // coefficient, which build_site_operator then cannot evaluate (issue #385)
+    alps::expression::ParameterEvaluator<value_type> coords(coordinate_as_parameter(*sites().first));
+    for (auto term : op.template templated_split<value_type>()) {
+      term.template get<0>().partial_evaluate(coords);
+      if (!term.template get<0>().can_evaluate())
+        throw std::runtime_error("Cannot measure '" + expression + "': it refers to a site other than i."
+          " A site measurement takes an expression in i, such as Sz(i), and a bond measurement"
+          " the name of a bond operator of the model, such as exchange");
+    }
     return op;
   }
   
