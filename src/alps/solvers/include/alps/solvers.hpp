@@ -9,7 +9,8 @@ namespace alps {
 namespace params_ns { class params; }
 typedef params_ns::params params;
 
-// Link the corresponding ALPS::maxent, ALPS::cthyb, or ALPS::ctint target.
+// Link the corresponding ALPS::maxent, ALPS::cthyb, ALPS::cthyb_segment, or
+// ALPS::ctint target.
 // Solvers run synchronously, write to output_file, and propagate exceptions.
 // Each defines the parameters it reads on a copy of `parameters` and throws
 // std::invalid_argument, naming them, if any is missing or malformed.
@@ -18,6 +19,8 @@ typedef params_ns::params params;
 namespace solvers {
 void maxent(params const& parameters, std::string const& output_file);
 void cthyb(params const& parameters, std::string const& output_file);
+// The segment-picture CT-HYB solver; its parameters carry the "cthyb." prefix.
+void cthyb_segment(params const& parameters, std::string const& output_file);
 void ctint(params const& parameters, std::string const& output_file);
 }
 }

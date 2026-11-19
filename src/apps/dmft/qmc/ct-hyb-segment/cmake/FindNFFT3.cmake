@@ -1,0 +1,22 @@
+include(FindPackageHandleStandardArgs)
+
+set(INCLUDE_SEARCH_PATHS
+    $ENV{NFFT3_DIR}/include
+    ${NFFT3_DIR}/include
+)
+
+set(LIBRARY_SEARCH_PATHS
+    $ENV{NFFT3_DIR}/lib
+    ${NFFT3_DIR}/lib
+)
+
+find_path(NFFT3_INCLUDE_DIR nfft3.h ${INCLUDE_SEARCH_PATHS} DOC "NFFT include path")
+find_library(NFFT3_LIBRARIES nfft3 ${LIBRARY_SEARCH_PATHS} DOC "NFFT library path")
+
+set(NFFT3_INCLUDE_DIRS ${NFFT3_INCLUDE_DIR})
+
+find_package(FFTW3 REQUIRED)
+list(APPEND NFFT3_LIBRARIES ${FFTW3_LIBRARIES})
+list(APPEND NFFT3_INCLUDE_DIRS ${FFTW3_INCLUDE_DIRS})
+
+find_package_handle_standard_args(NFFT3 DEFAULT_MSG NFFT3_LIBRARIES NFFT3_INCLUDE_DIRS)
