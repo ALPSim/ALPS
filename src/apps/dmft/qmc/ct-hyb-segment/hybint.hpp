@@ -1,0 +1,98 @@
+/****************************************************************************
+ *
+ * ALPS DMFT Project
+ *
+ * Copyright (C) 2012 by Emanuel Gull <gull@pks.mpg.de>,
+ *                   
+ *  based on an earlier version by Philipp Werner and Emanuel Gull
+ *
+ *
+* ALPS Project: https://alps.comp-phys.org/
+* SPDX-License-Identifier: MIT
+ *
+ *****************************************************************************/
+
+#ifndef HYB_INT_HPP
+#define HYB_INT_HPP
+#include <vector>
+#include <fstream>
+#include <alps/params.hpp>
+#include <alps/hdf5/vector.hpp>
+#include "./green_function.h"
+
+// Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
+namespace cthyb_segment {
+
+//the interaction matrix keeps track of the impurity density-density interactions (other interactions are not possible in this code). Two general methods: either specify U (and optionally J and U'), or define a matrix and write it into a file, from where it is read in.
+class interaction_matrix{
+public:
+  //constructor
+  interaction_matrix(const alps::params &p);
+  //element access routines
+  double &operator()(std::size_t flavor_i, std::size_t flavor_j){
+    return val_[flavor_i*n_orbitals_+flavor_j];
+  }
+  
+  const double &operator() (std::size_t flavor_i, std::size_t flavor_j)const {
+    return val_[flavor_i*n_orbitals_+flavor_j];
+  }
+  const int &n_orbitals() const{return n_orbitals_;}
+  void apply_shift(const double shift);
+private:
+  //get the usual density-density form of the interaction
+  void assemble(const double U, const double Uprime, const double J);
+  std::vector<double> val_; //interaction matrix values
+  int n_orbitals_;
+};
+
+//this class handles the 'mu' term (chemical potential term). In the most simple case, 'mu' is just a constant for all orbitals. More complicated situations happen, where e.g. there is a double counting which is orbital dependent.
+class chemical_potential{
+public:
+  chemical_potential(const alps::params &p){
+    extern int global_mpi_rank;
+    val_.resize(p["FLAVORS"]);
+    if(p.exists("MU")) {
+      if (!p.exists("U")) {
+        throw std::runtime_error("Parameter U must exist when MU is set! Or use MU_VECTOR instead.");
+      }
+      val_.assign(p["FLAVORS"], p["MU"].as<double>() + p["U"].as<double>()/2.);
+    }
+    if(p.exists("MU_VECTOR")){
+      if(p.exists("MU") && !global_mpi_rank){ std::cout << "Warning::parameter MU_VECTOR exists, ignoring parameter MU" << std::flush << std::endl; };
+      std::string mufilename=p["MU_VECTOR"];
+      if(p.exists("MU_IN_HDF5") && p["MU_IN_HDF5"]){//attempt to read from h5 archive
+        alps::hdf5::archive ar(mufilename, alps::hdf5::archive::READ);
+        ar["/MUvector"] >> val_;
+      }
+      else{//read from text file
+        std::ifstream mu_file(mufilename.c_str());
+        if(!mu_file.good()) throw std::runtime_error("Problem reading in MU_VECTOR.");
+        std::size_t i=0;
+        double MU_i;
+        for(i=0; i<n_orbitals(); ++i){
+          mu_file>>MU_i;
+          val_[i]=MU_i;
+          if(!mu_file.good()) throw std::runtime_error("Problem reading in MU_VECTOR.");
+        }
+      }
+    }else if (!p.exists("MU")) {
+      throw std::invalid_argument("please either define MU or MU_VECTOR in your parameters");
+      }
+  }
+  std::size_t n_orbitals(void)const { return val_.size(); }
+  const double &operator[] (std::size_t flavor)const {
+    return val_[flavor];
+  }
+  void apply_shift(const double shift){
+    for(std::size_t i=0; i<n_orbitals(); ++i)
+      val_[i]+=shift; //apply shift
+  }
+private:
+  std::vector<double> val_;
+};
+std::ostream &operator<<(std::ostream &os, const interaction_matrix &U);
+std::ostream &operator<<(std::ostream &os, const chemical_potential &mu);
+
+
+}  // namespace cthyb_segment
+#endif

@@ -10,6 +10,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.plot
@@ -29,8 +30,8 @@ for u in [3.]:
                 'H' : 0.0,           # there is no magnetic field
                 'H_INIT' : 0.05,     #  we set initial field to split spin up/down in order to trigger AF phase
                 'OMEGA_LOOP' : 1,        # the selfconsistency runs in Matsubara frequencies
-                'ANTIFERROMAGNET' : 1,   # allow Neel order
-                'SYMMETRIZATION' : 0,    # do not enforce paramagnetic solution
+                'ANTIFERROMAGNET' : True,   # allow Neel order
+                'SYMMETRIZATION' : False,    # do not enforce paramagnetic solution
                 'NMATSUBARA' : 500,      # number of Matsubara frequencies
                 'N' : 500,               # bins in imaginary time
                 'CONVERGED' : 0.005,     # criterion for convergency
@@ -40,7 +41,7 @@ for u in [3.]:
                 'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
-                'SOLVER' : "hybridization",   # we take the hybridization impurity solver
+                'SOLVER' : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
                 'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
                 'N_HISTOGRAM_ORDERS' : 50,               # histogram size
@@ -48,7 +49,6 @@ for u in [3.]:
                 't' : 1,          # the nearest-neighbor hopping
                 'tprime' : 0,     # the second nearest-neighbor hopping
                 'L' : 64,         # discretization in k-space in the Hilbert transformation
-                'GENERAL_FOURIER_TRANSFORMER' : 1,  # Fourier transformer for a general bandstructure
                 'EPS_0' : 0,                        # potential shift for the flavor 0
                 'EPS_1' : 0,                        # potential shift for the flavor 1
                 'EPSSQ_0' : 4,                      # the second moment of the bandstructure for the flavor 0
