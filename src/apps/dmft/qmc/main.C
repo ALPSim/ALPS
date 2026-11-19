@@ -139,6 +139,9 @@ int main(int argc, char** argv)
           
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss;
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd;
+        // The solver keeps a reference to its factory, so every factory has to
+        // live as long as solver_ptr.
+        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> hirschfye_factory;
 
         boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
         if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
@@ -172,8 +175,7 @@ int main(int argc, char** argv)
         }
         else if (parms["SOLVER"]=="Hirsch-Fye") {
           std::cout<<"solving Hirsch Fye"<<std::endl;
-          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-          solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(hirschfye_factory,parms,argc,argv));
           // Built-in solvers print no notice of their own; external solvers do.
           if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
         }
