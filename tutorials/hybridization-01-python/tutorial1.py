@@ -24,7 +24,13 @@
  # python tutorial1.py
  #
 
-import pyalps.cthyb as cthyb # the solver module
+import os
+import pyalps.mpi # initializes MPI, which an MPI-enabled solver needs
+# ALPS_CTHYB_SOLVER=ct-hyb-segment runs the same parameters on CT-HYB-SEGMENT.
+if os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization') == 'ct-hyb-segment':
+  import pyalps.cthyb_segment_compat as cthyb
+else:
+  import pyalps.cthyb as cthyb # the solver module
 
 # specify solver parameters
 parms={

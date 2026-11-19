@@ -62,6 +62,8 @@ if(GSL_FOUND)
     add_dependencies(dca_interpolation_tools_test ${dca_tools})
     alps_add_gtest(dca_interpolation_tools_test COMPONENT dmft LABELS regression)
   endif()
+else()
+  message(STATUS "GSL not found: sigma_interpolate_normal, sigma_interpolate_sc and dca_interpolation_tools_test are not built")
 endif()
 
 if(ALPS_BUILD_TESTING)

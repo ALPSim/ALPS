@@ -46,7 +46,6 @@ dca parameters.ini
 | `N`, `NMATSUBARA`, `FLAVORS` | Imaginary-time points, Matsubara frequencies, flavors (default 2) |
 | `dca.LATTICE`, `dca.LATTICE_LIBRARY`, `dca.SITES` | Cluster name, cluster definition file, number of cluster sites |
 | `dca.L` | Linear number of lattice momenta per cluster momentum in the coarse-graining |
-| `dca.LATTICE_DUMP` | HDF5 file (default `cluster.h5`) that caches the cluster tables, in the group `/<cluster>/L<dca.L>` |
 | `dca.AFM_SELFCONSISTENCY`, `dca.CO_SELFCONSISTENCY`, `sc.NAMBU` | Double unit cell (AFM or charge order) or Nambu frameworks |
 | `dca.G0_OMEGA_INPUT`, `dca.G0_OMEGA_OUTPUT` | Starting G0, and G0 written after each iteration to restart from |
 | `sc.MAX_IT`, `sc.SELFCONSISTENCY_CONVERGENCE` | Number of iterations, and the change of G at which to stop earlier |

@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "gtest/gtest.h"
-#include "test_dump_file.h"
 #include "cluster_transform.h"
 #include "alps/params.hpp"
 #include<iostream>
@@ -34,7 +33,6 @@ protected:
     p["dca.LATTICE"] = "Betts2D-8A";
     p["dca.SITES"] = n_sites_;
     p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-    p["dca.LATTICE_DUMP"] = test_dump_file();
     p["MU"] = mu_;
     p["t"] = 1.;
     p["U"] = 3.14;

@@ -11,6 +11,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +23,7 @@ parms=[]
 for b in [6., 12.]:
     parms.append(
             {
-              'ANTIFERROMAGNET'     : 1,
+              'ANTIFERROMAGNET'     : True,
               'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
@@ -36,9 +37,9 @@ for b in [6., 12.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',
+              'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'      : 1,
-              'SYMMETRIZATION'      : 0,
+              'SYMMETRIZATION'      : False,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'SWEEPS'              : int(10000*b/16.),
