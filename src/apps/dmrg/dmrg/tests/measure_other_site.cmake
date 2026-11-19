@@ -3,16 +3,19 @@
 # MEASURE_LOCAL and MEASURE_AVERAGE take a site expression in i or the name of
 # a bond operator. An expression on another site, such as exchange(i,j), used
 # to crash dmrg without a message (issue #385). dmrg must stop with an error
-# that names the expression.
+# that names the expression and the part it cannot evaluate, which for an
+# undefined parameter is the parameter, not another site.
 # Usage: cmake -DAPP=<dmrg> -DXML_PATH=<resources> -DWORK_DIR=<dir> -P ...
 
 set(ENV{ALPS_XML_PATH} "${XML_PATH}")
 set(ENV{ALPS_NO_CITATIONS} 1)
 
-foreach(measurement "MEASURE_LOCAL[x]|exchange(i,j)" "MEASURE_AVERAGE[x]|Sz(i)*Sz(j)")
+foreach(measurement "MEASURE_LOCAL[x]|exchange(i,j)|exchange(i, j)"
+    "MEASURE_AVERAGE[x]|Sz(i)*Sz(j)|Sz(j)" "MEASURE_AVERAGE[x]|foo*Sz(i)|foo")
   string(REPLACE "|" ";" measurement "${measurement}")
   list(GET measurement 0 name)
   list(GET measurement 1 expression)
+  list(GET measurement 2 unevaluated)
   file(REMOVE_RECURSE "${WORK_DIR}")
   file(MAKE_DIRECTORY "${WORK_DIR}")
   file(WRITE "${WORK_DIR}/task.in.xml" "<SIMULATION><PARAMETERS>
@@ -38,7 +41,8 @@ foreach(measurement "MEASURE_LOCAL[x]|exchange(i,j)" "MEASURE_AVERAGE[x]|Sz(i)*S
     message(FATAL_ERROR "expected a non-zero exit status\n${log}")
   endif()
   string(FIND "${err}" "'${expression}'" at)
-  if(at EQUAL -1 OR NOT err MATCHES "bond operator")
-    message(FATAL_ERROR "stderr does not name the expression and bond operators\n${log}")
+  string(FIND "${err}" "cannot evaluate '${unevaluated}'" named)
+  if(at EQUAL -1 OR named EQUAL -1 OR NOT err MATCHES "bond operator")
+    message(FATAL_ERROR "stderr does not name the expression, '${unevaluated}' and bond operators\n${log}")
   endif()
 endforeach()
