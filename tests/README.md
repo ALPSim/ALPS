@@ -97,7 +97,10 @@ See [mpi.md](mpi.md).
   [Wallerberger and Gull](https://doi.org/10.1103/PhysRevE.96.053303)), and
   choose the sweeps so that the bias the test is for is several error bars.
   For vector data such as G(tau) the points are correlated; test them with
-  their covariance (ALEA v2 `alps::alea::test_mean`), not point by point.
+  their covariance (ALEA v2 `alps::alea::test_mean`) when they are ALEA v2
+  results. Applications that write only means and errors are tested at a few
+  well-separated points within the shared level, which holds however the
+  points are correlated (`src/apps/dmft/qmc/dmft_hypothesis.hpp`).
 - Fixture changes carry provenance and a behavioural explanation in the PR.
 - Skip with a named reason when an optional capability is missing. Do not add
   permanently disabled tests; a quarantine names the reason, issue and owner.
