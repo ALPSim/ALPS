@@ -71,7 +71,7 @@ for _extension_name in (
     sys.modules[__name__ + "." + _extension_name] = _extension
 
 # Optional solver modules are present when PYALPS_BUILD_SOLVERS is enabled.
-for _extension_name in ("maxent_c", "cthyb", "ctint"):
+for _extension_name in ("maxent_c", "cthyb", "cthyb_segment", "ctint"):
     try:
         _extension = __import__(
             __name__ + "._ext." + _extension_name, fromlist=[_extension_name]
