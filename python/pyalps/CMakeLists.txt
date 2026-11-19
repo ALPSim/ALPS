@@ -55,9 +55,10 @@ set(_alps_optional_components "")
 if(PYALPS_BUILD_SOLVERS)
   list(APPEND _alps_optional_components cthyb_segment)
 endif()
-# CT-HYB-SEGMENT (module and program) links the shared ALPS::gf, which is not
-# one of the core runtime libraries, so the wheel has to bundle it as well.
-if(PYALPS_BUILD_SOLVERS OR PYALPS_BUNDLE_APPLICATIONS)
+# The CT-HYB-SEGMENT module links the shared ALPS::gf, which is not one of the
+# core runtime libraries, so the wheel has to bundle it as well. The libraries
+# the bundled applications load come with them (ALPS_APPLICATION_COMPONENTS).
+if(PYALPS_BUILD_SOLVERS)
   list(APPEND _alps_optional_components gf)
 endif()
 find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components}
@@ -68,9 +69,12 @@ endif()
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
-# An SDK built from #404 alone has dca but does not list ALPS::gf, which dca
-# loads, among its runtime targets; the package would lack it.
-if(PYALPS_BUNDLE_APPLICATIONS AND TARGET ALPS::dca AND NOT DEFINED ALPS_APPLICATION_COMPONENTS)
+# An SDK that does not set ALPS_APPLICATION_COMPONENTS does not list the
+# libraries its applications load among its runtime targets. If it has an
+# application that loads one (dca and ct-hyb-segment load ALPS::gf), the
+# package would lack it.
+if(PYALPS_BUNDLE_APPLICATIONS AND NOT DEFINED ALPS_APPLICATION_COMPONENTS
+   AND (TARGET ALPS::dca OR TARGET ALPS::ct-hyb-segment))
   message(FATAL_ERROR "This ALPS SDK does not list the libraries its applications load. "
                       "Rebuild and reinstall the SDK from this source tree.")
 endif()

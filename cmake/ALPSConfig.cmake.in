@@ -56,17 +56,36 @@ function(_alps_component_export component out)
   string(SUBSTRING "${component}" 1 -1 rest)
   set(${out} "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ALPS${initial}${rest}Targets.cmake" PARENT_SCOPE)
 endfunction()
+# Looks for the Eigen that components built with it need, once, and sets
+# _alps_have_eigen. As in src/alps: neither a minimum nor a range suits Eigen 3
+# and 5 alike. A macro, so that Eigen3_FOUND and its version are kept.
+macro(_alps_find_eigen)
+  if(NOT Eigen3_FOUND)
+    find_package(Eigen3 CONFIG QUIET)
+  endif()
+  if(Eigen3_FOUND AND NOT Eigen3_VERSION VERSION_LESS 3.3)
+    set(_alps_have_eigen TRUE)
+  else()
+    set(_alps_have_eigen FALSE)
+  endif()
+endmacro()
 set(ALPS_applications_FOUND FALSE)
 if("applications" IN_LIST ALPS_FIND_COMPONENTS AND @ALPS_BUILD_APPLICATIONS@
     AND EXISTS "${CMAKE_CURRENT_LIST_DIR}/ALPSApplicationTargets.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/ALPSApplicationTargets.cmake")
   set(ALPS_APPLICATION_TARGETS "@ALPS_APPLICATION_TARGETS@")
-  # Applications may link components built with Eigen (dca links ALPS::gf).
-  # Their libraries join the runtime targets, so that a consumer installing
-  # the programs installs what they load. Only the runtime files are needed:
-  # linking such a component still requires asking for it, and Eigen.
-  # Also tells consumers that this SDK lists them (pyalps checks for it).
+  # Applications may link components built with Eigen (dca and ct-hyb-segment
+  # link ALPS::gf). Their libraries join the runtime targets, so that a consumer
+  # installing the programs installs what they load. Linking such a component
+  # still requires asking for it: ALPS_<component>_FOUND says whether it can be
+  # linked. Eigen is looked for first, so that the target links when it is
+  # installed; without Eigen the export is still loaded for its runtime file.
+  # Always set here, also when empty: consumers check that this SDK lists them
+  # (pyalps does).
   set(ALPS_APPLICATION_COMPONENTS "@ALPS_APPLICATION_EIGEN_COMPONENTS@")
+  if(ALPS_APPLICATION_COMPONENTS)
+    _alps_find_eigen()
+  endif()
   foreach(_alps_component IN ITEMS @ALPS_APPLICATION_EIGEN_COMPONENTS@)
     _alps_component_export(${_alps_component} _alps_export)
     include("${_alps_export}")
@@ -94,11 +113,8 @@ foreach(_alps_component IN ITEMS @ALPS_EIGEN_COMPONENT_NAMES@)
   if(NOT _alps_component IN_LIST _alps_eigen_built OR NOT EXISTS "${_alps_export}")
     set(_alps_missing "this SDK was built without it, because Eigen was not found")
   else()
-    # As in src/alps: neither a minimum nor a range suits Eigen 3 and 5 alike.
-    if(NOT Eigen3_FOUND)
-      find_package(Eigen3 CONFIG QUIET)
-    endif()
-    if(Eigen3_FOUND AND NOT Eigen3_VERSION VERSION_LESS 3.3)
+    _alps_find_eigen()
+    if(_alps_have_eigen)
       include("${_alps_export}")
       set(ALPS_${_alps_component}_FOUND TRUE)
     else()
@@ -113,4 +129,5 @@ unset(_alps_eigen_built)
 unset(_alps_component)
 unset(_alps_export)
 unset(_alps_missing)
+unset(_alps_have_eigen)
 check_required_components(ALPS)
