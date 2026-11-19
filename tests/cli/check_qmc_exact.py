@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MIT
 """Quantum Monte Carlo averages of spin-1/2 chains agree with exact diagonalization.
 
+Applications: loop, dirloop_sse, worm.
+
 Each case is a spin-1/2 XXZ chain at T = 0.5,
 
     H = sum_<ij> [Jz Sz_i Sz_j + Jxy/2 (S+_i S-_j + S-_i S+_j)] - h sum_i Sz_i,
@@ -44,6 +46,11 @@ ISING_LIKE_4_FIELD = {  # exact_spin_chain.py 4 0.5 2 1 0.3 periodic
     "Staggered Magnetization^2": 3.11454,
 }
 
+ISING_LIKE_4 = {  # exact_spin_chain.py 4 0.5 2 1 0 periodic
+    "Energy Density": -0.6137794, "Magnetization^2": 0.06133107, "Staggered Magnetization^2": 3.138704,
+    "Susceptibility": 0.03066553,
+}
+
 SHORT_SWEEPS = 200000
 
 COMMON = {"LATTICE": '"chain lattice"', "MODEL": '"spin"', "T": 0.5, "THERMALIZATION": 10000}
@@ -67,6 +74,14 @@ CASES = {
           ("Energy Density", "Magnetization^2", "Staggered Magnetization^2", "Susceptibility")}),
         ("XXZ L=4 Jz=2 h=0.3", {"L": 4, "Jz": 2, "Jxy": 1, "h": 0.3, "SWEEPS": 200000, "SEED": 4722},
          ISING_LIKE_4_FIELD),
+    ],
+    "worm": [
+        # With a diagonal bond term (Jz) the fluctuations of the conserved
+        # magnetization were 3 % high, 5 to 6 error bars at this length.
+        ("XXZ L=4 Jz=2", {"L": 4, "Jz": 2, "Jxy": 1, "SWEEPS": 1000000, "SEED": 4731}, ISING_LIKE_4),
+        ("XXZ L=8 Jz=0.5 h=0.3", {"L": 8, "Jz": 0.5, "Jxy": 1, "h": 0.3, "SWEEPS": 200000, "SEED": 4732},
+         {name: XXZ_8_FIELD[name] for name in
+          ("Energy Density", "Magnetization Density", "Magnetization^2", "Staggered Magnetization^2")}),
     ],
 }
 

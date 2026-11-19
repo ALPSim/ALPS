@@ -59,7 +59,7 @@ if(Python_Interpreter_FOUND)
         "$<TARGET_FILE:simplemc>" "$<TARGET_FILE:parameter2xml>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(simplemc_exact PROPERTIES TIMEOUT 120 LABELS "cli")
   endif()
-  foreach(application loop dirloop_sse)
+  foreach(application loop dirloop_sse worm)
     if(TARGET ${application} AND TARGET parameter2xml)
       add_test(NAME qmc_exact_${application}
         COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_qmc_exact.py" ${application}
