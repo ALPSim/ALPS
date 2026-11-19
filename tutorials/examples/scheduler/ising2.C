@@ -18,7 +18,7 @@
 //=======================================================================
 
 #include "ising2.h"
-#include <alps/alea/detailedbinning.h>
+#include <alps/alea/observables.hpp>
 #include <cmath>
 
 using namespace std;
@@ -58,8 +58,8 @@ IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Pa
     spins[i]=(random_real() <0.5 ? 1 : -1);
 
   // create measurement objects
-  measurements << alps::RealObservable("Energy");
-  measurements << alps::RealObservable("Magnetization");
+  measurements << alps::alea::observable("Energy");
+  measurements << alps::alea::observable("Magnetization");
 }
 
 void IsingSimulation2::load(alps::IDump& dump)

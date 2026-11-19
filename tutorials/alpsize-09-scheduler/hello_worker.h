@@ -36,12 +36,12 @@ public:
     std::cout << "hello, " << params["WORLD"] << std::endl;
   }
   virtual ~hello_worker() {}
-  void init_observables(alps::Parameters const&, alps::ObservableSet&) {
+  void init_observables(alps::Parameters const&, alps::alea::observable_set&) {
     // initialize observable set
   }
   bool is_thermalized() const { return true; }
   double progress() const { return 1.0; }
-  void run(alps::ObservableSet&) {
+  void run(alps::alea::observable_set&) {
     // do some work
   }
   void save(alps::ODump&) const {}

@@ -73,19 +73,19 @@ public:
       boost::throw_exception(std::invalid_argument("non-bipartite lattice"));
   }
 
-  void init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
-    obs << alps::SimpleRealObservable("Volume")
-        << alps::RealObservable("Energy")
-        << alps::RealObservable("Energy Density")
-        << alps::RealObservable("Staggered Magnetization^2")
-        << alps::RealObservable("Susceptibility")
-        << alps::RealObservable("Staggered Susceptibility");
+  void init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
+    obs << alps::alea::observable("Volume").without_bins()
+        << alps::alea::observable("Energy")
+        << alps::alea::observable("Energy Density")
+        << alps::alea::observable("Staggered Magnetization^2")
+        << alps::alea::observable("Susceptibility")
+        << alps::alea::observable("Staggered Susceptibility");
   }
 
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  void run(alps::ObservableSet& obs) {
+  void run(alps::alea::observable_set& obs) {
     ++mcs_;
     r_time_.distribution() = boost::exponential_distribution<>(beta_ * nbonds_ / 2);
 
@@ -189,7 +189,7 @@ public:
       l2 += power2(pi->length);
     }
 
-    add_constant(obs["Volume"], volume_);
+    alps::add_constant(obs["Volume"], volume_);
     obs["Energy"] << (0.25 * nbonds_ - operators_.size() / beta_);
     obs["Energy Density"] << (0.25 * nbonds_ - operators_.size() / beta_) / volume_;
     obs["Staggered Magnetization^2"] << 0.25 * s2;

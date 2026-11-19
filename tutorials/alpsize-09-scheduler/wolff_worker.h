@@ -49,16 +49,16 @@ public:
   }
   virtual ~wolff_worker() {}
 
-  void init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
-    obs << alps::RealObservable("Magnetization")
-        << alps::RealObservable("Magnetization^2")
-        << alps::RealObservable("Magnetization^4");
+  void init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
+    obs << alps::alea::observable("Magnetization")
+        << alps::alea::observable("Magnetization^2")
+        << alps::alea::observable("Magnetization^4");
   }
 
   bool is_thermalized() const { return mcs >= MCTHRM; }
   double progress() const { return 1.0 * mcs / (MCTHRM + MCSTEP); }
 
-  void run(alps::ObservableSet& obs) {
+  void run(alps::alea::observable_set& obs) {
     ++mcs;
     int s = static_cast<int>(random_01() * N);
     int so = spin[s];
@@ -101,11 +101,9 @@ private:
 class wolff_evaluator : public alps::parapack::simple_evaluator {
 public:
   wolff_evaluator(alps::Parameters const&) {}
-  void evaluate(alps::ObservableSet& obs) const {
-    alps::RealObsevaluator m2 = obs["Magnetization^2"];
-    alps::RealObsevaluator m4 = obs["Magnetization^4"];
-    alps::RealObsevaluator binder("Binder Ratio of Magnetization");
-    binder = m2 * m2 / m4;
-    obs.addObservable(binder);
+  void evaluate(alps::alea::result_set& obs) const {
+    const alps::alea::observable_result m2 = obs["Magnetization^2"];
+    const alps::alea::observable_result m4 = obs["Magnetization^4"];
+    obs.insert("Binder Ratio of Magnetization", m2 * m2 / m4);
   }
 };

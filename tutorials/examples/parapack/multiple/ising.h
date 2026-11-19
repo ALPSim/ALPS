@@ -76,22 +76,22 @@ public:
   }
   virtual ~parallel_ising_worker() {}
 
-  void init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
+  void init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
     if (comm_.rank() == 0)
-      obs << alps::SimpleRealObservable("Temperature")
-          << alps::SimpleRealObservable("Inverse Temperature")
-          << alps::SimpleRealObservable("Number of Sites")
-          << alps::RealObservable("Energy")
-          << alps::RealObservable("Energy^2")
-          << alps::RealObservable("Magnetization")
-          << alps::RealObservable("Magnetization^2")
-          << alps::RealObservable("Magnetization^4");
+      obs << alps::alea::observable("Temperature").without_bins()
+          << alps::alea::observable("Inverse Temperature").without_bins()
+          << alps::alea::observable("Number of Sites").without_bins()
+          << alps::alea::observable("Energy")
+          << alps::alea::observable("Energy^2")
+          << alps::alea::observable("Magnetization")
+          << alps::alea::observable("Magnetization^2")
+          << alps::alea::observable("Magnetization^4");
   }
 
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  void run(alps::ObservableSet& obs) {
+  void run(alps::alea::observable_set& obs) {
     ++mcs_;
 
     for (int i = 0; i < loclen_; ++i) {
@@ -117,9 +117,9 @@ public:
     }
 
     if (comm_.rank() == 0) {
-      add_constant(obs["Temperature"], 1/beta_);
-      add_constant(obs["Inverse Temperature"], beta_);
-      add_constant(obs["Number of Sites"], (double)length_);
+      alps::add_constant(obs["Temperature"], 1/beta_);
+      alps::add_constant(obs["Inverse Temperature"], beta_);
+      alps::add_constant(obs["Number of Sites"], (double)length_);
       obs["Energy"] << energy_;
       obs["Energy^2"] << energy_ * energy_;
       obs["Magnetization"] << mag;

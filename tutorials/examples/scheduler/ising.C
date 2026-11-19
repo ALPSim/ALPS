@@ -20,7 +20,7 @@
 //=======================================================================
 
 #include "ising.h"
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <cmath>
 
 void IsingSimulation::print_copyright(std::ostream& out)
@@ -43,11 +43,11 @@ IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Para
     spins[i]=(random_real() <0.5 ? 1 : -1);
 
   // create measurement objects
-  measurements << alps::RealObservable("Energy");
-  measurements << alps::RealObservable("Magnetization");
-  measurements << alps::RealObservable("Magnetization^2");
-  measurements << alps::RealObservable("Magnetization^4");
-  measurements << alps::RealVectorObservable("Correlations");
+  measurements << alps::alea::observable("Energy");
+  measurements << alps::alea::observable("Magnetization");
+  measurements << alps::alea::observable("Magnetization^2");
+  measurements << alps::alea::observable("Magnetization^4");
+  measurements << alps::alea::observable("Correlations");
 }
 
 void IsingSimulation::load(alps::IDump& dump)

@@ -40,7 +40,7 @@ public:
   }
   virtual ~wanglandau_worker() {}
 
-  void init_observables(alps::Parameters const&, std::vector<alps::ObservableSet>& obs) {
+  void init_observables(alps::Parameters const&, std::vector<alps::alea::observable_set>& obs) {
     if (alps::wanglandau::is_learning_phase<WL_TYPE>::value) {
       // learning phase
       obs.resize(1);
@@ -49,12 +49,12 @@ public:
       // measurement phase
       obs.resize(weight.size());
       weight.init_observables(obs[0]);
-      BOOST_FOREACH(alps::ObservableSet& o, obs) {
-        o << alps::SimpleRealObservable("Number of Sites")
-          << alps::SimpleRealObservable("Energy")
-          << alps::SimpleRealObservable("Magnetization")
-          << alps::SimpleRealObservable("Magnetization^2")
-          << alps::SimpleRealObservable("Magnetization^4");
+      BOOST_FOREACH(alps::alea::observable_set& o, obs) {
+        o << alps::alea::observable("Number of Sites").without_bins()
+          << alps::alea::observable("Energy").without_bins()
+          << alps::alea::observable("Magnetization").without_bins()
+          << alps::alea::observable("Magnetization^2").without_bins()
+          << alps::alea::observable("Magnetization^4").without_bins();
       }
     }
   }
@@ -62,7 +62,7 @@ public:
   bool is_thermalized() const { return mcs.is_thermalized(); }
   double progress() const { return mcs.progress(); }
 
-  void run(std::vector<alps::ObservableSet>& obs) {
+  void run(std::vector<alps::alea::observable_set>& obs) {
     ++mcs;
     BOOST_FOREACH(site_descriptor s, sites()) {
       int enew = energy;
@@ -84,8 +84,8 @@ public:
         double mag = 0;
         BOOST_FOREACH(site_descriptor v, sites()) mag += spins[v];
         mag /= num_sites();
-        add_constant(obs[index]["Number of Sites"], (double)num_sites());
-        add_constant(obs[index]["Energy"], (double)energy);
+        alps::add_constant(obs[index]["Number of Sites"], (double)num_sites());
+        alps::add_constant(obs[index]["Energy"], (double)energy);
         obs[index]["Magnetization"] << mag;
         obs[index]["Magnetization^2"] << mag * mag;
         obs[index]["Magnetization^4"] << mag * mag * mag * mag;
@@ -129,31 +129,31 @@ public:
   }
   virtual ~wanglandau_reweight_worker() {}
 
-  void init_observables(alps::Parameters const&, std::vector<alps::ObservableSet>& obs) {
+  void init_observables(alps::Parameters const&, std::vector<alps::alea::observable_set>& obs) {
     obs.resize(nsteps);
-    BOOST_FOREACH(alps::ObservableSet& o, obs) {
-      o << alps::SimpleRealObservable("Temperature")
-        << alps::SimpleRealObservable("Inverse Temperature")
-        << alps::SimpleRealObservable("Number of Sites")
-        << alps::SimpleRealObservable("Energy")
-        << alps::SimpleRealObservable("Energy Density")
-        << alps::SimpleRealObservable("Energy^2")
-        << alps::SimpleRealObservable("Specific Heat")
-        << alps::SimpleRealObservable("Free-Energy")
-        << alps::SimpleRealObservable("Free-Energy Density")
-        << alps::SimpleRealObservable("Entropy")
-        << alps::SimpleRealObservable("Entropy Density")
-        << alps::SimpleRealObservable("Magnetization")
-        << alps::SimpleRealObservable("Magnetization^2")
-        << alps::SimpleRealObservable("Magnetization^4")
-        << alps::SimpleRealObservable("Binder Ratio of Magnetization");
+    BOOST_FOREACH(alps::alea::observable_set& o, obs) {
+      o << alps::alea::observable("Temperature").without_bins()
+        << alps::alea::observable("Inverse Temperature").without_bins()
+        << alps::alea::observable("Number of Sites").without_bins()
+        << alps::alea::observable("Energy").without_bins()
+        << alps::alea::observable("Energy Density").without_bins()
+        << alps::alea::observable("Energy^2").without_bins()
+        << alps::alea::observable("Specific Heat").without_bins()
+        << alps::alea::observable("Free-Energy").without_bins()
+        << alps::alea::observable("Free-Energy Density").without_bins()
+        << alps::alea::observable("Entropy").without_bins()
+        << alps::alea::observable("Entropy Density").without_bins()
+        << alps::alea::observable("Magnetization").without_bins()
+        << alps::alea::observable("Magnetization^2").without_bins()
+        << alps::alea::observable("Magnetization^4").without_bins()
+        << alps::alea::observable("Binder Ratio of Magnetization").without_bins();
     }
   }
 
   bool is_thermalized() const { return true; }
   double progress() const { return 1.0 * step / nsteps; }
 
-  void run(std::vector<alps::ObservableSet>& obs) {
+  void run(std::vector<alps::alea::observable_set>& obs) {
     double t = t_min + step * t_step;
     double beta = 1 / t;
     alps::IXDRFileDump dp(alps::wanglandau_weight::observable_dumpfile(params));
@@ -243,27 +243,25 @@ private:
 class wanglandau_reweight_evaluator : public alps::parapack::simple_evaluator {
 public:
   wanglandau_reweight_evaluator(alps::Parameters const&) {}
-  void evaluate(std::vector<alps::ObservableSet>& obs) const {
-    BOOST_FOREACH(alps::ObservableSet& o, obs) {
+  void evaluate(std::vector<alps::alea::result_set>& obs) const {
+    // Functions of results need bins; these observables have one sample per
+    // clone and keep the values measured directly unless they have bins.
+    BOOST_FOREACH(alps::alea::result_set& o, obs) {
       if (o.has("Inverse Temperature") && o.has("Number of Sites") &&
           o.has("Energy") && o.has("Energy^2")) {
-        alps::RealObsevaluator beta = o["Inverse Temperature"];
-        alps::RealObsevaluator n = o["Number of Sites"];
-        alps::RealObsevaluator ene = o["Energy"];
-        alps::RealObsevaluator ene2 = o["Energy^2"];
-        if (beta.count() && n.count() && ene.count() >= 8 && ene2.count()) {
-          alps::RealObsevaluator c("Specific Heat");
-          c = beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean();
-          o.addObservable(c);
+        const alps::alea::observable_result beta = o["Inverse Temperature"];
+        const alps::alea::observable_result n = o["Number of Sites"];
+        const alps::alea::observable_result ene = o["Energy"];
+        const alps::alea::observable_result ene2 = o["Energy^2"];
+        if (beta.count() && n.count() && ene.count() >= 8 && ene2.count() && ene.has_bins() && ene2.has_bins()) {
+          o.insert("Specific Heat", beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean());
         }
       }
       if (o.has("Magnetization^2") && o.has("Magnetization^4")) {
-        alps::RealObsevaluator m2 = o["Magnetization^2"];
-        alps::RealObsevaluator m4 = o["Magnetization^4"];
-        if (m2.count() >= 8 && m4.count()) {
-          alps::RealObsevaluator binder("Binder Ratio of Magnetization");
-          binder = m2 * m2 / m4;
-          o.addObservable(binder);
+        const alps::alea::observable_result m2 = o["Magnetization^2"];
+        const alps::alea::observable_result m4 = o["Magnetization^4"];
+        if (m2.count() >= 8 && m4.count() && m2.has_bins() && m4.has_bins()) {
+          o.insert("Binder Ratio of Magnetization", m2 * m2 / m4);
         }
       }
     }

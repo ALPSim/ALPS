@@ -62,21 +62,21 @@ public:
   }
   virtual ~single_ising_worker() {}
 
-  void init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
-    obs << alps::SimpleRealObservable("Temperature")
-        << alps::SimpleRealObservable("Inverse Temperature")
-        << alps::SimpleRealObservable("Number of Sites")
-        << alps::RealObservable("Energy")
-        << alps::RealObservable("Energy^2")
-        << alps::RealObservable("Magnetization")
-        << alps::RealObservable("Magnetization^2")
-        << alps::RealObservable("Magnetization^4");
+  void init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
+    obs << alps::alea::observable("Temperature").without_bins()
+        << alps::alea::observable("Inverse Temperature").without_bins()
+        << alps::alea::observable("Number of Sites").without_bins()
+        << alps::alea::observable("Energy")
+        << alps::alea::observable("Energy^2")
+        << alps::alea::observable("Magnetization")
+        << alps::alea::observable("Magnetization^2")
+        << alps::alea::observable("Magnetization^4");
   }
 
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  void run(alps::ObservableSet& obs) {
+  void run(alps::alea::observable_set& obs) {
     ++mcs_;
 
     for (std::size_t t = 0; t < sublat_.size(); ++t) {
@@ -118,9 +118,9 @@ public:
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
     energy_ = ene;
-    add_constant(obs["Temperature"], 1/beta_);
-    add_constant(obs["Inverse Temperature"], beta_);
-    add_constant(obs["Number of Sites"], (double)num_sites());
+    alps::add_constant(obs["Temperature"], 1/beta_);
+    alps::add_constant(obs["Inverse Temperature"], beta_);
+    alps::add_constant(obs["Number of Sites"], (double)num_sites());
     obs["Energy"] << energy_;
     obs["Energy^2"] << energy_ * energy_;
     obs["Magnetization"] << mag;
@@ -154,26 +154,22 @@ public:
   ising_evaluator(alps::Parameters const&) {}
   virtual ~ising_evaluator() {}
 
-  void evaluate(alps::ObservableSet& obs) const {
+  void evaluate(alps::alea::result_set& obs) const {
     if (obs.has("Inverse Temperature") && obs.has("Number of Sites") &&
         obs.has("Energy") && obs.has("Energy^2")) {
-      alps::RealObsevaluator beta = obs["Inverse Temperature"];
-      alps::RealObsevaluator n = obs["Number of Sites"];
-      alps::RealObsevaluator ene = obs["Energy"];
-      alps::RealObsevaluator ene2 = obs["Energy^2"];
+      const alps::alea::observable_result beta = obs["Inverse Temperature"];
+      const alps::alea::observable_result n = obs["Number of Sites"];
+      const alps::alea::observable_result ene = obs["Energy"];
+      const alps::alea::observable_result ene2 = obs["Energy^2"];
       if (beta.count() && n.count() && ene.count() && ene2.count()) {
-        alps::RealObsevaluator c("Specific Heat");
-        c = beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean();
-        obs.addObservable(c);
+        obs.insert("Specific Heat", beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean());
       }
     }
     if (obs.has("Magnetization^2") && obs.has("Magnetization^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization^4"];
+      const alps::alea::observable_result m2 = obs["Magnetization^2"];
+      const alps::alea::observable_result m4 = obs["Magnetization^4"];
       if (m2.count() && m4.count()) {
-        alps::RealObsevaluator binder("Binder Ratio of Magnetization");
-        binder = m2 * m2 / m4;
-        obs.addObservable(binder);
+        obs.insert("Binder Ratio of Magnetization", m2 * m2 / m4);
       }
     }
     if (obs.has("Inverse Temperature")) obs.erase("Inverse Temperature");
