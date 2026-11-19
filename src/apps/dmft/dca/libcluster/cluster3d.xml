@@ -1329,31 +1329,6 @@
     <UNITCELL ref="simple3d"/>
   </LATTICEGRAPH>
 
-  <LATTICE name="Betts3D-15F superlattice" dimension="3">
-    <BASIS>
-      <VECTOR>3 0 0</VECTOR>
-      <VECTOR>0 -2 1</VECTOR>
-      <VECTOR>0 -1 -2</VECTOR>
-    </BASIS>
-    <RECIPROCALBASIS>
-      <VECTOR>10*pi/15 0*pi/15 0*pi/15</VECTOR>
-      <VECTOR>0*pi/15 -12*pi/15 6*pi/15</VECTOR>
-      <VECTOR>0*pi/15 -6*pi/15 -12*pi/15</VECTOR>
-    </RECIPROCALBASIS>
-  </LATTICE>
-
-  <LATTICEGRAPH name = "Betts3D-15F">
-    <FINITELATTICE>
-      <LATTICE ref="Betts3D-15F superlattice"/>
-      <PARAMETER name="L" default="30"/>
-      <EXTENT dimension="1" size="L"/>
-      <EXTENT dimension="2" size="L"/>
-      <EXTENT dimension="3" size="L"/>
-      <BOUNDARY type="periodic"/>
-    </FINITELATTICE>
-    <UNITCELL ref="simple3d"/>
-  </LATTICEGRAPH>
-
   <LATTICE name="Betts3D-15G superlattice" dimension="3">
     <BASIS>
       <VECTOR>3 2 1</VECTOR>
