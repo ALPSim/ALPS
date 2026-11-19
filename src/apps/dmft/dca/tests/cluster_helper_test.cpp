@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 #include "gtest/gtest.h"
-#include "test_dump_file.h"
 #include "cluster_helper.h"
 #include "alps/params.hpp"
 #include "alps/hdf5.hpp"
@@ -20,7 +19,6 @@
 //,"Kent3D-10A","Kent3D-10B","Kent3D-12A","Kent3D-12B","Kent3D-14A","Kent3D-14B","Kent3D-16C","Kent3D-16D","Kent3D-18A","Kent3D-18B","Kent3D-20A","Kent3D-20B","Kent3D-22A","Kent3D-22B","Kent3D-24C","Kent3D-24D","Kent3D-26A","Kent3D-26B","Kent3D-28A","Kent3D-28B","Kent3D-30A","Kent3D-30B","Kent3D-32A","Kent3D-32B","Kent3D-34A","Kent3D-34B","Kent3D-36A","Kent3D-36B","Kent3D-38A","Kent3D-38B","Kent3D-40A","Kent3D-40B","Kent3D-42A","Kent3D-42B","Kent3D-44A","Kent3D-44B","Kent3D-46A"
   void set_other_parameters(alps::params &p){
     p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-    p["dca.LATTICE_DUMP"] = test_dump_file();
     p["MU"] = 0.;
     p["t"] = 1.;
     p["tprime"] = 0.;
@@ -65,30 +63,14 @@ class ClusterHelperTest : public ::testing::TestWithParam<const char*> {
   ClusterHelper *CH_;
 };
 
-TEST_P(ClusterHelperTest, TwoDClusterReadWrite){
+// Setting up the same cluster twice gives the same tables.
+TEST_P(ClusterHelperTest, SetupIsReproducible){
   alps::params p2;
   p2["dca.LATTICE"]=GetParam();
-  p2["TMPNAME"]="cluster_dump.h5";
-  set_other_parameters(p2);
-  CH_->write();
-  
-  p2["dca.SITES"]=extract_unit_cell_volume_from_name(GetParam());
-  p2["dca.L"] = L_;
-  ClusterHelper CH2(p2);
-  CH2.read();
-  
-  EXPECT_EQ(*CH_, CH2);
-}
-TEST_P(ClusterHelperTest, TwoDClusterVsStoredALPS){
-  alps::params p2;
-  p2["dca.LATTICE"]=GetParam();
-  p2["dca.TMPNAME"]="cluster_dump.bup.h5";
   p2["dca.SITES"]=extract_unit_cell_volume_from_name(GetParam());
   p2["dca.L"] = L_;
   set_other_parameters(p2);
   ClusterHelper CH2(p2);
-  CH2.read();
-  //CH2.read(p2, GetParam());
 
   EXPECT_EQ(*CH_, CH2);
 }
@@ -134,35 +116,6 @@ TEST(ClusterHelper, Periodicity4Site){
 
   EXPECT_EQ(CH.periodicity(0), 2);
   EXPECT_EQ(CH.periodicity(1), 2);
-}
-// The lattice momenta depend on dca.L. A dump file written for one L must not
-// supply the tables for another: each L is stored in its own group.
-TEST(ClusterHelper, DumpFileKeepsEachL){
-  auto params_for = [](int L, const std::string &dump) {
-    alps::params p;
-    p["dca.LATTICE"]="Betts2D-4A";
-    p["dca.SITES"]=4;
-    p["dca.L"]=L;
-    set_other_parameters(p);
-    p["dca.LATTICE_DUMP"]=dump;
-    return p;
-  };
-  const std::string shared = test_dump_file();
-  const std::string fresh = "./fresh_" + shared.substr(2);
-  std::remove(shared.c_str());
-  std::remove(fresh.c_str());
-
-  ClusterHelper L8(params_for(8, shared));             // computes L=8 and writes it
-  ClusterHelper L12_shared(params_for(12, shared));    // must not reuse the L=8 tables
-  ClusterHelper L12_fresh(params_for(12, fresh));
-  EXPECT_NE(L8.n_lattice_momenta(), L12_shared.n_lattice_momenta());
-  EXPECT_EQ(L12_shared, L12_fresh);
-
-  ClusterHelper L8_again(params_for(8, shared));       // reads the L=8 group back
-  EXPECT_EQ(L8, L8_again);
-  alps::hdf5::archive ar(shared, "r");
-  EXPECT_TRUE(ar.is_group("/Betts2D-4A/L8"));
-  EXPECT_TRUE(ar.is_group("/Betts2D-4A/L12"));
 }
 
 // Periodicity: the number of hops along each lattice direction until the same

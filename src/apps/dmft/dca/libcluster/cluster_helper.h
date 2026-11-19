@@ -86,8 +86,6 @@ public:
   const pair_class_set_type &pair_class_set_k_space() const{return pair_class_set_k_space_;}
   
   virtual void write_hdf5(alps::hdf5::archive &ar, const std::string &p) const;
-  bool write() const;
-  bool read();
   
   bool operator==(const ClusterHelper &CH) const;
 private:
@@ -112,10 +110,6 @@ private:
   bool almost_equal(const double d1, const double d2) const { return std::abs(d1-d2)<epsilon_; }
   class lattice_momentum_set;
   std::vector<double> matrix_vector_mult(const Matrix<double>::Type& M, const std::vector<double>& v) const;
-  void write_site_class_set(alps::hdf5::archive &ar, const site_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
-  void write_pair_class_set(alps::hdf5::archive &ar, const pair_class_set_type &set, const std::string &name,const std::string &location="/transformer") const;
-  void read_site_class_set(alps::hdf5::archive &ar, site_class_set_type &set, const std::string &name,const std::string &location="/transformer");
-  void read_pair_class_set(alps::hdf5::archive &ar, pair_class_set_type &set, const std::string &name,const std::string &location="/transformer");
   void find_non_bipartite_cluster_momenta();
   void find_bipartite_cluster_momenta();
   void find_integration_weights();
@@ -151,13 +145,7 @@ private:
   bool paramagnet_;
   bool bipartite_;
   const double epsilon_;
-  const std::string hdf5_dump_name_;
   const std::string cluster_name_;
-  ///dca.L, the linear size of the lattice of clusters
-  const int lattice_L_;
-  ///group of the dump file holding this cluster: "<cluster name>/L<L>". The lattice momenta
-  ///depend on L, so each L has its own group, and changing dca.L never reuses another L's tables.
-  const std::string dump_location_;
 };
 
 
