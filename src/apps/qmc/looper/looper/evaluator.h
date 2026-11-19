@@ -24,13 +24,13 @@ namespace looper {
 class abstract_evaluator : public alps::parapack::simple_evaluator {
 public:
   virtual ~abstract_evaluator() {}
-  virtual void pre_evaluate(alps::ObservableSet& m, alps::Parameters const&,
-    alps::ObservableSet const& m_in) const = 0;
+  virtual void pre_evaluate(alps::alea::result_set& m, alps::Parameters const&,
+    alps::alea::result_set const& m_in) const = 0;
   virtual void evaluate(alps::scheduler::MCSimulation&, alps::Parameters const&,
     std::filesystem::path const&) const = 0;
-  virtual void evaluate(alps::ObservableSet& m, alps::Parameters const&,
-    alps::ObservableSet const& m_in) const = 0;
-  virtual void evaluate(alps::ObservableSet&) const {};
+  virtual void evaluate(alps::alea::result_set& m, alps::Parameters const&,
+    alps::alea::result_set const& m_in) const = 0;
+  virtual void evaluate(alps::alea::result_set&) const {};
 };
 
 } // end namespace looper

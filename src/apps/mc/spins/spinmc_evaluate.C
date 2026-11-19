@@ -12,53 +12,44 @@
 #include <alps/cli.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/config.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/scheduler.h>
 
 #include <filesystem>
 
 void evaluate(const std::filesystem::path& p, const bool write_xml) {
+  typedef alps::alea::observable_result result;
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
-  const alps::ObservableSet& m_in=sim.get_measurements();
+  const alps::alea::result_set m_in=sim.get_measurements();
   alps::Parameters parms=sim.get_parameters();
   alps::graph_helper<> graph(parms);
   double numsites=graph.num_sites();
   double beta=parms.defined("beta") ? alps::evaluate<double>("beta",parms) : 1./alps::evaluate<double>("T",parms);
   
-  alps::RealObsevaluator obse_e = m_in["beta * Energy / sqrt(N)"];
-  alps::RealObsevaluator obse_e2 = m_in["(beta * Energy)^2 / N"];
-  alps::RealObsevaluator eval("Specific Heat");
-  eval = (obse_e2 - obse_e * obse_e);
-  sim << eval;
+  result obse_e = m_in["beta * Energy / sqrt(N)"];
+  result obse_e2 = m_in["(beta * Energy)^2 / N"];
+  sim.add_result("Specific Heat", obse_e2 - obse_e * obse_e);
   
-  alps::RealObsevaluator m = m_in["|Magnetization|"];
-  alps::RealObsevaluator m2 = m_in["Magnetization^2"];
-  alps::RealObsevaluator u2("Binder Cumulant U2");
-  u2 = m2/(m*m);
-  sim << u2;
-  alps::RealObsevaluator chi("Connected Susceptibility");
-  chi=beta*numsites*(m2-m*m);
-  sim << chi;
+  result m = m_in["|Magnetization|"];
+  result m2 = m_in["Magnetization^2"];
+  sim.add_result("Binder Cumulant U2", m2/(m*m));
+  sim.add_result("Connected Susceptibility", beta*numsites*(m2-m*m));
   
   if (m_in.has("Magnetization^4")) {
-  alps::RealObsevaluator m4 = m_in["Magnetization^4"];
-  alps::RealObsevaluator u4("Binder Cumulant");
-  u4 = m4/(m2*m2);
-  sim << u4;
+    result m4 = m_in["Magnetization^4"];
+    sim.add_result("Binder Cumulant", m4/(m2*m2));
   
-  if (m_in.has("E.Magnetization^4")) {
-  alps::RealObsevaluator e = m_in["Energy"];
-  alps::RealObsevaluator em2 = m_in["E.Magnetization^2"];
-  alps::RealObsevaluator em4 = m_in["E.Magnetization^4"];
-  alps::RealObsevaluator du4("Binder Cumulant slope");
-  alps::RealObsevaluator dm4("Magnetization^4 slope");
-  alps::RealObsevaluator dm2("Magnetization^2 slope");
-	du4=beta*beta*((em4-e*m4)/(m2*m2)-2*m4*(em2-e*m2)/(m2*m2*m2));
-	dm2=beta*beta*((em2-e*m2)); dm4=beta*beta*((em4-e*m4)); 
-  sim << du4; sim << dm2; sim << dm4;
- } }
-   sim.checkpoint(p,write_xml);
+    if (m_in.has("E.Magnetization^4")) {
+      result e = m_in["Energy"];
+      result em2 = m_in["E.Magnetization^2"];
+      result em4 = m_in["E.Magnetization^4"];
+      sim.add_result("Binder Cumulant slope", beta*beta*((em4-e*m4)/(m2*m2)-2*m4*(em2-e*m2)/(m2*m2*m2)));
+      sim.add_result("Magnetization^2 slope", beta*beta*((em2-e*m2)));
+      sim.add_result("Magnetization^4 slope", beta*beta*((em4-e*m4)));
+    }
+  }
+  sim.checkpoint(p,write_xml);
 }
 
 int main(int argc, char** argv)

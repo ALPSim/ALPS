@@ -42,12 +42,12 @@ public:
   typedef double weight_parameter_type;
 
   loop_worker(alps::Parameters const& p);
-  void init_observables(alps::Parameters const& params, alps::ObservableSet& obs);
+  void init_observables(alps::Parameters const& params, alps::alea::observable_set& obs);
 
   bool is_thermalized() const { return mcs.is_thermalized(); }
   double progress() const { return mcs.progress(); }
 
-  void run(alps::ObservableSet& obs);
+  void run(alps::alea::observable_set& obs);
 
   // for exchange Monte Carlo
   void set_beta(double beta) { temperature.set_beta(beta); }
@@ -61,7 +61,7 @@ protected:
   void build();
 
   template<typename FIELD, typename SIGN, typename IMPROVE>
-  void flip(alps::ObservableSet& obs);
+  void flip(alps::alea::observable_set& obs);
 
 private:
   // helpers
@@ -121,24 +121,24 @@ loop_worker::loop_worker(alps::Parameters const& p)
   estimator.initialize(p, lattice, model.is_signed(), use_improved_estimator);
 }
 
-void loop_worker::init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
-  obs << make_observable(alps::SimpleRealObservable("Temperature"));
-  obs << make_observable(alps::SimpleRealObservable("Inverse Temperature"));
-  obs << make_observable(alps::SimpleRealObservable("Volume"));
-  obs << make_observable(alps::SimpleRealObservable("Number of Sites"));
-  obs << make_observable(alps::SimpleRealObservable("Number of Clusters"));
+void loop_worker::init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
+  obs << alps::alea::observable("Temperature").without_bins();
+  obs << alps::alea::observable("Inverse Temperature").without_bins();
+  obs << alps::alea::observable("Volume").without_bins();
+  obs << alps::alea::observable("Number of Sites").without_bins();
+  obs << alps::alea::observable("Number of Clusters").without_bins();
   if (model.is_signed()) {
-    obs << alps::RealObservable("Sign");
+    obs << alps::alea::observable("Sign");
     if (use_improved_estimator) {
-      obs << alps::RealObservable("Weight of Zero-Meron Sector");
-      obs << alps::RealObservable("Sign in Zero-Meron Sector");
+      obs << alps::alea::observable("Weight of Zero-Meron Sector");
+      obs << alps::alea::observable("Sign in Zero-Meron Sector");
     }
   }
   looper::energy_estimator::init_observables(obs, model.is_signed());
   estimator.init_observables(obs, model.is_signed());
 }
 
-void loop_worker::run(alps::ObservableSet& obs) {
+void loop_worker::run(alps::alea::observable_set& obs) {
   // if (!mcs.can_work()) return;
   ++mcs;
   beta = 1.0 / temperature(mcs());
@@ -240,7 +240,7 @@ void loop_worker::build() {
 //
 
 template<typename FIELD, typename SIGN, typename IMPROVE>
-void loop_worker::flip(alps::ObservableSet& obs) {
+void loop_worker::flip(alps::alea::observable_set& obs) {
   if (model.has_field() != FIELD() ||
       model.is_signed() != SIGN() ||
       use_improved_estimator != IMPROVE()) return;

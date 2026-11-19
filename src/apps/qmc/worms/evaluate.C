@@ -15,7 +15,7 @@
 #include <alps/cli.hpp>
 #include <alps/utilities/copyright.hpp>
 #include <alps/scheduler.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <fstream>
 #include <filesystem>
 
@@ -34,49 +34,27 @@ void evaluate(const std::filesystem::path& p, std::ostream& out, const bool writ
   double numsites = graph.num_sites();
 
   // determine compressibility
-  alps::RealObsevaluator n  = sim.get_measurements()["Density"];
-  alps::RealObsevaluator n2 = sim.get_measurements()["Density^2"];
+  const alps::alea::result_set measurements = sim.get_measurements();
+  alps::alea::observable_result n  = measurements["Density"];
+  alps::alea::observable_result n2 = measurements["Density^2"];
 
-  alps::RealObsevaluator kappa= beta*(n2 - numsites*n*n);  // add factor of beta
-  kappa.rename("Compressibility");
+  alps::alea::observable_result kappa= beta*(n2 - numsites*n*n);  // add factor of beta
 
   bool use_1D_stiffness = parms.defined("USE_1D_STIFFNESS") ? static_cast<bool>(parms["USE_1D_STIFFNESS"]) : false ; 
-  //bool use_1D_stiffness = parms.defined("USE_1D_STIFFNESS") ? true : false ; 
 
   if (use_1D_stiffness){
-    // winding number statistics
-    alps::RealVectorObsevaluator wz = sim.get_measurements()["Winding number histogram"] ;
-    alps::RealObsevaluator wz_m1(wz.slice(0)) ;
-    alps::RealObsevaluator wz_0(wz.slice(1)) ;
-    alps::RealObsevaluator wz_p1(wz.slice(2)) ;
-
-    alps::RealObsevaluator rho_s_01=log(2.*wz_0/( wz_m1+wz_p1 )) ;
-    rho_s_01 *= 2.*beta/L ;
-    rho_s_01 = 1./rho_s_01 ; 
-    rho_s_01.rename("Superfluid stiffness (1D estimator)") ;
-    out<<rho_s_01<<"\n" ; 
-    sim << rho_s_01 ; 
+    // winding number statistics: how often the winding number was -1, 0 and +1
+    alps::alea::observable_result rho_s_01 = alps::alea::transform(
+      [beta, L](const std::vector<double>& wz) {
+        return std::vector<double>(1, 1./(2.*beta/L*std::log(2.*wz[1]/(wz[0]+wz[2]))));
+      }, {measurements["Winding number histogram"]});
+    out << "Superfluid stiffness (1D estimator): " << rho_s_01 << "\n";
+    sim.add_result("Superfluid stiffness (1D estimator)", rho_s_01);
   }
-
-
-
-/*
-  alps::RealVectorObsevaluator IntervalStatistics 
-    = sim.get_measurements()["Statistics time intervals"];
-
-  alps::RealObsevaluator intervals;
-  alps::RealObsevaluator ratio = 0;
-  for(int i=1; i<IntervalStatistics.value().size(); ++i) {
-    intervals += IntervalStatistics.slice(i) * i;
-    ratio += IntervalStatistics.slice(i) / i;
-  }
-*/
 
   // output
-  out << kappa << "\n";
-   //   << intervals << "\n"
-   //   << ratio << "\n";
-  sim << kappa;
+  out << "Compressibility: " << kappa << "\n";
+  sim.add_result("Compressibility", kappa);
   sim.checkpoint(p,write_xml);
 }
 

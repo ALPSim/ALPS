@@ -16,7 +16,7 @@
 #include <alps/scheduler/measurement_operators.h>
 #include <alps/osiris/dump.h>
 #include <alps/lattice.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 
 #include "../qmc.h"
 #include "lattice.h"
@@ -64,9 +64,7 @@ public:
     
     void load(alps::IDump& dump)
     {
-        if (super_type::where.empty())
-            super_type::measurements.compact();
-        else {
+        if (!super_type::where.empty()) {
             dump >> nthermalization >> sweeps_done >> measurements_done;
             algorithm.load(dump);
         }
@@ -141,9 +139,14 @@ public:
         return super_type::random_01();
     }
     
-    alps::ObservableSet& measurements()
+    alps::alea::observable_set& measurements()
     {
         return super_type::measurements;
+    }
+
+    alps::alea::observable observable(const std::string& name) const
+    {
+        return super_type::observable(name);
     }
     
     bool is_signed() const

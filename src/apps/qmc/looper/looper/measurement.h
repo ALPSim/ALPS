@@ -16,7 +16,7 @@
 
 #include "lattice.h"
 #include "power.h"
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <boost/call_traits.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/type_traits/is_base_of.hpp>
@@ -39,20 +39,26 @@ struct has_evaluator_tag {};
 // helper functions
 //
 
-inline
-void add_scalar_obs(alps::ObservableSet& m, std::string const& name, bool is_signed = false) {
-  if (!m.has(name)) m << make_observable(alps::RealObservable(name), is_signed);
+inline alps::alea::observable declare_obs(std::string const& name, bool is_signed) {
+  alps::alea::observable obs(name);
+  if (is_signed) obs.signed_by("Sign");
+  return obs;
 }
 
 inline
-void add_vector_obs(alps::ObservableSet& m, std::string const& name, bool is_signed = false) {
-  if (!m.has(name)) m << make_observable(alps::RealVectorObservable(name), is_signed);
+void add_scalar_obs(alps::alea::observable_set& m, std::string const& name, bool is_signed = false) {
+  if (!m.has(name)) m << declare_obs(name, is_signed);
 }
 
 inline
-void add_vector_obs(alps::ObservableSet& m, std::string const& name,
-  alps::RealVectorObservable::label_type const& label, bool is_signed = false) {
-  if (!m.has(name)) m << make_observable(alps::RealVectorObservable(name, label), is_signed);
+void add_vector_obs(alps::alea::observable_set& m, std::string const& name, bool is_signed = false) {
+  if (!m.has(name)) m << declare_obs(name, is_signed);
+}
+
+inline
+void add_vector_obs(alps::alea::observable_set& m, std::string const& name,
+  std::vector<std::string> const& label, bool is_signed = false) {
+  if (!m.has(name)) m << declare_obs(name, is_signed).labels(label);
 }
 
 // for path integral
@@ -228,19 +234,19 @@ struct pre_evaluator_selector {
 private:
   template<bool, typename M>
   struct impl {
-    static void pre_evaluate(alps::ObservableSet&, alps::Parameters const&,
-    alps::ObservableSet const&) {}
+    static void pre_evaluate(alps::alea::result_set&, alps::Parameters const&,
+    alps::alea::result_set const&) {}
   };
   template<typename M>
   struct impl<true, M> {
-    static void pre_evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-      alps::ObservableSet const& m_in) {
+    static void pre_evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+      alps::alea::result_set const& m_in) {
       M::pre_evaluator::pre_evaluate(m, params, m_in);
     }
   };
 public:
-  static void pre_evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-    alps::ObservableSet const& m_in) {
+  static void pre_evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+    alps::alea::result_set const& m_in) {
     impl<boost::is_base_of<has_pre_evaluator_tag, MEASUREMENT>::value, MEASUREMENT>::
       pre_evaluate(m, params, m_in);
   }
@@ -251,19 +257,19 @@ struct evaluator_selector {
 private:
   template<bool, typename M>
   struct impl {
-    static void evaluate(alps::ObservableSet&, alps::Parameters const&,
-    alps::ObservableSet const&) {}
+    static void evaluate(alps::alea::result_set&, alps::Parameters const&,
+    alps::alea::result_set const&) {}
   };
   template<typename M>
   struct impl<true, M> {
-    static void evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-      alps::ObservableSet const& m_in) {
+    static void evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+      alps::alea::result_set const& m_in) {
       M::evaluator::evaluate(m, params, m_in);
     }
   };
 public:
-  static void evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-    alps::ObservableSet const& m_in) {
+  static void evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+    alps::alea::result_set const& m_in) {
     impl<boost::is_base_of<has_evaluator_tag, MEASUREMENT>::value, MEASUREMENT>::
       evaluate(m, params, m_in);
   }
@@ -374,7 +380,7 @@ struct energy_estimator {
   // normal estimator
 
   template<typename RG>
-  static void measurement(alps::ObservableSet& m, lattice_helper<RG> const& lat, double beta,
+  static void measurement(alps::alea::observable_set& m, lattice_helper<RG> const& lat, double beta,
     double nop, double sign, double ene) {
     m["Energy"] << sign * ene;
     m["Energy Density"] << sign * ene / lat.volume();
@@ -383,18 +389,15 @@ struct energy_estimator {
 };
 
 struct energy_evaluator {
-  static void evaluate(alps::ObservableSet& m, alps::ObservableSet const& m_in) {
+  static void evaluate(alps::alea::result_set& m, alps::alea::result_set const& m_in) {
     if (m_in.has("Inverse Temperature") && m_in.has("Volume") &&
         m_in.has("Energy") && m_in.has("Energy^2")) {
-      alps::RealObsevaluator beta = m_in["Inverse Temperature"];
-      alps::RealObsevaluator vol = m_in["Volume"];
-      alps::RealObsevaluator ene = m_in["Energy"];
-      alps::RealObsevaluator ene2 = m_in["Energy^2"];
-      if (beta.count() && vol.count() && ene.count() && ene2.count()) {
-        alps::RealObsevaluator c("Specific Heat");
-        c = beta.mean() * beta.mean() * (ene2 - ene * ene) / vol.mean();
-        m.addObservable(c);
-      }
+      const alps::alea::observable_result beta = m_in["Inverse Temperature"];
+      const alps::alea::observable_result vol = m_in["Volume"];
+      const alps::alea::observable_result ene = m_in["Energy"];
+      const alps::alea::observable_result ene2 = m_in["Energy^2"];
+      if (beta.count() && vol.count() && ene.count() && ene2.count())
+        m.insert("Specific Heat", beta.mean() * beta.mean() * (ene2 - ene * ene) / vol.mean());
     }
   }
 };
@@ -596,15 +599,15 @@ struct composite_measurement :
   };
 
   struct pre_evaluator {
-    static void pre_evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-      alps::ObservableSet const& m_in) {
+    static void pre_evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+      alps::alea::result_set const& m_in) {
       pre_evaluator_selector<measurement1>::pre_evaluate(m, params, m_in);
       pre_evaluator_selector<measurement2>::pre_evaluate(m, params, m_in);
     }
   };
   struct evaluator {
-    static void evaluate(alps::ObservableSet& m, alps::Parameters const& params,
-      alps::ObservableSet const& m_in) {
+    static void evaluate(alps::alea::result_set& m, alps::Parameters const& params,
+      alps::alea::result_set const& m_in) {
       evaluator_selector<measurement1>::evaluate(m, params, m_in);
       evaluator_selector<measurement2>::evaluate(m, params, m_in);
     }

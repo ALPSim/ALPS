@@ -195,13 +195,13 @@ public:
   
   std::pair<matsubara_green_function_t,itime_green_function_t> get_result(); 
 
-  void evaluate_selfenergy_measurement_matsubara(const alps::ObservableSet &gathered_measurements, 
+  void evaluate_selfenergy_measurement_matsubara(const alps::alea::result_set &gathered_measurements, 
                                                  matsubara_green_function_t &green_matsubara_measured,
                                                  const matsubara_green_function_t &bare_green_matsubara, 
                                                  std::vector<double>& densities, const double &beta, 
                                                  const int n_site, const int n_flavors, const int n_matsubara) const;
 
-  void evaluate_selfenergy_measurement_itime_rs(const alps::ObservableSet &gathered_measurements, itime_green_function_t &green_result,
+  void evaluate_selfenergy_measurement_itime_rs(const alps::alea::result_set &gathered_measurements, itime_green_function_t &green_result,
                                                 const itime_green_function_t &green0, const double &beta, const int n_site, 
                                                 const int n_flavors, const int n_tau, const int n_self) const;
 

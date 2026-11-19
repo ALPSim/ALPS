@@ -332,47 +332,39 @@ struct susceptibility :
   };
 
   struct evaluator {
-    static void evaluate(alps::ObservableSet& m, alps::Parameters const& /* params */,
-      alps::ObservableSet const& m_in) {
+    static void evaluate(alps::alea::result_set& m, alps::Parameters const& /* params */,
+      alps::alea::result_set const& m_in) {
       if (m_in.has("Magnetization^2") && m_in.has("Magnetization^4")) {
-        alps::RealObsevaluator obse_m2 = m_in["Magnetization^2"];
-        alps::RealObsevaluator obse_m4 = m_in["Magnetization^4"];
+        const alps::alea::observable_result obse_m2 = m_in["Magnetization^2"];
+        const alps::alea::observable_result obse_m4 = m_in["Magnetization^4"];
         if (obse_m2.count() && obse_m4.count()) {
-          alps::RealObsevaluator eval("Binder Ratio of Magnetization");
-          eval = power2(obse_m2) / obse_m4;
-          m.addObservable(eval);
+          m.insert("Binder Ratio of Magnetization", obse_m2 * obse_m2 / obse_m4);
         }
       }
       if (m_in.has("Staggered Magnetization^2") &&
           m_in.has("Staggered Magnetization^4")) {
-        alps::RealObsevaluator obse_m2 = m_in["Staggered Magnetization^2"];
-        alps::RealObsevaluator obse_m4 = m_in["Staggered Magnetization^4"];
+        const alps::alea::observable_result obse_m2 = m_in["Staggered Magnetization^2"];
+        const alps::alea::observable_result obse_m4 = m_in["Staggered Magnetization^4"];
         if (obse_m2.count() && obse_m4.count()) {
-          alps::RealObsevaluator eval("Binder Ratio of Staggered Magnetization");
-          eval = power2(obse_m2) / obse_m4;
-          m.addObservable(eval);
+          m.insert("Binder Ratio of Staggered Magnetization", obse_m2 * obse_m2 / obse_m4);
         }
       }
       if (m_in.has("Generalized Magnetization^2") &&
           m_in.has("Generalized Magnetization^4")) {
-        alps::RealObsevaluator obse_m2 = m_in["Generalized Magnetization^2"];
-        alps::RealObsevaluator obse_m4 = m_in["Generalized Magnetization^4"];
+        const alps::alea::observable_result obse_m2 = m_in["Generalized Magnetization^2"];
+        const alps::alea::observable_result obse_m4 = m_in["Generalized Magnetization^4"];
         if (obse_m2.count() && obse_m4.count()) {
-          alps::RealObsevaluator eval("Binder Ratio of Generalized Magnetization");
-          eval = power2(obse_m2) / obse_m4;
-          m.addObservable(eval);
+          m.insert("Binder Ratio of Generalized Magnetization", obse_m2 * obse_m2 / obse_m4);
         }
       }
       if (m_in.has("Generalized Staggered Magnetization^2") &&
           m_in.has("Generalized Staggered Magnetization^4")) {
-        alps::RealObsevaluator obse_m2 =
+        const alps::alea::observable_result obse_m2 =
           m_in["Generalized Staggered Magnetization^2"];
-        alps::RealObsevaluator obse_m4 =
+        const alps::alea::observable_result obse_m4 =
           m_in["Generalized Staggered Magnetization^4"];
         if (obse_m2.count() && obse_m4.count()) {
-          alps::RealObsevaluator eval("Binder Ratio of Generalized Staggered Magnetization");
-          eval = power2(obse_m2) / obse_m4;
-          m.addObservable(eval);
+          m.insert("Binder Ratio of Generalized Staggered Magnetization", obse_m2 * obse_m2 / obse_m4);
         }
       }
     }

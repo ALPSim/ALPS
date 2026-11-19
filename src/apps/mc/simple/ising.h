@@ -54,22 +54,22 @@ public:
   }
   virtual ~ising_worker() {}
 
-  void init_observables(alps::Parameters const&, alps::ObservableSet& obs) {
-    obs << alps::SimpleRealObservable("Temperature")
-        << alps::SimpleRealObservable("Inverse Temperature")
-        << alps::SimpleRealObservable("Number of Sites")
-        << alps::RealObservable("Energy")
-        << alps::RealObservable("Energy Density")
-        << alps::RealObservable("Energy^2")
-        << alps::RealObservable("Magnetization Density")
-        << alps::RealObservable("Magnetization Density^2")
-        << alps::RealObservable("Magnetization Density^4");
+  void init_observables(alps::Parameters const&, alps::alea::observable_set& obs) {
+    obs << alps::alea::observable("Temperature").without_bins()
+        << alps::alea::observable("Inverse Temperature").without_bins()
+        << alps::alea::observable("Number of Sites").without_bins()
+        << alps::alea::observable("Energy")
+        << alps::alea::observable("Energy Density")
+        << alps::alea::observable("Energy^2")
+        << alps::alea::observable("Magnetization Density")
+        << alps::alea::observable("Magnetization Density^2")
+        << alps::alea::observable("Magnetization Density^4");
   }
 
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  void run(alps::ObservableSet& obs) {
+  void run(alps::alea::observable_set& obs) {
     ++mcs_;
     for (int s = 0; s < num_sites(); ++s) {
       double diff = 2 * field_ * spins_[s];
@@ -83,9 +83,9 @@ public:
     double mag = 0;
     for (int s = 0; s < num_sites(); ++s) mag += spins_[s];
     update_energy();
-    add_constant(obs["Temperature"], 1/beta_);
-    add_constant(obs["Inverse Temperature"], beta_);
-    add_constant(obs["Number of Sites"], (double)num_sites());
+    alps::add_constant(obs["Temperature"], 1/beta_);
+    alps::add_constant(obs["Inverse Temperature"], beta_);
+    alps::add_constant(obs["Number of Sites"], (double)num_sites());
     obs["Energy"] << energy_;
     obs["Energy Density"] << energy_ / num_sites();
     obs["Energy^2"] << energy_ * energy_;

@@ -121,8 +121,7 @@ void SSE::load(alps::IDump& dump)
   if(!where.empty()) {
     dump >>  site_state >> operator_string >>  cutoff_L >> current_number_of_non_identity >> number_of_worms_per_sweep >>  nb_worms_thermalization >> count_worms_thermalization;
     op_indices.resize(cutoff_L);
-  } else
-    measurements.compact();
+  }
 }
 
 int main(int argc, char** argv)

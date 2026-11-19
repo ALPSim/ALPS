@@ -15,17 +15,12 @@
 
 #include "interaction_expansion.hpp"
 #include <complex>
-#include <alps/alea.h>
-#include <alps/alea/simpleobseval.h>
+#include <alps/alea/observables.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
 
-typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
-typedef alps::RealVectorObservable vec_obs_t;
-typedef alps::SimpleObservable<double,alps::DetailedBinning<double> > simple_obs_t;
-typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > const_simple_obs_t;
 
 
 #ifdef SSE
@@ -123,8 +118,8 @@ void InteractionExpansionRun::measure_Wk(std::vector<std::vector<std::valarray<s
         Wk_real[w] = Wk[flavor][k][w].real();
         Wk_imag[w] = Wk[flavor][k][w].imag();
       }
-      measurements.get<alps::SignedObservable<vec_obs_t> >(Wk_real_name.str().c_str()) <<Wk_real*sign;
-      measurements.get<alps::SignedObservable<vec_obs_t> >(Wk_imag_name.str().c_str()) <<Wk_imag*sign;
+      measurements[Wk_real_name.str().c_str()] <<Wk_real*sign;
+      measurements[Wk_imag_name.str().c_str()] <<Wk_imag*sign;
     }
   }
 }
@@ -162,11 +157,11 @@ void InteractionExpansionRun::measure_densities()
       densities[z] += dens[z][i];
       densmeas[i] = 1+dens[z][i];
     }
-    measurements.get<alps::SignedObservable<vec_obs_t> >("densities_"+boost::lexical_cast<std::string>(z)) << densmeas*sign;
+    measurements["densities_"+boost::lexical_cast<std::string>(z)] << densmeas*sign;
     densities[z] /= n_site;
     densities[z] = 1 + densities[z];
   }
-  measurements.get<alps::SignedObservable<vec_obs_t> >("densities") << densities*sign;
+  measurements["densities"] << densities*sign;
   double density_correlation = 0.;
   for (unsigned int i=0; i<n_site; ++i) {
     density_correlation += (1+dens[0][i])*(1+dens[1][i]);
@@ -182,7 +177,7 @@ void InteractionExpansionRun::measure_densities()
       ninj[i*n_site+j+3] = (1+dens[1][i])*(1+dens[1][j]);
     }
   }
-  measurements.get<alps::SignedObservable<vec_obs_t> >("n_i n_j") << ninj*sign;
+  measurements["n_i n_j"] << ninj*sign;
 }
 
 
@@ -248,8 +243,7 @@ void InteractionExpansionRun::compute_W_itime()
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream W_name;
           W_name  <<"W_"  <<flavor<<"_"<<i<<"_"<<j;
-          measurements.get<alps::SignedObservable<vec_obs_t> >(W_name  .str().c_str()) 
-          << W_z_i_j[flavor][i][j]*(sign/ntaupoints);
+          measurements[W_name  .str().c_str()] << W_z_i_j[flavor][i][j]*(sign/ntaupoints);
         }
         std::stringstream density_name;
         density_name<<"density_"<<flavor<<"_"<<i;
@@ -269,7 +263,7 @@ void InteractionExpansionRun::compute_W_itime()
 
 
 
-void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const alps::ObservableSet &gathered_measurements, 
+void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const alps::alea::result_set &gathered_measurements, 
                                                                         matsubara_green_function_t &green_matsubara_measured,
                                                                         const matsubara_green_function_t &bare_green_matsubara, 
                                                                         std::vector<double>& densities,
@@ -287,18 +281,16 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
       std::stringstream Wk_real_name, Wk_imag_name;
       Wk_real_name  <<"Wk_real_"  <<z<<"_"<<k << "_" << k;
       Wk_imag_name  <<"Wk_imag_"  <<z<<"_"<<k << "_" << k;
-      alps::RealVectorObsevaluator Weval_real=gathered_measurements[Wk_real_name.str().c_str()];
-      alps::RealVectorObsevaluator Weval_imag=gathered_measurements[Wk_imag_name.str().c_str()];
-      Weval_real /= beta*n_site;
-      Weval_imag /= beta*n_site;
-      std::valarray<double> mean_real = Weval_real.mean();
-      std::valarray<double> mean_imag = Weval_imag.mean();
+      alps::alea::observable_result Weval_real=gathered_measurements[Wk_real_name.str()] / (beta*n_site);
+      alps::alea::observable_result Weval_imag=gathered_measurements[Wk_imag_name.str()] / (beta*n_site);
+      std::vector<double> mean_real = Weval_real.mean_vector();
+      std::vector<double> mean_imag = Weval_imag.mean_vector();
       for(int w=0;w<n_matsubara;++w)
         Wk(w, k, k, z) = std::complex<double>(mean_real[w], mean_imag[w]);
       for(int w=0;w<n_matsubara;++w)
         reduced_bare_green_matsubara(w, k, k, z) = bare_green_matsubara(w, k, k, z);
-      std::valarray<double> error_real = Weval_real.error();
-      std::valarray<double> error_imag = Weval_imag.error();
+      std::vector<double> error_real = Weval_real.error_vector();
+      std::vector<double> error_imag = Weval_imag.error_vector();
       for (unsigned int e=0; e<error_real.size(); ++e) {
         double ereal = error_real[e];
         double eimag = error_imag[e];
@@ -314,7 +306,7 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
       for(int w=0;w<n_matsubara;++w)
         green_matsubara_measured(w,k,k, z) = bare_green_matsubara(w,k,k,z) 
         - bare_green_matsubara(w,k,k,z) * bare_green_matsubara(w,k,k,z) * Wk(w,k,k,z);
-  std::valarray<double> dens = alps::RealVectorObsevaluator(gathered_measurements["densities"]).mean();
+  std::vector<double> dens = gathered_measurements["densities"].mean_vector();
   for (int z=0; z<n_flavors; ++z) 
     densities[z] = dens[z];
 }
@@ -322,7 +314,7 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
 
 
 
-void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alps::ObservableSet &gathered_measurements, 
+void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alps::alea::result_set &gathered_measurements, 
                                                                        itime_green_function_t &green_result,
                                                                        const itime_green_function_t &green0, 
                                                                        const double &beta, const int n_site, 
@@ -342,10 +334,10 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alp
       for(int j=0;j<n_site;++j){
         std::stringstream W_name;
         W_name<<"W_"<<z<<"_"<<i<<"_"<<j;
-        alps::RealVectorObsevaluator W_eval  =gathered_measurements[W_name.  str().c_str()];
+        const alps::alea::observable_result &W_eval  =gathered_measurements[W_name.str()];
         W_z_i_j[z][i][j].resize(n_self+1);
-        std::valarray<double> tmp=(W_eval.mean());
-        std::valarray<double> errorvec = W_eval.error();
+        std::vector<double> tmp=W_eval.mean_vector();
+        std::vector<double> errorvec = W_eval.error_vector();
         for(int k=0;k<n_self+1;++k){
           W_z_i_j[z][i][j][k]=tmp[k];
           double error = errorvec[k];
@@ -379,15 +371,13 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alp
     }
   }
   if(n_flavors==2){  
-    alps::RealObsevaluator Sz_obs = gathered_measurements["Sz_0"];
+    alps::alea::observable_result Sz_obs = gathered_measurements["Sz_0"];
     for(int i=1;i<n_site;i++) {
       std::stringstream Sz_name;
       Sz_name << "Sz_" << i;
-      alps::RealObsevaluator Sz_i_obs = gathered_measurements[Sz_name.str().c_str()];
-      Sz_i_obs *= ((i%2==0) ? 1 : -1);
-      Sz_obs += Sz_i_obs;
+      Sz_obs = Sz_obs + ((i%2==0) ? 1. : -1.) * gathered_measurements[Sz_name.str()];
     }
-    Sz_obs /= n_site;
+    Sz_obs = Sz_obs / double(n_site);
     std::ofstream szstream("staggered_sz", std::ios::app);
     szstream << Sz_obs.mean() << "\t" << Sz_obs.error() << std::endl;
   }

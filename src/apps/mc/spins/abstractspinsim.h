@@ -16,7 +16,7 @@
 #define ALPS_APPLICATIONS_MC_SPIN_ABSTRACTSPINMC_H_
 
 #include <alps/scheduler.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <boost/property_map/vector_property_map.hpp>
 
 #include <alps/model/sign.h>
@@ -245,25 +245,25 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
 
   if ( cluster_updates_) std::cerr << "Using cluster updates\n";
   // check whether frustrated 
-  measurements << alps::RealObservable("Energy");
-  measurements << alps::RealVectorObservable("Bond-type Energy");
-  measurements << alps::RealObservable("Energy Density");
-  measurements << alps::RealVectorObservable("Bond-type Energy Density");
-  measurements << alps::RealObservable("Energy^2");
-  measurements << alps::RealObservable("beta * Energy / sqrt(N)");
-  measurements << alps::RealObservable("(beta * Energy)^2 / N");
-  measurements << alps::RealObservable("|Magnetization|");
-  measurements << alps::RealObservable("Magnetization along Field");
-  measurements << alps::RealObservable("Magnetization^2");
-  measurements << alps::RealObservable("E.Magnetization^2");
-  measurements << alps::RealObservable("Magnetization^4");
-  measurements << alps::RealObservable("E.Magnetization^4");
-  measurements << alps::RealObservable("Susceptibility");
+  measurements << alps::alea::observable("Energy");
+  measurements << alps::alea::observable("Bond-type Energy");
+  measurements << alps::alea::observable("Energy Density");
+  measurements << alps::alea::observable("Bond-type Energy Density");
+  measurements << alps::alea::observable("Energy^2");
+  measurements << alps::alea::observable("beta * Energy / sqrt(N)");
+  measurements << alps::alea::observable("(beta * Energy)^2 / N");
+  measurements << alps::alea::observable("|Magnetization|");
+  measurements << alps::alea::observable("Magnetization along Field");
+  measurements << alps::alea::observable("Magnetization^2");
+  measurements << alps::alea::observable("E.Magnetization^2");
+  measurements << alps::alea::observable("Magnetization^4");
+  measurements << alps::alea::observable("E.Magnetization^4");
+  measurements << alps::alea::observable("Susceptibility");
   if(cluster_updates_)
-    measurements << alps::RealObservable("Cluster size");
+    measurements << alps::alea::observable("Cluster size");
   if (is_bipartite()) {
-    measurements << alps::RealObservable("|Staggered Magnetization|");
-    measurements << alps::RealObservable("Staggered Magnetization^2");
+    measurements << alps::alea::observable("|Staggered Magnetization|");
+    measurements << alps::alea::observable("Staggered Magnetization^2");
   }
   
 }
@@ -292,22 +292,15 @@ double AbstractSpinSim<MAT>::work_done() const {
   else if (use_error_limit) {
     error_checked_at_ = sweeps_done_;
     wd_error_cached_ = 0.;
-    alps::RealObservable myObs;
-#ifndef BOOST_NO_EXCEPTIONS
-    try {
-#endif
-      myObs = measurements.template get<alps::RealObservable>(parms["ERROR_VARIABLE"].c_str());
-#ifndef BOOST_NO_EXCEPTIONS
-    }
-    catch (std::exception& e) {
-      std::cerr << "Caught exception: " << e.what() << "\n";
+    const std::string error_variable = parms["ERROR_VARIABLE"];
+    if (!measurements.has(error_variable)) {
+      std::cerr << "ERROR_VARIABLE names '" << error_variable << "', which is not measured\n";
       std::exit(-5);
-   }
-#endif
-    if (myObs.count() == 0)
+    }
+    if (measurements[error_variable].count() == 0)
       return 0.;
 
-    double current_error = myObs.error();
+    double current_error = measurements[error_variable].result().error();
     double error_limit = parms["ERROR_LIMIT"];
     double tmp = error_limit/current_error;
     wd_error = wd_error_cached_ = tmp*tmp;
@@ -371,8 +364,6 @@ void AbstractSpinSim<MAT>::save(alps::ODump& dump) const {
 template<class MAT>
 void AbstractSpinSim<MAT>::load(alps::IDump& dump) {
   dump >> sweeps_done_ >> thermalization_fraction_ >> thermalization_sweeps_;
-  if(where.empty())
-    measurements.compact();
 }
 
 #endif

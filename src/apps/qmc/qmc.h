@@ -19,7 +19,7 @@
 #include <boost/math/constants/constants.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/scheduler/measurement_operators.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 
 #include <boost/optional.hpp>
 #include <boost/assert.hpp>
@@ -68,6 +68,16 @@ protected:
   boost::optional<int> restricted_magnetization;
   
   
+  /// The declaration of an observable of this simulation. With a sign problem
+  /// its samples are the quantity times the sign, and it is divided by "Sign".
+  alps::alea::observable observable(const std::string& name) const
+  {
+    alps::alea::observable declaration(name);
+    if (is_signed_)
+      declaration.signed_by("Sign");
+    return declaration;
+  }
+
   void create_common_observables();
   bool do_common_measurements(double sign, const std::vector<state_type>& local, 
             const std::valarray<double>& local_int=std::valarray<double>());
@@ -232,11 +242,11 @@ void QMCRun<G,StateType>::create_common_observables()
 {
   local.resize(this->num_sites());
   if (is_signed_)
-    this->measurements << alps::RealObservable("Sign");
+    this->measurements << alps::alea::observable("Sign");
 
   // Initialize this->measurements
-  this->measurements << alps::make_observable(alps::RealObservable("Energy"),is_signed_);
-  this->measurements << alps::make_observable(alps::RealObservable("Energy Density"),is_signed_);
+  this->measurements << observable("Energy");
+  this->measurements << observable("Energy Density");
 
   if (is_charge_model_) {
     measure_local_compressibility_=this->parms.value_or_default(
@@ -253,17 +263,17 @@ void QMCRun<G,StateType>::create_common_observables()
   }
  
 
-  alps::RealVectorObservable::label_type sitelabels;
+  std::vector<std::string> sitelabels;
   if (measure_local_density_ || measure_local_compressibility_ || measure_local_magnetization_)
     sitelabels =  this->site_labels();
 
-  alps::RealVectorObservable::label_type sitetypelabels;
+  std::vector<std::string> sitetypelabels;
   if (measure_site_type_density_)
     for (std::size_t i=0; i< num_site_types_;++i)
       sitetypelabels.push_back(boost::lexical_cast<std::string>(i));
 
-  alps::RealVectorObservable::label_type bondtypelabels;
-  alps::RealVectorObservable::label_type bondtypecorrlabels;
+  std::vector<std::string> bondtypelabels;
+  std::vector<std::string> bondtypecorrlabels;
   if (measure_bond_type_stiffness_) {
     for (std::size_t i=0; i< num_bond_types_;++i) {
       bondtypelabels.push_back(boost::lexical_cast<std::string>(i));
@@ -273,7 +283,7 @@ void QMCRun<G,StateType>::create_common_observables()
     }
   }
 
-  alps::RealVectorObservable::label_type corrlabels;
+  std::vector<std::string> corrlabels;
   if (measure_correlations_ || measure_green_function_ || !this->correlation_expressions.empty()) {
     if (measurement_origin_) {
       corrlabels.clear();
@@ -287,74 +297,74 @@ void QMCRun<G,StateType>::create_common_observables()
   }
 
   
-  alps::RealVectorObservable::label_type momentalabels;
+  std::vector<std::string> momentalabels;
   if(measure_structure_factor_ || !this->structurefactor_expressions.empty())
     momentalabels = this->momenta_labels();
     
-  this->measurements << alps::make_observable(alps::RealObservable("Stiffness"),is_signed_);
+  this->measurements << observable("Stiffness");
   if (measure_bond_type_stiffness_) {
-    this->measurements << alps::make_observable(alps::RealVectorObservable("Bond Type Stiffness",bondtypelabels),is_signed_);
-    this->measurements << alps::make_observable(alps::RealVectorObservable("Bond Type Stiffness Correlations",bondtypecorrlabels),is_signed_);
+    this->measurements << observable("Bond Type Stiffness").labels(bondtypelabels);
+    this->measurements << observable("Bond Type Stiffness Correlations").labels(bondtypecorrlabels);
   }
   if (is_spin_model_) {
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization Density"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("|Magnetization|"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("|Magnetization Density|"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization^2"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization Density^2"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization^4"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Magnetization Density^4"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Susceptibility"),is_signed_);
+    this->measurements << observable("Magnetization");
+    this->measurements << observable("Magnetization Density");
+    this->measurements << observable("|Magnetization|");
+    this->measurements << observable("|Magnetization Density|");
+    this->measurements << observable("Magnetization^2");
+    this->measurements << observable("Magnetization Density^2");
+    this->measurements << observable("Magnetization^4");
+    this->measurements << observable("Magnetization Density^4");
+    this->measurements << observable("Susceptibility");
     if (this->is_bipartite()) {
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization Density"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("|Staggered Magnetization|"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("|Staggered Magnetization Density|"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization^2"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization Density^2"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization^4"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Staggered Magnetization Density^4"),is_signed_);
+      this->measurements << observable("Staggered Magnetization");
+      this->measurements << observable("Staggered Magnetization Density");
+      this->measurements << observable("|Staggered Magnetization|");
+      this->measurements << observable("|Staggered Magnetization Density|");
+      this->measurements << observable("Staggered Magnetization^2");
+      this->measurements << observable("Staggered Magnetization Density^2");
+      this->measurements << observable("Staggered Magnetization^4");
+      this->measurements << observable("Staggered Magnetization Density^4");
     }
     if(measure_correlations_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Spin Correlations",corrlabels),is_signed_);
+      this->measurements << observable("Spin Correlations").labels(corrlabels);
     if(measure_structure_factor_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Spin Structure Factor",momentalabels),is_signed_);
+      this->measurements << observable("Spin Structure Factor").labels(momentalabels);
     if (measure_local_magnetization_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Local Magnetization",sitelabels),is_signed_);
+      this->measurements << observable("Local Magnetization").labels(sitelabels);
   }
 
 if(measure_CBS_order_)
 {
-  this->measurements << alps::make_observable(alps::RealObservable("CBS Order"),is_signed_);
-  this->measurements << alps::make_observable(alps::RealObservable("CBS Order^2"),is_signed_);
-  this->measurements << alps::make_observable(alps::RealObservable("CBS Order^4"),is_signed_);
+  this->measurements << observable("CBS Order");
+  this->measurements << observable("CBS Order^2");
+  this->measurements << observable("CBS Order^4");
 }
   
   if (is_charge_model_) {
-    this->measurements << alps::make_observable(alps::RealObservable("Density"),is_signed_);
-    this->measurements << alps::make_observable(alps::RealObservable("Density^2"),is_signed_);
+    this->measurements << observable("Density");
+    this->measurements << observable("Density^2");
     if (this->is_bipartite()) {
-      this->measurements << alps::make_observable(alps::RealObservable("Checkerboard Charge Order"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Checkerboard Charge Order^2"),is_signed_);
-      this->measurements << alps::make_observable(alps::RealObservable("Checkerboard Charge Order^4"),is_signed_);
+      this->measurements << observable("Checkerboard Charge Order");
+      this->measurements << observable("Checkerboard Charge Order^2");
+      this->measurements << observable("Checkerboard Charge Order^4");
     }
     if (measure_local_density_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Local Density",sitelabels),is_signed_);
+      this->measurements << observable("Local Density").labels(sitelabels);
     if (measure_site_type_density_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Site Type Density",sitetypelabels),is_signed_);
+      this->measurements << observable("Site Type Density").labels(sitetypelabels);
     if (measure_site_compressibility_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Integrated Local Density Correlations",sitelabels),is_signed_);
+      this->measurements << observable("Integrated Local Density Correlations").labels(sitelabels);
     if (measure_local_compressibility_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Local Density * Global Density",sitelabels),is_signed_);
+      this->measurements << observable("Local Density * Global Density").labels(sitelabels);
     if(measure_correlations_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Density Correlations",corrlabels),is_signed_);
+      this->measurements << observable("Density Correlations").labels(corrlabels);
     if(measure_structure_factor_)
-      this->measurements << alps::make_observable(alps::RealVectorObservable("Density Structure Factor",momentalabels),is_signed_);
+      this->measurements << observable("Density Structure Factor").labels(momentalabels);
   }
 
   if (measure_green_function_)
-    this->measurements << alps::make_observable(alps::RealVectorObservable("Green's Function",corrlabels),is_signed_);
+    this->measurements << observable("Green's Function").labels(corrlabels);
 
   // set up the matrices for the general measurements
   std::map<std::string,std::string>::iterator it = this-> average_expressions.begin();
@@ -366,11 +376,11 @@ if(measure_CBS_order_)
       this-> average_expressions.erase(it);
     }
     else
-      this->measurements << alps::make_observable(alps::RealObservable(it->first),is_signed_);
+      this->measurements << observable(it->first);
     it = next;
   }
 
-  alps::RealVectorObservable::label_type bondlabels;
+  std::vector<std::string> bondlabels;
   it = this->local_expressions.begin();
   while ( it != this-> local_expressions.end() ) {
     std::map<std::string,std::string>::iterator next = it;
@@ -382,12 +392,12 @@ if(measure_CBS_order_)
     else if (this->has_bond_operator(it->second)) {
       if (bondlabels.empty())
         bondlabels = this->bond_labels();
-      this->measurements << alps::make_observable(alps::RealVectorObservable(it->first,bondlabels),is_signed_);
+      this->measurements << observable(it->first).labels(bondlabels);
     }
     else {
       if (sitelabels.empty())
         sitelabels = this->site_labels();
-      this->measurements << alps::make_observable(alps::RealVectorObservable(it->first,sitelabels),is_signed_);
+      this->measurements << observable(it->first).labels(sitelabels);
     }
     it = next;
   }
@@ -401,7 +411,7 @@ if(measure_CBS_order_)
       this-> correlation_expressions.erase(itp);
     }
     else
-      this->measurements << alps::make_observable(alps::RealVectorObservable(itp->first,corrlabels),is_signed_);
+      this->measurements << observable(itp->first).labels(corrlabels);
     itp = next;
   }
 
@@ -414,7 +424,7 @@ if(measure_CBS_order_)
       this-> structurefactor_expressions.erase(itp);
     }
     else
-      this->measurements << alps::make_observable(alps::RealVectorObservable(itp->first,momentalabels),is_signed_);
+      this->measurements << observable(itp->first).labels(momentalabels);
     itp = next;
   }
 }

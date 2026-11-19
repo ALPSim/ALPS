@@ -14,7 +14,6 @@
 
 #include "evaluator.h"
 #include "measurement.h"
-#include <boost/foreach.hpp>
 
 namespace looper {
 
@@ -24,26 +23,28 @@ public:
   typedef typename measurement<MEASUREMENT_SET>::type measurement_t;
   evaluator() {}
   evaluator(alps::Parameters const& p) : params(p) {}
-  void pre_evaluate(alps::ObservableSet& m, alps::Parameters const& p,
-    alps::ObservableSet const& m_in) const {
+  void pre_evaluate(alps::alea::result_set& m, alps::Parameters const& p,
+    alps::alea::result_set const& m_in) const {
     pre_evaluator_selector<measurement_t>::pre_evaluate(m, p, m_in);
   }
   void evaluate(alps::scheduler::MCSimulation& sim, alps::Parameters const& p,
     std::filesystem::path const&) const {
-    alps::ObservableSet m;
-    energy_evaluator::evaluate(m, sim.get_measurements());
-    evaluator_selector<measurement_t>::evaluate(m, p, sim.get_measurements());
-    BOOST_FOREACH(alps::ObservableSet::iterator::value_type const& v, m)
-      sim.addObservable(*(v.second));
+    alps::alea::result_set m;
+    const alps::alea::result_set m_in = sim.get_measurements();
+    energy_evaluator::evaluate(m, m_in);
+    evaluator_selector<measurement_t>::evaluate(m, p, m_in);
+    for (std::string const& name : m.names())
+      sim.add_result(name, m[name]);
   }
-  void evaluate(alps::ObservableSet& m, alps::Parameters const& p,
-    alps::ObservableSet const& m_in) const {
+  void evaluate(alps::alea::result_set& m, alps::Parameters const& p,
+    alps::alea::result_set const& m_in) const {
     energy_evaluator::evaluate(m, m_in);
     evaluator_selector<measurement_t>::evaluate(m, p, m_in);
   }
-  void evaluate(alps::ObservableSet& m) const {
-    energy_evaluator::evaluate(m, m);
-    evaluator_selector<measurement_t>::evaluate(m, params, m);
+  void evaluate(alps::alea::result_set& m) const {
+    const alps::alea::result_set m_in(m);
+    energy_evaluator::evaluate(m, m_in);
+    evaluator_selector<measurement_t>::evaluate(m, params, m_in);
   }
 private:
   alps::Parameters params;

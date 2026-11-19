@@ -15,19 +15,13 @@
 
 #include "interaction_expansion.hpp"
 #include <complex>
-#include <alps/alea.h>
-#include <alps/alea/simpleobseval.h>
+#include <alps/alea/observables.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
 
 
-typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
-typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
-typedef alps::RealVectorObservable vec_obs_t;
-typedef alps::SimpleObservable<double,alps::DetailedBinning<double> > simple_obs_t;
-typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > const_simple_obs_t;
 
 
 
@@ -38,17 +32,17 @@ typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > cons
 void InteractionExpansionRun::initialize_observables(void) 
 {
   if(measurements.has("Sign")){
-    measurements.clear();
+    measurements = alps::alea::observable_set();
   }
-  measurements<<alps::RealObservable("Sign");
-  measurements<<alps::RealVectorObservable("PertOrder");  
+  measurements<<alps::alea::observable("Sign");
+  measurements<<alps::alea::observable("PertOrder");  
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
-          measurements<<signed_vec_obs_t(obs_name.str().c_str());
+          measurements<<alps::alea::observable(obs_name.str().c_str()).signed_by("Sign");
         }
       }
     }
@@ -59,21 +53,21 @@ void InteractionExpansionRun::initialize_observables(void)
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
-        measurements<<signed_vec_obs_t(obs_name_real.str().c_str());
-        measurements<<signed_vec_obs_t(obs_name_imag.str().c_str());
+        measurements<<alps::alea::observable(obs_name_real.str().c_str()).signed_by("Sign");
+        measurements<<alps::alea::observable(obs_name_imag.str().c_str()).signed_by("Sign");
       }
     }
   }
-  measurements << signed_vec_obs_t("densities");
+  measurements << alps::alea::observable("densities").signed_by("Sign");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor)
-    measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
-  measurements << signed_obs_t("density_correlation");
-  measurements << signed_vec_obs_t("n_i n_j");
+    measurements << alps::alea::observable("densities_"+boost::lexical_cast<std::string>(flavor)).signed_by("Sign");
+  measurements << alps::alea::observable("density_correlation").signed_by("Sign");
+  measurements << alps::alea::observable("n_i n_j").signed_by("Sign");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor){
     for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor<<"_"<<i;
-      measurements<<signed_obs_t(density_name.str().c_str());
+      measurements<<alps::alea::observable(density_name.str().c_str()).signed_by("Sign");
     }
   }
   for(unsigned int i=0;i<n_site;++i){
@@ -81,14 +75,14 @@ void InteractionExpansionRun::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-    measurements<<signed_obs_t(sz_name.str().c_str());
-    measurements<<signed_obs_t(sz2_name.str().c_str());
-    measurements<<signed_obs_t(sz0_szj_name.str().c_str());
+    measurements<<alps::alea::observable(sz_name.str().c_str()).signed_by("Sign");
+    measurements<<alps::alea::observable(sz2_name.str().c_str()).signed_by("Sign");
+    measurements<<alps::alea::observable(sz0_szj_name.str().c_str()).signed_by("Sign");
   }
   //acceptance probabilities
-  measurements<<alps::RealObservable("VertexInsertion");
-  measurements<<alps::RealObservable("VertexRemoval");
-  measurements.reset(true);
+  measurements<<alps::alea::observable("VertexInsertion");
+  measurements<<alps::alea::observable("VertexRemoval");
+  measurements.reset();
 }
 
 

@@ -15,7 +15,7 @@
 #include "qwl_histogram.h"
 #include <boost/lexical_cast.hpp>
 #include <alps/scheduler/montecarlo.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -632,22 +632,22 @@ void QWL_SSE_Simulation::init_tables() {
 
 
 void QWL_SSE_Simulation::init_measurements() {
-  measurements << SimpleRealObservable("Offset");
+  measurements << alps::alea::observable("Offset").without_bins();
   for (int pos=parms.value_or_default("START_STORING",logf_steps_total);pos<=logf_steps_total;++pos) {
-    measurements << SimpleRealVectorObservable("Coefficients "+boost::lexical_cast<string>(pos));
-    measurements << SimpleRealObservable("Total Sweeps "+boost::lexical_cast<string>(pos));
+    measurements << alps::alea::observable("Coefficients "+boost::lexical_cast<string>(pos)).without_bins();
+    measurements << alps::alea::observable("Total Sweeps "+boost::lexical_cast<string>(pos)).without_bins();
   }
-  measurements << SimpleRealVectorObservable("Coefficients");
-  measurements << SimpleRealVectorObservable("Histogram");
-  measurements << SimpleRealVectorObservable("Fraction");
-  measurements << SimpleRealObservable("Total Sweeps");
-  measurements << RealObservable("Time Up");
-  measurements << RealObservable("Time Down");
-  measurements << RealObservable("Time Total");
+  measurements << alps::alea::observable("Coefficients").without_bins();
+  measurements << alps::alea::observable("Histogram").without_bins();
+  measurements << alps::alea::observable("Fraction").without_bins();
+  measurements << alps::alea::observable("Total Sweeps").without_bins();
+  measurements << alps::alea::observable("Time Up");
+  measurements << alps::alea::observable("Time Down");
+  measurements << alps::alea::observable("Time Total");
   if (measure_magnetics) {
-    measurements << SimpleRealVectorObservable("Uniform Structure Factor Coefficients");
+    measurements << alps::alea::observable("Uniform Structure Factor Coefficients").without_bins();
     if (is_bipartite())
-      measurements << SimpleRealVectorObservable("Staggered Structure Factor Coefficients");
+      measurements << alps::alea::observable("Staggered Structure Factor Coefficients").without_bins();
   }   
 }
 

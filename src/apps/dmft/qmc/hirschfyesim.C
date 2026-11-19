@@ -21,7 +21,7 @@
 #include "hirschfyesim.h"
 #include "xml.h"
 #include "fouriertransform.h"
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <cmath>
 #include <alps/numeric/matrix.hpp>
 #include <alps/numeric/matrix/algorithms.hpp>
@@ -148,17 +148,17 @@ green_tau(N+1, n_site, 2)
   
   
   // create measurement objects
-  measurements << RealObservable("Sign");
-  measurements <<SignedObservable<alps::RealVectorObservable>("G_meas_up");
-  measurements <<SignedObservable<alps::RealVectorObservable>("G_meas_down");  
+  measurements << alps::alea::observable("Sign");
+  measurements << alps::alea::observable("G_meas_up").signed_by("Sign");
+  measurements << alps::alea::observable("G_meas_down").signed_by("Sign");  
 #ifdef FOURPOINT
-  measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_du");  
+  measurements << alps::alea::observable("G_fourpoint_uu").without_bins();  
+  measurements << alps::alea::observable("G_fourpoint_dd").without_bins();  
+  measurements << alps::alea::observable("G_fourpoint_ud").without_bins();  
+  measurements << alps::alea::observable("G_fourpoint_du").without_bins();  
 #endif //FOURPOINT
   
-  measurements.reset(true);
+  measurements.reset();
   
 }
 
@@ -214,9 +214,9 @@ void HirschFyeRun::dostep()
     }
   }
   if(is_thermalized()){
-  	measurements.get<SignedObservable<alps::RealVectorObservable> >("G_meas_up") << (G_up*(double)sign);
-  	measurements.get<SignedObservable<alps::RealVectorObservable> >("G_meas_down") << (G_down*(double)sign);
-    measurements.get<RealObservable>("Sign")<<sign;
+  	measurements["G_meas_up"] << (G_up*(double)sign);
+  	measurements["G_meas_down"] << (G_down*(double)sign);
+    measurements["Sign"]<<sign;
     
   }
 #ifdef FOURPOINT
@@ -262,10 +262,10 @@ void HirschFyeRun::dostep()
         G_ijkl_dd_va[i]=G_ijkl_dd(i)/meas_int;
       }
       
-      measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu")<<G_ijkl_uu_va;
-      measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd")<<G_ijkl_dd_va;
-      measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud")<<G_ijkl_ud_va;
-      measurements.get<SimpleRealVectorObservable>("G_fourpoint_du")<<G_ijkl_du_va;
+      measurements["G_fourpoint_uu"]<<G_ijkl_uu_va;
+      measurements["G_fourpoint_dd"]<<G_ijkl_dd_va;
+      measurements["G_fourpoint_ud"]<<G_ijkl_ud_va;
+      measurements["G_fourpoint_du"]<<G_ijkl_du_va;
       
       G_ijkl_uu=0;
       G_ijkl_du=0;
@@ -307,11 +307,9 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
   
-  alps::RealVectorObsevaluator G_meas_up=get_measurements()["G_meas_up"];
-  alps::RealVectorObsevaluator G_meas_down=get_measurements()["G_meas_down"];  
-  
-  std::valarray<double> g_up_mean_vector(G_meas_up.mean());
-  std::valarray<double> g_down_mean_vector(G_meas_down.mean());
+  const alps::alea::result_set results=get_measurements();
+  std::vector<double> g_up_mean_vector(results["G_meas_up"].mean_vector());
+  std::vector<double> g_down_mean_vector(results["G_meas_down"].mean_vector());
   
   if(parms.defined("CHECKPOINT")){
     alps::Parameters *p=const_cast<alps::Parameters*>(&parms);

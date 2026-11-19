@@ -18,17 +18,17 @@ void WRun::create_observables()
 {
   create_common_observables();
   
-  measurements << alps::RealVectorObservable("Statistics");
+  measurements << alps::alea::observable("Statistics");
   // winding numbers need lattice directions; a <GRAPH> has none (dimension 0)
   if (dimension() > 0) {
-    measurements << alps::make_observable(alps::RealVectorObservable("Winding number^2"), is_signed_);
+    measurements << observable("Winding number^2");
 
     if(use_1D_stiffness){   //@#$br: take care of D=1 ---> need a histogram of the winding numbers
-       measurements << alps::make_observable(alps::RealVectorObservable("Winding number histogram"), is_signed_); 
+       measurements << observable("Winding number histogram"); 
     }
   }
   else {
-    measurements.removeObservable("Stiffness");
+    measurements.erase("Stiffness");
     std::cerr << "The lattice has no periodic lattice directions: winding numbers and the stiffness are not measured.\n";
   }
   
@@ -40,17 +40,17 @@ void WRun::create_observables()
 
  
   if (nonlocal) {
-    measurements << alps::RealObservable("Ratio time intervals");
-    measurements << alps::RealObservable("Ratio time intervals 2");
-    measurements << alps::RealObservable("Time interval");
-    measurements << alps::RealVectorObservable("Statistics time intervals");
+    measurements << alps::alea::observable("Ratio time intervals");
+    measurements << alps::alea::observable("Ratio time intervals 2");
+    measurements << alps::alea::observable("Time interval");
+    measurements << alps::alea::observable("Statistics time intervals");
   }
   
   site_iterator it,end;
   num_chains=0;
   if (chain_kappa) {
-    measurements << alps::make_observable(alps::RealVectorObservable("Chain density"), is_signed_);
-    measurements << alps::make_observable(alps::RealVectorObservable("Chain density^2"), is_signed_);
+    measurements << observable("Chain density");
+    measurements << observable("Chain density^2");
     if (!where.empty()) {
       for (boost::tie(it,end)=sites();it!=end;++it) 
         if (coordinate(*it).size()>=2) {

@@ -11,7 +11,7 @@
 
 #include <alps/cli.hpp>
 #include <alps/utilities/copyright.hpp>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/plot.h>
 #include <alps/scheduler.h>
 #include <filesystem>
@@ -31,9 +31,9 @@ void evaluate(const std::filesystem::path& p, const alps::Parameters new_parms) 
   double T_min=new_parms.value_or_default("T_MIN", parms.value_or_default("T_MIN",0.1));
   double T_max=new_parms.value_or_default("T_MAX", parms.value_or_default("T_MAX",10.));
   double T_delta=new_parms.value_or_default("DELTA_T", parms.value_or_default("DELTA_T",0.1));
-  alps::RealVectorObsevaluator g_=sim.get_measurements()["Coefficients"];
-  std::valarray<double> g=g_.mean();
-  alps::RealObsevaluator offset=sim.get_measurements()["Offset"];
+  const alps::alea::result_set measurements=sim.get_measurements();
+  std::vector<double> g=measurements["Coefficients"].mean_vector();
+  alps::alea::observable_result offset=measurements["Offset"];
   alps::plot::Set<double> energy_set;
   alps::plot::Set<double> free_energy_set;
   alps::plot::Set<double> entropy_set;
@@ -100,17 +100,11 @@ void evaluate(const std::filesystem::path& p, const alps::Parameters new_parms) 
 
   if (bool(parms.value_or_default("MEASURE_MAGNETIC_PROPERTIES",1))) {
     std::string final=parms.value_or_default("NUMBER_OF_WANG_LANDAU_STEPS","16");
-    alps::RealVectorObsevaluator gf_=sim.get_measurements()["Coefficients "+final];
-    std::valarray<double> gf=gf_.mean();
-    alps::RealVectorObsevaluator m2_=sim.get_measurements()["Uniform Structure Factor Coefficients"];
-    std::valarray<double> m2=m2_.mean();
-    std::valarray<double> sm2;
-    if (lattice.is_bipartite()) {
-      alps::RealVectorObsevaluator sm2_=sim.get_measurements()["Staggered Structure Factor Coefficients"];
-      std::valarray<double> sm2__=sm2_.mean();
-      sm2.resize(sm2__.size());
-      sm2=sm2__;
-    }     
+    std::vector<double> gf=measurements["Coefficients "+final].mean_vector();
+    std::vector<double> m2=measurements["Uniform Structure Factor Coefficients"].mean_vector();
+    std::vector<double> sm2;
+    if (lattice.is_bipartite())
+      sm2=measurements["Staggered Structure Factor Coefficients"].mean_vector();
     alps::plot::Set<double> uniform_structure_factor_set;
     alps::plot::Set<double> uniform_susceptibility_set;
     alps::plot::Set<double> staggered_structure_factor_set;

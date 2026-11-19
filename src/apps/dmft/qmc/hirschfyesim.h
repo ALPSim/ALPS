@@ -26,9 +26,7 @@
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
-#include <alps/alea/detailedbinning.h>
-#include <alps/alea/detailedbinning.h>
-#include <alps/alea/nobinning.h>
+#include <alps/alea/observables.hpp>
 
 #include <boost/numeric/ublas/io.hpp>
 
@@ -41,7 +39,6 @@
 
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
-typedef alps::SimpleRealVectorObservable vec_obs_t;
 
 class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
 {

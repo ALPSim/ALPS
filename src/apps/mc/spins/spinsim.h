@@ -211,8 +211,7 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
   }
   
   if (this->cluster_updates_)
-    this->measurements.template get<alps::RealObservable>("Cluster size") 
-        << double(update_info.clustersize)/double(this->num_sites());
+    this->measurements["Cluster size"] << double(update_info.clustersize)/double(this->num_sites());
 
   typename parent::site_iterator si;
   si=this->sites().first;
@@ -257,13 +256,13 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
     bt_en_density[i] = bt_energy[i]/this->num_sites();
   }
   
-  this->measurements.template get<alps::RealObservable>("Energy") << en;
-  this->measurements.template get<alps::RealObservable>("Energy Density") << en/this->num_sites();
-  this->measurements.template get<alps::RealVectorObservable>("Bond-type Energy") << bt_en;
-  this->measurements.template get<alps::RealVectorObservable>("Bond-type Energy Density") << bt_en_density;
-  this->measurements.template get<alps::RealObservable>("Energy^2") << en*en;
-  this->measurements.template get<alps::RealObservable>("beta * Energy / sqrt(N)") << this->beta_ *en/sqrt(static_cast<double>(this->num_sites()));
-  this->measurements.template get<alps::RealObservable>("(beta * Energy)^2 / N") << this->beta_*this->beta_*en*en/this->num_sites();;
+  this->measurements["Energy"] << en;
+  this->measurements["Energy Density"] << en/this->num_sites();
+  this->measurements["Bond-type Energy"] << bt_en;
+  this->measurements["Bond-type Energy Density"] << bt_en_density;
+  this->measurements["Energy^2"] << en*en;
+  this->measurements["beta * Energy / sqrt(N)"] << this->beta_ *en/sqrt(static_cast<double>(this->num_sites()));
+  this->measurements["(beta * Energy)^2 / N"] << this->beta_*this->beta_*en*en/this->num_sites();;
 
   
   using std::abs;
@@ -284,13 +283,13 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
    m4=am*am*am*am; 
    enm2=en*am*am;
    
-  this->measurements.template get<alps::RealObservable>("|Magnetization|") << am;
-  this->measurements.template get<alps::RealObservable>("Magnetization along Field") << mh;
-  this->measurements.template get<alps::RealObservable>("Magnetization^2") << m2;
-  this->measurements.template get<alps::RealObservable>("E.Magnetization^2") << enm2;
-  this->measurements.template get<alps::RealObservable>("Magnetization^4") << m4;
-  this->measurements.template get<alps::RealObservable>("E.Magnetization^4") << en*m4;
-  this->measurements.template get<alps::RealObservable>("Susceptibility") << chi;
+  this->measurements["|Magnetization|"] << am;
+  this->measurements["Magnetization along Field"] << mh;
+  this->measurements["Magnetization^2"] << m2;
+  this->measurements["E.Magnetization^2"] << enm2;
+  this->measurements["Magnetization^4"] << m4;
+  this->measurements["E.Magnetization^4"] << en*m4;
+  this->measurements["Susceptibility"] << chi;
   if (this->is_bipartite()) {
     double amst = abs(mst)/this->num_sites();
     double am2;
@@ -298,8 +297,8 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
       am2 = (update_info.m2_)*(update_info.m2_)*measurement_traits<M>::component_number()/(update_info.clustersize*double(this->num_sites()));
     else
       am2 = amst*amst;
-    this->measurements.template get<alps::RealObservable>("|Staggered Magnetization|") << amst;
-    this->measurements.template get<alps::RealObservable>("Staggered Magnetization^2") << am2;
+    this->measurements["|Staggered Magnetization|"] << amst;
+    this->measurements["Staggered Magnetization^2"] << am2;
   } 
   
   if (this->print_sweeps_) {
@@ -343,8 +342,7 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
   }
   
   if (this->cluster_updates_)
-    this->measurements.template get<alps::RealObservable>("Cluster size") 
-        << double(update_info.clustersize)/double(this->num_sites());
+    this->measurements["Cluster size"] << double(update_info.clustersize)/double(this->num_sites());
 
   typename parent::site_iterator si;
   
@@ -384,13 +382,13 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
     bt_en_density[i] = bt_energy[i]/this->num_sites();
   }
   
-  this->measurements.template get<alps::RealObservable>("Energy") << en;
-  this->measurements.template get<alps::RealObservable>("Energy Density") << en/this->num_sites();
-  this->measurements.template get<alps::RealVectorObservable>("Bond-type Energy") << bt_en;
-  this->measurements.template get<alps::RealVectorObservable>("Bond-type Energy Density") << bt_en_density;
-  this->measurements.template get<alps::RealObservable>("Energy^2") << en*en;
-  this->measurements.template get<alps::RealObservable>("beta * Energy / sqrt(N)") << this->beta_ *en/sqrt(static_cast<double>(this->num_sites()));
-  this->measurements.template get<alps::RealObservable>("(beta * Energy)^2 / N") << this->beta_*this->beta_*en*en/this->num_sites();;
+  this->measurements["Energy"] << en;
+  this->measurements["Energy Density"] << en/this->num_sites();
+  this->measurements["Bond-type Energy"] << bt_en;
+  this->measurements["Bond-type Energy Density"] << bt_en_density;
+  this->measurements["Energy^2"] << en*en;
+  this->measurements["beta * Energy / sqrt(N)"] << this->beta_ *en/sqrt(static_cast<double>(this->num_sites()));
+  this->measurements["(beta * Energy)^2 / N"] << this->beta_*this->beta_*en*en/this->num_sites();;
 
   
   using std::abs;
@@ -412,13 +410,13 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
   }
   m4=am*am*am*am;
   enm2=en*am*am;
-  this->measurements.template get<alps::RealObservable>("|Magnetization|") << am;
-  this->measurements.template get<alps::RealObservable>("Magnetization along Field") << mh;
-  this->measurements.template get<alps::RealObservable>("Magnetization^2") << m2;
-  this->measurements.template get<alps::RealObservable>("E.Magnetization^2") << enm2;
-  this->measurements.template get<alps::RealObservable>("Magnetization^4") << m4;
-  this->measurements.template get<alps::RealObservable>("E.Magnetization^4") << en*m4;
-  this->measurements.template get<alps::RealObservable>("Susceptibility") << chi;
+  this->measurements["|Magnetization|"] << am;
+  this->measurements["Magnetization along Field"] << mh;
+  this->measurements["Magnetization^2"] << m2;
+  this->measurements["E.Magnetization^2"] << enm2;
+  this->measurements["Magnetization^4"] << m4;
+  this->measurements["E.Magnetization^4"] << en*m4;
+  this->measurements["Susceptibility"] << chi;
   if (this->is_bipartite()) {
     double amst = abs(mst)/this->num_sites();
     double am2;
@@ -428,8 +426,8 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
       am2 = (update_info.m2_)*(update_info.m2_)*measurement_traits<M>::component_number()/(update_info.clustersize*double(this->num_sites()));
     else
       am2 = amst*amst;
-    this->measurements.template get<alps::RealObservable>("|Staggered Magnetization|") << amst;
-    this->measurements.template get<alps::RealObservable>("Staggered Magnetization^2") << am2;
+    this->measurements["|Staggered Magnetization|"] << amst;
+    this->measurements["Staggered Magnetization^2"] << am2;
   } 
   if (this->print_sweeps_) {
     int good_sweeps = this->sweeps_done_-this->thermalization_sweeps_;

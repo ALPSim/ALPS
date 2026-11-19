@@ -12,7 +12,7 @@
 /* $Id$ */
 
 #include <alps/scheduler.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <fstream>
 #include <filesystem>
 
@@ -28,49 +28,39 @@ void evaluate(const std::filesystem::path& p, const bool write_xml) {
   double numsites = graph.num_sites();
 
   // determine specific heat
-  
-  alps::RealObsevaluator n  = sim.get_measurements()["n"];
-  alps::RealObsevaluator n2 = sim.get_measurements()["n^2"];
-  alps::RealObsevaluator cv = (n2-n*n-n)/numsites;
-  cv.rename("Specific Heat");
-  std::cout << cv << "\n";
-//  for (int i=0;i<cv.bin_number();++i)
-//    std::cout << std::setprecision(20) << cv.bin_value(i)/cv.bin_size() << "\n";
-	
-  sim << cv;
+  const alps::alea::result_set measurements = sim.get_measurements();
+  alps::alea::observable_result n  = measurements["n"];
+  alps::alea::observable_result n2 = measurements["n^2"];
+  alps::alea::observable_result cv = (n2-n*n-n)/numsites;
+  std::cout << "Specific Heat: " << cv << "\n";
+  sim.add_result("Specific Heat", cv);
 
-  if (sim.get_measurements().has("Density")) {
-	  // determine compressibility
-	  alps::RealObsevaluator density  = sim.get_measurements()["Density"];
-	  alps::RealObsevaluator density2 = sim.get_measurements()["Density^2"];
+  if (measurements.has("Density")) {
+    // determine compressibility
+    alps::alea::observable_result density  = measurements["Density"];
+    alps::alea::observable_result density2 = measurements["Density^2"];
 
-	  alps::RealObsevaluator kappa= (density2 - numsites*density*density);  // add factor of beta
-	  kappa*=beta;
-	  kappa.rename("Compressibility");
-	  std::cout << kappa << "\n";
-	  sim << kappa;
+    alps::alea::observable_result kappa = beta*(density2 - numsites*density*density);
+    std::cout << "Compressibility: " << kappa << "\n";
+    sim.add_result("Compressibility", kappa);
 
-	  if(parms.value_or_default("MEASURE[Local Compressibility]",false)) {
-		alps::RealVectorObsevaluator nl  = sim.get_measurements()["Local Density"];
-		alps::RealVectorObsevaluator nlg  = sim.get_measurements()["Local Density * Global Density"];
+    if(parms.value_or_default("MEASURE[Local Compressibility]",false)) {
+      alps::alea::observable_result nl  = measurements["Local Density"];
+      alps::alea::observable_result nlg  = measurements["Local Density * Global Density"];
 
-		alps::RealVectorObsevaluator kappa_local= (nlg - nl*density);  // add factor of beta
-		kappa_local *= beta*numsites;
-		kappa_local.rename("Local Compressibility");
-		std::cout << kappa_local << "\n";
-		sim << kappa_local;
-	  }
+      alps::alea::observable_result kappa_local = beta*numsites*(nlg - nl*density);
+      std::cout << "Local Compressibility: " << kappa_local << "\n";
+      sim.add_result("Local Compressibility", kappa_local);
+    }
 
-	  if(parms.value_or_default("MEASURE[Site Compressibility]",false)) {
-		alps::RealVectorObsevaluator nl  = sim.get_measurements()["Local Density"];
-		alps::RealVectorObsevaluator nlc  = sim.get_measurements()["Integrated Local Density Correlations"];
+    if(parms.value_or_default("MEASURE[Site Compressibility]",false)) {
+      alps::alea::observable_result nl  = measurements["Local Density"];
+      alps::alea::observable_result nlc  = measurements["Integrated Local Density Correlations"];
 
-		alps::RealVectorObsevaluator kappa_site = nl - nl*nlc;  // add factor of beta
-		kappa_site *= beta;
-		kappa_site.rename("Site Compressibility");
-		std::cout << kappa_site << "\n";
-		sim << kappa_site;
-	  }
+      alps::alea::observable_result kappa_site = beta*(nl - nl*nlc);
+      std::cout << "Site Compressibility: " << kappa_site << "\n";
+      sim.add_result("Site Compressibility", kappa_site);
+    }
   }
   // save
   sim.checkpoint(p,write_xml);

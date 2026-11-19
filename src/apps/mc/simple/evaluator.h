@@ -21,45 +21,33 @@ public:
   evaluator(alps::Parameters const&) {}
   virtual ~evaluator() {}
 
-  void evaluate(alps::ObservableSet& obs) const {
+  void evaluate(alps::alea::result_set& obs) const {
     if (obs.has("Inverse Temperature") && obs.has("Number of Sites") &&
         obs.has("Energy") && obs.has("Energy^2")) {
-      alps::RealObsevaluator beta = obs["Inverse Temperature"];
-      alps::RealObsevaluator n = obs["Number of Sites"];
-      alps::RealObsevaluator ene = obs["Energy"];
-      alps::RealObsevaluator ene2 = obs["Energy^2"];
-      if (beta.count() && n.count() && ene.count() && ene2.count()) {
-        alps::RealObsevaluator c("Specific Heat");
-        c = beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean();
-        obs.addObservable(c);
-      }
+      const alps::alea::observable_result beta = obs["Inverse Temperature"];
+      const alps::alea::observable_result n = obs["Number of Sites"];
+      const alps::alea::observable_result ene = obs["Energy"];
+      const alps::alea::observable_result ene2 = obs["Energy^2"];
+      if (beta.count() && n.count() && ene.count() && ene2.count())
+        obs.insert("Specific Heat", beta.mean() * beta.mean() * (ene2 - ene * ene) / n.mean());
     }
     if (obs.has("Magnetization Density^2") && obs.has("Magnetization Density^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization Density^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization Density^4"];
-      if (m2.count() && m4.count()) {
-        alps::RealObsevaluator binder("Binder Ratio of Magnetization");
-        binder = m2 * m2 / m4;
-        obs.addObservable(binder);
-      }
+      const alps::alea::observable_result m2 = obs["Magnetization Density^2"];
+      const alps::alea::observable_result m4 = obs["Magnetization Density^4"];
+      if (m2.count() && m4.count())
+        obs.insert("Binder Ratio of Magnetization", m2 * m2 / m4);
     }
     if (obs.has("Magnetization Density Z^2") && obs.has("Magnetization Density Z^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization Density Z^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization Density Z^4"];
-      if (m2.count() && m4.count()) {
-        alps::RealObsevaluator binder("Binder Ratio of Magnetization Z");
-        binder = m2 * m2 / m4;
-        obs.addObservable(binder);
-      }
+      const alps::alea::observable_result m2 = obs["Magnetization Density Z^2"];
+      const alps::alea::observable_result m4 = obs["Magnetization Density Z^4"];
+      if (m2.count() && m4.count())
+        obs.insert("Binder Ratio of Magnetization Z", m2 * m2 / m4);
     }
     if (obs.has("Magnetization Density X^2") && obs.has("Magnetization Density X^4")) {
-      alps::RealObsevaluator m2 = obs["Magnetization Density X^2"];
-      alps::RealObsevaluator m4 = obs["Magnetization Density X^4"];
-      if (m2.count() && m4.count()) {
-        alps::RealObsevaluator binder("Binder Ratio of Magnetization X");
-        binder = m2 * m2 / m4;
-        obs.addObservable(binder);
-      }
+      const alps::alea::observable_result m2 = obs["Magnetization Density X^2"];
+      const alps::alea::observable_result m4 = obs["Magnetization Density X^4"];
+      if (m2.count() && m4.count())
+        obs.insert("Binder Ratio of Magnetization X", m2 * m2 / m4);
     }
     if (obs.has("Inverse Temperature")) obs.erase("Inverse Temperature");
     if (obs.has("Temperature")) obs.erase("Temperature");

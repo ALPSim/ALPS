@@ -45,11 +45,11 @@ void SSE::create_observables()
     localint2.resize(num_sites());
   }
 
-  measurements << alps::make_observable(RealObservable("n"),is_signed_);
-  measurements << alps::make_observable(RealObservable("n^2"),is_signed_);
-  measurements << alps::make_observable(RealObservable("n^3"),is_signed_);
+  measurements << observable("n");
+  measurements << observable("n^2");
+  measurements << observable("n^3");
 #ifdef AUTO_TIMES
-  measurements << alps::RealObservable("Worm Size");
+  measurements << alps::alea::observable("WormSize");
 #endif
 }
    

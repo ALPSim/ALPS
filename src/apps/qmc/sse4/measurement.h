@@ -48,17 +48,12 @@ public:
         escale = 1.0 / worker.beta() / nsites;
         sscale = 1.0 / worker.beta() / lattice.dimension();
         
-        measurements << alps::make_observable(
-            alps::RealObservable("Kinetic Energy"), worker.is_signed());
-        measurements << alps::make_observable(
-            alps::RealObservable("Kinetic Energy Density"), worker.is_signed());
+        measurements << worker.observable("Kinetic Energy");
+        measurements << worker.observable("Kinetic Energy Density");
         
-        measurements << alps::make_observable(
-            alps::RealObservable("n"), worker.is_signed());
-        measurements << alps::make_observable(
-            alps::RealObservable("n^2"), worker.is_signed());
-        measurements << alps::make_observable(
-            alps::RealObservable("n^3"),  worker.is_signed());
+        measurements << worker.observable("n");
+        measurements << worker.observable("n^2");
+        measurements << worker.observable("n^3");
             
         worker.initialize_site_states();
         worker.create_common_observables();
@@ -190,7 +185,7 @@ private:
     lattice_type const& lattice;
     model_type const& model;
     worker_type& worker;
-    alps::ObservableSet& measurements;
+    alps::alea::observable_set& measurements;
     
     std::vector<state_type>& state;
     std::vector<Operator> const& opstring;

@@ -15,19 +15,13 @@
 
 #include "interaction_expansion.hpp"
 #include <complex>
-#include <alps/alea.h>
-#include <alps/alea/simpleobseval.h>
+#include <alps/alea/observables.hpp>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 #include "xml.h"
 #include <filesystem>
 
-typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
-typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
-typedef alps::RealVectorObservable vec_obs_t;
-typedef alps::SimpleObservable<double,alps::DetailedBinning<double> > simple_obs_t;
-typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > const_simple_obs_t;
 
 
 
@@ -75,19 +69,16 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   if(p_.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
     measure_in_matsubara=false;
   
-  const bool compactit = parms.value_or_default("GET_COMPACTED_MEASUREMENTS", true);
-  if (!compactit) 
-    std::cout << "getting non-compacted measurements\n";
-  alps::ObservableSet gathered_measurements=get_measurements(compactit);
-  alps::RealVectorObsevaluator pert_obseval=gathered_measurements["PertOrder"];
-  alps::RealObsevaluator vertex_insertion=gathered_measurements["VertexInsertion"];
-  alps::RealObsevaluator vertex_removal=gathered_measurements["VertexRemoval"];
+  const alps::alea::result_set gathered_measurements=get_measurements();
+  const alps::alea::observable_result &pert_obseval=gathered_measurements["PertOrder"];
+  const alps::alea::observable_result &vertex_insertion=gathered_measurements["VertexInsertion"];
+  const alps::alea::observable_result &vertex_removal=gathered_measurements["VertexRemoval"];
   if(vertex_insertion.count()!=0) 
     std::cout<<"vertex insertion: attempts: "<<vertex_insertion.count()<<" acceptance: "<<vertex_insertion.mean()<<std::endl;
   if(vertex_removal  .count()!=0) 
     std::cout<<"vertex removal  : attempts: "<<vertex_removal  .count()<<" acceptance: "<<vertex_removal  .mean()<<std::endl;
-  alps::RealObsevaluator sign_obseval=gathered_measurements["Sign"];
-  std::valarray<double> mean_order(pert_obseval.mean());
+  const alps::alea::observable_result &sign_obseval=gathered_measurements["Sign"];
+  std::vector<double> mean_order(pert_obseval.mean_vector());
   std::cout<<"average matrix size was: "<<std::endl;
   std::ofstream matrix_size("matrix_size", std::ios::app);
   for(unsigned int i=0;i<n_flavors;++i){
