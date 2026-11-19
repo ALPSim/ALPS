@@ -57,6 +57,9 @@ public:
     {
         nworms = params.value_or_default("NUMBER_OF_WORMS_PER_SWEEP", 0);
         nops = params.value_or_default("INITIAL_CUTOFF", 10);
+        // WORM_ABORT: a worm longer than WORM_ABORT * nops is abandoned and
+        // the operator string restored to its state before the worm. The
+        // limit follows nops, which can grow between sweeps.
         abort_factor = params.value_or_default("WORM_ABORT", 0.0);
         
         if (abort_factor != 0.0)
@@ -570,10 +573,20 @@ private:
         for (unsigned i = nnonzero; i < nops1; ++i)
             opstring[i].vertex_index = IDENTITY;
 
-        // Spread them over the longer string. Every placement of the
-        // nnonzero operators among nops1 slots is equally likely, which is
-        // the equilibrium distribution of the identities, so growing the
-        // string does not disturb the Markov chain.
+        // Spread them over the longer string, every placement of the
+        // nnonzero operators among nops1 slots equally likely. The weight of
+        // an operator sequence does not depend on the cutoff, only its number
+        // of placements does, so this keeps the distribution of the sequence
+        // and makes the placement given the sequence the equilibrium one at
+        // the new cutoff. This must stay uniform: growth now also happens
+        // while measuring, and estimators that use the operator positions
+        // (and nops) would see any bias here.
+        //
+        // What is not exact is that growing depends on the current nnonzero.
+        // Each growth lengthens the string by at least 10%, so it happens a
+        // few times per run, and the residual effect is of order
+        // (number of growths) / SWEEPS, far below the truncation bias that a
+        // fixed cutoff would cause.
         unsigned left = nnonzero;
         for (unsigned i = nops1; left > 0 && left < i; --i)
             if (worker.mrandom_real() * i < left) {
