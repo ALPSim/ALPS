@@ -25,9 +25,9 @@ void dumb_worker::print_copyright(std::ostream& out) {
   out << "ALPS/parapack dumb worker\n";
 }
 
-void dumb_worker::init_observables(Parameters const&, ObservableSet&) {}
+void dumb_worker::init_observables(Parameters const&, alps::alea::observable_set&) {}
 
-void dumb_worker::run(ObservableSet&) {}
+void dumb_worker::run(alps::alea::observable_set&) {}
 
 void dumb_worker::load(IDump&) {}
 

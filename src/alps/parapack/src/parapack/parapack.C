@@ -54,6 +54,22 @@ namespace alps {
 
 namespace parapack {
 
+namespace {
+
+// The results of the measurements, with what the evaluator adds to them
+std::vector<alps::alea::result_set> evaluated(abstract_evaluator& evaluator,
+  std::vector<alps::alea::observable_set> const& obs) {
+  std::vector<alps::alea::result_set> measured, results;
+  BOOST_FOREACH(alps::alea::observable_set const& m, obs) measured.push_back(m.results());
+  std::vector<alps::alea::observable_set> merged;
+  evaluator.load(measured, merged);
+  BOOST_FOREACH(alps::alea::observable_set const& m, merged) results.push_back(m.results());
+  evaluator.evaluate(results);
+  return results;
+}
+
+} // end namespace
+
 int start(int argc, char **argv) {
   #ifndef BOOST_NO_EXCEPTIONS
   try {
@@ -353,24 +369,22 @@ int run_sequential(int argc, char **argv) {
     p["WORKER_SEED"] = p["SEED"];
     p["DISORDER_SEED"] = p["SEED"];
     std::cout << "[input parameters]\n" << p << std::flush;
-    std::vector<alps::ObservableSet> obs;
+    std::vector<alps::alea::observable_set> obs;
     boost::shared_ptr<alps::parapack::abstract_worker>
       worker = worker_factory::make_worker(p);
     worker->init_observables(p, obs);
     bool thermalized = worker->is_thermalized();
-    if (thermalized) for (std::size_t r = 0; r < obs.size(); ++r) obs[r].reset(true);
+    if (thermalized) for (std::size_t r = 0; r < obs.size(); ++r) obs[r].reset();
     while (worker->progress() < 1.0) {
       worker->run(obs);
       if (!thermalized && worker->is_thermalized()) {
-        for (std::size_t r = 0; r < obs.size(); ++r) obs[r].reset(true);
+        for (std::size_t r = 0; r < obs.size(); ++r) obs[r].reset();
         thermalized = true;
       }
     }
-    std::vector<alps::ObservableSet> obs_out;
     boost::shared_ptr<alps::parapack::abstract_evaluator>
       evaluator = evaluator_factory::make_evaluator(p);
-    evaluator->load(obs, obs_out);
-    evaluator->evaluate(obs_out);
+    std::vector<alps::alea::result_set> obs_out = evaluated(*evaluator, obs);
     std::cerr << "[speed]\nelapsed time = "
               << static_cast<double>(std::clock() - tm) / CLOCKS_PER_SEC << " sec\n";
     std::cout << "[results]\n";
@@ -744,18 +758,18 @@ int run_sequential_mpi(int argc, char** argv) {
     p["WORKER_SEED"] = static_cast<unsigned int>(p["SEED"]) ^ (world.rank() << 11);
     p["DISORDER_SEED"] = p["SEED"];
     if (world.rank() == 0) std::cout << "[input parameters]\n" << p << std::flush;
-    std::vector<alps::ObservableSet> obs;
+    std::vector<alps::alea::observable_set> obs;
     boost::shared_ptr<alps::parapack::abstract_worker>
       worker = parallel_worker_factory::make_worker(world, p);
     worker->init_observables(p, obs);
     bool thermalized = worker->is_thermalized();
     if (thermalized) {
-      BOOST_FOREACH(alps::ObservableSet& o, obs) { o.reset(true); }
+      BOOST_FOREACH(alps::alea::observable_set& o, obs) { o.reset(); }
     }
     while (worker->progress() < 1.0) {
       worker->run(obs);
       if (!thermalized && worker->is_thermalized()) {
-        BOOST_FOREACH(alps::ObservableSet& o, obs) { o.reset(true); }
+        BOOST_FOREACH(alps::alea::observable_set& o, obs) { o.reset(); }
         thermalized = true;
       }
     }
@@ -764,11 +778,9 @@ int run_sequential_mpi(int argc, char** argv) {
       std::cerr << "[speed]\nelapsed time = "
                 << static_cast<double>(std::clock() - tm) / CLOCKS_PER_SEC << " sec" << std::endl;
     }
-    std::vector<alps::ObservableSet> obs_out;
     boost::shared_ptr<alps::parapack::abstract_evaluator>
       evaluator = evaluator_factory::make_evaluator(p);
-    evaluator->load(obs, obs_out);
-    evaluator->evaluate(obs_out);
+    std::vector<alps::alea::result_set> obs_out = evaluated(*evaluator, obs);
     for (int r = 0; r < world.size(); ++r) {
       if (world.rank() == r) {
         std::cout << "[results " << r << "]\n";

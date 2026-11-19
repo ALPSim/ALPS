@@ -21,10 +21,10 @@ public:
 #ifdef ALPS_HAVE_MPI
   citation_worker(const alps::mpi::communicator&, const alps::Parameters&) {}
 #endif
-  void init_observables(const alps::Parameters&, alps::ObservableSet& obs) override {
-    obs << alps::RealObservable("Steps");
+  void init_observables(const alps::Parameters&, alps::alea::observable_set& obs) override {
+    obs << alps::alea::observable("Steps");
   }
-  void run(alps::ObservableSet& obs) override { obs["Steps"] << double(++steps_); }
+  void run(alps::alea::observable_set& obs) override { obs["Steps"] << double(++steps_); }
   bool is_thermalized() const override { return true; }
   double progress() const override { return steps_ / 2.; }
   void load(alps::IDump& dump) override { dump >> steps_; }

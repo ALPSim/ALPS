@@ -20,7 +20,7 @@
 #include "option.h"
 #include "types.h"
 #include <alps/parser/xmlstream.h>
-#include <alps/alea/observableset.h>
+#include <alps/alea/observables.hpp>
 #include <boost/optional.hpp>
 #include <deque>
 #include <set>
@@ -222,7 +222,8 @@ private:
 
   // these parameters will be read from simulation xml file
   Parameters params_;
-  std::vector<ObservableSet> obs_;
+  // the results of the task, one set per replica
+  std::vector<alps::alea::result_set> obs_;
 
   range_type num_clones_;
   std::deque<clone_info> clone_info_;

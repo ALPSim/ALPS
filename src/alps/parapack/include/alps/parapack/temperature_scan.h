@@ -48,21 +48,21 @@ public:
   }
   virtual ~temperature_scan_adaptor() {}
 
-  void init_observables(alps::Parameters const& params, std::vector<alps::ObservableSet>& obs) {
+  void init_observables(alps::Parameters const& params, std::vector<alps::alea::observable_set>& obs) {
     obs.resize(num_temps_);
     for (int p = 0; p < num_temps_; ++p) {
       worker_->init_observables(params, obs[p]);
     }
   }
 
-  void run(std::vector<alps::ObservableSet>& obs) {
+  void run(std::vector<alps::alea::observable_set>& obs) {
     bool is_thermalized = mcs_.is_thermalized();
     double progress = mcs_.progress();
     if (stage_ < num_temps_ && progress < 1) {
       ++mcs_;
       worker_->set_beta(1.0 / (temp_init_ + stage_ * temp_diff_));
       worker_->run(obs[stage_]);
-      if (!is_thermalized && mcs_.is_thermalized()) obs[stage_].reset(true);
+      if (!is_thermalized && mcs_.is_thermalized()) obs[stage_].reset();
       if (progress < 1 && mcs_.progress() >= 1) {
         ++stage_;
         mcs_ = steps_; // reinitialize mcs_

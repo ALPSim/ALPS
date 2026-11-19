@@ -66,7 +66,7 @@ namespace alps
 
   private:
     const alps::Parameters* m_parameters; //!< パラメータコンテナ
-    alps::ObservableSet* m_observable; //!< 結果コンテナ
+    alps::alea::observable_set* m_observable; //!< 結果コンテナ
     mutable alps::ODump* m_odump; //!< リスタートファイル出力用ストリーム
     alps::IDump* m_idump; //!< リスタートファイル入力用ストリーム
     alps_fortran_ptr m_self; //!< 自身へのポインタ
@@ -101,7 +101,7 @@ namespace alps
        * @param[in] params パラメータコンテナ
        * @param[out] ob 計算結果コンテナ
        */
-      void init_observables(alps::Parameters const& params, alps::ObservableSet& ob)
+      void init_observables(alps::Parameters const& params, alps::alea::observable_set& ob)
       {
 	m_observable = &ob;
 	alps_init_observables_(m_self.m_integer);
@@ -141,7 +141,7 @@ namespace alps
        * ユーザーアプリケーションのalps_run_サブルーチンを呼び出す。
        * @param[out] obs 計算結果コンテナ
        */
-      void run(alps::ObservableSet& obs)
+      void run(alps::alea::observable_set& obs)
       {
 	m_observable = &obs;
 	alps_run_(m_self.m_integer);
@@ -202,7 +202,7 @@ namespace alps
        * @brief 自身に関連付けられた計算結果コンテナを返す。
        * @return 計算結果コンテナ
        */
-      alps::ObservableSet& observables()const
+      alps::alea::observable_set& observables()const
 	{
 	  return *m_observable;
 	}

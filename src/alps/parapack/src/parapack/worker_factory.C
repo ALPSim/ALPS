@@ -22,18 +22,19 @@ namespace parapack {
 
 abstract_worker::~abstract_worker() {}
 
-void abstract_worker::init_observables(Parameters const&, ObservableSet&) {
+void abstract_worker::init_observables(Parameters const&, alps::alea::observable_set&) {
   boost::throw_exception(std::runtime_error("abstract_worker::init_observables() should be implemented"));
 }
-void abstract_worker::init_observables(Parameters const& params, std::vector<ObservableSet>& obs) {
+void abstract_worker::init_observables(Parameters const& params,
+                                       std::vector<alps::alea::observable_set>& obs) {
   obs.resize(1);
   this->init_observables(params, obs[0]);
 }
 
-void abstract_worker::run(ObservableSet&) {
+void abstract_worker::run(alps::alea::observable_set&) {
   boost::throw_exception(std::runtime_error("abstract_worker::run() should be implemented"));
 }
-void abstract_worker::run(std::vector<ObservableSet>& obs) {
+void abstract_worker::run(std::vector<alps::alea::observable_set>& obs) {
   this->run(obs[0]);
 }
 
@@ -47,24 +48,24 @@ void abstract_worker::save_worker(ODump& dump) const { this->save(dump); }
 
 abstract_evaluator::~abstract_evaluator() {}
 
-void abstract_evaluator::load(ObservableSet const&, ObservableSet&) {
+void abstract_evaluator::load(alps::alea::result_set const&, alps::alea::observable_set&) {
   boost::throw_exception(std::runtime_error("abstract_evaluator::load() should be implemented"));
 }
 
-void abstract_evaluator::load(std::vector<ObservableSet> const& obs_in,
-                              std::vector<ObservableSet>& obs_out) {
+void abstract_evaluator::load(std::vector<alps::alea::result_set> const& obs_in,
+                              std::vector<alps::alea::observable_set>& obs_out) {
   if (obs_out.size() == 0) obs_out.resize(obs_in.size());
   if (obs_out.size() != obs_in.size())
-    boost::throw_exception(std::runtime_error("inconsistent size of ObservableSet"));
+    boost::throw_exception(std::runtime_error("inconsistent number of sets of observables"));
   for (std::size_t r = 0; r < obs_out.size(); ++r) this->load(obs_in[r], obs_out[r]);
 }
 
-void abstract_evaluator::evaluate(ObservableSet&) const {
+void abstract_evaluator::evaluate(alps::alea::result_set&) const {
   boost::throw_exception(std::runtime_error("abstract_evaluator::evaluate() should be implemented"));
 }
 
-void abstract_evaluator::evaluate(std::vector<ObservableSet>& obs_out) const {
-  BOOST_FOREACH(ObservableSet& m, obs_out) { this->evaluate(m); }
+void abstract_evaluator::evaluate(std::vector<alps::alea::result_set>& results) const {
+  BOOST_FOREACH(alps::alea::result_set& m, results) { this->evaluate(m); }
 }
 
 //
@@ -77,11 +78,11 @@ simple_evaluator::simple_evaluator(Parameters const&) {}
 
 simple_evaluator::~simple_evaluator() {}
 
-void simple_evaluator::load(ObservableSet const& obs_in, ObservableSet& obs_out) {
-  obs_out << obs_in;
+void simple_evaluator::load(alps::alea::result_set const& obs_in, alps::alea::observable_set& obs_out) {
+  obs_out.merge(obs_in);
 }
 
-void simple_evaluator::evaluate(ObservableSet&) const {}
+void simple_evaluator::evaluate(alps::alea::result_set&) const {}
 
 
 //

@@ -19,7 +19,7 @@
 #include <alps/export.h>
 #include "process.h"
 #include <alps/config.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/parameter.h>
 #include <alps/scheduler.h>
 #include <boost/shared_ptr.hpp>
@@ -36,12 +36,12 @@ public:
   virtual ~abstract_worker();
 
   // one of the following virtual member functions should be overwritten by the subclass
-  virtual void init_observables(Parameters const& params, ObservableSet& obs);
-  virtual void init_observables(Parameters const& params, std::vector<ObservableSet>& obs);
+  virtual void init_observables(Parameters const& params, alps::alea::observable_set& obs);
+  virtual void init_observables(Parameters const& params, std::vector<alps::alea::observable_set>& obs);
 
   // one of the following virtual member functions should be overwritten by the subclass
-  virtual void run(ObservableSet& obs);
-  virtual void run(std::vector<ObservableSet>& obs);
+  virtual void run(alps::alea::observable_set& obs);
+  virtual void run(std::vector<alps::alea::observable_set>& obs);
 
   // the concrete subclass should implement the following 4 pure virtual functions
   virtual void load(IDump& dp) = 0;
@@ -85,13 +85,16 @@ class ALPS_DECL abstract_evaluator {
 public:
   virtual ~abstract_evaluator();
 
-  // one of the following virtual member functions should be overwritten by the subclass
-  virtual void load(ObservableSet const& obs_in, ObservableSet& obs_out);
-  virtual void load(std::vector<ObservableSet> const& obs_in, std::vector<ObservableSet>& obs_out);
+  // Add the measurements of one clone to those of the task. One of the
+  // following virtual member functions should be overwritten by the subclass.
+  virtual void load(alps::alea::result_set const& obs_in, alps::alea::observable_set& obs_out);
+  virtual void load(std::vector<alps::alea::result_set> const& obs_in,
+    std::vector<alps::alea::observable_set>& obs_out);
 
-  // one of the following virtual member functions should be overwritten by the subclass
-  virtual void evaluate(ObservableSet& obs_out) const;
-  virtual void evaluate(std::vector<ObservableSet>& obs_out) const;
+  // Add functions of the results of the task to them. One of the following
+  // virtual member functions should be overwritten by the subclass.
+  virtual void evaluate(alps::alea::result_set& results) const;
+  virtual void evaluate(std::vector<alps::alea::result_set>& results) const;
 };
 
 class ALPS_DECL simple_evaluator : public abstract_evaluator {
@@ -99,8 +102,8 @@ public:
   simple_evaluator();
   simple_evaluator(Parameters const& params);
   virtual ~simple_evaluator();
-  virtual void load(ObservableSet const& obs_in, ObservableSet& obs_out);
-  virtual void evaluate(ObservableSet& obs_out) const;
+  virtual void load(alps::alea::result_set const& obs_in, alps::alea::observable_set& obs_out);
+  virtual void evaluate(alps::alea::result_set& results) const;
 };
 
 

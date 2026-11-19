@@ -12,7 +12,6 @@
 *****************************************************************************/
 
 #include <alps/parapack/wanglandau.h>
-#include <alps/alea.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <gtest/gtest.h>
 #include <boost/random.hpp>
@@ -42,11 +41,11 @@ TEST(WangLandauWeights, CountsVisitsAndMergesOverlappingSavedRanges) {
                                       31.8848, 31.1916, 31.1916, 26.3396, 31.8848, 34.6574};
   const alps::integer_range<int> range0(-10, 13), range1(10, 30);
   alps::wanglandau_weight weight0(range0), weight1(range1);
-  alps::ObservableSet observables0, observables1;
+  alps::alea::observable_set observables0, observables1;
   weight0.init_observables(observables0);
-  observables0.reset(true);
+  observables0.reset();
   weight1.init_observables(observables1);
-  observables1.reset(true);
+  observables1.reset();
   std::vector<int> visits0(range0.size()), visits1(range1.size());
   for (int i = 0; i < 100; ++i) {
     const int index = static_cast<int>(range0.size() * random());
@@ -71,9 +70,9 @@ TEST(WangLandauWeights, CountsVisitsAndMergesOverlappingSavedRanges) {
   weight0.write_observables(observables0);
   weight1.write_observables(observables1);
   params["WEIGHT_DUMP_FILE"] = "weight0.xdr";
-  alps::wanglandau_weight::save_weight(observables0, params);
+  alps::wanglandau_weight::save_weight(observables0.results(), params);
   params["WEIGHT_DUMP_FILE"] = "weight1.xdr";
-  alps::wanglandau_weight::save_weight(observables1, params);
+  alps::wanglandau_weight::save_weight(observables1.results(), params);
   alps::wanglandau_weight merged(unify(range0, range1));
   params["WEIGHT_DUMP_FILE"] = "weight0.xdr weight1.xdr";
   merged.load_weight(params);

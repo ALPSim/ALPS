@@ -12,20 +12,139 @@
 *
 *****************************************************************************/
 
-/* $Id$ */
-#include<alps/alea.h>
-
 #include <alps/scheduler/montecarlo.h>
 #include <alps/scheduler/types.h>
 #include <alps/scheduler/scheduler.h>
+#include <alps/alea/observables_io.hpp>
 #include <alps/parser/xslt_path.h>
 #include <alps/osiris/mpdump.h>
-#include <alps/alea/detailedbinning.h>
+#include <alps/osiris/std/vector.h>
 #include <filesystem>
+#include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <fstream>
+#include <limits>
 
 namespace alps {
 namespace scheduler {
+
+namespace {
+
+// Where a run keeps what it measured, in its HDF5 file: the results for
+// reading, and the measurements to continue from.
+const std::string run_results = "/simulation/realizations/0/clones/0/results";
+const std::string run_measurements = "/simulation/realizations/0/clones/0/measurements";
+
+// Digits that show the mean to about a thousandth of its error
+int mean_digits(double mean, double error, int otherwise)
+{
+  const double digits = 4. - std::log10(std::abs(error / mean));
+  return digits >= 3. && digits < 20. ? static_cast<int>(digits) : otherwise;
+}
+
+bool error_underflow(double mean, double error)
+{
+  return error != 0. && mean != 0.
+    && std::abs(mean) * 10. * std::sqrt(std::numeric_limits<double>::epsilon()) > std::abs(error);
+}
+
+const char* convergence_text(alps::alea::error_convergence c)
+{
+  return c == alps::alea::CONVERGED ? "yes" : c == alps::alea::MAYBE_CONVERGED ? "maybe" : "no";
+}
+
+struct average_values
+{
+  explicit average_values(const alps::alea::observable_result& r)
+    : count(r.count()), mean(r.mean_vector()), error(r.error_vector()), variance(r.variance_vector()),
+      tau(r.tau_vector()), converged(r.converged_vector()), binning(r.size())
+  {
+    for (std::size_t i = 0; i != r.size(); ++i)
+      binning[i] = r.binning_errors(i);
+    // A binning analysis belongs to a measured observable. Other results with
+    // bins are functions of observables, evaluated by jackknife.
+    method = !binning.empty() && !binning[0].empty() ? "binning" : r.has_bins() ? "jackknife" : "simple";
+  }
+
+  std::uint64_t count;
+  std::vector<double> mean, error, variance, tau;
+  std::vector<alps::alea::error_convergence> converged;
+  std::vector<std::vector<double> > binning;
+  std::string method;
+};
+
+// The elements inside one <SCALAR_AVERAGE>, for component i
+void write_component(oxstream& out, const average_values& v, std::size_t i, int digits)
+{
+  const bool jackknife = v.method == "jackknife";
+  out << start_tag("COUNT") << no_linebreak << v.count << end_tag("COUNT");
+  out << start_tag("MEAN") << no_linebreak << attribute("method", jackknife ? "jackknife" : "simple")
+      << precision(v.mean[i], digits) << end_tag("MEAN");
+  out << start_tag("ERROR") << attribute("converged", convergence_text(v.converged[i]));
+  if (error_underflow(v.mean[i], v.error[i]))
+    out << attribute("underflow", "true");
+  out << attribute("method", v.method) << no_linebreak << precision(v.error[i], 3) << end_tag("ERROR");
+  if (v.variance[i] == v.variance[i])
+    out << start_tag("VARIANCE") << no_linebreak << attribute("method", "simple")
+        << precision(v.variance[i], 3) << end_tag("VARIANCE");
+  if (v.tau[i] == v.tau[i])
+    out << start_tag("AUTOCORR") << no_linebreak << attribute("method", "binning")
+        << precision(v.tau[i], 3) << end_tag("AUTOCORR");
+  for (std::size_t level = 0; level != v.binning[i].size(); ++level)
+    out << start_tag("BINNED") << attribute("size", boost::lexical_cast<std::string>(std::uint64_t(1) << level))
+        << no_linebreak << start_tag("COUNT") << (v.count >> level) << end_tag("COUNT")
+        << start_tag("ERROR") << attribute("method", "simple") << no_linebreak
+        << precision(v.binning[i][level], 3) << end_tag("ERROR") << end_tag("BINNED");
+}
+
+void write_xml_average(oxstream& out, const std::string& name, const alps::alea::observable_result& r)
+{
+  if (r.count() == 0)
+    return;
+  if (r.is_histogram()) {
+    const std::vector<std::uint64_t>& counts = r.histogram();
+    out << start_tag("HISTOGRAM") << attribute("name", name) << attribute("nvalues", counts.size());
+    for (std::size_t i = 0; i != counts.size(); ++i)
+      out << start_tag("ENTRY") << attribute("indexvalue", i)
+          << start_tag("COUNT") << no_linebreak << r.count() << end_tag("COUNT")
+          << start_tag("VALUE") << no_linebreak << counts[i] << end_tag("VALUE")
+          << end_tag("ENTRY");
+    out << end_tag("HISTOGRAM");
+    return;
+  }
+  const average_values v(r);
+  if (r.is_scalar()) {
+    out << start_tag("SCALAR_AVERAGE") << attribute("name", name);
+    if (!r.sign().empty())
+      out << attribute("signed", "true");
+    write_component(out, v, 0, mean_digits(v.mean[0], v.error[0], 8));
+    out << end_tag("SCALAR_AVERAGE");
+    return;
+  }
+  out << start_tag("VECTOR_AVERAGE") << attribute("name", name) << attribute("nvalues", r.size());
+  if (!r.sign().empty())
+    out << attribute("signed", "true");
+  for (std::size_t i = 0; i != r.size(); ++i) {
+    const std::string label = i < r.labels().size() && !r.labels()[i].empty()
+      ? r.labels()[i] : boost::lexical_cast<std::string>(i);
+    out << start_tag("SCALAR_AVERAGE") << attribute("indexvalue", label);
+    write_component(out, v, i, v.count == 1 ? 19 : mean_digits(v.mean[i], v.error[i], 8));
+    out << end_tag("SCALAR_AVERAGE");
+  }
+  out << end_tag("VECTOR_AVERAGE");
+}
+
+} // namespace
+
+void write_xml_averages(oxstream& out, const alps::alea::result_set& results, int id)
+{
+  out << start_tag("AVERAGES");
+  if (id >= 0)
+    out << attribute("id", id);
+  for (const std::string& name : results.names())
+    write_xml_average(out, name, results[name]);
+  out << end_tag("AVERAGES");
+}
 
 /**
  * Returns the summary of the MCSimulation for the Observable given by the
@@ -36,12 +155,11 @@ namespace scheduler {
 ResultType MCSimulation::get_summary(const std::string name) const
 {
   ResultType res;
-  ObservableSet mySet = get_measurements(true);
-  RealObservable* myObs = ((RealObservable*)&mySet[name]);
+  const alps::alea::result_set results = get_measurements();
   res.T = parms["T"];
-  res.mean = myObs->mean();
-  res.error = myObs->error();
-  res.count = myObs->count();
+  res.mean = results[name].mean();
+  res.error = results[name].error();
+  res.count = results[name].count();
   return res;
 }
 
@@ -64,106 +182,72 @@ ResultType MCSimulation::get_summary() const
   return get_summary(theName);
 }
 
-void MCSimulation::accumulate_measurements(std::vector<std::pair<std::size_t, ObservableSet> > & all_measurements, ObservableSet const & measurements) const {
-    all_measurements.push_back(make_pair(1, measurements));
-    while (all_measurements.size() > 1 && all_measurements.back().first == (all_measurements.rbegin() + 1)->first) {
-        (all_measurements.rbegin() + 1)->first *= 2;
-        (all_measurements.rbegin() + 1)->second << all_measurements.back().second;
-        all_measurements.pop_back();
-    }
-}
-
 // collect all measurements
-ObservableSet MCSimulation::get_measurements(bool compactit) const
+alps::alea::result_set MCSimulation::get_measurements() const
 {
-  if (runs.empty())
-    return ObservableSet();
-  std::vector<std::pair<std::size_t, ObservableSet> > all_measurements;
+  // Runs that measured with this version are merged. A run read from a file
+  // of an earlier version has results only, which cannot be merged.
+  alps::alea::observable_set merged;
+  std::vector<alps::alea::result_set> earlier;
+  std::size_t number_merged = 0;
   ProcessList where_master;
-  int remote_runs=0;
-  // add runs stored locally
   for (unsigned int i=0;i<runs.size();i++) {
     if(workerstatus[i]==RemoteRun) {
       if(!runs[i])
         boost::throw_exception(std::runtime_error( "run does not exist in MCSimulation::get_measurements"));
       where_master.push_back( Process(dynamic_cast<const RemoteWorker*>(runs[i])->process()));
-      remote_runs++;
     }
     else if(runs[i]) {
-      if (compactit)
-        accumulate_measurements(all_measurements, dynamic_cast<const MCRun*>(runs[i])->get_compacted_measurements());
-      else
-        accumulate_measurements(all_measurements, dynamic_cast<const MCRun*>(runs[i])->get_measurements());
+      const MCRun& run = dynamic_cast<const MCRun&>(*runs[i]);
+      if (run.can_continue()) {
+        merged.merge(run.get_results());
+        ++number_merged;
+      } else
+        earlier.push_back(run.get_results());
     }
   }
-  // adding measurements from remote runs:
-  if(remote_runs) {
+  if(!where_master.empty()) {
     // broadcast request to all slaves
     OMPDump send;
-    send << compactit;
     send.send(where_master,MCMP_get_measurements);
     // collect results
     for (unsigned int i=0;i<where_master.size();i++) {
       // receive dump from remote process, abort if error
       IMPDump receive(where_master[i],MCMP_measurements);
-      ObservableSet m;
-      receive >> m;
-      accumulate_measurements(all_measurements, m);
+      // bytes, not a string: a string on a dump ends at the first zero
+      std::vector<char> packed;
+      receive >> packed;
+      merged.merge(alps::alea::unpack(std::string(packed.begin(), packed.end())));
+      ++number_merged;
     }
   }
-  for (std::size_t i = all_measurements.size() - 1; i > 0; --i)
-      all_measurements[i - 1].second << all_measurements[i].second;
-  for (ObservableSet::const_iterator it=measurements.begin();it!=measurements.end();++it)
-    if (!all_measurements[0].second.has(it->first))
-      all_measurements[0].second << *(it->second);
-  if (compactit)
-    all_measurements[0].second.compact();
-  return all_measurements[0].second;
+
+  alps::alea::result_set results;
+  if (earlier.empty())
+    results = merged.results();
+  else if (earlier.size() == 1 && number_merged == 0)
+    results = earlier.front();
+  else if (!stored_results_.names().empty())
+    results = stored_results_;
+  else
+    boost::throw_exception(std::runtime_error(
+      "The runs of this simulation were written by an earlier version of ALPS and cannot be merged"
+      " by this one, and the task file holds no results. Evaluate the simulation with the version"
+      " that wrote it."));
+
+  // results of an earlier evaluation, kept with the task
+  for (const std::string& name : stored_results_.names())
+    if (!results.has(name))
+      results.insert(name, stored_results_[name]);
+  for (const std::string& name : added_results_.names())
+    results.insert(name, added_results_[name]);
+  return results;
 }
 
 
-ObservableSet MCSimulation::get_and_remove_observable(const std::string& obsname, bool compactit) 
+void MCSimulation::add_result(const std::string& name, const alps::alea::observable_result& result)
 {
-  ObservableSet obs_set;    
-  ProcessList where_master;
-  int remote_runs=0;
-  // add runs stored locally
-  for (unsigned int i=0;i<runs.size();i++) {
-      if(workerstatus[i]==RemoteRun) {
-	if(!runs[i])
-	  boost::throw_exception(std::runtime_error( "run does not exist in MCSimulation::get_measurements"));
-	where_master.push_back( Process(dynamic_cast<const RemoteWorker*>(runs[i])->process()));
-	remote_runs++;
-      }
-      else if(runs[i]) {
-	obs_set << dynamic_cast<MCRun*>(runs[i])->get_and_remove_observable(obsname, compactit);
-      }
-  }
-  // adding measurements from remote runs:
-  if(remote_runs) {
-    // broadcast request to all slaves
-    OMPDump send;
-    send << compactit;
-    send << obsname;
-    send.send(where_master,MCMP_get_observable);
-    // collect results
-    for (unsigned int i=0;i<where_master.size();i++) {
-      // receive dump from remote process, abort if error
-      IMPDump receive(where_master[i],MCMP_observable);
-      ObservableSet m;
-      receive >> m;
-      obs_set << m;
-    }
-  }
-  if (measurements.has(obsname)) {
-    obs_set << measurements[obsname];
-    if(measurements[obsname].is_signed())
-      obs_set << measurements[measurements[obsname].sign_name()];
-    measurements.removeObservable(obsname);
-  }
-  if (compactit)
-    obs_set.compact();
-  return obs_set;
+  added_results_.insert(name, result);
 }
 
 
@@ -174,10 +258,8 @@ std::string MCSimulation::worker_tag() const
 
 
 void MCSimulation::write_xml_body(oxstream& out, std::filesystem::path const& fn, bool writeall) const {
-  if (writeall) {
-    ObservableSet set = get_measurements(false);
-    set.write_xml(out); // write non-compacted measurements
-  }
+  if (writeall)
+    write_xml_averages(out, get_measurements());
   WorkerTask::write_xml_body(out,fn,writeall);
 }
 
@@ -197,31 +279,47 @@ MCRun::MCRun(const ProcessList& w,const Parameters&  myparms,int n)
 void MCRun::load_worker(IDump& dump)
 {
   Worker::load_worker(dump);
+  // Before ALPS 2.1 the measurements were part of this file.
   if(node==0 && dump.version() < 400)
-    dump >> measurements;
+    boost::throw_exception(std::runtime_error(
+      "This run was written by a version of ALPS before 2.1, which kept the measurements in the"
+      " run file itself. This version reads the measurements of a run from its HDF5 file only."));
   load(dump);
 }
 
 void MCRun::save_worker(ODump& dump) const
 {
   Worker::save_worker(dump);
-  if(node==0 && MCDump_worker_version < 400)
-    dump << measurements;
   save(dump);
+}
+
+alps::alea::result_set MCRun::get_results() const
+{
+  return earlier_results_ ? *earlier_results_ : measurements.results();
 }
 
 void MCRun::save(hdf5::archive & ar) const {
   Worker::save(ar);
-  if(node==0)
-    ar << make_pvp("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(node) + "/results", measurements);
+  if(node==0) {
+    alps::alea::save_results(ar, run_results, get_results());
+    if (can_continue())
+      alps::alea::save_checkpoint(ar, run_measurements, measurements);
+  }
 }
 
 void MCRun::load(hdf5::archive & ar) {
   Worker::load(ar);
-#ifdef ALPS_ONLY_HDF5
-  if(node==0 && ar.is_group("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(node) + "/results"))
-    ar >> make_pvp("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(node) + "/results", measurements);
-#endif
+  if(node!=0)
+    return;
+  if (ar.is_group(run_measurements))
+    alps::alea::load_checkpoint(ar, run_measurements, measurements);
+  else if (ar.is_group(run_results)) {
+    // A file of an earlier version of ALPS: what it measured can be read as
+    // results. The run cannot go on, see run().
+    const alps::alea::result_set results = alps::alea::load_results(ar, run_results);
+    if (!results.names().empty())
+      earlier_results_.reset(new alps::alea::result_set(results));
+  }
 }
 
 void MCRun::save(ODump&) const
@@ -241,15 +339,19 @@ std::string MCRun::work_phase()
 // do some work, either thermalization or measurements serrps
 void MCRun::run()
 {
+  if (!can_continue())
+    boost::throw_exception(std::runtime_error(
+      "This run was written by an earlier version of ALPS and cannot be continued by this one."
+      " Its results can still be read. To measure more, finish the simulation with the version"
+      " that wrote it, or start a new simulation."));
   bool thermalized=is_thermalized();
   // do some work
   Worker::run();
   // check if it just became thermalized
   if(!thermalized&&node==0&&is_thermalized()) {
-    if(node==0)
-      measurements.reset(true);
+    measurements.reset();
     change_phase("running");
-    }
+  }
 }
 
 // do one sweep
@@ -265,24 +367,23 @@ void MCRun::write_xml(const std::filesystem::path& name) const
 {
   oxstream xml(name.parent_path()/(name.filename().string()+".xml"));
   std::filesystem::path fn_hdf5(name.parent_path()/(name.filename().string()+".hdf"));
+  const alps::alea::result_set results = get_results();
 
   xml << header("UTF-8") << stylesheet(xslt_path("ALPS.xsl"));
   xml << start_tag("SIMULATION") << xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
         << attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/ALPS.xsd");
   xml << parms;
-  measurements.write_xml(xml);
+  write_xml_averages(xml, results);
   xml << start_tag("MCRUN");
   xml << start_tag("CHECKPOINT") << attribute("format","osiris")
       << attribute("file", name.string())
       << end_tag("CHECKPOINT");
-#ifdef ALPS_HAVE_HDF5
   xml << start_tag("CHECKPOINT") << attribute("format","hdf5")
       << attribute("file", fn_hdf5.string())
       << end_tag("CHECKPOINT");
-#endif
 
   xml << get_info();
-  measurements.write_xml(xml);
+  write_xml_averages(xml, results);
   xml << end_tag("MCRUN") << end_tag("SIMULATION");
 }
 
@@ -291,61 +392,20 @@ bool MCRun::handle_message(const Process& runmaster,int32_t tag)
 {
   IMPDump message;
   OMPDump dump;
-  ObservableSet m;
-  bool compactit;
-  std::string obsname;
   switch(tag) {
   case MCMP_get_measurements:
     message.receive(runmaster,MCMP_get_measurements);
-    message >> compactit;
-    if (compactit)
-      dump << get_compacted_measurements();
-    else
-      dump << get_measurements();
+    {
+      const std::string packed = alps::alea::pack(get_results());
+      dump << std::vector<char>(packed.begin(), packed.end());
+    }
     dump.send(runmaster,MCMP_measurements);
-    return true;
-  case MCMP_get_measurements_and_infos:
-    message.receive(runmaster, MCMP_get_measurements_and_infos);
-//TODO:    std::ostringstream rngstream;
-//TODO:    rngstream << *(runs[i]->engine_ptr);
-    dump << get_measurements() << get_info() /*<< rngstream.str() << rng_name()*/;
-    dump.send(runmaster, MCMP_measurements_and_infos);
-    return true;
-  case MCMP_get_observable:
-    message.receive(runmaster, MCMP_get_observable);
-    message >> compactit;
-    message >> obsname;
-    dump << get_and_remove_observable(obsname, compactit);
-    dump.send(runmaster, MCMP_observable);
     return true;
   default:
     return Worker::handle_message(runmaster,tag);
   }
 }
   
-
-ObservableSet MCRun::get_and_remove_observable(const std::string& obsname, bool compactit) 
-{
-  ObservableSet obs_set;
-  if (measurements.has(obsname)) {
-    obs_set << measurements[obsname];
-    if(measurements[obsname].is_signed())
-      obs_set << measurements[measurements[obsname].sign_name()];
-    measurements.removeObservable(obsname);
-  }
-  if (compactit)
-    obs_set.compact();
-  return obs_set;
-}
-
-
-ObservableSet MCRun::get_compacted_measurements() const 
-{
-  ObservableSet m(get_measurements());
-  m.compact();
-  return m;
-}
-
 
 void DummyMCRun::dostep()
 {
@@ -367,98 +427,24 @@ ResultType DummyMCRun::get_summary() const
   return res;
 }
 
-#ifdef ALPS_HAVE_HDF5
 void MCSimulation::load(hdf5::archive & ar) {
-    WorkerTask::load(ar);
-    #ifdef ALPS_ONLY_HDF5
-        if (ar.is_group("/simulation/results"))
-            ar >> make_pvp("/simulation/results", measurements);
-    #endif
+  WorkerTask::load(ar);
+  if (ar.is_group("/simulation/results"))
+    stored_results_ = alps::alea::load_results(ar, "/simulation/results");
 }
-void MCSimulation::save(hdf5::archive & ar) const {
-    WorkerTask::save(ar);
-    #ifdef ALPS_ONE_CHECKPOINT_FILE_ONLY
-        std::vector<std::pair<std::size_t, ObservableSet> > all_measurements;
-        ProcessList remote_runs;
-        std::size_t index = 0;
-        for (std::size_t i = 0; i < runs.size(); ++i)
-            if(runs[i] && workerstatus[i]==RemoteRun)
-                remote_runs.push_back( Process(dynamic_cast<const RemoteWorker*>(runs[i])->process()));
-            else if(runs[i]) {
-                ObservableSet measurements = dynamic_cast<const MCRun*>(runs[i])->get_measurements();
-                all_measurements.push_back(make_pair(1, measurements));
-                while (all_measurements.size() > 1 && all_measurements.back().first == (all_measurements.rbegin() + 1)->first) {
-                    (all_measurements.rbegin() + 1)->first *= 2;
-                    (all_measurements.rbegin() + 1)->second << all_measurements.back().second;
-                    all_measurements.pop_back();
-                }
-//TODO:         std::ostringstream rngstream;
-//TODO:         rngstream << *(runs[i]->engine_ptr);
-                ar
-                    << make_pvp("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(index) + "/results", measurements)
-                    << make_pvp("/log/realizations/0/clones/" + boost::lexical_cast<std::string>(index) + "/alps", runs[i]->get_info())
-//TODO:             << make_pvp("/rng/realizations/0/clones/" + boost::lexical_cast<std::string>(index++), rngstream.str())
-//TODO:             << make_pvp("/rng/realizations/0/clones/" + boost::lexical_cast<std::string>(index++) + "/@name", runs[i]->rng_name())
-                ;
-                ++index;
-            }
-        if(remote_runs.size()) {
-            OMPDump send;
-            send.send(remote_runs, MCMP_get_measurements_and_infos);
-            for (unsigned int i = 0; i < remote_runs.size(); ++i) {
-                IMPDump receive(remote_runs[i],MCMP_measurements_and_infos);
-                ObservableSet measurements;
-                receive >> measurements;
-                all_measurements.push_back(make_pair(1, measurements));
-                while (all_measurements.size() > 1 && all_measurements.back().first == (all_measurements.rbegin() + 1)->first) {
-                    (all_measurements.rbegin() + 1)->first *= 2;
-                    (all_measurements.rbegin() + 1)->second << all_measurements.back().second;
-                    all_measurements.pop_back();
-                }
-                TaskInfo infos;
-                receive >> infos;
-//TODO:         std::string rng_engine;
-//TODO:         receive >> rng_engine;
-//TODO:         std::string rng_name;
-//TODO:         receive >> rng_name;
-                ar
-                    << make_pvp("/simulation/realizations/0/clones/" + boost::lexical_cast<std::string>(index) + "/results", measurements)
-                    << make_pvp("/log/realizations/0/clones/" + boost::lexical_cast<std::string>(index) + "/alps", infos)
-//TODO:             << make_pvp("/rng/realizations/0/clones/" + boost::lexical_cast<std::string>(index++), rng_engine)
-//TODO:             << make_pvp("/rng/realizations/0/clones/" + boost::lexical_cast<std::string>(index++) + "/@name", rng_name)
-                ;
-                ++index;
-            }
-        }
-        for (std::size_t i = all_measurements.size() - 1; i > 0; --i)
-            all_measurements[i - 1].second << all_measurements[i].second;
-        for (ObservableSet::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
-            if (!all_measurements[0].second.has(it->first))
-                all_measurements[0].second << *(it->second);
-        ar << make_pvp("/simulation/results", all_measurements[0].second);
-    #else
-        ar << make_pvp("/simulation/results", get_measurements(false));
-    #endif
-}
-#endif
 
+void MCSimulation::save(hdf5::archive & ar) const {
+  WorkerTask::save(ar);
+  alps::alea::save_results(ar, "/simulation/results", get_measurements());
+}
+
+// The results are read from the HDF5 file of the task, not from its XML file.
 void MCSimulation::handle_tag(std::istream& infile, const XMLTag& tag) 
 {
   if (tag.name!="AVERAGES")
     WorkerTask::handle_tag(infile,tag);
   else
-    measurements.read_xml(infile,tag);
-}
-
-MCSimulation& MCSimulation::operator<<(const Observable& obs)
-{
-  addObservable(obs);
-  return *this;
-}
-
-void MCSimulation::addObservable(const Observable& obs)
-{
-  measurements.addObservable(obs);
+    skip_element(infile,tag);
 }
 
 DummyMCRun::DummyMCRun()

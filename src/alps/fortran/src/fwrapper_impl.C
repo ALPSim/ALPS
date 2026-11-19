@@ -227,34 +227,13 @@ namespace
    * @param[out] obs データの追加先
    * @param[in] name Observableの名前
    */
-  template <typename T> void accumulate(void* data, int count, alps::ObservableSet& obs, const std::string& name)
+  template <typename T> void accumulate(void* data, int count, alps::alea::observable_set& obs, const std::string& name)
   {
-    std::valarray<T> array(reinterpret_cast<T*>(data), count);
-
+    const T* values = reinterpret_cast<const T*>(data);
     if(count == 1)
-	obs[name] << array[0];
+      obs[name] << static_cast<double>(values[0]);
     else
-	obs[name] << array;
-  }
-
-  /**
-   * @brief 指定された名前のObservableにデータを追加する
-   * @param[in] data 追加されるデータ
-   * @param[in] count dataの長さ
-   * @param[out] obs データの追加先
-   * @param[in] name Observableの名前
-   */
-  template <> void accumulate<float>(void* data, int count, alps::ObservableSet& obs, const std::string& name)
-  {
-    std::valarray<float> array(count);
-    float* values = reinterpret_cast<float*>(data);
-    for(int i = 0; i < count; ++i)
-      array[i] = static_cast<double>(values[i]);
-
-    if(count == 1)
-      obs[name] << array[0];
-    else
-      obs[name] << array;
+      obs[name] << std::vector<double>(values, values + count);
   }
 }
 
@@ -396,23 +375,16 @@ void alps_restore_(void* data, int* count,  int* type, int* caller, int lchar)
 void alps_init_observable_(int* count, int* type, char* name, int* caller, int lname)
 {
   alps::fortran_wrapper::alps_fortran_ptr ptr(caller);
-  alps::ObservableSet& obs = ptr.m_pointer->observables();
+  alps::alea::observable_set& obs = ptr.m_pointer->observables();
   std::string str = getString(name, lname);
 
   switch(*type)
     {
     case ALPS_INT:
-      if(*count == 1)
-	obs << alps::IntObservable(str);
-      else
-	obs << alps::IntVectorObservable(str);
-      break;
     case ALPS_REAL:
     case ALPS_DOUBLE_PRECISION:
-      if(*count == 1)
-	obs << alps::RealObservable(str);
-      else
-	obs << alps::RealVectorObservable(str);
+      // Integers are measured as real numbers, like every observable
+      obs << alps::alea::observable(str).components(*count);
       break;
     default:
       boost::throw_exception(std::runtime_error("alps_init_observable : an invalid type is specified."));
@@ -432,7 +404,7 @@ void alps_init_observable_(int* count, int* type, char* name, int* caller, int l
 void alps_accumulate_observable_(void* data, int* count, int* type, char* name, int* caller, int lname)
 {
   alps::fortran_wrapper::alps_fortran_ptr ptr(caller);
-  alps::ObservableSet& obs = ptr.m_pointer->observables();
+  alps::alea::observable_set& obs = ptr.m_pointer->observables();
   std::string str = getString(name, lname);
 
   switch(*type)

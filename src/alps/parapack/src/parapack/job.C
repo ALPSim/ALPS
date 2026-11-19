@@ -17,6 +17,7 @@
 #include <alps/parapack/measurement.h>
 #include <alps/parapack/simulation_p.h>
 
+#include <alps/alea/observables_io.hpp>
 #include <alps/hdf5.hpp>
 
 // some file (probably a python header) defines a tolower macro ...
@@ -28,6 +29,49 @@
 #include <regex>
 
 namespace alps {
+
+namespace {
+
+// Where the results of a task are written: one file, or one per replica
+std::filesystem::path results_file(std::filesystem::path const& basedir, std::string const& base,
+  std::size_t replicas, std::size_t i) {
+  return alps::fs::absolute(std::filesystem::path(replicas == 1 ? base + ".out.h5" :
+    base + ".replica" + boost::lexical_cast<std::string>(i+1) + ".h5"), basedir);
+}
+
+bool has_results(std::filesystem::path const& file) {
+  if (!exists(file)) return false;
+  bool found;
+  #pragma omp critical (hdf5io)
+  {
+    hdf5::archive h5(file.string());
+    found = h5.is_group("/simulation/results");
+  }
+  return found;
+}
+
+// The results written by the last evaluation of the task, if any
+std::vector<alps::alea::result_set> load_results(std::filesystem::path const& basedir,
+  std::string const& base) {
+  std::filesystem::path single = results_file(basedir, base, 1, 0);
+  std::filesystem::path first = results_file(basedir, base, 2, 0);
+  bool replicas = has_results(first) &&
+    (!has_results(single) || last_write_time(first) > last_write_time(single));
+  std::vector<alps::alea::result_set> results;
+  for (std::size_t i = 0; ; ++i) {
+    std::filesystem::path file = replicas ? results_file(basedir, base, 2, i) : single;
+    if (!has_results(file)) break;
+    #pragma omp critical (hdf5io)
+    {
+      hdf5::archive h5(file.string());
+      results.push_back(alps::alea::load_results(h5, "/simulation/results"));
+    }
+    if (!replicas) break;
+  }
+  return results;
+}
+
+} // end namespace
 
 //
 // task
@@ -86,7 +130,7 @@ void task::load() {
   clone_info_.clear();
   std::filesystem::path file_in = alps::fs::absolute(std::filesystem::path(file_in_str_), basedir_);
   std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
-  simulation_xml_handler handler(params_, obs_, clone_info_);
+  simulation_xml_handler handler(params_, clone_info_);
   XMLParser parser(handler);
   if (!exists(file_out)) {
     parser.parse(file_in);
@@ -95,6 +139,7 @@ void task::load() {
     if (!lock.locked())
       boost::throw_exception(std::runtime_error("task::load() lock failed after 60 seconds"));
     parser.parse(file_out);
+    obs_ = load_results(basedir_, base_);
   }
 
   num_clones_ = range_type(params_.value_or_default("NUM_CLONES", "1"), params_);
@@ -128,13 +173,9 @@ void task::save(alps::parapack::option const& opt) const {
     if (!lock.locked())
       boost::throw_exception(std::runtime_error("task::load() lock failed after 60 seconds"));
     if (exists(file_out)) {
-      Parameters params_tmp;
-      std::vector<ObservableSet> obs_tmp;
-      std::deque<clone_info> clone_info_tmp;
-      simulation_xml_handler handler(params_tmp, obs_tmp, clone_info_tmp);
-      XMLParser parser(handler);
-      parser.parse(file_out);
-      simulation_xml_writer(file_out, opt.write_xml, true, params_, obs_tmp, clone_info_);
+      // keep the results that were written with the task
+      simulation_xml_writer(file_out, opt.write_xml, true, params_, load_results(basedir_, base_),
+        clone_info_);
     } else {
       simulation_xml_writer(file_out, opt.write_xml, true, params_, obs_, clone_info_);
     }
@@ -150,55 +191,21 @@ void task::save_observable(alps::parapack::option const& opt) const {
       boost::throw_exception(std::runtime_error("task::load() lock failed after 60 seconds"));
     if (exists(file_out)) {
       Parameters params_tmp;
-      std::vector<ObservableSet> obs_tmp;
       std::deque<clone_info> clone_info_tmp;
-      simulation_xml_handler handler(params_tmp, obs_tmp, clone_info_tmp);
+      simulation_xml_handler handler(params_tmp, clone_info_tmp);
       XMLParser parser(handler);
       parser.parse(file_out);
       if (obs_.size() > 1 && !params_tmp.defined("NUM_REPLICAS"))
         params_tmp["NUM_REPLICAS"] = obs_.size();
       simulation_xml_writer(file_out, opt.write_xml, true, params_tmp, obs_, clone_info_tmp);
-      if (obs_.size() == 1) {
-        if (opt.dump_format == dump_format::hdf5) {
-          #pragma omp critical (hdf5io)
-          {
-            std::filesystem::path file = alps::fs::absolute(std::filesystem::path(base_ + ".out.h5"),
-              basedir_);
-            hdf5::archive h5(file.string(), "a");
-            h5["/parameters"] << params_tmp;
-            h5["/simulation/results"] << obs_[0];
-            // for (std::size_t n = 0; n < oss.size(); ++n)
-            //   h5["/simulation/realizations/0/clones/" +
-            //      boost::lexical_cast<std::string>(n) + "/results"] << oss[n][0];
-          }
-        } else {
-          std::filesystem::path file = alps::fs::absolute(std::filesystem::path(base_ + ".out.xdr"),
-            basedir_);
-          OXDRFileDump dp(file);
-          dp << params_tmp << obs_[0];
-        }
-      } else {
-        for (std::size_t i = 0; i < obs_.size(); ++i) {
-          Parameters p = params_tmp;
-          if (!p.defined("REPLICA")) p["REPLICA"] = i+1;
-          if (opt.dump_format == dump_format::hdf5) {
-            #pragma omp critical (hdf5io)
-            {
-              std::filesystem::path file = alps::fs::absolute(std::filesystem::path(
-                base_ + ".replica" + boost::lexical_cast<std::string>(i+1) + ".h5"), basedir_);
-              hdf5::archive h5(file.string(), "a");
-              h5["/parameters"] << p;
-              h5["/simulation/results"] << obs_[i];
-              // for (std::size_t n = 0; n < oss.size(); ++n)
-              //   h5["/simulation/realizations/0/clones/" +
-              //      boost::lexical_cast<std::string>(n) + "/results"] << oss[n][i];
-            }
-          } else {
-            std::filesystem::path file = alps::fs::absolute(std::filesystem::path(
-              base_ + ".replica" + boost::lexical_cast<std::string>(i+1) + ".xdr"), basedir_);
-            OXDRFileDump dp(file);
-            dp << p << obs_[i];
-          }
+      for (std::size_t i = 0; i < obs_.size(); ++i) {
+        Parameters p = params_tmp;
+        if (obs_.size() > 1 && !p.defined("REPLICA")) p["REPLICA"] = i+1;
+        #pragma omp critical (hdf5io)
+        {
+          hdf5::archive h5(results_file(basedir_, base_, obs_.size(), i).string(), "a");
+          h5["/parameters"] << p;
+          alps::alea::save_results(h5, "/simulation/results", obs_[i]);
         }
       }
     } else {
@@ -354,59 +361,30 @@ void task::evaluate(alps::parapack::option const& opt) {
     = parapack::evaluator_factory::instance()->make_evaluator(p);
 
   std::cout << "  loading clones: ";
-  // std::vector<std::vector<ObservableSet> > oss;
+  std::vector<alps::alea::observable_set> merged;
   BOOST_FOREACH(cid_t cid, clones) {
     std::cout << (cid+1) << ' ' << std::flush;
-    // std::vector<ObservableSet> os;
-    if (clone_info_[cid].checkpoints().size() == 1) {
+    const std::size_t workers = clone_info_[cid].checkpoints().size();
+    for (std::size_t w = 0; w < workers; ++w) {
       std::filesystem::path dump_h5 =
-        alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[0] + ".h5"), basedir_);
-      std::filesystem::path dump_xdr =
-        alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[0] + ".xdr"), basedir_);
-      std::vector<ObservableSet> o;
+        alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[w] + ".h5"), basedir_);
+      std::vector<alps::alea::observable_set> o;
       bool success;
-      if (exists(dump_h5)) {
-        #pragma omp critical (hdf5io)
-        {
-          hdf5::archive h5(dump_h5);
-          success = load_observable(h5, cid, o);
-        }
-      } else {
-        IXDRFileDump dp(dump_xdr);
-        success = load_observable(dp, o);
+      #pragma omp critical (hdf5io)
+      {
+        hdf5::archive h5(dump_h5);
+        success = workers == 1 ? load_observable(h5, cid, o) : load_observable(h5, cid, w, o);
       }
       if (success) {
-        // evaluator->load(o, os);
-        evaluator->load(o, obs_);
-      }
-    } else {
-      for (unsigned int w = 0; w < clone_info_[cid].checkpoints().size(); ++w) {
-        std::filesystem::path dump_h5 =
-          alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[w] + ".h5"), basedir_);
-        std::filesystem::path dump_xdr =
-          alps::fs::absolute(std::filesystem::path(clone_info_[cid].checkpoints()[w] + ".xdr"), basedir_);
-        std::vector<ObservableSet> o;
-        bool success;
-        if (exists(dump_h5)) {
-          #pragma omp critical (hdf5io)
-          {
-            hdf5::archive h5(dump_h5);
-            success = load_observable(h5, cid, w, o);
-          }
-        } else {
-          IXDRFileDump dp(dump_xdr);
-          success = load_observable(dp, o);
-        }
-        if (success) {
-          // evaluator->load(o, os);
-          evaluator->load(o, obs_);
-        }
+        std::vector<alps::alea::result_set> r;
+        BOOST_FOREACH(alps::alea::observable_set const& m, o) r.push_back(m.results());
+        evaluator->load(r, merged);
       }
     }
-    // oss.push_back(os);
   }
   std::cout << std::endl;
   if (clones.size() > 0) {
+    BOOST_FOREACH(alps::alea::observable_set const& m, merged) obs_.push_back(m.results());
     evaluator->evaluate(obs_);
     save_observable(opt);
   }
@@ -435,9 +413,9 @@ void task::write_xml_archive(oxstream& os) const {
      << attribute("progress", precision(progress() * 100, 3) + '%')
      << params_;
   if (obs_.size() == 1) {
-    obs_[0].write_xml(os);
+    scheduler::write_xml_averages(os, obs_[0]);
   } else {
-    for (unsigned int i = 0; i < obs_.size(); ++i) obs_[i].write_xml_with_id(os, i+1);
+    for (unsigned int i = 0; i < obs_.size(); ++i) scheduler::write_xml_averages(os, obs_[i], i+1);
   }
   for (unsigned int i = 0; i < clone_info_.size(); ++i) if (clone_info_[i].clone_id() == i) os << clone_info_[i];
   os << alps::end_tag("SIMULATION");

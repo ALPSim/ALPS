@@ -19,6 +19,7 @@
 #include "parapack.h"
 #include "permutation.h"
 #include "process.h"
+#include <limits>
 #include <alps/expression.h>
 #include <alps/osiris.h>
 
@@ -61,11 +62,11 @@ struct initializer_helper<WALKER, no_initializer> {
     return boost::shared_ptr<walker_type>(new walker_type(params));
   }
   static void init_observables(boost::shared_ptr<walker_type> walker_ptr,
-    alps::Parameters const& params, no_initializer const&, alps::ObservableSet& obs) {
+    alps::Parameters const& params, no_initializer const&, alps::alea::observable_set& obs) {
     walker_ptr->init_observables(params, obs);
   }
   static void run_walker(boost::shared_ptr<walker_type> walker_ptr, no_initializer const&,
-    alps::ObservableSet& obs) {
+    alps::alea::observable_set& obs) {
     walker_ptr->run(obs);
   }
 };
@@ -79,11 +80,11 @@ struct initializer_helper {
     return boost::shared_ptr<walker_type>(new walker_type(params, init));
   }
   static void init_observables(boost::shared_ptr<walker_type> walker_ptr,
-    alps::Parameters const& params, initializer_type const& init, alps::ObservableSet& obs) {
+    alps::Parameters const& params, initializer_type const& init, alps::alea::observable_set& obs) {
     walker_ptr->init_observables(params, init, obs);
   }
   static void run_walker(boost::shared_ptr<walker_type> walker_ptr, initializer_type const& init,
-    alps::ObservableSet& obs) {
+    alps::alea::observable_set& obs) {
     walker_ptr->run(init, obs);
   }
 };
@@ -586,29 +587,29 @@ public:
   }
   virtual ~single_exchange_worker() {}
 
-  void init_observables(alps::Parameters const& params, std::vector<alps::ObservableSet>& obs) {
+  void init_observables(alps::Parameters const& params, std::vector<alps::alea::observable_set>& obs) {
     int nrep = beta_.size();
     obs.resize(nrep);
     for (int p = 0; p < nrep; ++p) {
       helper::init_observables(walker_[0], params, init_, obs[p]);
-      obs[p] << SimpleRealObservable("EXMC: Temperature")
-             << SimpleRealObservable("EXMC: Inverse Temperature");
+      obs[p] << alps::alea::observable("EXMC: Temperature").without_bins()
+             << alps::alea::observable("EXMC: Inverse Temperature").without_bins();
       if (mcs_.exchange()) {
-        obs[p] << SimpleRealObservable("EXMC: Ratio of Upward-Moving Walker")
-               << SimpleRealObservable("EXMC: Ratio of Downward-Moving Walker")
-               << SimpleRealObservable("EXMC: Inverse Round-Trip Time");
-        obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-        obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+        obs[p] << alps::alea::observable("EXMC: Ratio of Upward-Moving Walker").without_bins()
+               << alps::alea::observable("EXMC: Ratio of Downward-Moving Walker").without_bins()
+               << alps::alea::observable("EXMC: Inverse Round-Trip Time").without_bins();
+        obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+        obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
         if (p != nrep - 1) {
-          obs[p] << SimpleRealObservable("EXMC: Acceptance Rate");
-          obs[p]["EXMC: Acceptance Rate"].reset(true);
+          obs[p] << alps::alea::observable("EXMC: Acceptance Rate").without_bins();
+          obs[p]["EXMC: Acceptance Rate"].reset();
         }
       }
     }
-    if (mcs_.exchange()) obs[0] << SimpleRealObservable("EXMC: Average Inverse Round-Trip Time");
+    if (mcs_.exchange()) obs[0] << alps::alea::observable("EXMC: Average Inverse Round-Trip Time").without_bins();
   }
 
-  void run(std::vector<alps::ObservableSet>& obs) {
+  void run(std::vector<alps::alea::observable_set>& obs) {
     ++mcs_;
 
     int nrep = beta_.size();
@@ -706,7 +707,7 @@ public:
 
           for (int p = 0; p < nrep - 1; ++p)
             accept_[p] =
-              reinterpret_cast<SimpleRealObservable&>(obs[p]["EXMC: Acceptance Rate"]).mean();
+              obs[p]["EXMC: Acceptance Rate"].result().mean();
           for (int p = 0; p < nrep; ++p) wp_[p] = weight_parameters_[p] / mcs_.stage_count();
           std::cout << "EXMC stage " << mcs_.stage() << ": acceptance rate = "
                     << write_vector(accept_, " ", 3) << std::endl;
@@ -719,11 +720,11 @@ public:
           mcs_.next_stage();
 
           for (int p = 0; p < nrep - 1; ++p) {
-            obs[p]["EXMC: Acceptance Rate"].reset(true);
+            obs[p]["EXMC: Acceptance Rate"].reset();
           }
           for (int p = 0; p < nrep; ++p) {
-            obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-            obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+            obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+            obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
             weight_parameters_[p] = weight_parameter_type(0);
           }
 
@@ -736,16 +737,13 @@ public:
           if (nu > 0) success = false;
 
           for (int p = 0; p < nrep; ++p) {
-            double up = reinterpret_cast<SimpleRealObservable&>(
-              obs[p]["EXMC: Ratio of Upward-Moving Walker"]).mean();
-            double down = reinterpret_cast<SimpleRealObservable&>(
-              obs[p]["EXMC: Ratio of Downward-Moving Walker"]).mean();
-            upward_[p] = (up + down > 0) ? up / (up + down) : alps::nan();
+            double up = obs[p]["EXMC: Ratio of Upward-Moving Walker"].result().mean();
+            double down = obs[p]["EXMC: Ratio of Downward-Moving Walker"].result().mean();
+            upward_[p] = (up + down > 0) ? up / (up + down) : std::numeric_limits<double>::quiet_NaN();
           }
 
           for (int p = 0; p < nrep - 1; ++p)
-            accept_[p] = reinterpret_cast<SimpleRealObservable&>(
-              obs[p]["EXMC: Acceptance Rate"]).mean();
+            accept_[p] = obs[p]["EXMC: Acceptance Rate"].result().mean();
 
           std::cout << "EXMC stage " << mcs_.stage()
                     << ": stage count = " << mcs_.stage_count() << '\n'
@@ -769,11 +767,11 @@ public:
                         << write_vector(beta_, " ", 5) << std::endl;
             mcs_.next_stage();
             for (int p = 0; p < nrep - 1; ++p) {
-              obs[p]["EXMC: Acceptance Rate"].reset(true);
+              obs[p]["EXMC: Acceptance Rate"].reset();
             }
             for (int p = 0; p < nrep; ++p) {
-              obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-              obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+              obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+              obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
             }
             num_returnee_ = 0;
           } else {
@@ -819,7 +817,7 @@ public:
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  static void evaluate_observable(alps::ObservableSet& obs) {
+  static void evaluate_observable(alps::alea::result_set& obs) {
     walker_type::evaluate_observable(obs);
   }
 
@@ -929,32 +927,32 @@ public:
   }
   virtual ~parallel_exchange_worker() {}
 
-  void init_observables(alps::Parameters const& params, std::vector<alps::ObservableSet>& obs) {
+  void init_observables(alps::Parameters const& params, std::vector<alps::alea::observable_set>& obs) {
     int nrep = beta_.size();
     obs.resize(nrep);
     for (int p = 0; p < nrep; ++p)
       helper::init_observables(walker_[0], params, init_, obs[p]);
     if (comm_.rank() == 0) {
       for (int p = 0; p < nrep; ++p) {
-        obs[p] << SimpleRealObservable("EXMC: Temperature")
-               << SimpleRealObservable("EXMC: Inverse Temperature");
+        obs[p] << alps::alea::observable("EXMC: Temperature").without_bins()
+               << alps::alea::observable("EXMC: Inverse Temperature").without_bins();
         if (mcs_.exchange()) {
-          obs[p] << SimpleRealObservable("EXMC: Ratio of Upward-Moving Walker")
-                 << SimpleRealObservable("EXMC: Ratio of Downward-Moving Walker")
-                 << SimpleRealObservable("EXMC: Inverse Round-Trip Time");
-          obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-          obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+          obs[p] << alps::alea::observable("EXMC: Ratio of Upward-Moving Walker").without_bins()
+                 << alps::alea::observable("EXMC: Ratio of Downward-Moving Walker").without_bins()
+                 << alps::alea::observable("EXMC: Inverse Round-Trip Time").without_bins();
+          obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+          obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
           if (p != nrep - 1) {
-            obs[p] << SimpleRealObservable("EXMC: Acceptance Rate");
-            obs[p]["EXMC: Acceptance Rate"].reset(true);
+            obs[p] << alps::alea::observable("EXMC: Acceptance Rate").without_bins();
+            obs[p]["EXMC: Acceptance Rate"].reset();
           }
         }
       }
-      if (mcs_.exchange()) obs[0] << SimpleRealObservable("EXMC: Average Inverse Round-Trip Time");
+      if (mcs_.exchange()) obs[0] << alps::alea::observable("EXMC: Average Inverse Round-Trip Time").without_bins();
     }
   }
 
-  void run(std::vector<alps::ObservableSet>& obs) {
+  void run(std::vector<alps::alea::observable_set>& obs) {
     ++mcs_;
 
     int nrep = beta_.size();
@@ -1063,7 +1061,7 @@ public:
 
             for (int p = 0; p < nrep - 1; ++p)
               accept_[p] =
-                reinterpret_cast<SimpleRealObservable&>(obs[p]["EXMC: Acceptance Rate"]).mean();
+                obs[p]["EXMC: Acceptance Rate"].result().mean();
             for (int p = 0; p < nrep; ++p) wp_[p] = weight_parameters_[p] / mcs_.stage_count();
             std::cout << "EXMC stage " << mcs_.stage() << ": acceptance rate = "
                       << write_vector(accept_, " ", 5) << std::endl;
@@ -1076,11 +1074,11 @@ public:
             next_stage = true;
 
             for (int p = 0; p < nrep - 1; ++p) {
-              obs[p]["EXMC: Acceptance Rate"].reset(true);
+              obs[p]["EXMC: Acceptance Rate"].reset();
             }
             for (int p = 0; p < nrep; ++p) {
-              obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-              obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+              obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+              obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
               weight_parameters_[p] = weight_parameter_type(0);
             }
 
@@ -1093,16 +1091,13 @@ public:
             if (nu > 0) success = false;
 
             for (int p = 0; p < nrep; ++p) {
-              double up = reinterpret_cast<SimpleRealObservable&>(
-                obs[p]["EXMC: Ratio of Upward-Moving Walker"]).mean();
-              double down = reinterpret_cast<SimpleRealObservable&>(
-                obs[p]["EXMC: Ratio of Downward-Moving Walker"]).mean();
-              upward_[p] = (up + down > 0) ? up / (up + down) : alps::nan();
+              double up = obs[p]["EXMC: Ratio of Upward-Moving Walker"].result().mean();
+              double down = obs[p]["EXMC: Ratio of Downward-Moving Walker"].result().mean();
+              upward_[p] = (up + down > 0) ? up / (up + down) : std::numeric_limits<double>::quiet_NaN();
             }
 
             for (int p = 0; p < nrep - 1; ++p)
-              accept_[p] = reinterpret_cast<SimpleRealObservable&>(
-                obs[p]["EXMC: Acceptance Rate"]).mean();
+              accept_[p] = obs[p]["EXMC: Acceptance Rate"].result().mean();
 
             std::cout << "EXMC stage " << mcs_.stage()
                       << ": stage count = " << mcs_.stage_count() << '\n'
@@ -1126,11 +1121,11 @@ public:
                           << write_vector(beta_, " ", 5) << std::endl;
               next_stage = true;
               for (int p = 0; p < nrep - 1; ++p) {
-                obs[p]["EXMC: Acceptance Rate"].reset(true);
+                obs[p]["EXMC: Acceptance Rate"].reset();
               }
               for (int p = 0; p < nrep; ++p) {
-                obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset(true);
-                obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset(true);
+                obs[p]["EXMC: Ratio of Upward-Moving Walker"].reset();
+                obs[p]["EXMC: Ratio of Downward-Moving Walker"].reset();
               }
               num_returnee_ = 0;
             } else {
@@ -1190,7 +1185,7 @@ public:
   bool is_thermalized() const { return mcs_.is_thermalized(); }
   double progress() const { return mcs_.progress(); }
 
-  static void evaluate_observable(alps::ObservableSet& obs) {
+  static void evaluate_observable(alps::alea::result_set& obs) {
     walker_type::evaluate_observable(obs);
   }
 

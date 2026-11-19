@@ -1,48 +1,27 @@
-/*****************************************************************************
-*
-* ALPS Project: Algorithms and Libraries for Physics Simulations
-*
-* ALPS Libraries
-*
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
-*
-* ALPS Project: https://alps.comp-phys.org/
-* SPDX-License-Identifier: MIT
-*
-*****************************************************************************/
-
 #include <alps/parapack/measurement.h>
 #include <gtest/gtest.h>
+#include <cmath>
 
-TEST(MeasurementMerge, PreservesHistoricalMeansAndBinningErrors) {
-  alps::RealObservable single("single");
-  for (int i = 0; i < 100; ++i)
-    single << static_cast<double>(i);
-  EXPECT_DOUBLE_EQ(single.mean(), 49.5);
-  // Legacy output rounded errors to three significant digits. Preserve that
-  // uncertainty contract without coupling the test to ostream formatting.
-  EXPECT_NEAR(single.error(), 2.92, .005);
-  alps::ObservableSet merged, random_clone;
+// The numbers 0 to 99, each measured 100 times by its own clone. As a
+// disorder average every clone is one sample: mean 49.5 and error
+// sqrt(833.25 / 99) = 2.9011, from the 100 uncorrelated clone means.
+// Merged with equal weight per sample all 10000 samples count.
+TEST(MeasurementMerge, DisorderAverageTakesOneSamplePerClone) {
+  alps::alea::observable_set merged, random_clone;
   for (int i = 0; i < 100; ++i) {
-    alps::ObservableSet bin;
-    bin << alps::RealObservable("obs", 10000);
-    bin.reset(true);
-    for (int j = 0; j < 100; ++j)
-      bin["obs"] << static_cast<double>(i);
-    merged << bin;
-    alps::ObservableSet clone;
-    clone << alps::RealObservable("obs");
-    clone.reset(true);
+    alps::alea::observable_set clone;
+    clone << alps::alea::observable("obs");
     for (int j = 0; j < 100; ++j)
       clone["obs"] << static_cast<double>(i);
-    alps::merge_random_clone(random_clone, clone);
+    alps::merge_clone(merged, clone.results(), false);
+    alps::merge_random_clone(random_clone, clone.results());
   }
-  const auto &merged_result = dynamic_cast<const alps::RealObsevaluator &>(merged["obs"]);
-  // The evaluator combines 10,000 samples through jackknife arithmetic;
-  // allow accumulated roundoff while tightening the old 0.05 output bound.
-  EXPECT_NEAR(merged_result.mean(), 49.5, 1e-8);
-  EXPECT_NEAR(merged_result.error(), .289, .0005);
-  const auto &clone_result = dynamic_cast<const alps::RealObservable &>(random_clone["obs"]);
-  EXPECT_DOUBLE_EQ(clone_result.mean(), single.mean());
-  EXPECT_DOUBLE_EQ(clone_result.error(), single.error());
+  const alps::alea::result_set disorder = random_clone.results();
+  EXPECT_EQ(disorder["obs"].count(), 100u);
+  EXPECT_DOUBLE_EQ(disorder["obs"].mean(), 49.5);
+  EXPECT_NEAR(disorder["obs"].error(), std::sqrt(833.25 / 99), 1e-12);
+
+  const alps::alea::result_set all = merged.results();
+  EXPECT_EQ(all["obs"].count(), 10000u);
+  EXPECT_NEAR(all["obs"].mean(), 49.5, 1e-12);
 }

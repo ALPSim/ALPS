@@ -19,8 +19,8 @@ class RecordingWorker {
 public:
   inline static std::vector<double> temperatures;
   RecordingWorker(const alps::Parameters &) {}
-  void init_observables(const alps::Parameters &, const alps::ObservableSet &) {}
-  void run(const alps::ObservableSet &) {}
+  void init_observables(const alps::Parameters &, const alps::alea::observable_set &) {}
+  void run(const alps::alea::observable_set &) {}
   void set_beta(double beta) { temperatures.push_back(1 / beta); }
   void save(alps::ODump &) const {}
   void load(alps::IDump &) {}
@@ -34,7 +34,7 @@ TEST(TemperatureScan, UsesInitialThermalizationThenVisitsEveryTemperature) {
   params["DIFF_TEMPERATURE"] = .1;
   params["INITIAL_THERMALIZATION"] = 10;
   RecordingWorker::temperatures.clear();
-  std::vector<alps::ObservableSet> observables;
+  std::vector<alps::alea::observable_set> observables;
   alps::parapack::temperature_scan_adaptor<RecordingWorker> worker(params);
   worker.init_observables(params, observables);
   ASSERT_EQ(observables.size(), 5);

@@ -47,8 +47,7 @@ typedef parapack_dump::parapack_dump_t parapack_dump_t;
 
 struct ALPS_DECL dump_format {
   enum dump_format_t {
-    hdf5, // default
-    xdr
+    hdf5
   };
   static std::string to_string(dump_format_t format);
 };

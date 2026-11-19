@@ -32,7 +32,7 @@ option::option(int argc, char** argv, bool eval)
   desc.flag("help,h", "produce help message")
     .flag("license,l", "print license conditions")
     .value<std::string>("dump-format",
-     "format for dumping info, parameter, and measurements [hdf5 (default), xdr]")
+     "format for dumping info, parameter, and measurements [hdf5]")
     .value<std::string>("task-range",
      "specify range of task indices to be processed, e.g. [2:5]")
     .flag("write-xml", "write results to XML files")
@@ -84,9 +84,10 @@ option::option(int argc, char** argv, bool eval)
     std::string value = desc.get<std::string>("dump-format");
     if (value == "hdf5")
       dump_format = dump_format::hdf5;
-    else if (value == "xdr")
-      dump_format = dump_format::xdr;
     else {
+      if (value == "xdr")
+        std::cerr << "The xdr dump format is no longer available: measurements are written to"
+                     " HDF5 files only.\n";
       valid = false;
       return;
     }

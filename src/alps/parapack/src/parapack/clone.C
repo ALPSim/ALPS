@@ -12,105 +12,88 @@
 *****************************************************************************/
 #include <alps/parapack/clone.h>
 #include <alps/parapack/logger.h>
+#include <alps/alea/observables_io.hpp>
 #include <filesystem>
 #include <alps/utilities/fs/absolute.hpp>
 
 namespace alps {
 
-void save_observable(alps::hdf5::archive & ar, std::string const& prefix,
-                     std::vector<ObservableSet> const& obs) {
-  if (obs.size() == 1)
-    ar[prefix] << obs[0];
-  else
-    for (std::size_t m = 0; m < obs.size(); ++m)
-      ar[prefix + "/sections/" + boost::lexical_cast<std::string>(m)] << obs[m];
-}
+namespace {
 
-void save_observable(alps::hdf5::archive & ar, std::vector<ObservableSet> const& obs) {
-  save_observable(ar, "simulation/results", obs);
-}
+std::string clones_path() { return "simulation/realizations/0/clones"; }
 
-void save_observable(alps::hdf5::archive & ar, cid_t cid, std::vector<ObservableSet> const& obs) {
-  save_observable(ar, "simulation/realizations/" + boost::lexical_cast<std::string>(0) +
-                  "/clones/" + boost::lexical_cast<std::string>(cid) + "/results", obs);
-}
-
-void save_observable(alps::hdf5::archive & ar, cid_t cid, int rank,
-                     std::vector<ObservableSet> const& obs) {
-  save_observable(ar, "simulation/realizations/" + boost::lexical_cast<std::string>(0) +
-                  "/clones/" + boost::lexical_cast<std::string>(cid) +
-                  "/workers/" + boost::lexical_cast<std::string>(rank) + "/results", obs);
-}
-
-bool load_observable(alps::hdf5::archive & ar, std::string const& prefix,
-                     std::vector<ObservableSet>& obs) {
-  obs.clear();
-  if (ar.is_group(prefix)) {
-    if (!ar.is_group(prefix + "/sections/0")) {
-      obs.resize(1);
-      ar[prefix] >> obs[0];
-    } else {
-      for (int m = 0; ; ++m) {
-        std::string p = prefix + "/sections/" + boost::lexical_cast<std::string>(m);
-        if (ar.is_group(p)) {
-          obs.push_back(ObservableSet());
-          ar[p] >> obs[m];
-        } else {
-          break;
-        }
-      }
-    }
-    return true;
-  } else {
-    return false;
+void save_sets(alps::hdf5::archive & ar, std::string const& prefix,
+               std::vector<alps::alea::observable_set> const& obs) {
+  for (std::size_t m = 0; m < obs.size(); ++m) {
+    std::string section = obs.size() == 1 ? "" : "/sections/" + boost::lexical_cast<std::string>(m);
+    alps::alea::save_results(ar, prefix + "/results" + section, obs[m].results());
+    alps::alea::save_checkpoint(ar, prefix + "/measurements" + section, obs[m]);
   }
 }
 
-bool load_observable(alps::hdf5::archive & ar, std::vector<ObservableSet>& obs) {
-  return load_observable(ar, "simulation/results", obs);
-}
-
-bool load_observable(alps::hdf5::archive & ar, std::string const& prefix, cid_t cid,
-                     std::string const& suffix,  std::vector<ObservableSet>& obs) {
+// `suffix` is appended to the path of the only clone in the file
+bool load_sets(alps::hdf5::archive & ar, cid_t cid, std::string const& suffix,
+               std::vector<alps::alea::observable_set>& obs) {
+  obs.clear();
+  std::string prefix = clones_path();
   if (!ar.is_group(prefix)) return false;
   std::vector<std::string> children = ar.list_children(prefix);
   if (children.size() > 1) {
     std::cerr << logger::header() << "warning: more than one clone is found in in prefix = "
               << prefix << ". Only the first one will be loaded." << std::endl;
   }
-  if (children.size() > 0) {
-    if (children[0] != boost::lexical_cast<std::string>(cid)) {
-      std::cerr << logger::header() << "warning: try to find clone id = " << cid << ", but found "
-                << children[0] << " in prefix = " << prefix << std::endl;
-    }
-    return load_observable(ar, prefix + "/" + children[0] + "/" + suffix, obs);
+  if (children.empty()) return false;
+  if (children[0] != boost::lexical_cast<std::string>(cid)) {
+    std::cerr << logger::header() << "warning: try to find clone id = " << cid << ", but found "
+              << children[0] << " in prefix = " << prefix << std::endl;
   }
-  return false;
+  std::string clone = prefix + "/" + children[0] + suffix;
+  std::string measurements = clone + "/measurements";
+  if (!ar.is_group(measurements)) {
+    if (ar.is_group(clone + "/results"))
+      boost::throw_exception(std::runtime_error(
+        "The clone in '" + ar.get_filename() + "' was written by an earlier version of ALPS."
+        " This version cannot continue it or evaluate it again. The results of a finished"
+        " simulation can still be read from its result files."));
+    return false;
+  }
+  if (!ar.is_group(measurements + "/sections/0")) {
+    obs.resize(1);
+    alps::alea::load_checkpoint(ar, measurements, obs[0]);
+  } else {
+    for (int m = 0; ; ++m) {
+      std::string p = measurements + "/sections/" + boost::lexical_cast<std::string>(m);
+      if (!ar.is_group(p)) break;
+      obs.push_back(alps::alea::observable_set());
+      alps::alea::load_checkpoint(ar, p, obs[m]);
+    }
+  }
+  return true;
 }
 
-bool load_observable(alps::hdf5::archive & ar, cid_t cid, std::vector<ObservableSet>& obs) {
-  std::string prefix = "simulation/realizations/" + boost::lexical_cast<std::string>(0) +
-    "/clones";
-  if (ar.is_group(prefix))
-    return load_observable(ar, prefix, cid, "results", obs);
-  else
-    return false;
+} // end namespace
+
+void save_observable(alps::hdf5::archive & ar, cid_t cid,
+                     std::vector<alps::alea::observable_set> const& obs) {
+  save_sets(ar, clones_path() + "/" + boost::lexical_cast<std::string>(cid), obs);
+}
+
+void save_observable(alps::hdf5::archive & ar, cid_t cid, int rank,
+                     std::vector<alps::alea::observable_set> const& obs) {
+  save_sets(ar, clones_path() + "/" + boost::lexical_cast<std::string>(cid) +
+            "/workers/" + boost::lexical_cast<std::string>(rank), obs);
+}
+
+bool load_observable(alps::hdf5::archive & ar, cid_t cid,
+                     std::vector<alps::alea::observable_set>& obs) {
+  return load_sets(ar, cid, "", obs);
 }
 
 bool load_observable(alps::hdf5::archive & ar, cid_t cid, int rank,
-                       std::vector<ObservableSet>& obs) {
-  return load_observable(ar, "simulation/realizations/" + boost::lexical_cast<std::string>(0) +
-                         "/clones", cid, "workers/" + boost::lexical_cast<std::string>(rank) +
-                         "/results", obs);
+                     std::vector<alps::alea::observable_set>& obs) {
+  return load_sets(ar, cid, "/workers/" + boost::lexical_cast<std::string>(rank), obs);
 }
 
-bool load_observable(alps::IDump& dp, std::vector<ObservableSet>& obs) {
-  Parameters ptmp;
-  clone_info itmp;
-  dp >> ptmp >> itmp >> obs;
-  return true;
-}
-  
 
 //
 // clone
@@ -119,7 +102,7 @@ bool load_observable(alps::IDump& dp, std::vector<ObservableSet>& obs) {
 clone::clone(std::filesystem::path const& basedir, alps::parapack::option opt, tid_t tid,
   cid_t cid, Parameters const& params, std::string const& base, bool is_new)
   : task_id_(tid), clone_id_(cid), params_(params), basedir_(basedir),
-    dump_format_(opt.dump_format), dump_policy_(opt.dump_policy), timer_(opt.check_interval) {
+    dump_policy_(opt.dump_policy), timer_(opt.check_interval) {
   params_["DIR_NAME"] = basedir_.string();
   params_["BASE_NAME"] = base;
 
@@ -134,8 +117,7 @@ clone::clone(std::filesystem::path const& basedir, alps::parapack::option opt, t
   if (!is_new) {
     bool exists = 
       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_)) &&
-      (std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
-       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_)));
+      std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_));
     if (exists) {
       this->load();
     } else {
@@ -147,7 +129,7 @@ clone::clone(std::filesystem::path const& basedir, alps::parapack::option opt, t
   if (is_new) worker_->init_observables(params_, measurements_);
 
   if (is_new && worker_->is_thermalized()) { // no thermalization steps
-    BOOST_FOREACH(alps::ObservableSet& m, measurements_) { m.reset(true); }
+    BOOST_FOREACH(alps::alea::observable_set& m, measurements_) { m.reset(); }
   }
 
   if (is_new || worker_->progress() < 1)
@@ -170,7 +152,7 @@ void clone::run() {
     double progress = worker_->progress();
     worker_->run(measurements_);
     if (!thermalized && worker_->is_thermalized()) {
-      BOOST_FOREACH(alps::ObservableSet& m, measurements_) m.reset(true);
+      BOOST_FOREACH(alps::alea::observable_set& m, measurements_) m.reset();
       info_.stop();
       info_.start("running");
     }
@@ -193,8 +175,6 @@ void clone::load() {
   std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
   std::filesystem::path dump_h5 =
     alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
-  std::filesystem::path dump_xdr =
-    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (exists(dump_h5)) {
     #pragma omp critical (hdf5io)
     {
@@ -202,8 +182,9 @@ void clone::load() {
       h5["/"] >> *this;
     }
   } else {
-    IXDRFileDump dp(dump_xdr);
-    dp >> params_ >> info_ >> measurements_;
+    boost::throw_exception(std::runtime_error(
+      "The measurements of the clone are expected in '" + dump_h5.string() + "', which does not"
+      " exist. Clones dumped in the xdr format by an earlier version of ALPS cannot be read."));
   }
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
@@ -217,17 +198,10 @@ void clone::save() const{
   std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
   std::filesystem::path dump_h5 =
     alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
-  std::filesystem::path dump_xdr =
-    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
-  if (dump_format_ == dump_format::hdf5) {
-    #pragma omp critical (hdf5io)
-    {
-      hdf5::archive h5(dump_h5.string(), "a");
-      h5["/"] << *this;
-    }
-  } else if (dump_format_ == dump_format::xdr) {
-    OXDRFileDump dp(dump_xdr);
-    dp << params_ << info_ << measurements_;
+  #pragma omp critical (hdf5io)
+  {
+    hdf5::archive h5(dump_h5.string(), "a");
+    h5["/"] << *this;
   }
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
@@ -271,7 +245,7 @@ void clone::do_halt() {
 
 void clone::output() const{
   std::cout << params_;
-  BOOST_FOREACH(ObservableSet const& m, measurements_) std::cout << m;
+  BOOST_FOREACH(alps::alea::observable_set const& m, measurements_) std::cout << m.results();
 }
 
 #ifdef ALPS_HAVE_MPI
@@ -283,7 +257,7 @@ void clone::output() const{
 clone_mpi::clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicator const& work,
   std::filesystem::path const& basedir, alps::parapack::option opt, clone_create_msg_t const& msg)
   : ctrl_(ctrl), work_(work), task_id_(msg.task_id), clone_id_(msg.clone_id),
-    group_id_(msg.group_id), params_(msg.params), basedir_(basedir), dump_format_(opt.dump_format),
+    group_id_(msg.group_id), params_(msg.params), basedir_(basedir),
     dump_policy_(opt.dump_policy), timer_(opt.check_interval) {
   bool is_new = msg.is_new;
   params_["DIR_NAME"] = basedir;
@@ -303,8 +277,7 @@ clone_mpi::clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicato
   if (!is_new) {
     bool exists = 
       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_)) &&
-      (std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_)) ||
-       std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_)));
+      std::filesystem::exists(alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_));
     int all_exist = exists;
     MPI_Allreduce(MPI_IN_PLACE, &all_exist, 1, MPI_INT, MPI_LAND, work_);
     exists = all_exist;
@@ -321,7 +294,7 @@ clone_mpi::clone_mpi(alps::mpi::communicator const& ctrl, alps::mpi::communicato
   if (is_new) worker_->init_observables(params_, measurements_);
 
   if (is_new && worker_->is_thermalized()) { // no thermalization steps
-    BOOST_FOREACH(alps::ObservableSet& m, measurements_) { m.reset(true); }
+    BOOST_FOREACH(alps::alea::observable_set& m, measurements_) { m.reset(); }
   }
 
   if (is_new || info_.progress() < 1)
@@ -359,7 +332,7 @@ void clone_mpi::run() {
       double progress = worker_->progress();
       worker_->run(measurements_);
       if (!thermalized && worker_->is_thermalized()) {
-        BOOST_FOREACH(alps::ObservableSet& m, measurements_) m.reset(true);
+        BOOST_FOREACH(alps::alea::observable_set& m, measurements_) m.reset();
         if (work_.rank() == 0) {
           info_.stop();
           info_.start("running");
@@ -453,8 +426,6 @@ void clone_mpi::load() {
   std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
   std::filesystem::path dump_h5 =
     alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
-  std::filesystem::path dump_xdr =
-    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
   if (exists(dump_h5)) {
     #pragma omp critical (hdf5io)
     {
@@ -462,8 +433,9 @@ void clone_mpi::load() {
       h5["/"] >> *this;
     }
   } else {
-    IXDRFileDump dp(dump_xdr);
-    dp >> params_ >> info_ >> measurements_;
+    boost::throw_exception(std::runtime_error(
+      "The measurements of the clone are expected in '" + dump_h5.string() + "', which does not"
+      " exist. Clones dumped in the xdr format by an earlier version of ALPS cannot be read."));
   }
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
@@ -478,17 +450,10 @@ void clone_mpi::save() const{
   std::filesystem::path dump = alps::fs::absolute(std::filesystem::path(info_.dumpfile()), basedir_);
   std::filesystem::path dump_h5 =
     alps::fs::absolute(std::filesystem::path(info_.dumpfile_h5()), basedir_);
-  std::filesystem::path dump_xdr =
-    alps::fs::absolute(std::filesystem::path(info_.dumpfile_xdr()), basedir_);
-  if (dump_format_ == dump_format::hdf5) {
-    #pragma omp critical (hdf5io)
-    {
-      hdf5::archive h5(dump_h5.string(), "a");
-      h5["/"] << *this;
-    }
-  } else if (dump_format_ == dump_format::xdr) {
-    OXDRFileDump dp(dump_xdr);
-    dp << params_ << info_ << measurements_;
+  #pragma omp critical (hdf5io)
+  {
+    hdf5::archive h5(dump_h5.string(), "a");
+    h5["/"] << *this;
   }
   bool workerdump = (dump_policy_ == dump_policy::All) ||
     (dump_policy_ == dump_policy::RunningOnly && info_.progress() < 1);
@@ -521,7 +486,7 @@ void clone_mpi::save(hdf5::archive & ar) const {
 
 void clone_mpi::output() const{
   std::cout << params_;
-  BOOST_FOREACH(ObservableSet const& m, measurements_) std::cout << m;
+  BOOST_FOREACH(alps::alea::observable_set const& m, measurements_) std::cout << m.results();
 }
 
 void clone_mpi::send_info(mcmp_tag_t tag) {

@@ -18,8 +18,6 @@ std::string dump_format::to_string(dump_format_t format) {
   switch (format) {
   case hdf5:
     return "hdf5";
-  case xdr:
-    return "xdr";
   default:
     ;
   }

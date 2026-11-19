@@ -33,8 +33,8 @@ class ALPS_DECL dumb_worker : public abstract_worker {
 public:
   virtual ~dumb_worker();
   static void print_copyright(std::ostream& out);
-  void init_observables(Parameters const& param, ObservableSet& obs);
-  void run(ObservableSet& obs);
+  void init_observables(Parameters const& param, alps::alea::observable_set& obs);
+  void run(alps::alea::observable_set& obs);
   void load(IDump& dp);
   void save(ODump& dp) const;
   bool is_thermalized() const;

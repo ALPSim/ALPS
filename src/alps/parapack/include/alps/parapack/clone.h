@@ -21,7 +21,7 @@
 #include "types.h"
 #include "worker_factory.h"
 
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/hdf5.hpp>
 #include <alps/osiris.h>
 #include <alps/parameter.h>
@@ -29,19 +29,21 @@
 
 namespace alps {
 
-ALPS_DECL void save_observable(hdf5::archive & ar, std::vector<ObservableSet> const& obs);
+// The measurements of a clone in its HDF5 file: the results for reading, and
+// what is needed to continue measuring. Several sets, as of the replicas of an
+// exchange Monte Carlo simulation, are written as sections. With `rank`, they
+// are those of one process of a parallel clone.
 ALPS_DECL void save_observable(hdf5::archive & ar, cid_t cid,
-  std::vector<ObservableSet> const& obs);
+  std::vector<alps::alea::observable_set> const& obs);
 ALPS_DECL void save_observable(hdf5::archive& ar, cid_t cid, int rank,
-  std::vector<ObservableSet> const& obs);
-ALPS_DECL bool load_observable(hdf5::archive & ar, std::vector<ObservableSet>& obs);
-ALPS_DECL bool load_observable(hdf5::archive & ar, std::string const& prefix, cid_t cid,
-  std::string const& suffix, std::vector<ObservableSet>& obs);
+  std::vector<alps::alea::observable_set> const& obs);
+
+// Returns false if the file holds no measurements of a clone. Measurements
+// written by an earlier version of ALPS are refused.
 ALPS_DECL bool load_observable(hdf5::archive & ar, cid_t cid,
-  std::vector<ObservableSet>& obs);
+  std::vector<alps::alea::observable_set>& obs);
 ALPS_DECL bool load_observable(hdf5::archive & ar, cid_t cid, int rank,
-  std::vector<ObservableSet>& obs);
-ALPS_DECL bool load_observable(alps::IDump& dp, std::vector<ObservableSet>& obs);
+  std::vector<alps::alea::observable_set>& obs);
 
 class abstract_clone : public boost::noncopyable {
 public:
@@ -93,9 +95,8 @@ private:
 
   std::filesystem::path basedir_;
   clone_info info_;
-  std::vector<ObservableSet> measurements_;
+  std::vector<alps::alea::observable_set> measurements_;
 
-  dump_format_t dump_format_;
   dump_policy_t dump_policy_;
   clone_timer timer_;
   clone_timer::loops_t loops_;
@@ -184,9 +185,8 @@ private:
 
   std::filesystem::path basedir_;
   clone_info info_;
-  std::vector<ObservableSet> measurements_;
+  std::vector<alps::alea::observable_set> measurements_;
 
-  dump_format_t dump_format_;
   dump_policy_t dump_policy_;
   clone_timer timer_;
   clone_timer::loops_t loops_;

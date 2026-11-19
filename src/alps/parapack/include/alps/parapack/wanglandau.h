@@ -18,7 +18,7 @@
 #include "worker_factory.h"
 #include "integer_range.h"
 #include "montecarlo.h"
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/numeric/double2int.hpp>
 #include <alps/osiris.h>
 #include <filesystem>
@@ -68,21 +68,22 @@ public:
       last_direction_(unknown), direction_(unknown), penalty_(8) {
   }
 
-  void init_observables(ObservableSet& obs) const {
+  void init_observables(alps::alea::observable_set& obs) const {
+    using alps::alea::observable;
+    using alps::alea::histogram;
     std::vector<std::string> label;
     for (int b = bin_min(); b <= bin_max(); ++b)
       label.push_back(boost::lexical_cast<std::string>(b));
-    obs << SimpleRealVectorObservable("Log(g)", label)
-        << IntHistogramObservable("Final Histogram", 0, size())
-        << IntHistogramObservable("Overall Histogram", 0, size())
-        << IntHistogramObservable("Histogram of Ascending Walker", 0, size())
-        << IntHistogramObservable("Measurement Histogram", 0, size())
-        << SimpleRealObservable("Inverse Round-trip Time")
-        << SimpleRealObservable("Lower Bound of Random Walk")
-        << SimpleRealObservable("Upper Bound of Random Walk")
-        << SimpleRealObservable("Lower Bound of Measurement")
-        << SimpleRealObservable("Upper Bound of Measurement");
-    obs["Final Histogram"].reset(true);
+    obs << observable("Log(g)").without_bins().labels(label)
+        << histogram("Final Histogram", 0, size() - 1)
+        << histogram("Overall Histogram", 0, size() - 1)
+        << histogram("Histogram of Ascending Walker", 0, size() - 1)
+        << histogram("Measurement Histogram", 0, size() - 1)
+        << observable("Inverse Round-trip Time")
+        << observable("Lower Bound of Random Walk").without_bins()
+        << observable("Upper Bound of Random Walk").without_bins()
+        << observable("Lower Bound of Measurement").without_bins()
+        << observable("Upper Bound of Measurement").without_bins();
   }
 
   void set_penalty(double p) { penalty_ = p; }
@@ -114,7 +115,7 @@ public:
     }
   }
 
-  void visit(ObservableSet& obs, int bin, exp_double const& factor) {
+  void visit(alps::alea::observable_set& obs, int bin, exp_double const& factor) {
     if (walk_range_.is_included(bin)) {
       if (bin == bin_min())
         direction_ = ascending;
@@ -131,7 +132,7 @@ public:
         weight_[bin2index(bin)] *= pow(factor, penalty_);
     }
   }
-  void measure(ObservableSet& obs, int bin) {
+  void measure(alps::alea::observable_set& obs, int bin) {
     if (measure_range_.is_included(bin))
       obs["Measurement Histogram"] << bin2index(bin);
     if (walk_range_.is_included(bin)) {
@@ -141,7 +142,7 @@ public:
     }
   }
 
-  void write_observables(ObservableSet& obs) const {
+  void write_observables(alps::alea::observable_set& obs) const {
     std::valarray<double> w(size());
     for (int i = 0; i < size(); ++i) w[i] = log(weight_[i]);
     obs["Log(g)"] << w;
@@ -151,26 +152,23 @@ public:
     obs["Upper Bound of Measurement"] << 1.0 * measure_range_.max();
   }
 
-  static void evaluate_observable(std::vector<ObservableSet>& obs) { evaluate_observable(obs[0]); }
-  static void evaluate_observable(ObservableSet& obs) {
-    if (obs.has("Inverse Round-trip Time")) {
-      RealObsevaluator irt = obs["Inverse Round-trip Time"];
-      RealObsevaluator rt("Round-trip Time");
-      rt = 1.0 / irt;
-      obs.addObservable(rt);
-    }
+  static void evaluate_observable(std::vector<alps::alea::result_set>& obs) {
+    evaluate_observable(obs[0]);
+  }
+  static void evaluate_observable(alps::alea::result_set& obs) {
+    if (obs.has("Inverse Round-trip Time") && obs["Inverse Round-trip Time"].count() > 0)
+      obs.insert("Round-trip Time", 1.0 / obs["Inverse Round-trip Time"]);
   }
 
-  static void save_weight(std::vector<ObservableSet> const& obs, Parameters const& params) {
+  static void save_weight(std::vector<alps::alea::result_set> const& obs, Parameters const& params) {
     save_weight(obs[0], params);
   }
-  static void save_weight(ObservableSet const& obs, Parameters const& params) {
-    typedef RealObsevaluator eval_t;
-    range_t walk(numeric::double2int(eval_t(obs["Lower Bound of Random Walk"]).mean()),
-                 numeric::double2int(eval_t(obs["Upper Bound of Random Walk"]).mean()));
-    range_t measure(numeric::double2int(eval_t(obs["Lower Bound of Measurement"]).mean()),
-                    numeric::double2int(eval_t(obs["Upper Bound of Measurement"]).mean()));
-    std::valarray<double> weight = RealVectorObsevaluator(obs["Log(g)"]).mean();
+  static void save_weight(alps::alea::result_set const& obs, Parameters const& params) {
+    range_t walk(numeric::double2int(obs["Lower Bound of Random Walk"].mean()),
+                 numeric::double2int(obs["Upper Bound of Random Walk"].mean()));
+    range_t measure(numeric::double2int(obs["Lower Bound of Measurement"].mean()),
+                    numeric::double2int(obs["Upper Bound of Measurement"].mean()));
+    std::vector<double> weight = obs["Log(g)"].mean_vector();
     std::valarray<double> logg(measure.size());
     for (int bin = measure.min(); bin <= measure.max(); ++bin)
       logg[bin - measure.min()] = weight[bin - walk.min()];
@@ -299,7 +297,7 @@ inline alps::IDump& operator>>(alps::IDump& dp, alps::wanglandau_weight& hist) {
   return dp;
 }
 
-inline alps::ObservableSet& operator<<(alps::ObservableSet& obs,
+inline alps::alea::observable_set& operator<<(alps::alea::observable_set& obs,
   alps::wanglandau_weight const& hist) {
   hist.write_observables(obs);
   return obs;
@@ -345,12 +343,12 @@ public:
 
   exp_double const& factor() const { return factor_; }
 
-  bool check_flatness(ObservableSet& obs, wanglandau_weight const& weight) {
+  bool check_flatness(alps::alea::observable_set& obs, wanglandau_weight const& weight) {
     bool verbose = true;
     int num = 0;
     double mean = 0;
     double hist_min = -1;
-    IntHistogramObsevaluator hist = obs["Final Histogram"];
+    const std::vector<std::uint64_t> hist = obs["Final Histogram"].result().histogram();
     for (int bin = weight.measure_range().min(); bin < weight.measure_range().max(); ++bin) {
       int index = bin - weight.walk_range().min();
       if (hist[index] > 0) {
@@ -381,7 +379,7 @@ public:
                                << ": update factor is reduced to " << factor_
                                << " (target = " << final_ << ")\n";
         mcs_.set_sweeps(mcs_.sweeps().min() + interval_);
-        obs["Final Histogram"].reset(true);
+        obs["Final Histogram"].reset();
         ++stage_;
         return false;
       } else {
@@ -394,7 +392,7 @@ public:
     return true;
   }
   template<typename COMMUNICATOR>
-  bool check_flatness(ObservableSet& obs, wanglandau_weight& weight, COMMUNICATOR& comm) {
+  bool check_flatness(alps::alea::observable_set& obs, wanglandau_weight& weight, COMMUNICATOR& comm) {
     bool finished = false;
     if (comm.rank() == 0) {
       finished = check_flatness(obs, weight);
@@ -429,7 +427,7 @@ public:
   wanglandau_steps() : mc_steps() {}
   wanglandau_steps(Parameters const& p) : mc_steps(p) {}
   exp_double factor() const { return exp_double(1); }
-  bool check_flatness(ObservableSet&, wanglandau_weight const&, bool /* verbose */ = true) { return true; }
+  bool check_flatness(alps::alea::observable_set&, wanglandau_weight const&, bool /* verbose */ = true) { return true; }
 };
 
 } // end namespace alps
@@ -456,42 +454,34 @@ template<typename WL_TYPE>
 class wanglandau_evaluator : public parapack::abstract_evaluator {
 public:
   wanglandau_evaluator(Parameters const& params) : params_(params), count_(0) {}
-  void load(std::vector<ObservableSet> const& obs_in,
-            std::vector<ObservableSet>& obs_out) {
+  void load(std::vector<alps::alea::result_set> const& obs_in,
+            std::vector<alps::alea::observable_set>& obs_out) {
     if (wanglandau::is_learning_phase<WL_TYPE>::value) {
       // learning phase
       if (obs_out.size() != obs_in.size()) obs_out.resize(obs_in.size());
-      for (int i = 0; i < obs_in.size(); ++i) obs_out[i] << obs_in[i];
+      for (int i = 0; i < obs_in.size(); ++i) obs_out[i].merge(obs_in[i]);
     } else {
       // measurement phase
       if (obs_out.size() != 1) obs_out.resize(1);
       int size = obs_in.size();
       wanglandau::observable_map_type obs_map;
-      IntHistogramObsevaluator hist = obs_in[0]["Measurement Histogram"];
+      alps::alea::observable_result const& hist = obs_in[0]["Measurement Histogram"];
       if (hist.count() > 0) {
         obs_map["Measurement Histogram"] = std::vector<double>();
         std::vector<double>& hist_array = obs_map["Measurement Histogram"];
         hist_array.resize(size);
-        for (int i = 0; i < size; ++i) hist_array[i] = hist[i];
-        for (std::map<std::string, Observable*>::const_iterator itr = obs_in[0].begin();
-             itr != obs_in[0].end(); ++itr) {
-          std::string name = itr->second->name();
-          if (obs_in[0].has(name) && obs_in[1].has(name)) {
+        for (int i = 0; i < size; ++i) hist_array[i] = hist.histogram()[i];
+        BOOST_FOREACH(std::string const& name, obs_in[0].names()) {
+          if (size > 1 && obs_in[1].has(name)) {
             obs_map[name] = std::vector<double>();
             std::vector<double>& obs_array = obs_map[name];
             obs_array.resize(size);
             for (int i = 0; i < size; ++i) {
-              if (dynamic_cast<const RealObsevaluator*>(&obs_in[i][name])!=0 ||
-                  dynamic_cast<const RealObservable*>(&obs_in[i][name])!=0 ||
-                  dynamic_cast<const SimpleRealObservable*>(&obs_in[i][name])!=0) {
-                RealObsevaluator eval = obs_in[i][name];
-                obs_array[i] = (eval.count() ? eval.mean() : 0.0);
-              } else {
-                obs_array[i] = 0.0;
-              }
+              alps::alea::observable_result const& r = obs_in[i][name];
+              obs_array[i] = (!r.is_histogram() && r.is_scalar() && r.count()) ? r.mean() : 0.0;
             }
           } else {
-            obs_out[0] << obs_in[0][name];
+            obs_out[0].merge(obs_in[0].select(std::vector<std::string>(1, name)));
           }
         }
         OXDRFileDump dp(wanglandau_weight::observable_dumpfile(params_), (count_ > 0));
@@ -502,7 +492,7 @@ public:
       }
     }
   }
-  void evaluate(std::vector<ObservableSet>& obs) const {
+  void evaluate(std::vector<alps::alea::result_set>& obs) const {
     wanglandau_weight::evaluate_observable(obs);
     if (wanglandau::is_learning_phase<WL_TYPE>::value) {
       // learning phase

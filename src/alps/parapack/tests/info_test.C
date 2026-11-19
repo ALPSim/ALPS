@@ -38,5 +38,4 @@ TEST(CloneInfo, TracksPhasesSeedAndProgress) {
   EXPECT_DOUBLE_EQ(info.progress(), 1);
   EXPECT_EQ(info.dumpfile(), "info_test.clone1");
   EXPECT_EQ(info.dumpfile_h5(), "info_test.clone1.h5");
-  EXPECT_EQ(info.dumpfile_xdr(), "info_test.clone1.xdr");
 }

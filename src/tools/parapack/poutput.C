@@ -12,6 +12,7 @@
 *****************************************************************************/
 
 #include <alps/parapack/clone.h>
+#include <alps/scheduler/montecarlo.h>
 
 int main(int argc, char** argv) {
   alps::oxstream os(std::cout);
@@ -22,12 +23,12 @@ int main(int argc, char** argv) {
     alps::clone_info info;
     ar["/parameters"] >> params;
     ar["/log/alps"] >> info;
-    std::vector<alps::ObservableSet> obs;
+    std::vector<alps::alea::observable_set> obs;
     alps::load_observable(ar, info.clone_id(), obs);
     os << alps::start_tag("CLONE")
        << alps::attribute("dumpfile", argv[i])
        << params;
-    BOOST_FOREACH(alps::ObservableSet const& m, obs) m.write_xml(os);
+    for (alps::alea::observable_set const& m : obs) alps::scheduler::write_xml_averages(os, m.results());
     info.write_xml(os);
     os << alps::end_tag("CLONE");
   }
