@@ -2,22 +2,20 @@
 # SPDX-License-Identifier: MIT
 """spinmc cluster updates give the exact squared magnetizations of an open chain.
 
-For an open chain of classical unit spins with H = -J sum s_i.s_j the
-correlations are <s_i.s_j> = u^|i-j|, with u = I1(K)/I0(K) for the XY model and
-u = coth(K) - 1/K for the Heisenberg model, K = J/T. The squared uniform and
-staggered magnetizations follow as sums over all pairs. With cluster updates
-the staggered one used to equal the uniform one for the XY model and for the
-antiferromagnetic Heisenberg model. The results are compared in units of their
-error bars (mc_hypothesis), all eight comparisons sharing one level.
+The exact squared uniform and staggered magnetizations are from
+classical_chain.py. With cluster updates the staggered one used to equal the
+uniform one for the XY model and for the antiferromagnetic Heisenberg model.
+The results are compared in units of their error bars (mc_hypothesis), all
+eight comparisons sharing one level.
 Usage: check_spinmc_cluster.py <spinmc> <directory with lattices.xml>
 """
-import math
 import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
+import classical_chain
 import mc_hypothesis
 
 L = 8
@@ -25,20 +23,11 @@ T = 0.5
 CASES = [("XY", 1), ("XY", -1), ("Heisenberg", 1), ("Heisenberg", -1)]
 
 
-def bessel_ratio(k):
-    """I1(k)/I0(k) from the power series."""
-    i0 = sum((k / 2) ** (2 * n) / math.factorial(n) ** 2 for n in range(60))
-    i1 = sum((k / 2) ** (2 * n + 1) / (math.factorial(n) * math.factorial(n + 1)) for n in range(60))
-    return i1 / i0
-
-
 def exact(model, coupling):
     k = coupling / T
-    u = bessel_ratio(k) if model == "XY" else 1 / math.tanh(k) - 1 / k
-    pairs = [(i, j) for i in range(L) for j in range(L)]
     return {
-        "Magnetization^2": sum(u ** abs(i - j) for i, j in pairs) / L**2,
-        "Staggered Magnetization^2": sum((-u) ** abs(i - j) for i, j in pairs) / L**2,
+        "Magnetization^2": classical_chain.magnetization_squared(model, k, L),
+        "Staggered Magnetization^2": classical_chain.magnetization_squared(model, k, L, staggered=True),
     }
 
 
