@@ -224,6 +224,12 @@ def test_optional_application_extension_surface():
     assert callable(cthyb.solve)
     assert callable(ctint.solve)
 
+def test_cthyb_segment_extension_surface():
+    # Built only when the SDK has ALPS::cthyb_segment, which needs Eigen.
+    module = pytest.importorskip("pyalps._ext.cthyb_segment")
+    assert importlib.import_module("pyalps.cthyb_segment") is module
+    assert callable(module.solve)
+
 def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, capfd):
     # MPI-enabled SDK solvers require caller initialization, including when
     # this test is selected without collecting the MPI adapter tests.
@@ -273,6 +279,16 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, cap
         "BASENAME": str(tmp_path / "ctint-signal"),
     }
 
+    solvers = [(cthyb, cthyb_params, "ALPS CT-HYB impurity solver"),
+               (ctint, ctint_params, "ALPS CT-INT impurity solver")]
+    # CT-HYB-SEGMENT needs Eigen; an SDK built without it has no binding.
+    if importlib.util.find_spec("pyalps._ext.cthyb_segment") is not None:
+        from pyalps import cthyb_segment
+        from pyalps.cthyb_segment_compat import from_hybridization
+        segment_params = from_hybridization(
+            dict(cthyb_params, BASENAME=str(tmp_path / "cthyb-segment-signal")))
+        solvers.append((cthyb_segment, segment_params, "ALPS CT-HYB-SEGMENT impurity solver"))
+
     calls = []
 
     def python_sigint_handler(signum, frame):
@@ -282,8 +298,7 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, cap
     try:
         # Run each solver twice: restoration alone is not enough if ALPS' own
         # handlers are not reinstalled for the next embedded call.
-        for solver, params, component in ((cthyb, cthyb_params, "ALPS CT-HYB impurity solver"),
-                                           (ctint, ctint_params, "ALPS CT-INT impurity solver")):
+        for solver, params, component in solvers:
             for disabled in (False, True):
                 if disabled:
                     monkeypatch.setenv("ALPS_NO_CITATIONS", "1")
@@ -300,7 +315,7 @@ def test_ctqmc_solvers_restore_python_signal_handlers(tmp_path, monkeypatch, cap
     finally:
         signal.signal(signal.SIGINT, previous_handler)
 
-    assert len(calls) == 4
+    assert len(calls) == 2 * len(solvers)
 
 
 def test_maxent_restores_python_signal_handlers(tmp_path, monkeypatch):

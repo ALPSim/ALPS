@@ -11,6 +11,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 
 #prepare the input parameters
@@ -33,7 +34,7 @@ parms.append(
           'OMEGA_LOOP'          : 1,
           'SEED'                : 0,
           'SITES'               : 1,
-          'SOLVER'              : 'hybridization',
+          'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
           'SC_WRITE_DELTA'      : 1,
           'SYMMETRIZATION'      : 1,
           'U'                   : 3,
