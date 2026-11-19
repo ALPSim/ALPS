@@ -23,7 +23,7 @@ parms=[]
 for b in [6., 8., 10., 12., 14., 16.]:
     parms.append(
             {
-              'ANTIFERROMAGNET'     : 1,
+              'ANTIFERROMAGNET'     : True,
               'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
@@ -39,7 +39,7 @@ for b in [6., 8., 10., 12., 14., 16.]:
               'SITES'               : 1,
               'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'      : 1,
-              'SYMMETRIZATION'      : 0,
+              'SYMMETRIZATION'      : False,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'SWEEPS'              : int(10000*b/16.),

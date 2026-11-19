@@ -30,8 +30,8 @@ for u in [3.]:
                 'H' : 0.0,           # there is no magnetic field
                 'H_INIT' : 0.05,     #  we set initial field to split spin up/down in order to trigger AF phase
                 'OMEGA_LOOP' : 1,        # the selfconsistency runs in Matsubara frequencies
-                'ANTIFERROMAGNET' : 1,   # allow Neel order
-                'SYMMETRIZATION' : 0,    # do not enforce paramagnetic solution
+                'ANTIFERROMAGNET' : True,   # allow Neel order
+                'SYMMETRIZATION' : False,    # do not enforce paramagnetic solution
                 'NMATSUBARA' : 500,      # number of Matsubara frequencies
                 'N' : 500,               # bins in imaginary time
                 'CONVERGED' : 0.005,     # criterion for convergency
@@ -49,7 +49,6 @@ for u in [3.]:
                 't' : 1,          # the nearest-neighbor hopping
                 'tprime' : 0,     # the second nearest-neighbor hopping
                 'L' : 64,         # discretization in k-space in the Hilbert transformation
-                'GENERAL_FOURIER_TRANSFORMER' : 1,  # Fourier transformer for a general bandstructure
                 'EPS_0' : 0,                        # potential shift for the flavor 0
                 'EPS_1' : 0,                        # potential shift for the flavor 1
                 'EPSSQ_0' : 4,                      # the second moment of the bandstructure for the flavor 0

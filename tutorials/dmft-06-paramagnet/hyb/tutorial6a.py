@@ -18,7 +18,7 @@ import pyalps
 parms=[]
 parms.append(
         {
-          'ANTIFERROMAGNET'     : 0,
+          'ANTIFERROMAGNET'     : False,
           'CHECKPOINT'          : 'dump_hyb',
           'CONVERGED'           : 0.0025,
           'FLAVORS'             : 2,
@@ -36,7 +36,7 @@ parms.append(
           'SITES'               : 1,
           'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
           'SC_WRITE_DELTA'      : 1,
-          'SYMMETRIZATION'      : 1,
+          'SYMMETRIZATION'      : True,
           'U'                   : 3,
           't'                   : 0.707106781186547,
           'SWEEPS'              : 2500,

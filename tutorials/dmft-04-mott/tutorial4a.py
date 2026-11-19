@@ -23,7 +23,7 @@ parms=[]
 for u in [4.,5.,6.,8.]: 
     parms.append(
             { 
-              'ANTIFERROMAGNET'         : 0,
+              'ANTIFERROMAGNET'         : False,
               'CONVERGED'               : 0.001,
               'FLAVORS'                 : 2,
               'H'                       : 0,
@@ -40,7 +40,7 @@ for u in [4.,5.,6.,8.]:
               'SITES'                   : 1,              
               'SOLVER'                  : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'          : 1,
-              'SYMMETRIZATION'          : 1,
+              'SYMMETRIZATION'          : True,
               't'                       : 1,
               'SWEEPS'                  : 1500*u,
               'BETA'                    : 20.0,

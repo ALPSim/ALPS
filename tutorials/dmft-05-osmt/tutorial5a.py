@@ -37,7 +37,7 @@ for u,j in [[1.8,0.45],[2.2,0.55],[2.8,0.7]]:
               'SEED'                : 0,
               'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'      : 1,
-              'SYMMETRIZATION'      : 1,
+              'SYMMETRIZATION'      : True,
               'SWEEPS'              : 10000,
               'BETA'                : 30,
               'THERMALIZATION'      : 500,
