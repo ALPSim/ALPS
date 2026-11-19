@@ -68,6 +68,7 @@ User-facing changes and migration notes are recorded here, starting with the bui
 - Run `SOLVER = interaction` from `dmft`; the solver previously looked for a standalone-format G0 and stopped. Run the built-in `SOLVER = Hirsch-Fye` in the Matsubara loop (`OMEGA_LOOP = 1`), where it previously was handed to the shell as an external program. With `OMEGA_LOOP = 0`, Hirsch-Fye and interaction-expansion solvers, which read G0 only in Matsubara frequencies, are rejected with a message instead of failing during the first iteration.
 - Run the built-in Hirsch-Fye solver without `SITES`, which defaults to 1. It previously ran its first solver call and then stopped with "parameter SITES not defined".
 - Report `p2h5` input with `{ }` blocks, which it cannot store as one parameter set, by pointing to `parameter2hdf5`, and report parse errors and a missing output name with exit code 1 instead of aborting on an uncaught exception.
+- `dmrg` stops with an error when a `MEASURE_LOCAL`, `MEASURE_AVERAGE` or `MEASURE_CORRELATIONS` expression contains an operator on a site other than `i`, such as `Sz(i)*Sz(j)`, or an undefined parameter, and names the part it cannot evaluate. It used to crash with a stack overflow.
 
 ### Changed
 
