@@ -30,8 +30,6 @@ def test_extension_import_surface():
     import pyalps.cxx as cxx
 
     expected = {
-        "pyalea_c",
-        "pymcdata_c",
         "pytools_c",
         "pyngsparams_c",
         "pyngshdf5_c",
@@ -92,8 +90,7 @@ def test_cross_module_parameter_archive_and_rng_roundtrip():
 
 
 def test_alea_numpy_and_mcdata_operators():
-    from pyalps.cxx.pyalea_c import MCScalarTimeseries, RealObservable, mean, size
-    from pyalps.cxx.pymcdata_c import MCScalarData
+    from pyalps.alea import MCScalarData, MCScalarTimeseries, RealObservable, mean, size
 
     observable = RealObservable("energy")
     for sample in (0.9, 1.0, 1.1, 1.0):
@@ -132,7 +129,7 @@ def test_params_from_parameter_file():
 
 def test_alea_mcanalyze_surface():
     from pyalps import alea
-    from pyalps.cxx.pyalea_c import (
+    from pyalps.alea import (
         MCScalarTimeseries,
         MCScalarTimeseriesView,
         MCVectorTimeseries,
@@ -1148,13 +1145,8 @@ def test_archive_setitem_reaches_registered_types_nested_in_containers():
             assert archive.list_children("/deep/clone/Energy")
 
 
-def test_archive_setitem_rejects_mcdata_with_actionable_advice():
-    """The one ALPS family whose save() is not archive-shaped.
-
-    MCScalarData.save takes (filename, observable_name), so it is deliberately
-    excluded from the dispatch above -- but the message has to name the
-    spelling that does work rather than calling the type unsupported.
-    """
+def test_archive_setitem_stores_mcdata():
+    """MCScalarData saves either into an archive or to a file and path."""
     from pyalps import alea, hdf5
 
     observable = alea.MCScalarData(1.0, 0.1)
@@ -1162,10 +1154,11 @@ def test_archive_setitem_rejects_mcdata_with_actionable_advice():
     with tempfile.TemporaryDirectory() as directory:
         path = os.path.join(directory, "mcdata.h5")
         with hdf5.archive(path, "w") as archive:
-            with pytest.raises(TypeError, match="does not declare an archive-shaped"):
-                archive["/observable"] = observable
+            archive["/observable"] = observable
+        restored = alea.MCScalarData()
+        restored.load(path, "/observable")
+        assert (restored.mean, restored.error) == (1.0, 0.1)
 
-        # The documented spelling still works.
         target = os.path.join(directory, "direct.h5")
         observable.save(target, "/simulation/results/Energy")
         restored = alea.MCScalarData()
@@ -1184,11 +1177,12 @@ def test_numpy_arrays_are_writable_and_own_their_buffer():
     """
     import gc
 
-    from pyalps import alea
+    from pyalps import ngs
 
-    observable = alea.MCVectorData(np.array([1.0, 2.0, 3.0]),
-                                   np.array([0.1, 0.2, 0.3]))
-    mean = observable.mean
+    observable = ngs.createRealVectorObservable("x")
+    observable << np.array([1.0, 2.0, 3.0])
+    result = ngs.observable2result(observable)
+    mean = result.mean
     assert isinstance(mean, np.ndarray)
     assert mean.flags.writeable
     assert mean.flags.c_contiguous
@@ -1196,12 +1190,13 @@ def test_numpy_arrays_are_writable_and_own_their_buffer():
 
     mean[0] = 99.0
     assert mean[0] == 99.0
-    # Each access copies out of C++; mutating one must not touch the observable.
-    assert observable.mean[0] == 1.0
+    # Each access copies out of C++; mutating one must not touch the result.
+    assert result.mean[0] == 1.0
 
     def orphan():
-        local = alea.MCVectorData(np.arange(1000, dtype=float), np.full(1000, 0.5))
-        return local.mean
+        local = ngs.createRealVectorObservable("y")
+        local << np.arange(1000, dtype=float)
+        return ngs.observable2result(local).mean
 
     survivor = orphan()
     for _ in range(3):

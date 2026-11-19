@@ -9,9 +9,8 @@
 // objects defined in Python it duck-types on a bound save() method. That test
 // cannot work for extension types: nanobind's bound methods are their own type
 // (nb_bound_method), and more importantly having a method *named* save is not
-// enough -- alps::alea's MCScalarData / MCVectorData and the pyalea
-// observables all have one that takes a file name and an observable name
-// instead of an archive, and calling those with an archive is a type error.
+// enough: a save() may take a file name instead of an archive, and calling it
+// with an archive is a type error.
 //
 // So the capability is declared, not guessed, and it is declared at the
 // binding site where the signature is known. The archive module then needs no

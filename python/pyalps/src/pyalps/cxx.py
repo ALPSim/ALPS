@@ -22,8 +22,6 @@
 
 # The compiled extensions, in the order pyalps.cxx exposes them.
 _EXTENSIONS = (
-    "pyalea_c",
-    "pymcdata_c",
     "pytools_c",
     "pyngsparams_c",
     "pyngshdf5_c",

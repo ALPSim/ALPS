@@ -12,16 +12,14 @@ from pyalps import alea, ngs
 
 
 def test_timeseries_statistics_match_independent_references():
-    from pyalps.cxx import pyalea_c
-
     samples = np.array([1., 2., 4., 9.])
-    series = pyalea_c.MCScalarTimeseries(samples)
-    assert pyalea_c.mean(series) == pytest.approx(4.)
-    assert pyalea_c.variance(series) == pytest.approx(38. / 3.)
-    assert pyalea_c.uncorrelated_error(series) == pytest.approx(np.sqrt(38. / 12.))
-    np.testing.assert_allclose(pyalea_c.running_mean(series).timeseries(),
+    series = alea.MCScalarTimeseries(samples)
+    assert alea.mean(series) == pytest.approx(4.)
+    assert alea.variance(series) == pytest.approx(38. / 3.)
+    assert alea.error(series) == pytest.approx(np.sqrt(38. / 12.))
+    np.testing.assert_allclose(alea.running_mean(series).timeseries(),
                                [1., 1.5, 7. / 3., 4.])
-    np.testing.assert_allclose(pyalea_c.reverse_running_mean(series).timeseries(),
+    np.testing.assert_allclose(alea.reverse_running_mean(series).timeseries(),
                                [4., 5., 6.5, 9.])
 
 

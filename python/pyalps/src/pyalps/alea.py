@@ -11,30 +11,25 @@
 # 
 # ****************************************************************************
 
-""" 
-This module contains classes for the evaluation of Monte Carlo measurements:
-- RealObservable
-- RealVectorObservable
-- RealTimeSeriesObservable
-- RealVectorTimeSeriesObservable
+"""
+Evaluation of Monte Carlo measurements, on the observables of
+<alps/alea/observables.hpp>:
 
-- MCScalarTimeseries
-- MCVectorTimeseries
-- MCScalarTimeseriesView
-- MCVectorTimeseriesView
+- RealObservable, RealVectorObservable, RealTimeSeriesObservable and
+  RealVectorTimeSeriesObservable take measurements.
+- MCScalarData and MCVectorData are results with errors; see pyalps._mcdata
+  for how errors propagate.
+- MCScalarTimeseries, MCVectorTimeseries and their views, with the functions
+  below, analyse time series.
 """
 
-from .cxx.pymcdata_c import *
-from .cxx.pyalea_c import RealObservable, RealVectorObservable, RealTimeSeriesObservable, RealVectorTimeSeriesObservable
-from .cxx.pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseriesView, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
+from ._mcdata import MCScalarData, MCVectorData
+from ._observables import RealObservable, RealVectorObservable, RealTimeSeriesObservable, RealVectorTimeSeriesObservable
+from ._timeseries import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseriesView, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
 from . import alea_detail as detail
 import numpy
 import pyalps.dataset
 
-
-# TODO: __repr__ function for StdPairDouble
-#def std_pair_double.__repr__():
-#  return str(self.first) + ", " + str(self.second)
 
 def make_dataset(MCTimeseries):
   "Makes a pyalps.dataset from a MCTimeseries object making it possible to plot one using pyalps.plot"

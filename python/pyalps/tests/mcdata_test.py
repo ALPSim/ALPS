@@ -15,7 +15,9 @@
 
 # Assertion-based MCScalarData / MCVectorData arithmetic test. The
 # expected values are the ones recorded in the historic mcdata.output
-# fixture (error propagation without covariance).
+# fixture, except where operands depend on each other: Y = X + 1 below, and
+# X + Y and X / Y now carry that correlation (the fixture treated them as
+# independent).
 
 from pyalps.alea import *
 import numpy as np
@@ -105,13 +107,15 @@ def test_mcdata_vector():
     assert_vector(X[:], [2.3, 1.2, 0.7], [0.01] * 3)
     assert_vector(Y, [3.3, 2.2, 1.7], [0.01] * 3)
 
-    assert_vector(X + Y, [5.6, 3.4, 2.4], [0.014142135624] * 3)
+    # X + Y = 2 X + 1: twice the error of X, not sqrt(2) times.
+    assert_vector(X + Y, [5.6, 3.4, 2.4], [0.02] * 3)
     assert_vector(X + 2.0, [4.3, 3.2, 2.7], [0.01] * 3)
     assert_vector(2.0 + X, [4.3, 3.2, 2.7], [0.01] * 3)
 
     assert_vector(X / Y,
                   [0.696969696970, 0.545454545455, 0.411764705882],
-                  [0.003693697954, 0.005177671110, 0.006361514294])
+                  # d(X / (X + 1)) / dX = 1 / Y^2
+                  [0.01 / 3.3**2, 0.01 / 2.2**2, 0.01 / 1.7**2])
     assert_vector(X / 2.0, [1.15, 0.6, 0.35], [0.005] * 3)
     assert_vector(2.0 / X,
                   [0.869565217391, 1.666666666667, 2.857142857143],

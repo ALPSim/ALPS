@@ -519,19 +519,16 @@ namespace alps {
                 });
                 return;
             }
-            // A type that has a save() but did not declare it archive-shaped.
-            // In this tree that means alps::alea's MCScalarData / MCVectorData
-            // and the pyalea observables, whose save() opens a file of its own
-            // -- but it also catches a type whose binding simply forgot the
-            // marker, so the message says what it actually knows rather than
-            // asserting the signature.
+            // An extension type that has a save() but did not declare it
+            // archive-shaped, such as one whose binding forgot the marker. The
+            // message says what it actually knows rather than asserting the
+            // signature.
             if (nb::hasattr(data, "save"))
                 throw nb::type_error(
                     "this object has a save() but does not declare an "
                     "archive-shaped one, so it cannot be stored with "
-                    "archive[path] = object. If its save() takes a file name "
-                    "(as the pyalps.alea observables' does), call "
-                    "object.save(filename, path) instead.");
+                    "archive[path] = object. If its save() takes a file name, "
+                    "call object.save(filename, path) instead.");
             hdf5_save_py11_visitor visitor{ar, path};
             extract_from_pyobject_py11(visitor, data);
         }

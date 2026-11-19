@@ -308,7 +308,7 @@ class Workflow(unittest.TestCase):
         # run_wheel_tests.py (packaging) runs tests/cmake against the wheel.
         config = fp.Config.load(os.path.join(CI_SCRIPTS, "areas.json"))
         for area, path in (("static", "src/alps/ietl/include/ietl/jd.h"),
-                           ("static", "python/pyalps/cpp/pyalea.cpp"),
+                           ("static", "python/pyalps/cpp/result.cpp"),
                            ("static", "tests/integration/CMakeLists.txt"),
                            ("static", "third_party/boost_numeric_bindings/README.md"),
                            ("packaging", "tests/cmake/test_sdk_contracts.py"),

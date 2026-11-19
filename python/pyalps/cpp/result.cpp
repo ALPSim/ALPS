@@ -12,10 +12,12 @@
 #include "archive_savable.hpp"
 #include <nanobind/ndarray.h>
 #include <nanobind/stl/string.h>
+#include <nanobind/stl/vector.h>
 
 #include <alps/hdf5/archive.hpp>
 
 #include <cmath>
+#include <cstdint>
 #include <cstddef>
 #include <cstring>
 #include <sstream>
@@ -79,6 +81,108 @@ NB_MODULE(pyngsresult_c, m) {
         return wrap(observable.result());
     });
 
+    // A function of results by jackknife: `f` takes the means of all
+    // operands, one after the other, as one numpy array, and returns those of
+    // the result. Every operand needs bins.
+    m.def("transform", [](nb::callable f, std::vector<result> const & operands) {
+        std::vector<alea::observable_result> values;
+        for (result const & operand : operands)
+            values.push_back(operand.get());
+        auto function = [f](std::vector<double> const & x) {
+            nb::gil_scoped_acquire gil;
+            nb::object out = f(vec_to_numpy(x));
+            std::vector<double> y;
+            for (nb::handle item : out)
+                y.push_back(nb::cast<double>(item));
+            return y;
+        };
+        return wrap(alea::transform(function, values));
+    }, nb::arg("f"), nb::arg("operands"));
+
+    // Independent runs as one result; see alps::alea::join.
+    m.def("join", [](std::vector<result> const & runs) {
+        std::vector<alea::observable_result> values;
+        for (result const & run : runs)
+            values.push_back(run.get());
+        return wrap(alea::join(values));
+    }, nb::arg("runs"));
+
+    // A result of these numbers, without bins: it scales and shifts by
+    // numbers exactly, but cannot enter other functions of results.
+    m.def("stored", [](std::vector<double> const & mean, std::vector<double> const & error,
+                       std::uint64_t count, bool scalar, std::vector<double> const & variance,
+                       std::vector<double> const & tau) {
+        alea::stored_numbers numbers;
+        numbers.count = count;
+        numbers.scalar = scalar;
+        numbers.mean = mean;
+        numbers.error = error;
+        numbers.variance = variance;
+        numbers.tau = tau;
+        try {
+            return wrap(alea::stored_result("", numbers));
+        } catch (std::invalid_argument const & e) {
+            throw nb::value_error(e.what());
+        }
+    }, nb::arg("mean"), nb::arg("error"), nb::arg("count"), nb::arg("scalar"),
+       nb::arg("variance") = std::vector<double>(), nb::arg("tau") = std::vector<double>());
+
+    // The components `indices` of a result: its numbers for them, and its
+    // bins if it has its own.
+    m.def("select", [](result const & self, std::vector<std::size_t> const & indices, bool scalar) {
+        alea::observable_result const & a = self.get();
+        for (std::size_t i : indices)
+            if (i >= a.size())
+                throw nb::index_error("component out of range");
+        if (a.is_histogram())
+            throw nb::value_error("components of a histogram cannot be selected");
+        // Measured bins come along when they hold every sample; otherwise,
+        // as for a function of results, the components are a function.
+        std::vector<std::vector<double> > bins;
+        if (a.has_bins()) {
+            try {
+                bins = a.bin_means();
+            } catch (std::logic_error const &) {
+                bins.clear();
+            }
+            if (!a.sign().empty() || bins.empty() || bins.size() * a.bin_size() != a.count()) {
+                auto pick = [indices](std::vector<double> const & x) {
+                    std::vector<double> y;
+                    for (std::size_t i : indices)
+                        y.push_back(x[i]);
+                    return y;
+                };
+                return wrap(alea::transform(pick, {a}));
+            }
+        }
+        alea::stored_numbers numbers;
+        if (!bins.empty()) {
+            numbers.bin_size = a.bin_size();
+            for (std::vector<double> const & bin : bins) {
+                std::vector<double> picked;
+                for (std::size_t i : indices)
+                    picked.push_back(bin[i]);
+                numbers.bins.push_back(picked);
+            }
+        }
+        numbers.count = a.count();
+        numbers.scalar = scalar;
+        std::vector<double> const mean = a.mean_vector(), error = a.error_vector(),
+            variance = a.variance_vector(), tau = a.tau_vector();
+        std::vector<alea::error_convergence> const converged = a.converged_vector();
+        for (std::size_t i : indices) {
+            numbers.mean.push_back(mean[i]);
+            numbers.error.push_back(error[i]);
+            numbers.variance.push_back(variance[i]);
+            numbers.tau.push_back(tau[i]);
+            numbers.converged.push_back(converged[i]);
+            numbers.binning_errors.push_back(a.binning_errors(i));
+            if (!a.labels().empty())
+                numbers.labels.push_back(a.labels()[i]);
+        }
+        return wrap(alea::stored_result("", numbers));
+    }, nb::arg("result"), nb::arg("indices"), nb::arg("scalar"));
+
     using R = result;
 #define PYALPS_RESULT_FUNCTION(NAME, OP) \
     .def(#NAME, [](R const & self) { return apply(self, OP); })
@@ -108,6 +212,33 @@ NB_MODULE(pyngsresult_c, m) {
         })
         .def_prop_ro("count", [](R const & self) -> std::size_t {
             return self.value ? self.value->count() : 0;
+        })
+        .def_prop_ro("size", [](R const & self) -> std::size_t { return self.value ? self.value->size() : 0; })
+        .def_prop_ro("is_scalar", [](R const & self) { return self.get().is_scalar(); })
+        .def_prop_ro("has_bins", [](R const & self) { return self.value && self.value->has_bins(); })
+        .def_prop_ro("bin_size", [](R const & self) -> std::size_t { return self.get().bin_size(); })
+        .def_prop_ro("mean_vector", [](R const & self) { return vec_to_numpy(self.get().mean_vector()); })
+        .def_prop_ro("error_vector", [](R const & self) { return vec_to_numpy(self.get().error_vector()); })
+        .def_prop_ro("tau_vector", [](R const & self) { return vec_to_numpy(self.get().tau_vector()); })
+        .def_prop_ro("variance_vector", [](R const & self) { return vec_to_numpy(self.get().variance_vector()); })
+        .def_prop_ro("converged_vector", [](R const & self) {
+            std::vector<int> flags;
+            for (alea::error_convergence c : self.get().converged_vector())
+                flags.push_back(static_cast<int>(c));
+            return flags;
+        })
+        .def_prop_ro("labels", [](R const & self) { return self.get().labels(); })
+        // The bin means, one row per bin, of a result with any number of components.
+        .def_prop_ro("bin_matrix", [](R const & self) {
+            std::vector<std::vector<double> > const bins = self.get().bin_means();
+            std::size_t const n = bins.size(), size = self.get().size();
+            double * buf = new double[n * size ? n * size : 1];
+            for (std::size_t b = 0; b != n; ++b)
+                for (std::size_t i = 0; i != size; ++i)
+                    buf[b * size + i] = bins[b][i];
+            nb::capsule owner(buf, [](void * p) noexcept { delete[] static_cast<double *>(p); });
+            std::size_t shape[2] = { n, size };
+            return nb::cast(nb::ndarray<nb::numpy, double>(buf, 2, shape, owner));
         })
 
         .def("__pos__", [](R const & self) { return wrap(self.get()); })
