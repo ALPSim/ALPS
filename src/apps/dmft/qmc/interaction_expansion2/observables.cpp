@@ -16,17 +16,10 @@
 #include "interaction_expansion.hpp"
 #include "sz_results.hpp"
 #include <complex>
-#include <alps/alea.h>
-#include <alps/alea/simpleobseval.h>
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
-typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
-typedef alps::SignedObservable<alps::RealVectorObservable> signed_vec_obs_t;
-typedef alps::RealVectorObservable vec_obs_t;
-typedef alps::SimpleObservable<double,alps::DetailedBinning<double> > simple_obs_t;
-typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > const_simple_obs_t;
 
 
 

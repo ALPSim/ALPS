@@ -16,7 +16,6 @@
 #include "interaction_expansion.hpp"
 #include <complex>
 #include <string>
-#include <alps/alea.h>
 #include "alps/ngs/make_deprecated_parameters.hpp"
 
 void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardInteractionExpansion>::type &results, 

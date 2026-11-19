@@ -5,7 +5,6 @@
 // Ignoring the covariance would give 168 / N, an error 2.65 times too large.
 #include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
@@ -32,20 +31,6 @@ double ratio(double a, double b) { return b / (a * a); }
 }
 
 TEST(Nonlinear, Alea)
-{
-    alps::RealObservable a("A"), b("B");
-    statistics_test::normal xi(424242);
-    for (std::size_t t = 0; t < n; ++t) {
-        const double x = xi();
-        a << x * x;
-        b << x * x * x * x;
-    }
-    const alps::RealObsevaluator ea(a), eb(b);
-    const alps::RealObsevaluator u = eb / (ea * ea);
-    expect_ratio(u.mean(), u.error(), "ALEA");
-}
-
-TEST(Nonlinear, AleaV2)
 {
     using namespace alps::alea;
     batch_acc<double> batch(2);

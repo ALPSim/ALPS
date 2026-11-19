@@ -51,8 +51,8 @@ print("with binning: " + str(error_binning))
 print("with correlation time: " + str(error_corrtime))
 
 # we can also write one of the errors back to the file
-ar = pyalps.hdf5.archive(filename, 1)
-ar.write("simulation/results/" + pyalps.hdf5_name_encode("m") + "/mean/error", error_corrtime)
+with pyalps.hdf5.archive(filename, "a") as ar:
+    ar["/" + "simulation/results/" + pyalps.hdf5_name_encode("m") + "/mean/error"] = error_corrtime
 
 
 

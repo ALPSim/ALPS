@@ -12,8 +12,9 @@
  *
  *****************************************************************************/
 
-#include <alps/scheduler/montecarlo.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
+#include <alps/alea/observables_io.hpp>
+#include <alps/hdf5.hpp>
 #include <boost/random.hpp>
 #include <boost/multi_array.hpp>
 #include <iostream>
@@ -33,13 +34,16 @@ public:
     ,   L_(L)
     ,   beta_(beta)
     ,   spins_(boost::extents[L][L])
-    ,   energy_("E")
-    ,   magnetization_("m")
-    ,   abs_magnetization_("|m|")
-    ,   m2_("m^2")
-    ,   m4_("m^4")
     ,   filename_(output_file)
     {
+        // Each observable keeps a binning analysis for its error and bins
+        // for functions of results.
+        measurements_ << alps::alea::observable("E")
+                      << alps::alea::observable("m")
+                      << alps::alea::observable("|m|")
+                      << alps::alea::observable("m^2")
+                      << alps::alea::observable("m^4");
+
         // Init exponential map
         for(int E = -4; E <= 4; E += 2)
             exp_table_[E] = exp(2*beta*E);
@@ -70,16 +74,11 @@ public:
         //save the observables 
         save(filename_);
         
-        // Print observables
-        std::cout << abs_magnetization_;
-        std::cout << energy_.name() << ":\t" << energy_.mean()
-            << " +- " << energy_.error() << ";\ttau = " << energy_.tau() 
-            << ";\tconverged: " << alps::convergence_to_text(energy_.converged_errors()) 
-            << std::endl;
-        std::cout << magnetization_.name() << ":\t" << magnetization_.mean()
-            << " +- " << magnetization_.error() << ";\ttau = " << magnetization_.tau() 
-            << ";\tconverged: " << alps::convergence_to_text(magnetization_.converged_errors())
-            << std::endl;
+        // Print observables: mean +/- error, the autocorrelation time, and a
+        // warning if the error has not converged
+        alps::alea::result_set const results = measurements_.results();
+        for (std::string const name : {"|m|", "E", "m"})
+            std::cout << name << ":\t" << results[name] << std::endl;
     }
     void step()
     {
@@ -111,21 +110,17 @@ public:
         }
         
         // Add sample to observables
-        energy_ << E/double(L_*L_);
+        measurements_["E"] << E/double(L_*L_);
         double m = M/double(L_*L_);
-        magnetization_ << m;
-        abs_magnetization_ << fabs(M)/double(L_*L_);
-        m2_ << m*m;
-        m4_ << m*m*m*m;
+        measurements_["m"] << m;
+        measurements_["|m|"] << fabs(M)/double(L_*L_);
+        measurements_["m^2"] << m*m;
+        measurements_["m^4"] << m*m*m*m;
     }
     
     void save(std::string const & filename){
         alps::hdf5::archive ar(filename, "a");
-        ar["/simulation/results/"+energy_.representation()] << energy_;
-        ar["/simulation/results/"+magnetization_.representation()] << magnetization_;
-        ar["/simulation/results/"+abs_magnetization_.representation()] << abs_magnetization_;
-        ar["/simulation/results/"+m2_.representation()] << m2_;
-        ar["/simulation/results/"+m4_.representation()] << m4_;
+        alps::alea::save_results(ar, "/simulation/results", measurements_.results());
         ar["/parameters/L"] << L_;
         ar["/parameters/BETA"] << beta_;
         ar["/parameters/SWEEPS"] << sweeps_;
@@ -154,11 +149,7 @@ private:
     boost::multi_array<int,2> spins_;
     std::map< int, double > exp_table_;
 
-    alps::RealObservable energy_;
-    alps::RealObservable magnetization_;
-    alps::RealObservable abs_magnetization_;
-    alps::RealObservable m2_;
-    alps::RealObservable m4_;
+    alps::alea::observable_set measurements_;
     
     std::string filename_;
 };

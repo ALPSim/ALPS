@@ -405,8 +405,8 @@ jobs:
         cmake --preset mpi -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DMPIEXEC_PREFLAGS=--oversubscribe
-        cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi dmft_cthyb_segment_exact mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
-          mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 aleav2_mpi_twogauss \
+        cmake --build _build/ci --target parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi dmft_cthyb_segment_exact mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
+          mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 alea_mpi_twogauss \
           gf_one_index_gf_test_mpi gf_four_index_gf_test_mpi gf_four_index_gf_test_mismatched_mpi gf_four_index_gf_test_mismatched-tail_mpi \
           gf_multiarray_bcast_mpi gf_mesh_test_mpi gf_new_test_mpi gf_new_tail_test_mpi \
           statistics_mpi_reduce \
@@ -611,9 +611,9 @@ jobs:
         cmake --preset sanitizers -B _build/sanitizers \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/sanitizers/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
-        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string observableset_hdf5 testobservableset params_hdf5 params_plain_group osiris_dump_serialization mc_runner accumulators_save_load2
+        cmake --build _build/sanitizers --target runtime_correctness hdf5_memory hdf5_valgrind hdf5_multi_array hdf5_exceptions hdf5_fortran_string statistics_observables_files statistics_frozen_files params_hdf5 params_plain_group osiris_dump_serialization mc_runner accumulators_save_load2
     - name: Run instrumented native tests
-      run: ctest --test-dir _build/sanitizers -R '^[^.]+\.(runtime_correctness|hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|observableset_hdf5|testobservableset|params_hdf5|params_plain_group|osiris_dump_serialization|mc_runner)\.'
+      run: ctest --test-dir _build/sanitizers -R '^[^.]+\.(runtime_correctness|hdf5_memory|hdf5_valgrind|hdf5_multi_array|hdf5_exceptions|hdf5_fortran_string|statistics_observables_files|statistics_frozen_files|params_hdf5|params_plain_group|osiris_dump_serialization|mc_runner)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
     # This test aborted once on master without a diagnosis. Repeating it under
     # the sanitizers is meant to locate the fault, in the accumulators or below.

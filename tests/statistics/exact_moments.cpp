@@ -2,13 +2,11 @@
 // The definitions, on a sample whose sums are small integers: count, mean,
 // variance and the naive standard error of the mean. Every expected value is
 // exact, so a change of normalisation in any library fails here first.
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
 
 #include <cmath>
-#include <valarray>
 #include <vector>
 
 namespace {
@@ -22,33 +20,6 @@ const double naive_error = std::sqrt(6.0 / 8.0);
 }
 
 TEST(ExactMoments, Alea)
-{
-    alps::SimpleRealObservable simple("simple");
-    alps::RealObservable binned("binned");
-    alps::RealVectorObservable vector("vector");
-    for (int t = 1; t <= n; ++t) {
-        simple << double(t);
-        binned << double(t);
-        vector << std::valarray<double>({double(t), 2. * t});
-    }
-    EXPECT_EQ(simple.count(), 8u);
-    EXPECT_EQ(simple.mean(), mean);
-    EXPECT_DOUBLE_EQ(simple.variance(), variance);
-    EXPECT_DOUBLE_EQ(simple.error(), naive_error);
-
-    EXPECT_EQ(binned.count(), 8u);
-    EXPECT_EQ(binned.mean(), mean);
-    EXPECT_DOUBLE_EQ(binned.variance(), variance);
-    // ALEA's binned error is sqrt(S / (N - 1)^2), the naive error times
-    // sqrt(N / (N - 1)): sqrt(42 / 49) here.
-    EXPECT_DOUBLE_EQ(binned.error(0), std::sqrt(42.0 / 49.0));
-
-    EXPECT_EQ(vector.mean()[0], mean);
-    EXPECT_EQ(vector.mean()[1], 2 * mean);
-    EXPECT_DOUBLE_EQ(vector.error(0)[1], 2 * std::sqrt(42.0 / 49.0));
-}
-
-TEST(ExactMoments, AleaV2)
 {
     using namespace alps::alea;
     var_acc<double> simple(1);

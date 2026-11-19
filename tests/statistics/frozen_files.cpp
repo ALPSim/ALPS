@@ -1,11 +1,10 @@
 // Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 // A result file whose bytes are fixed: fixtures/legacy_observables.h5 was
-// written once by ALEA (fixtures/write_legacy_observables.cpp), together with
-// every number a reader got back from it then. Whatever reads result files
+// written once by the ALEA of 3.0 (the writer went with it), together with
+// every number its reader got back from it then. Whatever reads result files
 // must return exactly those numbers.
-#include "fixtures/legacy_observables.hpp"
+#include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea/observables_io.hpp>
 #include <alps/hdf5.hpp>
 
@@ -13,14 +12,17 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <map>
 #include <string>
 
 namespace {
 
+typedef std::map<std::string, double> numbers;
+
 const std::string fixtures = std::string(ALPS_TEST_SOURCE_DIR) + "/fixtures/";
 
-statistics_test::numbers expected(const std::string & group) {
-    statistics_test::numbers values;
+numbers expected(const std::string & group) {
+    numbers values;
     std::ifstream in(fixtures + "legacy_observables.expected");
     std::string key, value;
     while (in >> key >> value)
@@ -29,7 +31,7 @@ statistics_test::numbers expected(const std::string & group) {
     return values;
 }
 
-void expect_equal(const statistics_test::numbers & want, const statistics_test::numbers & got) {
+void expect_equal(const numbers & want, const numbers & got) {
     ASSERT_FALSE(want.empty());
     ASSERT_EQ(want.size(), got.size());
     for (const auto & value : want) {
@@ -42,40 +44,13 @@ void expect_equal(const statistics_test::numbers & want, const statistics_test::
     }
 }
 
-alps::ObservableSet load(const std::string & group) {
-    alps::ObservableSet set;
-    alps::hdf5::archive archive(fixtures + "legacy_observables.h5", "r");
-    archive[group] >> set;
-    return set;
-}
-
-}
-
-TEST(FrozenFiles, AleaReadsARun)
-{
-    const alps::ObservableSet set = load("/run");
-    expect_equal(expected("run"), statistics_test::describe_run(set));
-    EXPECT_EQ(set.get<alps::SignedObservable<alps::RealObservable> >("O").sign_name(), "Sign");
-}
-
-TEST(FrozenFiles, AleaReadsMergedRuns)
-{
-    expect_equal(expected("merged"), statistics_test::describe_merged(load("/merged")));
-}
-
-// ALEA writes merged runs that hold a signed observable but does not read them
-// back: the group lacks an attribute its own reader requires. It fails loudly.
-// The group is in the file for the reader that replaces this one.
-TEST(FrozenFiles, AleaRefusesMergedSignedRuns)
-{
-    EXPECT_THROW(load("/merged_signed"), alps::hdf5::path_not_found);
 }
 
 // The frozen numbers are not arbitrary: the stream is known, so the file can
 // be held to exact values as well.
 TEST(FrozenFiles, TheFileHoldsTheKnownStream)
 {
-    const statistics_test::numbers run = expected("run");
+    const numbers run = expected("run");
     const std::vector<double> x = statistics_test::ar1_series(1001, 0.7, 20000);
     double sum = 0;
     for (double value : x)
@@ -98,7 +73,7 @@ TEST(FrozenFiles, ObservableLayerReadsARun)
     const alps::alea::result_set results = alps::alea::load_results(archive, "/run");
     EXPECT_FALSE(results.has("Sign * O"));
 
-    statistics_test::numbers got;
+    numbers got;
     const alps::alea::observable_result x = results["x"], s = results["s"], v = results["v"], o = results["O"];
     got["x/count"] = x.count();
     got["x/mean"] = x.mean();
@@ -130,7 +105,7 @@ TEST(FrozenFiles, ObservableLayerReadsARun)
     for (int bin = 0; bin < 10; ++bin)
         got["h/" + std::to_string(bin)] = results["h"].histogram()[bin];
 
-    statistics_test::numbers want = expected("run");
+    numbers want = expected("run");
     want.erase("x/error_level0");
     want.erase("x/error_level3");
     want.erase("O/count");
@@ -144,4 +119,33 @@ TEST(FrozenFiles, ObservableLayerReadsARun)
     // Measurements of an earlier version cannot be continued, and say so.
     alps::alea::observable_set set;
     EXPECT_THROW(alps::alea::load_checkpoint(archive, "/run", set), std::runtime_error);
+}
+
+// Merged runs, as a task's result group holds them, read back with the stored
+// numbers. The group with a signed observable, which the ALEA of 3.0 wrote but
+// could not read, reads too.
+TEST(FrozenFiles, ObservableLayerReadsMergedRuns)
+{
+    alps::hdf5::archive archive(fixtures + "legacy_observables.h5", "r");
+    const alps::alea::result_set results = alps::alea::load_results(archive, "/merged");
+    numbers got;
+    const alps::alea::observable_result x = results["x"], v = results["v"], h = results["h"];
+    got["x/count"] = x.count();
+    got["x/mean"] = x.mean();
+    got["x/error"] = x.error();
+    got["x/tau"] = x.tau();
+    got["x/bins"] = x.bin_means().size();
+    for (int i = 0; i < 2; ++i) {
+        got["v/mean/" + std::to_string(i)] = v.mean_vector()[i];
+        got["v/error/" + std::to_string(i)] = v.error_vector()[i];
+    }
+    got["h/count"] = h.count();
+    got["h/0"] = h.histogram()[0];
+    got["h/9"] = h.histogram()[9];
+    expect_equal(expected("merged"), got);
+
+    const alps::alea::result_set signed_runs = alps::alea::load_results(archive, "/merged_signed");
+    EXPECT_EQ(signed_runs["O"].sign(), "Sign");
+    // Signed average 1.5; two runs of 20000 samples give an error near 0.009.
+    EXPECT_NEAR(signed_runs["O"].mean(), 1.5, 0.05);
 }

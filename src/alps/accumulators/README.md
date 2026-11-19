@@ -7,7 +7,7 @@ from ALPSCore at commit `7146b9e1f017938a94e5dae35d88467cc5ba7969`
 (2026-09-25).
 
 Nothing in ALPS uses it: ALPS measures with the observables of
-`<alps/alea/observables.hpp>` ([ALEA v2](../aleav2/README.md)). It is kept for
+`<alps/alea/observables.hpp>` ([ALEA](../alea/README.md)). It is kept for
 codes outside ALPS that were written against ALPSCore's accumulators, and is
 built, installed and tested on its own so that it can be removed in one step
 later: this directory, its entries in `../CMakeLists.txt`, its consumer

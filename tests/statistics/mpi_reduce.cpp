@@ -46,7 +46,7 @@ void expect_calibrated(double error, const slices & s) {
 
 }
 
-TEST(MpiReduce, AleaV2Autocorr)
+TEST(MpiReduce, AleaAutocorr)
 {
     using namespace alps::alea;
     const slices s;
@@ -71,7 +71,7 @@ TEST(MpiReduce, AleaV2Autocorr)
     expect_calibrated(reduced.stderror()[0], s);
 }
 
-TEST(MpiReduce, AleaV2Batch)
+TEST(MpiReduce, AleaBatch)
 {
     using namespace alps::alea;
     const slices s;
@@ -100,7 +100,7 @@ TEST(MpiReduce, AleaV2Batch)
 // Ranks with runs of different lengths, as after a time limit: rank r holds
 // 2^(15 - 2r) samples, so the ranks differ in their number of levels and in
 // their batch sizes. No sample may be lost, at any level.
-TEST(MpiReduce, AleaV2UnequalRuns)
+TEST(MpiReduce, AleaUnequalRuns)
 {
     using namespace alps::alea;
     const slices s;

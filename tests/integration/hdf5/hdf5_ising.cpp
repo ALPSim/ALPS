@@ -15,7 +15,10 @@
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 #include <alps/scheduler/montecarlo.h>
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
+#include <alps/alea/observables_io.hpp>
+#include <alps/hdf5.hpp>
+#include <alps/utilities/encode.hpp>
 #include <boost/random.hpp>
 #include <boost/multi_array.hpp>
 #include <iostream>
@@ -33,13 +36,11 @@ public:
     ,   L_(L)
     ,   beta_(beta)
     ,   spins_(boost::extents[L][L])
-    ,   energy_("E")
-    ,   magnetization_("m")
-    ,   abs_magnetization_("|m|")
-    ,   m2_("m^2")
-    ,   m4_("m^4")
     ,   filename_(output_file)
     {
+        measurements_ << alps::alea::observable("E") << alps::alea::observable("m")
+                      << alps::alea::observable("|m|") << alps::alea::observable("m^2")
+                      << alps::alea::observable("m^4");
         // Init exponential map
         for(int E = -4; E <= 4; E += 2)
             exp_table_[E] = exp(2*beta*E);
@@ -84,30 +85,31 @@ public:
         EXPECT_EQ(beta, beta_);
         EXPECT_EQ(sweeps, sweeps_);
         EXPECT_EQ(thermalization, thermalization_);
-        for (const auto* observable : {&energy_, &magnetization_, &abs_magnetization_, &m2_, &m4_}) {
-            SCOPED_TRACE(observable->name());
-            const auto path = "/simulation/results/" + observable->representation();
+        const alps::alea::result_set results = measurements_.results();
+        for (const std::string name : {"E", "m", "|m|", "m^2", "m^4"}) {
+            SCOPED_TRACE(name);
+            const auto path = "/simulation/results/" + alps::hdf5_name_encode(name);
             unsigned long long count = 0;
             double mean = 0., error = 0.;
             archive[path + "/count"] >> count;
             archive[path + "/mean/value"] >> mean;
             archive[path + "/mean/error"] >> error;
             EXPECT_EQ(count, sweeps_);
-            EXPECT_EQ(mean, observable->mean());
-            EXPECT_EQ(error, observable->error());
+            EXPECT_EQ(mean, results[name].mean());
+            EXPECT_EQ(error, results[name].error());
             EXPECT_TRUE(std::isfinite(mean));
             EXPECT_TRUE(std::isfinite(error));
             EXPECT_GE(error, 0.);
         }
         // Exact physical bounds; no probability of rejecting a valid sample.
-        EXPECT_GE(energy_.mean(), -2.);
-        EXPECT_LE(energy_.mean(), 2.);
-        EXPECT_GE(magnetization_.mean(), -1.);
-        EXPECT_LE(magnetization_.mean(), 1.);
-        EXPECT_GE(abs_magnetization_.mean(), 0.);
-        EXPECT_LE(abs_magnetization_.mean(), 1.);
-        EXPECT_LE(m4_.mean(), m2_.mean());
-        EXPECT_LE(m2_.mean(), abs_magnetization_.mean());
+        EXPECT_GE(results["E"].mean(), -2.);
+        EXPECT_LE(results["E"].mean(), 2.);
+        EXPECT_GE(results["m"].mean(), -1.);
+        EXPECT_LE(results["m"].mean(), 1.);
+        EXPECT_GE(results["|m|"].mean(), 0.);
+        EXPECT_LE(results["|m|"].mean(), 1.);
+        EXPECT_LE(results["m^4"].mean(), results["m^2"].mean());
+        EXPECT_LE(results["m^2"].mean(), results["|m|"].mean());
     }
     void step()
     {
@@ -141,21 +143,17 @@ public:
         }
 
         // Add sample to observables
-        energy_ << E/double(L_*L_);
+        measurements_["E"] << E/double(L_*L_);
         double m = M/double(L_*L_);
-        magnetization_ << m;
-        abs_magnetization_ << std::abs(M)/double(L_*L_);
-        m2_ << m*m;
-        m4_ << m*m*m*m;
+        measurements_["m"] << m;
+        measurements_["|m|"] << std::abs(M)/double(L_*L_);
+        measurements_["m^2"] << m*m;
+        measurements_["m^4"] << m*m*m*m;
     }
 
     void save(std::string const & filename){
         alps::hdf5::archive ar(filename, "wm");
-        ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
-        ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), m2_);
-        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), m4_);
+        alps::alea::save_results(ar, "/simulation/results", measurements_.results());
         ar << alps::make_pvp("/parameters/L", L_);
         ar << alps::make_pvp("/parameters/BETA", beta_);
         ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
@@ -184,11 +182,7 @@ private:
     boost::multi_array<int,2> spins_;
     std::map< int, double > exp_table_;
 
-    alps::RealObservable energy_;
-    alps::RealObservable magnetization_;
-    alps::RealObservable abs_magnetization_;
-    alps::RealObservable m2_;
-    alps::RealObservable m4_;
+    alps::alea::observable_set measurements_;
 
     std::string filename_;
 };

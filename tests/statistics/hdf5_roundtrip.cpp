@@ -3,9 +3,7 @@
 // report exactly what the saved one did, and a run that is saved, reloaded and
 // continued must end exactly where an uninterrupted run ends.
 #include "streams.hpp"
-#include "fixtures/legacy_observables.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 #include <alps/hdf5.hpp>
 #include <alps/testing/temporary_directory.hpp>
@@ -17,81 +15,16 @@
 
 namespace {
 
-using statistics_test::describe_run;
-using statistics_test::numbers;
-
 // Deliberately not a power of two: every level holds an unfinished bin.
 const std::size_t first_part = 5000, total = 8000;
 
-void expect_equal(const numbers & want, const numbers & got) {
-    ASSERT_EQ(want.size(), got.size());
-    for (const auto & value : want) {
-        if (value.second != value.second)
-            EXPECT_NE(got.at(value.first), got.at(value.first)) << value.first;
-        else
-            EXPECT_EQ(value.second, got.at(value.first)) << value.first;
-    }
 }
 
-template <typename Set> Set reload(const Set & set, const std::string & filename) {
-    {
-        alps::hdf5::archive archive(filename, "w");
-        archive["/set"] << set;
-    }
-    Set loaded;
-    alps::hdf5::archive archive(filename, "r");
-    archive["/set"] >> loaded;
-    return loaded;
-}
-
-}
-
-TEST(Hdf5RoundTrip, Alea)
-{
-    alps::testing::TemporaryDirectory temporary;
-    const alps::ObservableSet set = statistics_test::legacy_run(9, total);
-    expect_equal(describe_run(set), describe_run(reload(set, (temporary.path() / "alea.h5").string())));
-}
-
-TEST(Hdf5RoundTrip, AleaResume)
-{
-    alps::testing::TemporaryDirectory temporary;
-    const std::vector<double> values = statistics_test::ar1_series(9, 0.7, total);
-    alps::ObservableSet whole, part;
-    whole << alps::RealObservable("x") << alps::SimpleRealObservable("s");
-    part << alps::RealObservable("x") << alps::SimpleRealObservable("s");
-    for (std::size_t t = 0; t < total; ++t) {
-        whole["x"] << values[t];
-        whole["s"] << values[t];
-        if (t < first_part) {
-            part["x"] << values[t];
-            part["s"] << values[t];
-        }
-    }
-    alps::ObservableSet resumed = reload(part, (temporary.path() / "alea.h5").string());
-    for (std::size_t t = first_part; t < total; ++t) {
-        resumed["x"] << values[t];
-        resumed["s"] << values[t];
-    }
-    const alps::RealObservable & a = whole.get<alps::RealObservable>("x");
-    const alps::RealObservable & b = resumed.get<alps::RealObservable>("x");
-    EXPECT_EQ(a.count(), b.count());
-    EXPECT_EQ(a.mean(), b.mean());
-    EXPECT_EQ(a.error(), b.error());
-    EXPECT_EQ(a.tau(), b.tau());
-    for (unsigned level = 0; level < 6; ++level)
-        EXPECT_EQ(a.error(level), b.error(level)) << "level " << level;
-    ASSERT_EQ(a.bin_number(), b.bin_number());
-    for (unsigned bin = 0; bin < a.bin_number(); ++bin)
-        EXPECT_EQ(a.bin_value(bin), b.bin_value(bin)) << "bin " << bin;
-    EXPECT_EQ(whole.get<alps::SimpleRealObservable>("s").error(), resumed.get<alps::SimpleRealObservable>("s").error());
-}
-
-TEST(Hdf5RoundTrip, AleaV2Results)
+TEST(Hdf5RoundTrip, AleaResults)
 {
     using namespace alps::alea;
     alps::testing::TemporaryDirectory temporary;
-    const std::string filename = (temporary.path() / "aleav2.h5").string();
+    const std::string filename = (temporary.path() / "alea.h5").string();
     var_acc<double> var(1);
     autocorr_acc<double> autocorr(1);
     batch_acc<double> batch(1);
@@ -146,11 +79,11 @@ TEST(Hdf5RoundTrip, AleaV2Results)
 
 // The five ALEA v2 accumulators, saved in the middle of a run and continued
 // from the file, end bit for bit where the uninterrupted ones do.
-TEST(Hdf5RoundTrip, AleaV2Resume)
+TEST(Hdf5RoundTrip, AleaResume)
 {
     using namespace alps::alea;
     alps::testing::TemporaryDirectory temporary;
-    const std::string filename = (temporary.path() / "aleav2_state.h5").string();
+    const std::string filename = (temporary.path() / "alea_state.h5").string();
     mean_acc<double> mean(1), mean_resumed;
     var_acc<double> var(1, 3), var_resumed;
     cov_acc<double> cov(2), cov_resumed;

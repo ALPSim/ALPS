@@ -34,7 +34,7 @@ else()
     return()
   endif()
   if(EXPECT_APPLICATIONS)
-    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli aleav2 mc)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS applications utilities hdf5 params osiris xml cli alea mc)
     set(application_paths "")
     foreach(application IN LISTS ALPS_APPLICATION_TARGETS)
       string(APPEND application_paths "$<TARGET_FILE:${application}>\n")
@@ -42,7 +42,7 @@ else()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
   else()
-    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli aleav2 mc numerics numeric_io numeric_xml)
+    find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli alea mc numerics numeric_io numeric_xml)
   endif()
   if(EXPECT_SOLVERS)
     find_package(ALPS CONFIG REQUIRED COMPONENTS solvers)
@@ -66,7 +66,7 @@ else()
                                      alps/params/tests alps/params/adapters alps/params/iniparser
                                      alps/common/include alps/common/src alps/common/tests
                                      alps/runtime
-                                     alps/aleav2/include alps/aleav2/src alps/aleav2/tests
+                                     alps/alea/include alps/alea/src alps/alea/tests
                                      alps/gf/include alps/gf/src alps/gf/tests
                                      alps/accumulators/include alps/accumulators/src
                                      alps/accumulators/tests
@@ -200,8 +200,8 @@ add_contract(numeric numerics.cpp ALPS::numerics)
 add_contract(numeric_io numeric_io.cpp ALPS::numeric_io)
 add_contract(numeric_xml numeric_xml.cpp ALPS::numeric_xml)
 add_contract(parameter_adapters parameter_adapters.cpp ALPS::alps)
-add_component_contract(aleav2 aleav2.cpp "ALPS::alps|${numerical_dependencies}")
-add_header_contract(aleav2)
+add_component_contract(alea alea.cpp "ALPS::alps|${numerical_dependencies}")
+add_header_contract(alea)
 # ALPSCore's accumulators: nothing in ALPS links them.
 add_component_contract(accumulators accumulators.cpp
   "ALPS::alps|${numerical_dependencies}${serial_dependencies}")
@@ -252,13 +252,13 @@ if(NOT ALPS_SOURCE)
 endif()
 if(NOT ALPS_SOURCE)
   set_tests_properties(sdk_contract sdk_resources numeric_contract numeric_io_contract numeric_xml_contract utilities_contract hdf5_contract
-    params_contract osiris_contract xml_contract cli_contract aleav2_contract mc_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
+    params_contract osiris_contract xml_contract cli_contract alea_contract mc_contract parameter_adapters_contract PROPERTIES ENVIRONMENT_MODIFICATION
     "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   if(ALPS_LEGACY_API)
     set_tests_properties(legacy_spellings_contract PROPERTIES ENVIRONMENT_MODIFICATION
       "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")
   endif()
-  foreach(component IN ITEMS aleav2 gf accumulators)
+  foreach(component IN ITEMS alea gf accumulators)
     if(TARGET ALPS::${component})
       set_tests_properties(${component}_contract PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:${ALPS_RUNTIME_LIBRARY_DIRS}")

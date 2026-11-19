@@ -22,10 +22,9 @@ Sources use `include/`, `src/` and `tests/` where applicable. Public include spe
 | `legacy_parameters/`, `expression/` | Older `alps::Parameters` and expression evaluation | `ALPS::alps` |
 | `graph/`, `lattice/`, `model/` | Graph helpers, lattice definitions and physical models | `ALPS::headers`, `ALPS::alps` |
 | `random/` | Random generators and their factories | `ALPS::alps` |
-| `aleav2/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`), and the named observables of a simulation (`<alps/alea/observables.hpp>`); needs Eigen. See [its README](aleav2/README.md) | `ALPS::aleav2` |
+| `alea/` | ALEA v2, ALPSCore's ALEA: accumulators and results (`<alps/alea.hpp>`, `<alps/alea/*.hpp>`), and the named observables of a simulation (`<alps/alea/observables.hpp>`); needs Eigen. See [its README](alea/README.md) | `ALPS::alea` |
 | `gf/` | ALPSCore's Green's functions on frequency, time and index meshes (`<alps/gf/*.hpp>`), with the tensors they use (`<alps/numeric/tensors.hpp>`); built when Eigen is found. See [its README](gf/README.md) | `ALPS::gf` |
 | `accumulators/` | ALPSCore's accumulators (`<alps/accumulators.hpp>`, `<alps/accumulators/*.hpp>`), kept for codes outside ALPS; nothing in ALPS links them. See [its README](accumulators/README.md) | `ALPS::accumulators` |
-| `alea/` | ALEA observables and results (`<alps/alea.h>`, `<alps/alea/*.h>`) | `ALPS::alps` |
 | `mc/` | ALPSCore's Monte Carlo simulation base (`<alps/mc/*.hpp>`) and ALPS's `<alps/progress_callback.hpp>`. See [its README](mc/README.md) | `ALPS::mc` |
 | `scheduler/`, `parapack/` | Execution and scheduling | `ALPS::alps` |
 | `fortran/` | C++ bridge with public headers in `include/alps/fortran/` | `ALPS::fortran` |

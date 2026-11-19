@@ -31,7 +31,7 @@ mean = pyalps.alea.mean(obs)
 print("The mean of E is: " + str(mean))
   
 # write the result back to the file
-ar = pyalps.hdf5.archive(filename, 1)
-ar.write("simulation/results/" + pyalps.hdf5_name_encode("E") + "/mean/value", mean)
+with pyalps.hdf5.archive(filename, "a") as ar:
+    ar["/" + "simulation/results/" + pyalps.hdf5_name_encode("E") + "/mean/value"] = mean
 
 

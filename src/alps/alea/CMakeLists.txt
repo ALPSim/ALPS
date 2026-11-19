@@ -1,45 +1,79 @@
-# Alea source ownership.
-target_sources(alps PRIVATE
-  src/alea/nan.C
-  src/alea/observable.C
-  src/alea/observablefactory.C
-  src/alea/observableset.C)
-
-target_sources(alps_headers INTERFACE
+# Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
+# ALPS::alea, ALEA v2: the ALEA library of the ALPS Core Libraries, copied from
+# ALPSCore, with the observables of a simulation on top.
+# README.md records the source commit, the local changes and the license.
+add_library(alps_alea
+  src/autocorr.cpp
+  src/batch.cpp
+  src/covariance.cpp
+  src/fisher_f.cpp
+  src/mean.cpp
+  src/model.cpp
+  src/observables.cpp
+  src/observables_io.cpp
+  src/propagation.cpp
+  src/result.cpp
+  src/testing.cpp
+  src/transform.cpp
+  src/util.cpp
+  src/variance.cpp)
+target_link_libraries(alps_alea PUBLIC ALPS::configuration ALPS::hdf5 Eigen3::Eigen)
+if(ALPS_ENABLE_MPI)
+  # alps/alea/mpi.hpp reduces through ALPSCore's alps/utilities/mpi.hpp.
+  target_link_libraries(alps_alea PUBLIC ALPS::utilities MPI::MPI_CXX)
+endif()
+alps_configure_component(alps_alea alea)
+# ALPSCore's ALEA has no export macros; export everything as ALPSCore did.
+set_target_properties(alps_alea PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_sources(alps_alea PUBLIC
   FILE_SET alea_headers TYPE HEADERS
   BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/include"
   FILES
-    include/alps/alea.h
-    include/alps/alea/abstractbinning.h
-    include/alps/alea/abstractsimpleobservable.h
-    include/alps/alea/abstractsimpleobservable.ipp
-    include/alps/alea/convergence.hpp
-    include/alps/alea/detailedbinning.h
-    include/alps/alea/histogram.h
-    include/alps/alea/histogramdata.h
-    include/alps/alea/histogrameval.h
-    include/alps/alea/mcanalyze.hpp
-    include/alps/alea/mcdata.hpp
-    include/alps/alea/nan.h
-    include/alps/alea/nobinning.h
-    include/alps/alea/observable.h
-    include/alps/alea/observable_fwd.hpp
-    include/alps/alea/observablefactory.h
-    include/alps/alea/observableset.h
-    include/alps/alea/observableset_p.h
-    include/alps/alea/output_helper.h
-    include/alps/alea/recordableobservable.h
-    include/alps/alea/signedobservable.h
-    include/alps/alea/simplebinning.h
-    include/alps/alea/simpleobsdata.h
-    include/alps/alea/simpleobservable.h
-    include/alps/alea/simpleobservable.ipp
-    include/alps/alea/simpleobseval.h
-    include/alps/alea/simpleobseval.ipp
-    include/alps/alea/type_tag.hpp
-    include/alps/alea/value_with_error.hpp
-    include/alps/utility/assign.hpp
-    include/alps/utility/set_zero.hpp)
+    include/alps/alea.hpp
+    include/alps/alea/autocorr.hpp
+    include/alps/alea/batch.hpp
+    include/alps/alea/bundle.hpp
+    include/alps/alea/complex_op.hpp
+    include/alps/alea/computed.hpp
+    include/alps/alea/error_convergence.hpp
+    include/alps/alea/convert.hpp
+    include/alps/alea/core.hpp
+    include/alps/alea/covariance.hpp
+    include/alps/alea/fisher_f.hpp
+    include/alps/alea/hdf5.hpp
+    include/alps/alea/internal/format.hpp
+    include/alps/alea/internal/joined.hpp
+    include/alps/alea/internal/outer.hpp
+    include/alps/alea/internal/pooling.hpp
+    include/alps/alea/internal/state.hpp
+    include/alps/alea/internal/util.hpp
+    include/alps/alea/mean.hpp
+    include/alps/alea/observables.hpp
+    include/alps/alea/observables_io.hpp
+    include/alps/alea/plugin/stream_serializer.hpp
+    include/alps/alea/propagation.hpp
+    include/alps/alea/result.hpp
+    include/alps/alea/serialize.hpp
+    include/alps/alea/testing.hpp
+    include/alps/alea/transform.hpp
+    include/alps/alea/transformer.hpp
+    include/alps/alea/util.hpp
+    include/alps/alea/util/model.hpp
+    include/alps/alea/util/serializer.hpp
+    include/alps/alea/var_strategy.hpp
+    include/alps/alea/variance.hpp
+    # ALPSCore keeps these in its utilities module; only ALEA v2 uses them here.
+    include/alps/common/view.hpp
+    include/alps/serialization/core.hpp
+    include/alps/serialization/eigen.hpp
+    include/alps/serialization/util.hpp)
+if(ALPS_ENABLE_MPI)
+  # It includes alps/utilities/mpi.hpp, which only MPI builds install.
+  target_sources(alps_alea PUBLIC FILE_SET alea_headers FILES include/alps/alea/mpi.hpp)
+endif()
+# ALPS::alps links it, so it is installed with the SDK targets in ../CMakeLists.txt.
+install(FILES COPYRIGHT.TXT LICENSE.TXT
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/alps/licenses/alea" COMPONENT libraries)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

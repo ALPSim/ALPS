@@ -1,6 +1,6 @@
 # ALEA v2
 
-`ALPS::aleav2`, ALEA v2, is the ALEA library of the
+`ALPS::alea`, ALEA v2, is the ALEA library of the
 [ALPS Core Libraries](https://github.com/ALPSCore/ALPSCore): accumulators for
 mean, variance, covariance, autocorrelation and batch statistics, error
 propagation, and result serialization. It is copied from ALPSCore at commit
@@ -8,25 +8,21 @@ propagation, and result serialization. It is copied from ALPSCore at commit
 are ALPSCore's: `<alps/alea.hpp>` and `<alps/alea/*.hpp>`, in namespace
 `alps::alea`.
 
-ALPS's own ALEA, in [alea/](../alea/) with `<alps/alea.h>` and
-`<alps/alea/*.h>`, remains the default. It is unchanged and not deprecated.
-Nothing in ALPS uses ALEA v2 yet, and the two will be swapped only after a
-conformance suite passes on both. Only the names ALPS owns say v2: this
-directory, the target `ALPS::aleav2`, the SDK component `aleav2` and the test
-names. The two libraries share the include prefix and namespace without
-sharing a file name, and one program can use both; `aleav2_coexistence`
-checks this, including both kinds of result in one archive.
+It replaces ALPS's own ALEA of 3.0 (`<alps/alea.h>`, `alps::ObservableSet`),
+which was removed after every program, tutorial and binding had moved to the
+observables below; the CHANGELOG's migration table maps its classes. Result
+files written by the old ALEA are still read.
 
 ## Building and linking
 
 ALEA v2 needs [Eigen](https://eigen.tuxfamily.org) 3.3 or newer; it was tested with
-Eigen 5.0.1. `ALPS::alps` links `ALPS::aleav2`, so ALPS as a whole needs Eigen,
+Eigen 5.0.1. `ALPS::alps` links `ALPS::alea`, so ALPS as a whole needs Eigen,
 and an installed SDK finds it for its consumers. Linking `ALPS::alps` is enough;
 the component can also be named on its own:
 
 ```cmake
-find_package(ALPS CONFIG REQUIRED COMPONENTS aleav2)
-target_link_libraries(app PRIVATE ALPS::aleav2)
+find_package(ALPS CONFIG REQUIRED COMPONENTS alea)
+target_link_libraries(app PRIVATE ALPS::alea)
 ```
 
 ALEA v2 stores results through ALPS's `alps::hdf5::archive`
@@ -35,7 +31,7 @@ ALEA v2 stores results through ALPS's `alps::hdf5::archive`
 In an MPI build, `<alps/alea.hpp>` also includes ALPSCore's
 [`mpi_reducer`](include/alps/alea/mpi.hpp), which combines accumulators across
 ranks through `<alps/alea/mpi.hpp>` and ALPSCore's `<alps/utilities/mpi.hpp>`
-from `ALPS::utilities`; `ALPS::aleav2` then links MPI. Serial builds install
+from `ALPS::utilities`; `ALPS::alea` then links MPI. Serial builds install
 neither header.
 
 ## Observables of a simulation
@@ -61,12 +57,13 @@ reads it and the result files of ALPS 2 and 3.0, `save_checkpoint` and
 carry results between processes. Results read from a file return the stored
 numbers and can enter functions of results when the file has bins; they cannot
 be merged or continued. `tests/statistics/observables_files.cpp` and
-`frozen_files.cpp` check this, the latter against a file written by ALEA.
+`frozen_files.cpp` check this, the latter against a file written by the ALEA
+of 3.0.
 
 ## Provenance
 
 The imported revision is under the MIT license in [LICENSE.TXT](LICENSE.TXT).
-The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/aleav2/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
+The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYRIGHT.TXT) and [LICENSE.TXT](LICENSE.TXT). The SDK installs both under `share/alps/licenses/alea/`. Publication pointers in imported comments have been removed; the source relationships below refer to the remaining code.
 
 | ALPSCore path | Here | Relationship |
 | --- | --- | --- |
@@ -83,7 +80,7 @@ ALPSCore keeps `view.hpp` and the serialization headers in its utilities
 module. In ALPS only ALEA v2 uses them, so they live here, at ALPSCore's include
 spellings.
 
-The CMake files, `tests/coexistence.cpp` and this README are ALPS's own.
+The CMake files and this README are ALPS's own.
 
 ### Local changes
 

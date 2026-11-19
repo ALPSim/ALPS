@@ -6,7 +6,6 @@
 // (see ar1_known_answers.cpp).
 #include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
@@ -44,42 +43,6 @@ class SameStream : public ::testing::TestWithParam<double> {
 }
 
 TEST_P(SameStream, Alea)
-{
-    alps::SimpleRealObservable simple("simple");
-    alps::RealObservable binned("binned");
-    for (double value : values) {
-        simple << value;
-        binned << value;
-    }
-    EXPECT_EQ(simple.count(), n);
-    EXPECT_EQ(binned.count(), n);
-    EXPECT_EQ(simple.mean(), mean);
-    EXPECT_EQ(binned.mean(), mean);
-    expect_relative(binned_error(values, 1), simple.error(), 1e-11, "naive error");
-
-    // ALEA's binned errors carry a factor sqrt(N / (N - 1)) on top of the
-    // textbook value at every level.
-    const double convention = std::sqrt(double(n) / (n - 1));
-    for (std::size_t level = 0; (n >> level) >= 256; ++level)
-        expect_relative(convention * binned_error(values, std::size_t(1) << level), binned.error(level), 1e-10,
-                        "binned error", level);
-
-    // The default error is the one from 128 to 255 bins: 2^16 samples make 17
-    // levels, of which the top 7 are not used.
-    EXPECT_EQ(binned.error(), binned.error(9));
-
-    // 128 time-ordered bins of 512 samples.
-    ASSERT_EQ(binned.bin_number(), 128u);
-    ASSERT_EQ(binned.bin_size(), 512u);
-    for (std::size_t b = 0; b < 128; ++b) {
-        double sum = 0;
-        for (std::size_t i = 0; i < 512; ++i)
-            sum += values[512 * b + i];
-        ASSERT_NEAR(sum, binned.bin_value(b), 1e-11) << "bin " << b;
-    }
-}
-
-TEST_P(SameStream, AleaV2)
 {
     using namespace alps::alea;
     var_acc<double> simple(1);
@@ -125,7 +88,7 @@ TEST_P(SameStream, AleaV2)
 // In the middle of a run the batches are still consecutive and of one length,
 // followed by the samples that do not fill a batch yet. A second run is
 // appended behind the first, and no sample is lost.
-TEST(Batches, AleaV2KeepsTimeOrderAndAppendsRuns)
+TEST(Batches, AleaKeepsTimeOrderAndAppendsRuns)
 {
     using namespace alps::alea;
     const std::vector<double> values = ar1_series(seed, 0.5, 1300);

@@ -73,7 +73,7 @@ Build and install the C++ SDK with CMake, then build the Python package against 
 - CMake ≥ 3.27, Ninja for the bundled presets, and C++17/C11 compilers such as GCC or Clang.
 - Boost ≥ 1.76 with its compiled libraries and CMake packages, HDF5 ≥ 1.10.5 (C library), and LP64 BLAS/LAPACK. Use serial HDF5 for the default MPI-disabled build; see [numerical libraries](#numerical-libraries).
 - For Python development: GIL-enabled CPython ≥ 3.10 in a writable Python environment. Pip installs NumPy, SciPy and Matplotlib with pyalps. Free-threaded Python is unsupported.
-- Eigen ≥ 3.3. The statistics of Monte Carlo observables, [ALEA v2](src/alps/aleav2/README.md), need it, and so does MaxEnt.
+- Eigen ≥ 3.3. The statistics of Monte Carlo observables, [ALEA v2](src/alps/alea/README.md), need it, and so does MaxEnt.
 - Optional: MPI for `ALPS_ENABLE_MPI=ON`; an OpenMP runtime for `ALPS_ENABLE_OPENMP=ON`; a Fortran compiler for the Fortran examples.
 
 Use existing dependencies or your preferred package manager. Keep the compiler, architecture and native dependency stack consistent between the SDK, bindings and downstream extensions.
@@ -255,7 +255,7 @@ For substantial changes — new simulation applications, new libraries, signific
 - `python/pyalps/`: Python sources, bindings, packaging and extension example.
 - `tutorials/`: tutorials and [standalone library examples](tutorials/examples/README.md).
 - `tests/`: cross-module integration, Python, SDK, CLI, build-helper and packaging tests.
-- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md). [ALEA v2](src/alps/aleav2/README.md), [GF](src/alps/gf/README.md), the [accumulators](src/alps/accumulators/README.md) and the [parameters](src/alps/params/README.md) with iniparser, copied from ALPSCore, live in `src/alps/aleav2/`, `src/alps/gf/`, `src/alps/accumulators/` and `src/alps/params/` with their licenses. ALPSCore's numeric headers are recorded in the [numerics](src/alps/numerics/README.md) README. ALPSCore's MPI wrapper and test helpers are recorded in the [utilities](src/alps/utilities/README.md) and [test support](tests/support/README.md) READMEs.
+- `third_party/`: [Numeric Bindings headers](third_party/boost_numeric_bindings/README.md) and [XDR serialization](third_party/xdr/README.md). [ALEA v2](src/alps/alea/README.md), [GF](src/alps/gf/README.md), the [accumulators](src/alps/accumulators/README.md) and the [parameters](src/alps/params/README.md) with iniparser, copied from ALPSCore, live in `src/alps/alea/`, `src/alps/gf/`, `src/alps/accumulators/` and `src/alps/params/` with their licenses. ALPSCore's numeric headers are recorded in the [numerics](src/alps/numerics/README.md) README. ALPSCore's MPI wrapper and test helpers are recorded in the [utilities](src/alps/utilities/README.md) and [test support](tests/support/README.md) READMEs.
 - `cmake/` and `.github/`: shared build configuration, generated-header templates, version file, CI and release helpers.
 
 Add exported headers to the owning target's CMake `HEADERS` file set. Public `<alps/...>` and `<ietl/...>` include names are independent of the physical source directory. Keep subsystem tests beside their owner and cross-module tests under `tests/`.

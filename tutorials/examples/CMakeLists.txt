@@ -28,7 +28,6 @@ if(ALPS_BUILD_TESTING)
 endif()
 include("${CMAKE_CURRENT_LIST_DIR}/../../cmake/ALPSTesting.cmake")
 
-add_subdirectory(alea)
 add_subdirectory(parapack)
 add_subdirectory(scheduler)
 add_subdirectory(sampling)

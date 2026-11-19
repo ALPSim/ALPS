@@ -13,7 +13,7 @@ in namespace `alps::numerics`.
 ## Building and linking
 
 GF needs [Eigen](https://eigen.tuxfamily.org) 3.3 or newer, like
-[ALEA v2](../aleav2/README.md); it was tested with Eigen 5.0.1. ALPS as a
+[ALEA v2](../alea/README.md); it was tested with Eigen 5.0.1. ALPS as a
 whole requires Eigen. An installed SDK provides GF as a separate component:
 
 ```cmake

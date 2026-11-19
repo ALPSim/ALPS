@@ -5,7 +5,6 @@
 // not shorten the bins so far that the error is under-reported.
 #include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
@@ -46,30 +45,7 @@ class SplitMerge : public ::testing::TestWithParam<std::size_t> {
 
 }
 
-TEST_P(SplitMerge, Alea)
-{
-    alps::ObservableSet first, second;
-    first << alps::RealObservable("x");
-    second << alps::RealObservable("x");
-    for (std::size_t t = 0; t < n; ++t)
-        (t < GetParam() ? first : second)["x"] << values[t];
-    first << second;
-    const alps::RealObsevaluator merged = first["x"];
-    if (GetParam() * 2 == n) {
-        expect_whole({merged.count(), merged.mean(), merged.error()}, "ALEA");
-    } else {
-        // ALEA merges runs from their full bins: the samples of an unfinished
-        // bin (16 of 10000 and 240 of 22768 here) do not enter the merged
-        // mean, so it is the mean of the whole stream only to a fraction of
-        // the error.
-        const double exact = ar1_exact_error(phi, n);
-        EXPECT_NEAR(double(merged.count()), double(n), 0.01 * n);
-        EXPECT_NEAR(merged.mean(), mean, 0.1 * exact);
-        EXPECT_NEAR(1.0, merged.error() / exact, 0.3);
-    }
-}
-
-TEST_P(SplitMerge, AleaV2Batch)
+TEST_P(SplitMerge, AleaBatch)
 {
     alps::alea::batch_acc<double> first(1), second(1);
     for (std::size_t t = 0; t < n; ++t)
@@ -79,7 +55,7 @@ TEST_P(SplitMerge, AleaV2Batch)
     expect_whole({merged.count(), merged.mean()[0], merged.stderror()[0]}, "ALEA v2 batch");
 }
 
-TEST_P(SplitMerge, AleaV2Autocorr)
+TEST_P(SplitMerge, AleaAutocorr)
 {
     using alps::alea::autocorr_acc;
     using alps::alea::autocorr_result;
@@ -129,24 +105,6 @@ std::uint64_t run_seed(int replica, int run) { return 104729u * replica + 31u * 
 }
 
 TEST(ManyRuns, Alea)
-{
-    double error = 0;
-    for (int r = 0; r < replicas; ++r) {
-        alps::ObservableSet pooled;
-        for (int k = 0; k < runs; ++k) {
-            alps::ObservableSet run;
-            run << alps::RealObservable("x");
-            for (double value : ar1_series(run_seed(r, k), slow, run_length))
-                run["x"] << value;
-            pooled << run;
-        }
-        error += alps::RealObsevaluator(pooled["x"]).error() / replicas;
-    }
-    EXPECT_GE(error / pooled_error, floor_);
-    EXPECT_LE(error / pooled_error, 1.05);
-}
-
-TEST(ManyRuns, AleaV2)
 {
     double autocorr_error = 0, batch_error = 0;
     for (int r = 0; r < replicas; ++r) {

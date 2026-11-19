@@ -3,13 +3,11 @@
 // x1 = z1, x2 = 0.5 z1 + sqrt(1.75) z2 for independent standard normal z.
 #include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
 
 #include <cmath>
-#include <valarray>
 #include <vector>
 
 namespace {
@@ -39,24 +37,16 @@ void expect_errors(double e0, double e1, const char * library) {
 
 TEST(VectorCovariance, ComponentErrors)
 {
-    alps::SimpleRealVectorObservable alea("x");
     alps::alea::var_acc<double> v2(2);
-    for (const std::vector<double> & value : samples()) {
-        alea << std::valarray<double>(value.data(), 2);
+    for (const std::vector<double> & value : samples())
         v2 << value;
-    }
-    expect_errors(alea.error()[0], alea.error()[1], "ALEA");
     const alps::alea::var_result<double> result = v2.finalize();
     expect_errors(result.stderror()[0], result.stderror()[1], "ALEA v2");
-
-    // The same arithmetic in both.
-    for (int i = 0; i < 2; ++i)
-        EXPECT_NEAR(result.stderror()[i], alea.error()[i], 1e-11 * alea.error()[i]);
 }
 
-// Only ALEA v2 accumulates the full covariance. An entry estimated from n
+// The full covariance. An entry estimated from n
 // samples scatters by sqrt((S_ii S_jj + S_ij^2) / n), at most 0.8%.
-TEST(VectorCovariance, AleaV2Covariance)
+TEST(VectorCovariance, AleaCovariance)
 {
     alps::alea::cov_acc<double> cov(2);
     for (const std::vector<double> & value : samples())

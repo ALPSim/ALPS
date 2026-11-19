@@ -12,19 +12,21 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
+#include <alps/alea/observables_io.hpp>
+#include <alps/hdf5.hpp>
 #include <gtest/gtest.h>
 #include <alps/testing/temporary_directory.hpp>
 
 TEST(Hdf5ObservableSet, ArchiveRetainsCountAndMean) {
     alps::testing::TemporaryDirectory temporary;
     const auto filename = (temporary.path() / "observables.h5").string();
-    alps::ObservableSet measurements;
-    measurements << alps::RealObservable("E");
-    measurements.get<alps::RealObservable>("E") << 1;
+    alps::alea::observable_set measurements;
+    measurements << alps::alea::observable("E");
+    measurements["E"] << 1.;
     {
         alps::hdf5::archive archive(filename, "w");
-        archive["/simulation/results"] << measurements;
+        alps::alea::save_results(archive, "/simulation/results", measurements.results());
     }
     alps::hdf5::archive archive(filename, "r");
     unsigned long long count = 0;
@@ -33,9 +35,7 @@ TEST(Hdf5ObservableSet, ArchiveRetainsCountAndMean) {
     archive["/simulation/results/E/mean/value"] >> mean;
     EXPECT_EQ(count, 1u);
     EXPECT_EQ(mean, 1.);
-    alps::ObservableSet restored;
-    archive["/simulation/results"] >> restored;
-    const auto& energy = restored.get<alps::RealObservable>("E");
-    EXPECT_EQ(energy.count(), 1u);
-    EXPECT_EQ(energy.mean(), 1.);
+    const alps::alea::result_set restored = alps::alea::load_results(archive, "/simulation/results");
+    EXPECT_EQ(restored["E"].count(), 1u);
+    EXPECT_EQ(restored["E"].mean(), 1.);
 }

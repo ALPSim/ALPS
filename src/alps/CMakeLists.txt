@@ -122,7 +122,7 @@ target_sources(alps_configuration INTERFACE
         "${PROJECT_BINARY_DIR}/generated/include/alps/version.h"
         "${PROJECT_BINARY_DIR}/generated/include/alps/export.h")
 
-# The statistics of Monte Carlo observables, ALPS::aleav2, need Eigen 3.3 or
+# The statistics of Monte Carlo observables, ALPS::alea, need Eigen 3.3 or
 # newer, and ALPS::alps links them. The lookup names no version: Eigen 5's
 # version file rejects a "3.3" request, and Eigen 3's rejects a range reaching
 # past 3.x. ALPSConfig.cmake repeats it for consumers.
@@ -169,14 +169,14 @@ endfunction()
 # contribute to libalps until their dependency cycles have been disentangled.
 foreach(module IN ITEMS containers utilities cli numerics ietl solvers xml plotting
                         legacy_parameters expression graph lattice model random
-                        osiris hdf5 numeric_io numeric_xml params input alea aleav2 gf accumulators mc scheduler parapack fortran)
+                        osiris hdf5 numeric_io numeric_xml params input alea gf accumulators mc scheduler parapack fortran)
   add_subdirectory(${module})
 endforeach()
 target_link_libraries(alps PUBLIC ALPS::utilities ALPS::osiris ALPS::hdf5 ALPS::params
-                                  ALPS::xml ALPS::cli ALPS::aleav2 ALPS::mc)
+                                  ALPS::xml ALPS::cli ALPS::alea ALPS::mc)
 
 target_link_libraries(alps_headers INTERFACE alps_configuration
-  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::aleav2;ALPS::mc;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
+  "$<COMPILE_ONLY:ALPS::utilities;ALPS::osiris;ALPS::hdf5;ALPS::params;ALPS::xml;ALPS::cli;ALPS::alea;ALPS::mc;ALPS::numerics;ALPS::numeric_io;ALPS::numeric_xml;ALPS::solver_headers>")
 if(ALPS_ENABLE_OPENMP)
   target_link_libraries(alps_headers INTERFACE "$<COMPILE_ONLY:OpenMP::OpenMP_CXX>")
 endif()
@@ -184,7 +184,7 @@ endif()
 # The one list of SDK targets. ALPSConfig.cmake derives its component names and
 # runtime targets from it, so adding a module here is the only edit needed.
 set(ALPS_SDK_TARGETS alps alps_utilities alps_hdf5 alps_params alps_osiris
-                     alps_xml alps_cli alps_aleav2 alps_accumulators alps_mc alps_headers alps_configuration
+                     alps_xml alps_cli alps_alea alps_accumulators alps_mc alps_headers alps_configuration
                      alps_containers alps_numerics alps_numeric_io alps_numeric_xml alps_solver_headers)
 set(sdk_components "")
 set(sdk_runtime_targets "")

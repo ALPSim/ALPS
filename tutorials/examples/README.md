@@ -4,7 +4,7 @@ These small programs demonstrate individual ALPS APIs. For complete simulation w
 
 | Directory | Subject |
 | --- | --- |
-| [alea](alea/) | Statistical estimates and error analysis |
+| [alea](alea/) | Statistical estimates and error analysis with `pyalps.alea` (Python scripts) |
 | [hdf5](hdf5/) | Saving custom C++ types in HDF5 archives |
 | [ietl](ietl/) | Iterative eigenvalue methods |
 | [model](model/) | Symbolic and numerical model construction |

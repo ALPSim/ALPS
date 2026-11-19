@@ -5,7 +5,6 @@
 // length implies, and to a floor on how far below the exact error it may report.
 #include "streams.hpp"
 
-#include <alps/alea.h>
 #include <alps/alea.hpp>
 
 #include <gtest/gtest.h>
@@ -48,24 +47,6 @@ void expect_calibrated(const averages & avg, double phi, double bin_length) {
 averages alea(double phi) {
     averages avg;
     for (int r = 0; r < replicas; ++r) {
-        alps::SimpleRealObservable simple("simple");
-        alps::RealObservable binned("binned");
-        ar1 source(1000003u * r + 17, phi);
-        for (std::size_t t = 0; t < n; ++t) {
-            const double x = source();
-            simple << x;
-            binned << x;
-        }
-        avg.naive += simple.error() / replicas;
-        avg.error += binned.error() / replicas;
-        avg.tau += binned.tau() / replicas;
-    }
-    return avg;
-}
-
-averages aleav2(double phi) {
-    averages avg;
-    for (int r = 0; r < replicas; ++r) {
         alps::alea::var_acc<double> simple(1);
         alps::alea::autocorr_acc<double> binned(1);
         ar1 source(1000003u * r + 17, phi);
@@ -86,8 +67,8 @@ class Ar1KnownAnswers : public ::testing::TestWithParam<double> {};
 
 }
 
-// ALEA reports the error from 128 to 255 bins: bins of
-// 2048 samples here.
+// ALEA v2 reports the error from the highest level with at least 128 batches:
+// batches of 2048 samples here.
 TEST_P(Ar1KnownAnswers, Alea)
 {
     const double phi = GetParam();
@@ -96,30 +77,9 @@ TEST_P(Ar1KnownAnswers, Alea)
     EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
 }
 
-// ALEA v2 reports the error from the highest level with at least 128 batches:
-// batches of 2048 samples here.
-TEST_P(Ar1KnownAnswers, AleaV2)
-{
-    const double phi = GetParam();
-    const averages avg = aleav2(phi);
-    expect_calibrated(avg, phi, 2048);
-    EXPECT_GE(avg.error / ar1_exact_error(phi, n), calibration_floor);
-}
-
 INSTANTIATE_TEST_SUITE_P(Phi, Ar1KnownAnswers, ::testing::Values(0.0, 0.5, 0.9, 0.99));
 
-// A run of about a hundred autocorrelation times cannot give a trustworthy
-// error; a library must say so. 1000 samples at phi = 0.9: exact error 0.137.
 TEST(ShortRun, AleaDoesNotClaimConvergence)
-{
-    alps::RealObservable binned("binned");
-    ar1 source(5, 0.9);
-    for (int t = 0; t < 1000; ++t)
-        binned << source();
-    EXPECT_NE(binned.converged_errors(), alps::CONVERGED);
-}
-
-TEST(ShortRun, AleaV2DoesNotClaimConvergence)
 {
     alps::alea::autocorr_acc<double> binned(1);
     ar1 source(5, 0.9);
@@ -135,7 +95,7 @@ TEST(ShortRun, AleaV2DoesNotClaimConvergence)
 
 // Below 256 samples no level above the lowest has 128 batches. Nothing is
 // known about the correlation, and tau must not read as zero.
-TEST(ShortRun, AleaV2HasNoTauWithoutBatches)
+TEST(ShortRun, AleaHasNoTauWithoutBatches)
 {
     alps::alea::autocorr_acc<double> binned(1);
     ar1 source(5, 0.9);
@@ -150,20 +110,7 @@ TEST(ShortRun, AleaV2HasNoTauWithoutBatches)
     EXPECT_EQ(result.level(3).stderror()[0], result.stderror(16)[0]);
 }
 
-// The convergence flag separates a long run from a short one.
 TEST(ConvergenceFlag, Alea)
-{
-    alps::RealObservable long_run("long"), short_run("short");
-    ar1 fast(11, 0.5), slow(12, 0.99);
-    for (std::size_t t = 0; t < n; ++t)
-        long_run << fast();
-    for (std::size_t t = 0; t < (std::size_t(1) << 14); ++t)
-        short_run << slow();
-    EXPECT_EQ(long_run.converged_errors(), alps::CONVERGED);
-    EXPECT_NE(short_run.converged_errors(), alps::CONVERGED);
-}
-
-TEST(ConvergenceFlag, AleaV2)
 {
     alps::alea::autocorr_acc<double> long_run(1), short_run(1);
     ar1 fast(11, 0.5), slow(12, 0.99);

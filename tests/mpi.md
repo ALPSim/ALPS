@@ -21,7 +21,7 @@ when using OpenMPI.
 | Component / executable | Assertions |
 | --- | --- |
 | `legacy_parameters / parameters_mpi` | Ordered keys, decimal values, and unevaluated parameter expressions survive a relay through every rank and back to the sender. |
-| `alea / observableset_mpi` | The historical seed-2873 sequence of 4,096 paired samples, observable names, counts, means, errors, convergence states, and derived ratio survive the same relay. Every rank constructs its round-trip reference independently of serialization; means, errors, autocorrelation times and binning errors are also pinned to the historical numerical fixture. |
+| `statistics / statistics_mpi_reduce` | On 2 and 3 ranks, accumulators and an observable set reduced to rank 0 equal one accumulator fed every sample: counts, means, errors and bins, also for runs of unequal length. |
 | `parapack / collect_mpi` | Uneven vector lengths and offsets distribute correctly and reconstruct the original seeded vector. |
 | `parapack / comm_mpi` | Control, worker, and group-head membership, communicator sizes, local ranks, and the corresponding allocated process list. |
 | `parapack / process_mpi` | Group identifiers and members, free/active accounting, allocation exhaustion, recycling, release, and rejection of a second release, including two multi-rank groups. |

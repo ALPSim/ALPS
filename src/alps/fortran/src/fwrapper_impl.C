@@ -362,7 +362,7 @@ void alps_restore_(void* data, int* count,  int* type, int* caller, int lchar)
 }
 
 /**
- * @brief alps::ObservableSetにObservableを追加する
+ * @brief alps::alea::observable_setにobservableを追加する
  * @param[in] count Observableに渡す値の要素数
  * @param[in] type  Observableに渡す値の型
  * @param[in] name  Observableの名前
@@ -393,7 +393,7 @@ void alps_init_observable_(int* count, int* type, char* name, int* caller, int l
 }
 
 /**
- * @brief alps::Observableにデータを加算する
+ * @brief alps::alea::observableにデータを加算する
  * @param[in] data 加算する値
  * @param[in] count dataの要素数
  * @param[in] type  dataの型

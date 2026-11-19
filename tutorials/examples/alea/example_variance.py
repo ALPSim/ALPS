@@ -31,7 +31,7 @@ variance = pyalps.alea.variance(obs)
 print("The variance of E is: " + str(variance))
   
 # write the result back to the file
-ar = pyalps.hdf5.archive(filename, 1)
-ar.write("simulation/results/" + pyalps.hdf5_name_encode("E") + "/variance/value", variance)
+with pyalps.hdf5.archive(filename, "a") as ar:
+    ar["/" + "simulation/results/" + pyalps.hdf5_name_encode("E") + "/variance/value"] = variance
 
 

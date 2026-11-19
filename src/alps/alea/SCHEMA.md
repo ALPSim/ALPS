@@ -1,15 +1,15 @@
 # Result schema for Monte Carlo observables
 
 Status: `alps::mcbase` simulations, the CT-HYB and CT-INT solvers and
-`pyalps.ngs` write this schema. The scheduler and parapack applications still
-write the layout of 3.0 and follow. The conformance tests in `tests/statistics`
-are written against it.
+`pyalps.ngs` write this schema. The scheduler and parapack applications keep
+the datasets of 3.0 that readers use. The conformance tests in
+`tests/statistics` are written against it.
 
-ALPS has three implementations of Monte Carlo statistics today: the legacy
-classes behind `<alps/alea.h>`, `alps::accumulators`, and this directory. They
-store results in three different HDF5 layouts. The plan is to keep one
-implementation (this one, with an ALPS observable layer on top) and one layout.
-This file defines that layout and the rules the implementation follows.
+ALPS 3.0 had three implementations of Monte Carlo statistics: the classes
+behind `<alps/alea.h>`, `alps::accumulators`, and this directory, each with its
+own HDF5 layout. Only this one remains, with an ALPS observable layer on top.
+This file defines its layout and the rules the implementation follows; files
+in the two older layouts are still read.
 
 ## Design rules
 

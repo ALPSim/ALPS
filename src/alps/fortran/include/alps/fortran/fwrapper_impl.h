@@ -31,7 +31,7 @@ extern "C"
   void alps_init_(const int* caller);
 
   /**
-   * @brief alps::ObservableSetの初期化が実装される。
+   * @brief alps::alea::observable_setの初期化が実装される。
    * 
    * @param[in] caller 呼び出し元ワーカのポインタ
    */
@@ -61,7 +61,7 @@ extern "C"
   /**
    * @brief サーマライズ状態を返す。
    * 
-   * 1を返すとサーマライズが完了したとみなされ、 alps::ObservableSet への結果保存が開始される。
+   * 1を返すとサーマライズが完了したとみなされ、 alps::alea::observable_set への結果保存が開始される。
    *
    * @param[in] caller 呼び出し元ワーカのポインタ
    * @param[out] is_thermalized サーマライズ状態

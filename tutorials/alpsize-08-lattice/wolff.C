@@ -28,7 +28,7 @@
 *
 *****************************************************************************/
 
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <alps/parameter.h>
 #include <alps/lattice.h>
 #include <boost/foreach.hpp>
@@ -67,16 +67,16 @@ int main() {
   double pc = 1 - std::exp(-2./T);
 
   // measurement
-  alps::ObservableSet measurements;
-  measurements << alps::RealObservable("Magnetization");
-  measurements << alps::RealObservable("Magnetization^2");
-  measurements << alps::RealObservable("Magnetization^4");
+  alps::alea::observable_set measurements;
+  measurements << alps::alea::observable("Magnetization")
+               << alps::alea::observable("Magnetization^2")
+               << alps::alea::observable("Magnetization^4");
 
   // timer
   auto const started = std::chrono::steady_clock::now();
 
   for (int mcs = 0; mcs < MCSTEP + MCTHRM; ++mcs) {
-    if (mcs == MCTHRM) measurements.reset(true);
+    if (mcs == MCTHRM) measurements.reset();
     int s = static_cast<int>(random_01() * N);
     int so = spin[s];
     spin[s] = -so;
@@ -100,15 +100,14 @@ int main() {
     measurements["Magnetization^4"] << dsz * dsz * dsz * dsz;
   }
 
-  // calculate Binder parameter
-  alps::RealObsevaluator m2 = measurements["Magnetization^2"];
-  alps::RealObsevaluator m4 = measurements["Magnetization^4"];
-  alps::RealObsevaluator binder("Binder Ratio of Magnetization");
-  binder = m2 * m2 / m4;
-  measurements.addObservable(binder);
+  // calculate Binder parameter, by jackknife over the bins
+  alps::alea::result_set results = measurements.results();
+  const alps::alea::observable_result m2 = results["Magnetization^2"];
+  const alps::alea::observable_result m4 = results["Magnetization^4"];
+  results.insert("Binder Ratio of Magnetization", m2 * m2 / m4);
 
   // output results
-  std::cout << measurements;
+  std::cout << results;
   std::cerr << "Elapsed time = " << std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count() << " sec\n";
 
   return 0;

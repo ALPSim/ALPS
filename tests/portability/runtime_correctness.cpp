@@ -3,8 +3,6 @@
 // Runtime regressions adapted from ALPS PR 166 at 519d4bd0d.
 // Preserve the SDK follow-up regression coverage during test consolidation.
 #include <gtest/gtest.h>
-#include <alps/alea.h>
-#include <alps/alea/mcdata.hpp>
 #include <alps/mc/check_schedule.hpp>
 #include <alps/parapack/integer_range.h>
 #include <limits>
@@ -37,33 +35,6 @@ TEST(RuntimeCorrectness, PreservesSDKRegressions) {
     require(alps::numeric::valarray2vector(std::valarray<double>{}).empty(),
             "empty valarray conversion");
 
-    alps::RealObservable observable("scalar");
-    for (int i = 0; i < 1024; ++i) observable << (1. + i % 10);
-    const alps::alea::mcdata<double> original(observable);
-    const double mean = original.mean();
-    const auto negative = -original;
-    require(negative.mean() == -mean, "negation mean");
-    require(original.mean() == mean, "negation must not mutate source");
-    require(negative.error() >= 0., "negation uncertainty");
-    auto reciprocal = original;
-    reciprocal.divide(-2.);
-    require(reciprocal.error() >= 0., "reciprocal uncertainty");
-    alps::RealObsevaluator evaluator(observable);
-    evaluator *= -2.;
-    require(evaluator.error() >= 0., "negative scaling uncertainty");
-    evaluator /= -2.;
-    require(evaluator.error() >= 0., "negative division uncertainty");
-
-    alps::ObservableSet first, second;
-    first << alps::IntHistogramObservable("histogram", 0, 10);
-    second << alps::IntHistogramObservable("histogram", 0, 10);
-    first << second;
-    const alps::IntHistogramObsevaluator histogram(first["histogram"]);
-    require(histogram.count() == 0 && histogram.size() == 10, "empty histogram range");
-    for (std::size_t i = 0; i < histogram.size(); ++i)
-        require(histogram[i] == 0, "empty histogram bin");
-    first.clear();
-    require(first.empty(), "observable clear");
 #ifndef _WIN32
     const mode_t previous = umask(0);
     const auto filename = alps::temporary_filename("alps-runtime-regression-");

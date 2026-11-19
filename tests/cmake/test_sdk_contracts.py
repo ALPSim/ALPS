@@ -62,14 +62,14 @@ def test_components_link_without_building_the_core_runtime(tmp_path):
     subprocess.run([
         "cmake", "--build", str(tmp_path), "--config", "Release",
         "--target", "utilities_contract", "hdf5_contract", "params_contract", "osiris_contract",
-        "xml_contract", "cli_contract", "aleav2_contract", "accumulators_contract", "mc_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
+        "xml_contract", "cli_contract", "alea_contract", "accumulators_contract", "mc_contract", "numeric_contract", "numeric_io_contract", "numeric_xml_contract",
         "maxent_independent_contract", "maxent", "--parallel", "2",
     ], check=True)
     core_runtime = Path((tmp_path / "core-runtime-Release.txt").read_text().strip())
     assert not core_runtime.exists(), f"Extracted components built the core runtime: {core_runtime}"
     subprocess.run([
         "ctest", "--test-dir", str(tmp_path), "-C", "Release", "--output-on-failure",
-        "-R", "^(utilities|hdf5|params|osiris|xml|cli|aleav2|accumulators|numeric|numeric_io|numeric_xml|maxent_independent)_contract$", "--no-tests=error",
+        "-R", "^(utilities|hdf5|params|osiris|xml|cli|alea|accumulators|numeric|numeric_io|numeric_xml|maxent_independent)_contract$", "--no-tests=error",
     ], check=True)
 
 
@@ -181,7 +181,7 @@ def test_relocated_sdk(tmp_path):
     # Relocation affects how each exported library and the resources are found.
     # The runtime links the other components, except these.
     components = ["numeric", "numeric_io", "numeric_xml"]
-    components += [name.lower() for name in ("Aleav2", "Gf")
+    components += [name.lower() for name in ("Alea", "Gf")
                    if (relocated / f"share/alps/ALPS{name}Targets.cmake").is_file()]
     build_and_run(build, environment=environment,
                   targets=("sdk_contract", *(f"{name}_contract" for name in components)),

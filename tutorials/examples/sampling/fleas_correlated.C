@@ -12,7 +12,7 @@
 *****************************************************************************/
 
 #include "fleas.h"
-#include <alps/alea.h>
+#include <alps/alea/observables.hpp>
 #include <boost/random.hpp>
 
 
@@ -37,8 +37,8 @@ int main()
   boost::variate_generator<engine_type,dist_type> rng(engine,dist);
   
   std::valarray<double> current_distribution(0.,N+1);
-  alps::RealVectorObservable histogram;
-  alps::RealObservable number;
+  alps::alea::accumulator histogram(alps::alea::observable("Distribution"));
+  alps::alea::accumulator number(alps::alea::observable("Mean number on Anik"));
   
   // equilibration
   for (int i=0;i<M/5;++i) {
@@ -60,15 +60,18 @@ int main()
     current_distribution[n]=0;  
   }
   
-  std::cout << "Mean number on Anik: " << number << "\n";
-  std::cout << "Distribution: " << histogram << "\n";
+  const alps::alea::observable_result distribution = histogram.result();
+  const std::vector<double> mean = distribution.mean_vector(), error = distribution.error_vector(),
+                            tau = distribution.tau_vector();
+  std::cout << "Mean number on Anik: " << number.result() << "\n";
+  std::cout << "Distribution: " << distribution << "\n";
 
   for (int i=0;i<=N;++i)
     std::cout << i << "\t" 
               << probability(N,i) << "\t" 
-              << histogram.mean()[i] << "\t" 
-              << histogram.error()[i] << "\t" 
-              << histogram.tau()[i] << "\n";
+              << mean[i] << "\t" 
+              << error[i] << "\t" 
+              << tau[i] << "\n";
   
   return 0;
 }
