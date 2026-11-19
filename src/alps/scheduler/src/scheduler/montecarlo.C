@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <limits>
 
@@ -116,14 +117,14 @@ void write_xml_average(oxstream& out, const std::string& name, const alps::alea:
   if (r.is_scalar()) {
     out << start_tag("SCALAR_AVERAGE") << attribute("name", name);
     if (!r.sign().empty())
-      out << attribute("signed", "true");
+      out << attribute("signed", "true") << attribute("sign", r.sign());
     write_component(out, v, 0, mean_digits(v.mean[0], v.error[0], 8));
     out << end_tag("SCALAR_AVERAGE");
     return;
   }
   out << start_tag("VECTOR_AVERAGE") << attribute("name", name) << attribute("nvalues", r.size());
   if (!r.sign().empty())
-    out << attribute("signed", "true");
+    out << attribute("signed", "true") << attribute("sign", r.sign());
   for (std::size_t i = 0; i != r.size(); ++i) {
     const std::string label = i < r.labels().size() && !r.labels()[i].empty()
       ? r.labels()[i] : boost::lexical_cast<std::string>(i);
@@ -144,6 +145,170 @@ void write_xml_averages(oxstream& out, const alps::alea::result_set& results, in
   for (const std::string& name : results.names())
     write_xml_average(out, name, results[name]);
   out << end_tag("AVERAGES");
+}
+
+namespace {
+
+double xml_number(const std::string& text, const std::string& name)
+{
+  const char* begin = text.c_str();
+  char* end = nullptr;
+  const double value = std::strtod(begin, &end);   // also nan and inf
+  if (end == begin || *end != 0)
+    boost::throw_exception(std::runtime_error("Cannot read the number '" + text + "' in <AVERAGES> of '" + name + "'"));
+  return value;
+}
+
+alps::alea::error_convergence xml_convergence(const XMLAttributes& attributes)
+{
+  const std::string converged = attributes.value_or_default("converged", "maybe");
+  return converged == "yes" ? alps::alea::CONVERGED
+    : converged == "no" ? alps::alea::NOT_CONVERGED : alps::alea::MAYBE_CONVERGED;
+}
+
+} // namespace
+
+AveragesXMLHandler::AveragesXMLHandler(std::vector<alps::alea::result_set>& sets)
+  : XMLHandlerBase("AVERAGES"), sets_(sets), histogram_(false), histogram_min_(0)
+{
+}
+
+void AveragesXMLHandler::start_element(const std::string& name, const XMLAttributes& attributes,
+                                       xml::tag_type type)
+{
+  if (type != xml::element)
+    return;
+  text_.clear();
+  if (path_.empty() && name == "AVERAGES") {
+    sets_.push_back(alps::alea::result_set());
+    path_.push_back(name);
+    return;
+  }
+  const std::string parent = path_.empty() ? std::string() : path_.back();
+  path_.push_back(name);
+  if (parent == "AVERAGES") {
+    name_ = attributes.value_or_default("name", "");
+    numbers_ = alps::alea::stored_numbers();
+    histogram_ = name == "HISTOGRAM";
+    counts_.clear();
+    histogram_min_ = 0;
+    if (name == "SCALAR_AVERAGE" || name == "VECTOR_AVERAGE") {
+      numbers_.scalar = name == "SCALAR_AVERAGE";
+      if (attributes.value_or_default("signed", "") == "true")
+        numbers_.sign = attributes.value_or_default("sign", "Sign");
+      if (numbers_.scalar)
+        finish_component();
+    }
+  } else if (parent == "VECTOR_AVERAGE" && name == "SCALAR_AVERAGE") {
+    finish_component();
+    numbers_.labels.push_back(attributes.value_or_default("indexvalue", ""));
+  } else if (parent == "SCALAR_AVERAGE" && name == "ERROR") {
+    numbers_.converged.back() = xml_convergence(attributes);
+  }
+}
+
+// a new component, with what is unknown until it is read
+void AveragesXMLHandler::finish_component()
+{
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  numbers_.mean.push_back(nan);
+  numbers_.error.push_back(nan);
+  numbers_.variance.push_back(nan);
+  numbers_.tau.push_back(nan);
+  numbers_.converged.push_back(alps::alea::MAYBE_CONVERGED);
+  numbers_.binning_errors.push_back(std::vector<double>());
+}
+
+void AveragesXMLHandler::text(const std::string& text)
+{
+  text_ += text;
+}
+
+void AveragesXMLHandler::end_element(const std::string& name, xml::tag_type type)
+{
+  if (type != xml::element || path_.empty())
+    return;
+  path_.pop_back();
+  const std::string parent = path_.empty() ? std::string() : path_.back();
+  std::string content = text_;
+  text_.clear();
+  content.erase(0, content.find_first_not_of(" \t\r\n"));
+  content.erase(content.find_last_not_of(" \t\r\n") + 1);
+
+  if (parent == "SCALAR_AVERAGE" && !content.empty()) {
+    const double value = xml_number(content, name_);
+    if (name == "COUNT") {
+      if (numbers_.count == 0)
+        numbers_.count = static_cast<std::uint64_t>(value);
+    } else if (name == "MEAN") {
+      numbers_.mean.back() = value;
+    } else if (name == "ERROR") {
+      numbers_.error.back() = value;
+    } else if (name == "VARIANCE") {
+      numbers_.variance.back() = value;
+    } else if (name == "AUTOCORR") {
+      numbers_.tau.back() = value;
+    }
+  } else if (parent == "BINNED" && name == "ERROR" && !content.empty()) {
+    numbers_.binning_errors.back().push_back(xml_number(content, name_));
+  } else if (parent == "ENTRY" && name == "VALUE" && !content.empty()) {
+    counts_.push_back(static_cast<std::uint64_t>(std::llround(xml_number(content, name_))));
+  } else if (parent == "AVERAGES") {
+    if (name_.empty())
+      boost::throw_exception(std::runtime_error("An element <" + name + "> in <AVERAGES> has no name"));
+    if (histogram_) {
+      if (!counts_.empty())
+        sets_.back().insert(name_, alps::alea::stored_histogram(name_, histogram_min_, counts_));
+    } else if (name == "SCALAR_AVERAGE" || name == "VECTOR_AVERAGE") {
+      // Without labels, the writer gives the index of each component.
+      bool labelled = false;
+      for (std::size_t i = 0; i != numbers_.labels.size(); ++i)
+        labelled = labelled || numbers_.labels[i] != boost::lexical_cast<std::string>(i);
+      if (!labelled)
+        numbers_.labels.clear();
+      // Variances, autocorrelation times and binning analyses that are
+      // missing for every component are unknown.
+      auto all_nan = [](const std::vector<double>& v) {
+        for (double x : v) if (x == x) return false;
+        return true;
+      };
+      if (all_nan(numbers_.variance)) numbers_.variance.clear();
+      if (all_nan(numbers_.tau)) numbers_.tau.clear();
+      bool binned = false;
+      for (const std::vector<double>& levels : numbers_.binning_errors)
+        binned = binned || !levels.empty();
+      if (!binned)
+        numbers_.binning_errors.clear();
+      sets_.back().insert(name_, alps::alea::stored_result(name_, numbers_));
+    }
+  }
+}
+
+alps::alea::result_set read_xml_averages(std::istream& in, const XMLTag& tag)
+{
+  std::vector<alps::alea::result_set> sets;
+  AveragesXMLHandler handler(sets);
+  handler.start_element(tag.name, tag.attributes, xml::element);
+  if (tag.type != XMLTag::SINGLE) {
+    for (int depth = 1; depth > 0;) {
+      XMLTag next = parse_tag(in);
+      if (next.type == XMLTag::OPENING) {
+        handler.start_element(next.name, next.attributes, xml::element);
+        ++depth;
+        const std::string content = parse_content(in);
+        if (!content.empty())
+          handler.text(content);
+      } else if (next.type == XMLTag::SINGLE) {
+        handler.start_element(next.name, next.attributes, xml::element);
+        handler.end_element(next.name, xml::element);
+      } else if (next.type == XMLTag::CLOSING) {
+        handler.end_element(next.name.substr(1), xml::element);
+        --depth;
+      }
+    }
+  }
+  handler.end_element(tag.name, xml::element);
+  return sets.front();
 }
 
 /**
@@ -227,8 +392,8 @@ alps::alea::result_set MCSimulation::get_measurements() const
     results = merged.results();
   else if (earlier.size() == 1 && number_merged == 0)
     results = earlier.front();
-  else if (!stored_results_.names().empty())
-    results = stored_results_;
+  else if (!stored_results().names().empty())
+    results = stored_results();
   else
     boost::throw_exception(std::runtime_error(
       "The runs of this simulation were written by an earlier version of ALPS and cannot be merged"
@@ -236,9 +401,10 @@ alps::alea::result_set MCSimulation::get_measurements() const
       " that wrote it."));
 
   // results of an earlier evaluation, kept with the task
-  for (const std::string& name : stored_results_.names())
+  const alps::alea::result_set& stored = stored_results();
+  for (const std::string& name : stored.names())
     if (!results.has(name))
-      results.insert(name, stored_results_[name]);
+      results.insert(name, stored[name]);
   for (const std::string& name : added_results_.names())
     results.insert(name, added_results_[name]);
   return results;
@@ -438,13 +604,18 @@ void MCSimulation::save(hdf5::archive & ar) const {
   alps::alea::save_results(ar, "/simulation/results", get_measurements());
 }
 
-// The results are read from the HDF5 file of the task, not from its XML file.
+// The results in the XML file of the task are used where its HDF5 file has none.
 void MCSimulation::handle_tag(std::istream& infile, const XMLTag& tag) 
 {
   if (tag.name!="AVERAGES")
     WorkerTask::handle_tag(infile,tag);
   else
-    skip_element(infile,tag);
+    xml_results_ = read_xml_averages(infile, tag);
+}
+
+const alps::alea::result_set& MCSimulation::stored_results() const
+{
+  return stored_results_.names().empty() ? xml_results_ : stored_results_;
 }
 
 DummyMCRun::DummyMCRun()

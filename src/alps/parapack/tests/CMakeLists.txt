@@ -35,7 +35,8 @@ foreach(
   temperature_scan
   time
   version
-  wl_weight)
+  wl_weight
+  xml_averages)
   add_executable(${name} ${name}.C)
 
   target_link_libraries(${name} PRIVATE ALPS::alps)

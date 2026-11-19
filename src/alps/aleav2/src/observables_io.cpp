@@ -12,6 +12,8 @@
 #include <alps/hdf5/vector.hpp>
 #include <alps/utilities/encode.hpp>
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <set>
 
@@ -387,6 +389,75 @@ void save_result(hdf5::archive &ar, const std::string &group, const observable_r
         write_statistics(ar, group, result);
     if (!result.labels().empty())
         ar[group + "/labels"] << result.labels();
+}
+
+observable_result stored_result(const std::string &name, const stored_numbers &numbers)
+{
+    observable declaration(name);
+    access::sign(declaration) = numbers.sign;
+    access::labels(declaration) = numbers.labels;
+    access::with_bins(declaration) = false;
+    impl_pointer out(new observable_result::impl(declaration));
+    out->count = numbers.count;
+    const size_t size = numbers.mean.size();
+    if (numbers.count == 0 || size == 0) {
+        out->count = 0;
+        return access::make_result(out);
+    }
+    auto check = [&](size_t other, bool optional, const char *what) {
+        if (other != size && !(optional && other == 0)) {
+            throw std::invalid_argument("The stored " + std::string(what) + " of '" + name
+                                        + "' does not have the size of its mean");
+        }
+    };
+    check(numbers.error.size(), false, "error");
+    check(numbers.variance.size(), true, "variance");
+    check(numbers.tau.size(), true, "autocorrelation time");
+    check(numbers.converged.size(), true, "convergence");
+    check(numbers.binning_errors.size(), true, "binning analysis");
+    if (numbers.scalar && size != 1)
+        throw std::invalid_argument("The stored result '" + name + "' is a number with several components");
+
+    out->size = size;
+    access::is_vector(out->declaration) = !numbers.scalar;
+    std::shared_ptr<observable_result::impl::stored_values> stored(new observable_result::impl::stored_values);
+    stored->mean = numbers.mean;
+    stored->error = numbers.error;
+    stored->variance = numbers.variance.empty() ? std::vector<double>(size, nan) : numbers.variance;
+    stored->tau = numbers.tau.empty() ? std::vector<double>(size, nan) : numbers.tau;
+    stored->convergence = numbers.converged.empty()
+        ? std::vector<error_convergence>(size, MAYBE_CONVERGED) : numbers.converged;
+    // The levels that every component has, as error per level
+    if (!numbers.binning_errors.empty()) {
+        size_t levels = numbers.binning_errors[0].size();
+        for (const std::vector<double> &component : numbers.binning_errors)
+            levels = std::min(levels, component.size());
+        for (size_t level = 0; level != levels; ++level) {
+            std::vector<double> errors(size);
+            for (size_t i = 0; i != size; ++i)
+                errors[i] = numbers.binning_errors[i][level];
+            stored->binning_errors.push_back(errors);
+        }
+    }
+    out->stored = stored;
+
+    return access::make_result(out);
+}
+
+observable_result stored_histogram(const std::string &name, std::int64_t min, const std::vector<std::uint64_t> &counts)
+{
+    if (counts.empty())
+        throw std::invalid_argument("The stored histogram '" + name + "' has no entries");
+    observable declaration(name);
+    access::with_bins(declaration) = false;
+    access::is_histogram(declaration) = true;
+    access::min(declaration) = min;
+    access::max(declaration) = min + std::int64_t(counts.size()) - 1;
+    impl_pointer out(new observable_result::impl(declaration));
+    out->counts = counts;
+    out->size = counts.size();
+    out->count = std::accumulate(counts.begin(), counts.end(), uint64_t(0));
+    return access::make_result(out);
 }
 
 observable_result load_result(hdf5::archive &ar, const std::string &group)

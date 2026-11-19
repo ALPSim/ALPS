@@ -24,6 +24,9 @@
 #include <alps/model/sign.h>
 #include <alps/lattice/graph_helper.h>
 #include <alps/alea/observables.hpp>
+#include <alps/alea/observables_io.hpp>
+#include <alps/parser/parser.h>
+#include <alps/parser/xmlhandler.h>
 #include <alps/config.h>
 
 #include <alps/hdf5.hpp>
@@ -119,14 +122,42 @@ private:
   std::string worker_tag() const;
   void write_xml_body(alps::oxstream&, std::filesystem::path const& fn, bool) const;
   virtual void handle_tag(std::istream&, const XMLTag&);
-  // results stored with the task, and those added
-  alps::alea::result_set stored_results_, added_results_;
+  // results stored with the task, in its HDF5 file and in its XML file, and those added
+  alps::alea::result_set stored_results_, xml_results_, added_results_;
+  const alps::alea::result_set& stored_results() const;
 };
 
 
 /// The results as the <AVERAGES> element of the ALPS XML files. A non-negative
 /// `id` is written as its attribute.
 ALPS_DECL void write_xml_averages(oxstream&, const alps::alea::result_set& results, int id = -1);
+
+/// Reads <AVERAGES> elements as write_xml_averages writes them, and those of
+/// earlier versions of ALPS: count, mean, error, variance, autocorrelation
+/// time, convergence and binning analysis of every observable, and histograms.
+/// Each <AVERAGES> element adds a set. The results have no bins: they cannot
+/// enter functions of results or be merged with runs.
+class ALPS_DECL AveragesXMLHandler : public XMLHandlerBase
+{
+public:
+  explicit AveragesXMLHandler(std::vector<alps::alea::result_set>& sets);
+  void start_element(const std::string& name, const XMLAttributes& attributes, xml::tag_type type);
+  void end_element(const std::string& name, xml::tag_type type);
+  void text(const std::string& text);
+
+private:
+  void finish_component();
+  std::vector<alps::alea::result_set>& sets_;
+  std::vector<std::string> path_;     // open elements below <AVERAGES>
+  std::string text_, name_;
+  bool histogram_;
+  int64_t histogram_min_;
+  std::vector<std::uint64_t> counts_;
+  alps::alea::stored_numbers numbers_;
+};
+
+/// The results of the <AVERAGES> element whose opening tag was read from `in`
+ALPS_DECL alps::alea::result_set read_xml_averages(std::istream& in, const XMLTag& tag);
 
 
 template <class G=graph_helper<>::graph_type>

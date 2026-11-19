@@ -15,7 +15,9 @@
 
 #include <alps/alea/observables.hpp>
 
+#include <cstdint>
 #include <string>
+#include <vector>
 
 namespace alps { namespace hdf5 { class archive; } }
 
@@ -38,6 +40,29 @@ result_set load_results(hdf5::archive &ar, const std::string &path);
  */
 void save_result(hdf5::archive &ar, const std::string &group, const observable_result &result);
 observable_result load_result(hdf5::archive &ar, const std::string &group);
+
+/**
+ * The numbers of a result kept in another format, such as the <AVERAGES> of
+ * an ALPS XML file. Empty `variance` and `tau` are unknown, empty `converged`
+ * is "maybe". `binning_errors[i]` is the binning analysis of component `i`.
+ */
+struct stored_numbers
+{
+    std::uint64_t count = 0;
+    bool scalar = true;                 // a number, not a vector of one
+    std::string sign;                   // of a signed observable
+    std::vector<std::string> labels;
+    std::vector<double> mean, error, variance, tau;
+    std::vector<error_convergence> converged;
+    std::vector<std::vector<double> > binning_errors;
+};
+
+/** A result of such numbers. Like results read with `load_results` it cannot be merged; it has no bins. */
+observable_result stored_result(const std::string &name, const stored_numbers &numbers);
+
+
+/** A histogram of the integers from `min`, with these counts */
+observable_result stored_histogram(const std::string &name, std::int64_t min, const std::vector<std::uint64_t> &counts);
 
 /** Write everything needed to continue measuring */
 void save_checkpoint(hdf5::archive &ar, const std::string &path, const observable_set &set);

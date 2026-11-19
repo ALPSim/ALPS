@@ -49,8 +49,9 @@ def main():
         assert run(xml_command, job.name, cwd=root) == run(xml_command, job)
         assert result.tag == "ARCHIVE" and result.attrib["name"] == "archive regression"
         assert float(result.findtext("SIMULATION/PARAMETERS/PARAMETER")) == 1.25
-        # Results are read from the HDF5 file of the task; this one has none.
-        assert result.find("SIMULATION/AVERAGES") is None
+        assert float(result.findtext("SIMULATION/AVERAGES/SCALAR_AVERAGE/MEAN")) == -2
+        assert float(result.findtext("SIMULATION/AVERAGES/SCALAR_AVERAGE/ERROR")) == 0.125
+        assert result.findtext("SIMULATION/AVERAGES/SCALAR_AVERAGE/COUNT") == "64"
         run(xml_command, root / "absent.xml", success=False)
 
         if sqlite_command:

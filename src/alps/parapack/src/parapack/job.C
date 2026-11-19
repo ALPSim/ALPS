@@ -71,6 +71,13 @@ std::vector<alps::alea::result_set> load_results(std::filesystem::path const& ba
   return results;
 }
 
+// The results of a task: those in its HDF5 files, or else those of its XML file
+std::vector<alps::alea::result_set> task_results(std::filesystem::path const& basedir,
+  std::string const& base, std::vector<alps::alea::result_set> const& xml) {
+  std::vector<alps::alea::result_set> results = load_results(basedir, base);
+  return results.empty() ? xml : results;
+}
+
 } // end namespace
 
 //
@@ -130,7 +137,8 @@ void task::load() {
   clone_info_.clear();
   std::filesystem::path file_in = alps::fs::absolute(std::filesystem::path(file_in_str_), basedir_);
   std::filesystem::path file_out = alps::fs::absolute(std::filesystem::path(file_out_str_), basedir_);
-  simulation_xml_handler handler(params_, clone_info_);
+  std::vector<alps::alea::result_set> xml_results;
+  simulation_xml_handler handler(params_, clone_info_, xml_results);
   XMLParser parser(handler);
   if (!exists(file_out)) {
     parser.parse(file_in);
@@ -139,7 +147,7 @@ void task::load() {
     if (!lock.locked())
       boost::throw_exception(std::runtime_error("task::load() lock failed after 60 seconds"));
     parser.parse(file_out);
-    obs_ = load_results(basedir_, base_);
+    obs_ = task_results(basedir_, base_, xml_results);
   }
 
   num_clones_ = range_type(params_.value_or_default("NUM_CLONES", "1"), params_);
@@ -174,8 +182,14 @@ void task::save(alps::parapack::option const& opt) const {
       boost::throw_exception(std::runtime_error("task::load() lock failed after 60 seconds"));
     if (exists(file_out)) {
       // keep the results that were written with the task
-      simulation_xml_writer(file_out, opt.write_xml, true, params_, load_results(basedir_, base_),
-        clone_info_);
+      Parameters params_tmp;
+      std::deque<clone_info> clone_info_tmp;
+      std::vector<alps::alea::result_set> xml_results;
+      simulation_xml_handler handler(params_tmp, clone_info_tmp, xml_results);
+      XMLParser parser(handler);
+      parser.parse(file_out);
+      simulation_xml_writer(file_out, opt.write_xml, true, params_,
+        task_results(basedir_, base_, xml_results), clone_info_);
     } else {
       simulation_xml_writer(file_out, opt.write_xml, true, params_, obs_, clone_info_);
     }
@@ -192,7 +206,8 @@ void task::save_observable(alps::parapack::option const& opt) const {
     if (exists(file_out)) {
       Parameters params_tmp;
       std::deque<clone_info> clone_info_tmp;
-      simulation_xml_handler handler(params_tmp, clone_info_tmp);
+      std::vector<alps::alea::result_set> xml_results;
+      simulation_xml_handler handler(params_tmp, clone_info_tmp, xml_results);
       XMLParser parser(handler);
       parser.parse(file_out);
       if (obs_.size() > 1 && !params_tmp.defined("NUM_REPLICAS"))

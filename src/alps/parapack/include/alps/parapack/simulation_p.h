@@ -51,15 +51,16 @@ struct simulation_xml_writer {
 };
 
 
-// Reads the parameters and the clones of a task. The results are not read
-// from the XML file: they are in the HDF5 files of the task.
+// Reads the parameters, the results and the clones of a task. The results in
+// the XML file are used only where the task has no HDF5 files.
 class simulation_xml_handler : public CompositeXMLHandler {
 public:
-  simulation_xml_handler(Parameters& params, std::deque<clone_info>& clones) :
-    CompositeXMLHandler("SIMULATION"), params_handler_(params), os_handler_("AVERAGES"),
+  simulation_xml_handler(Parameters& params, std::deque<clone_info>& clones,
+    std::vector<alps::alea::result_set>& averages) :
+    CompositeXMLHandler("SIMULATION"), params_handler_(params), averages_handler_(averages),
     clones_(clones), clone_handler_(clone_) {
     add_handler(params_handler_);
-    add_handler(os_handler_);
+    add_handler(averages_handler_);
     add_handler(clone_handler_);
   }
 
@@ -77,7 +78,7 @@ protected:
 
 private:
   ParametersXMLHandler params_handler_;
-  DummyXMLHandler os_handler_;
+  scheduler::AveragesXMLHandler averages_handler_;
   std::deque<clone_info>& clones_;
   clone_info clone_;
   clone_info_xml_handler clone_handler_;
