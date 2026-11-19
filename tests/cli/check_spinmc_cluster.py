@@ -7,7 +7,8 @@ correlations are <s_i.s_j> = u^|i-j|, with u = I1(K)/I0(K) for the XY model and
 u = coth(K) - 1/K for the Heisenberg model, K = J/T. The squared uniform and
 staggered magnetizations follow as sums over all pairs. With cluster updates
 the staggered one used to equal the uniform one for the XY model and for the
-antiferromagnetic Heisenberg model.
+antiferromagnetic Heisenberg model. The results are compared in units of their
+error bars (mc_hypothesis), all eight comparisons sharing one level.
 Usage: check_spinmc_cluster.py <spinmc> <directory with lattices.xml>
 """
 import math
@@ -15,12 +16,12 @@ import os
 import subprocess
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+import mc_hypothesis
 
 L = 8
 T = 0.5
-TOLERANCE = 0.01
 CASES = [("XY", 1), ("XY", -1), ("Heisenberg", 1), ("Heisenberg", -1)]
 
 
@@ -61,11 +62,9 @@ def main():
         subprocess.run([spinmc, "--Tmin", "1", "--Tmax", "1", "--write-xml", "job.in.xml"], cwd=work, env=environment,
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         for number, (model, coupling) in enumerate(CASES, 1):
-            averages = {a.get("name"): float(a.findtext("MEAN"))
-                        for a in ET.parse(work / f"task{number}.out.xml").iter("SCALAR_AVERAGE")}
-            for name, expected in exact(model, coupling).items():
-                if abs(averages[name] - expected) > TOLERANCE:
-                    failures.append(f"{model} J={coupling}: {name} = {averages[name]:.4f}, exact {expected:.4f}")
+            averages = mc_hypothesis.read_averages(work / f"task{number}.out.xml")
+            failures += mc_hypothesis.compare(f"{model} J={coupling} (SEED={2873 + number})", averages,
+                                              exact(model, coupling), family=2 * len(CASES))
     if failures:
         sys.exit("\n".join(failures))
 

@@ -8,14 +8,18 @@
 - Ising chain of 6 sites in a field, with the default update: the reference
   enumerates the 64 states. The default used to be the cluster update, which
   ignores the field and gave the h=0 magnetization 0.
+
+Each average is compared with its exact value in units of its error bar
+(mc_hypothesis), all comparisons sharing one level.
 Usage: check_spinmc_exact.py <spinmc> <directory with lattices.xml>
 """
 import os
 import subprocess
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from pathlib import Path
+
+import mc_hypothesis
 
 CASES = {
     "nonsymmetric coupling": (
@@ -29,7 +33,7 @@ CASES = {
             "SEED": "2873",
             "J": "1 0.5 0 -0.5 1 0 0 0 1",
         },
-        {"Energy Density": (-0.241965, 0.008)},
+        {"Energy Density": -0.241965},
     ),
     "default update in a field": (
         {
@@ -43,7 +47,7 @@ CASES = {
             "SWEEPS": "1000000",
             "SEED": "2873",
         },
-        {"Energy": (-5.28997, 0.03), "Magnetization along Field": (0.58619, 0.008)},
+        {"Energy": -5.28997, "Magnetization along Field": 0.58619},
     ),
 }
 
@@ -60,17 +64,16 @@ def run(spinmc, xml_path, parameters):
         environment = dict(os.environ, ALPS_XML_PATH=xml_path, ALPS_NO_CITATIONS="1")
         subprocess.run([spinmc, "--Tmin", "1", "--Tmax", "1", "--write-xml", "job.in.xml"], cwd=work, env=environment,
                        check=True, stdout=subprocess.DEVNULL)
-        return {a.get("name"): float(a.findtext("MEAN")) for a in ET.parse(work / "task.out.xml").iter("SCALAR_AVERAGE")}
+        return mc_hypothesis.read_averages(work / "task.out.xml")
 
 
 def main():
     spinmc, xml_path = sys.argv[1:]
+    family = sum(len(expected) for _, expected in CASES.values())
     failures = []
     for case, (parameters, expected) in CASES.items():
         averages = run(spinmc, xml_path, parameters)
-        for name, (exact, tolerance) in expected.items():
-            if abs(averages[name] - exact) > tolerance:
-                failures.append(f"{case}: {name} {averages[name]}, expected {exact} +- {tolerance}")
+        failures += mc_hypothesis.compare(f"{case} (SEED={parameters['SEED']})", averages, expected, family=family)
     if failures:
         sys.exit("\n".join(failures))
 

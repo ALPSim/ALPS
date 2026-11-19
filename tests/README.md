@@ -89,6 +89,15 @@ See [mpi.md](mpi.md).
   trajectory; it does not validate error bars. New statistical validation
   states its ensemble, autocorrelation treatment and false-failure probability.
   Do not re-run a failed numerical test until it passes.
+- Compare a Monte Carlo average with its exact value in units of its own error
+  bar, not with a fixed tolerance tuned on a few seeds: a fixed tolerance
+  misses a bias of a few error bars and fails when statistics shrink. Use a
+  two-sided test with all comparisons of one test sharing a stated level
+  (`tests/cli/mc_hypothesis.py`, after
+  [Wallerberger and Gull](https://doi.org/10.1103/PhysRevE.96.053303)), and
+  choose the sweeps so that the bias the test is for is several error bars.
+  For vector data such as G(tau) the points are correlated; test them with
+  their covariance (ALEA v2 `alps::alea::test_mean`), not point by point.
 - Fixture changes carry provenance and a behavioural explanation in the PR.
 - Skip with a named reason when an optional capability is missing. Do not add
   permanently disabled tests; a quarantine names the reason, issue and owner.
