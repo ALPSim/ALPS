@@ -50,13 +50,21 @@ endif()
 if(PYALPS_BUNDLE_APPLICATIONS)
   list(APPEND _alps_components applications)
 endif()
-set(_alps_optional_components)
-if(PYALPS_BUNDLE_APPLICATIONS)
-  # Applications built with Eigen (dca) link ALPS::gf, which has its own export.
+# CT-HYB-SEGMENT needs Eigen, so an SDK may have been built without it.
+set(_alps_optional_components "")
+if(PYALPS_BUILD_SOLVERS)
+  list(APPEND _alps_optional_components cthyb_segment)
+endif()
+# CT-HYB-SEGMENT (module and program) links the shared ALPS::gf, which is not
+# one of the core runtime libraries, so the wheel has to bundle it as well.
+if(PYALPS_BUILD_SOLVERS OR PYALPS_BUNDLE_APPLICATIONS)
   list(APPEND _alps_optional_components gf)
 endif()
 find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components}
   OPTIONAL_COMPONENTS ${_alps_optional_components})
+if(ALPS_gf_FOUND)
+  list(APPEND ALPS_RUNTIME_TARGETS ALPS::gf)
+endif()
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
@@ -112,6 +120,9 @@ if(PYALPS_BUILD_SOLVERS)
   pyalps_add_module(maxent_c cpp/maxent_c.cpp ALPS::maxent)
   pyalps_add_module(cthyb cpp/cthyb.cpp ALPS::cthyb)
   pyalps_add_module(ctint cpp/ctint.cpp ALPS::ctint)
+  if(ALPS_cthyb_segment_FOUND)
+    pyalps_add_module(cthyb_segment cpp/cthyb_segment.cpp ALPS::cthyb_segment)
+  endif()
 endif()
 
 # A package-specific name avoids DLL/SONAME collisions with other nanobind users.
@@ -121,20 +132,13 @@ install(TARGETS ${_pyalps_nanobind_runtime} RUNTIME_DEPENDENCY_SET pyalps_runtim
   LIBRARY DESTINATION pyalps/lib RUNTIME DESTINATION pyalps/bin)
 
 # Required libraries are bundled whether or not command-line programs are wanted.
-set(_pyalps_runtime_targets ${ALPS_RUNTIME_TARGETS})
-if(PYALPS_BUNDLE_APPLICATIONS AND TARGET ALPS::gf)
-  get_target_property(_alps_gf_type ALPS::gf TYPE)
-  if(_alps_gf_type STREQUAL "SHARED_LIBRARY")
-    list(APPEND _pyalps_runtime_targets ALPS::gf)
-  endif()
-endif()
 if(WIN32)
   # An unused import library need not appear in an extension's PE imports.
   # Install every component and include its dependencies in the DLL scan.
-  install(IMPORTED_RUNTIME_ARTIFACTS ${_pyalps_runtime_targets}
+  install(IMPORTED_RUNTIME_ARTIFACTS ${ALPS_RUNTIME_TARGETS}
     RUNTIME_DEPENDENCY_SET pyalps_runtime RUNTIME DESTINATION pyalps/bin)
 else()
-  foreach(runtime IN LISTS _pyalps_runtime_targets)
+  foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
     install(FILES "$<TARGET_FILE:${runtime}>" DESTINATION pyalps/lib
       RENAME "$<TARGET_SONAME_FILE_NAME:${runtime}>")
   endforeach()

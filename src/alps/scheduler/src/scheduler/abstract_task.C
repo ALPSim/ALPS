@@ -41,6 +41,12 @@ bool AbstractTask::idle() const
   return worker && worker->idle();
 }
 
+bool AbstractTask::run_done() const
+{
+  Worker const* worker = dynamic_cast<Worker const*>(theWorker);
+  return worker && worker->run_done();
+}
+
 AbstractTask::~AbstractTask()
 {
 }
