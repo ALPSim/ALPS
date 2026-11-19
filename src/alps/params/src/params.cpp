@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip> // for help pretty-printing
 #include <iterator> // for ostream_iterator
+#include <cstdio> // for std::remove()
 #include <cstring> // for memcmp()
 #include <boost/optional.hpp>
 
@@ -326,6 +327,11 @@ namespace alps {
                     // FIXME!!!
                     // This is very inefficient and is done only for testing.
                     std::string tmpfile_name=alps::temporary_filename("tmp_ini_file");
+                    // Removed however parsing ends, or every run leaves one behind per rank.
+                    struct remove_on_exit {
+                        std::string name;
+                        ~remove_on_exit() { std::remove(name.c_str()); }
+                    } tmpfile_cleanup{tmpfile_name};
                     std::ofstream tmpstream(tmpfile_name.c_str());
                     tmpstream << cmd_options.rdbuf();
                     tmpstream.close();

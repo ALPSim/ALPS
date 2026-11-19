@@ -130,6 +130,8 @@ public:
 
   /// true if run() has nothing to do: the run is not started or its work is done
   bool idle() const { return !started || done_; }
+  /// true once the run has been started and its work is done
+  bool run_done() const { return started && done_; }
 
   /// A run whose results exist only once it has finished (work_done() >= 1)
   /// returns true. Its task then ends when all of its runs have finished,

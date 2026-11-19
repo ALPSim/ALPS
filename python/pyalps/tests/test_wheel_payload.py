@@ -44,6 +44,7 @@ EXPECTED_BUNDLED_PROGRAMS = {
     "fulldiag_evaluate",
     "hirschfye",
     "hybridization",
+    "ct-hyb-segment",
     "interaction",
     "loop",
     "qwl",

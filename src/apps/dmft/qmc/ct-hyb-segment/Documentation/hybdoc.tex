@@ -1,0 +1,791 @@
+\documentclass[aps,prb,floatfix,superscriptaddress,twocolumn,notitlepage]{revtex4-1}
+\usepackage{amsmath}
+\usepackage[colorlinks=true,
+%            allbordercolors={0 0 0},
+            pdfborderstyle={/S/U/W 1}]{hyperref}
+\usepackage{float}
+%\usepackage{epsfig}
+%\usepackage{epsf}
+\usepackage{array}
+\usepackage{color}
+\usepackage{graphicx}
+%\usepackage{epstopdf}
+%\usepackage{psfrag}
+%\usepackage[none,bottom]{draftcopy}
+%\usepackage{draftcopy}
+%\draftcopyName{Very First Draft Version}{155}
+\hypersetup{colorlinks=true,breaklinks,citecolor=blue}
+\newcommand\Let{\mathrel{\mathop:\!\!=}}
+\newcommand{\iom}{{\ensuremath{i\nu}}}                                                                                                                                          
+\def \sgn {\mathop {\rm sgn}}
+
+
+%\bibliographystyle{apsrev} %PRODUCES SPURIOUS EMPTY REFERENCE 1 AND 2
+\begin{document}
+\newcommand{\Emanuel}{\href{mailto:gull@pks.mpg.de}{Emanuel }}
+\title{Documentation -- Hybridization Expansion CT-QMC solver\\ version 3.0b1}
+\author{Emanuel Gull}
+\affiliation{Max Planck Institute for the Physics of Complex Systems, Dresden, Germany}
+\affiliation{Physics Department, University of Michigan, Ann Arbor, MI}
+\author{Hartmut Hafermann}
+\affiliation{\'{E}cole Polytechnique, CNRS, 91128 Palaiseau Cedex, France}
+\author{Philipp Werner}
+\affiliation{Department of Physics, University of Fribourg, 1700 Fribourg, Switzerland}
+\date{\today }
+
+\begin{abstract}
+This is the user documentation for the hybridization expansion solver of the ALPS DMFT code. It documents installation, running, and integration of the hybridization code into the ALPS self-consistencies of the ALPS DMFT code and the solver's Python interface. It is designed to be a useful documentation for users, primarily in the LDA+DMFT community.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+Welcome! This is the user documentation for the third version of the ALPS\cite{ALPS20} hybridization expansion\cite{Werner06} CT-QMC\cite{CPC_CTHYB} code, written by Emanuel Gull, in collaboration with Hartmut Hafermann and Philipp Werner, based on an earlier version\cite{ALPS_DMFT} by Philipp Werner, Emanuel Gull, Brigitte Surer, and Matthias Troyer. This user documentation is designed to make the program useful for users, in particular users from the LDA+DMFT field, who want to replace their solvers (IPT, Hirsch Fye, other versions of CT-QMC) with the ALPS hybridization code. A basic understanding of impurity models, Monte Carlo simulations and, where needed, LDA+DMFT is assumed. Knowledge of the inner workings of CT-QMC is not required, and we strive to make the code accessible to users who are not Monte Carlo experts.
+
+This documentation, as well as version $3$ of the hybridization expansion code, is open source. Bug reports and bug fixes, problem reports, and suggestion for improvements are most welcome.
+
+\section{Prerequisites}
+\subsection{Downloading}
+The hybridization solver is included in the compiled ALPS packages as a binary. Release versions and nightly builds are available from \verb#alps.comp-phys.org#. You can find the binary version at \verb#alps-prefix#\verb#/bin#\verb#/hybridization#.
+\subsection{Building}
+The hybridization expansion code uses several ALPS libraries\cite{ALPS20} and requires ALPS to build. You will therefore need to obtain the source code for ALPS from \href{http://alps.comp-phys.org}{alps.comp-phys.org}, either by downloading a current nightly build or by requesting a subversion account and downloading the svn version of ALPS. The ALPS home page has \href{http://alps.comp-phys.org/mediawiki/index.php/Download_and_install_ALPS_2}{detailed instructions} on how this works. In case of problems building ALPS, the \href{mailto:comp-phys-alps-users@lists.phys.ethz.ch}{ALPS user mailing list} will help you out. If this does not work, please don't hesitate to  contact \Emanuel.
+
+The ALPS DMFT code is dependent on two additional modules: \href{http://www.hdfgroup.org/}{HDF5} and \href{http://www.openmpi.org}{MPI} are required.
+Once ALPS and the hybridization code are installed in \verb#$ALPS_PREFIX/#\verb#bin/#\verb#hybridization3#, try running it. You will see
+\begin{verbatim}
+terminate called after throwing\
+ an instance of 'std::invalid_argument'
+  what():  No job file specified
+In $ALPS_ROOT/src/alps/ngs/lib/mcoptions.cpp\
+ on 62 in mcoptions
+\end{verbatim}
+
+If you have an MPI environment you can also run the code using, {\it e.g.},
+
+\verb#$MPI_RUN_COMMAND -np 3 $ALPS_PREFIX/ \#
+\verb#bin/hybridization3#
+
+and you'll see the same output three times. \verb#$MPI_RUN_COMMAND# is platform dependent, common options are \verb#mpirun#, \verb#mpiexec#, \verb#openmpirun#, and so on. Consult your MPI manual on what you need to use.
+
+\section{Running the hybridization code}
+
+The input of the solver consists of a parameter file, the hybridization function $\Delta(\tau)$ and optionally, the retarded interaction function $K(\tau)$ and its first derivative $K'(\tau)$.
+
+\subsection{Using the standalone executable}
+
+\subsubsection{Specifying a parameter file}
+We start with a simple parameter file to solve a single site impurity problem. A minimal parameter file, call it \verb#hyb1.param#, could look like this:
+\begin{verbatim}
+SWEEPS = 100000000
+MAX_TIME = 60
+THERMALIZATION = 1000
+SEED = 0
+N_MEAS = 50
+N_HISTOGRAM_ORDERS = 50
+N_ORBITALS = 2
+U =  4.0
+MU = 2.0
+DELTA = "delta.dat"
+N_TAU = 1000
+BETA = 45
+\end{verbatim}
+This is a parameter file for a single impurity Anderson model (two ``orbitals'', i.e. $N_{\text{orb}}=2$, one for spin ``up'' and one for spin ``down'') with $U=5$, $\mu=2.5$, and $\beta=30$ for which the hybridization function will be read from the file \verb#delta.dat#. The energy units are the ones of \verb#delta.dat#. This simulation runs for sixty seconds.
+
+Using the command \verb#p2h5# this parameter file is converted into an hdf5 file:
+\begin{verbatim}
+$ALPS_PREFIX/bin/p2h5 hyb1.h5 < hyb1.param
+\end{verbatim}
+
+\subsubsection{Running the solver}
+
+We can then run the program using this parameter file (make sure this is in a directory with read/write access and the file \verb#delta.dat# is present):
+\begin{verbatim}
+$ALPS_PREFIX/bin/hybridization3 hyb1.h5
+\end{verbatim}
+
+A typical output is:
+\begin{verbatim}
+U matrix with 2 orbitals: 
+0 5 
+5 0 
+chemical potential with 2 orbitals: 
+2.5 2.5 
+
+local configuration: 
+0 empty
+1 empty
+
+the hybridization function is: 
+0 -0.5 -0.5 
+1 -0.492823 -0.492823 
+2 -0.485805 -0.485805 
+3 -0.478945 -0.478945 
+4 -0.47224 -0.47224 
+5 -0.465686 -0.465686 
+6 -0.459282 -0.459282 
+7 -0.453024 -0.453024 
+8 -0.446909 -0.446909 
+9 -0.440935 -0.440935 
+... *** etc *** ...
+1000 -0.5 -0.5 
+
+process 0 starting simulation
+\end{verbatim}
+
+Running the same simulation under MPI will produce additional lines indicating the process number: \verb#process# \verb#1# \verb#starting# \verb#simulation# and so on. After \verb#MAX_TIME# is up or the number of \verb#SWEEPS# have been done, the code exits. The results will be written to the file \verb#hyb1.out.h5# in this case. The results can also be written in human-readable format by adding the line
+\begin{verbatim}
+TEXT_OUTPUT = 1
+\end{verbatim}
+to the parameter file. Do not forget to convert the parameter file to hdf5 format before running the solver.
+
+\subsection{Python interface}
+\label{pythoninterface}
+
+If ALPS is built with Python support (parameter \verb#ALPS_BUILD_PYTHON=ON#), the solver is also built as a Python module. It can directly be called from within a Python script. This provides a flexible framework which allows one to easily set up tasks ranging from calculations for multiple parameters to complex selfconsistency schemes.
+
+Basic usage of the Python interface is illustrated by the following script, which repeats the previous example for the standalone executable:
+\begin{verbatim}
+import pyalps.cthyb as cthyb # solver module
+import pyalps.mpi as mpi     # MPI library
+
+parms={
+'SWEEPS'              : 100000000,
+'MAX_TIME'            : 60,
+'THERMALIZATION'      : 1000,
+'SEED'                : 0,
+'N_MEAS'              : 50,
+'N_HISTOGRAM_ORDERS'  : 50,
+'N_ORBITALS'          : 2,
+'U'                   : 4.0,
+'MU'                  : 2.0,
+'DELTA'               : "delta.dat",
+'N_TAU'               : 1000,
+'BETA'                : 45,
+'TEXT_OUTPUT'         : 1
+}
+
+if mpi.rank==0:
+  f=open("delta.dat","w")
+  for i in range(parms["N_TAU"]+1):
+    f.write("%i %f %f\n"%(i,-0.5,-0.5))
+  f.close()
+
+cthyb.solve(parms)
+\end{verbatim}
+
+The first line imports the solver module. Note that importing the MPI library in the second line is mandatory, even if the code is run on a single process. In the next four lines a simple (constant) hybridization function is written to file.
+The parameters are specified in the form of a Python \verb#dict#.
+Finally the solver is invoked by executing the \verb#solve# method of the Python module. The latter takes the parameter dict as an argument. The hybridization function is read from file. Results are written to the file \verb#results.out.h5#. The name (without suffix) can be altered by specifying the parameter \verb#BASENAME#.
+
+The script is executed as follows:
+\begin{verbatim}
+alpspython scriptname.py
+\end{verbatim}
+or using MPI:
+\begin{verbatim}
+mpirun -np 2 alpspython scriptname.py
+\end{verbatim}
+On some machines it may be necessary to use 
+\begin{verbatim}
+mpirun -np 2 bash alpspython scriptname.py
+\end{verbatim}
+instead.
+Note that on some platforms mpirun has to be replaced by a different command to invoke MPI. See your MPI manual for details. 
+
+The above example and more advanced examples on how to use the Python framework can be found in the hybridization tutorials within the \verb#/tutorials# directory inside the ALPS installation directory:
+\begin{verbatim}
+/hybridization-01-python
+/hybridization-02-kondo
+/hybridization-03-retarded-interaction
+/hybridization-04-spinfreezing
+\end{verbatim}
+
+These tutorials illustrate how to run calculations for multiple parameters within a single script, plotting results, implementing a selfconsistency scheme, using the hdf5 interface, performing calculations with retarded interactions and for multiorbital models as well as performing simple computations with the measured observables.
+
+\section{Detailed input description}
+
+\subsection{Hybridization function}
+\label{hybridization}
+We use the following definition of the hybridization function:
+\begin{align}
+\Delta_{ab}(\iom_{n}) &= \sum_{kj}\frac{V_{k}^{aj}V_{k}^{*jb}}{\iom_{n}-\epsilon_{k}^{j}}\\
+\Delta(\tau) &= \frac{1}{\beta}\sum_{n=-\infty}^{\infty}\Delta(\iom_{n})e^{-\iom_{n}\tau}
+\end{align}
+where in the current implementation, the hybridization function is restricted to be diagonal, $\Delta_{ab}(\tau)=\Delta_{a}(\tau)\delta_{ab}$.
+As a consequence of this definition, the hybridization function is always negative. The code will throw a corresponding exception if this is not the case.
+
+The hybridization function is read from a text file the name of which is specified by the parameter \verb#DELTA#. The file has to contain a column with imaginary time values (or the time index, the actual values are ignored) and a column of hybridization values for each orbital. The number of lines has to match the number of time points $N_{\tau}+1$ used in the imaginary-time Green's function measurement, where $N_{\tau}$ is specified by the parameter \verb#N_TAU#.
+
+The code will attempt to read the hybridization function data from an hdf5 archive if the optional parameter \verb#DELTA_IN_HDF5# is set to 1. In this case the data has to be provided as a collection of one-dimensional arrays in the paths \verb#/Delta_{i}#, one for each orbital $i$ ($i=0,\ldots,N_{\text{orb}}-1$). Each array has length $N_{\tau}+1$ and the $n$-th entry corresponds to the value of the hybridization function at time $\tau_{n}=n\beta/N_{\tau}$ ($n=0,\ldots,N_{\tau}$).
+That the hybridization function has been read in correctly can be verified from the screen output of the solver immediately after starting the simulation.
+
+Note that the level energies, or double counting terms should not be absorbed into the hybridization function. They have to be specified separately, see Sec. \ref{sec:mu}.
+
+In cases where the hybridization function becomes extremely small, of the order of the machine accuracy, numerical instabilities will occur, which render the results useless, since the algorithm operates on the \emph{inverse} of the matrix of hybridization functions $[\Delta(\tau_{i}-\tau'_{j})]^{-1}$.
+This may happen within a DMFT calculation deep in the insulating phase and at very low temperature, or when an orbital is completely filled (or empty).
+These cases however are easily identified at the level of the Green's function, which will exhibit a lot of noise or even may change sign.
+
+\subsection{Retarded interaction function}
+\label{k_ret_int}
+A retarded interaction occurs in models with phonons, when dynamical screening is considered, or in the context of extended dynamical mean-field theory.
+
+The general algorithm for phonons is given in Ref.~\onlinecite{Werner07holstein}. The formalism for retarded interactions is described in Ref.~\onlinecite{Werner10_frequency}. The function $K(\tau)$, corresponding to the twice-integrated retarded interaction (for details see Ref.~\onlinecite{Werner10_frequency}) connects all pairs of creation and annihilation operators. It is symmetric, $K(\beta-\tau)=K(-\tau)=K(\tau)$, and hence is tabulated as a function $K(\tau)$ on $N_{\tau}+1$ points between $0$ and $\beta$. $K$ is positive and equal for all orbitals. We further use the convention that $K(0)=0$. For the measurement of the improved estimator, the integrated retarded interaction, or equivalently, the first derivative of $K(\tau)$, i.e. $K'(\tau)$, is required. While in principle $K'(\tau)$ can be obtained from the knowledge of $K(\tau)$, the computation from finite differences on the imaginary time grid is not reliable. Hence the derivative should also be precomputed and be provided in tabulated form.
+
+Providing the retarded interaction function and its derivative is optional. This feature is enabled by providing a filename through the parameter \verb#RET_INT_K#.
+$K(\tau)$ and $K'(\tau)$ are provided either through a text file, or, if the (optional) parameter \verb#K_IN_HDF5# is set to 1, within an hdf5 archive.
+The file format in both cases is similar as for the hybridization function. The text file should provide \emph{three} columns. The first column is the time or index (the actual value is ignored), the second column is the tabulated value of $K(\tau)$ and the third column gives the corresponding value of $K'(\tau)$.
+Likewise, the array in the hdf5 file should provide the $N_{\tau}+1$ values of $K$ and $K'$ within the paths \verb#Ret_int_K# for $K(\tau)$ and \verb#Ret_int_Kp# for $K'(\tau)$.
+Note that there is no orbital dependence because the retarded interaction couples to all orbitals equally.
+
+In case of a retarded interaction, the Hartree self-energy is given by
+\begin{align}
+\Sigma^{\text{H}}_{i} = - 2K'(0^{+})\sum_{i}\langle n_{i}\rangle +\frac{1}{2}\sum_{j}U_{ij}\langle n_{j}\rangle ,
+\end{align}
+so that in the particle-hole symmetric case an input chemical potential to $\mu=-2K'(0^{+})+\sum_{j}U_{ij}/2$ (which is independent of $i$) will give a half-filled system. The chemical potential is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
+The treatment of the retarded interaction requires the static interaction and chemical potential to be shifted by $U_{ij}\to U_{ij}-2K'(0)$ for $i\neq j$ and $\mu\to \mu+K'(0)$, respectively. This is done internally by the solver and does not have to be done by the user. The shifted values will be printed to screen as ``effective'' interaction and chemical potential.
+
+\subsection{Orbital chemical potential / double counting terms}
+\label{sec:mu}
+In the simplest case, the level energies of all levels are the same, and a parameter \verb#MU# sets them to that value. Note that in this code, there is no shift of the chemical potential $\mu$ to half filling: For a single impurity Anderson model with interaction $U$, half filling is at $\mu=U/2$.
+
+Double counting terms or crystal field splittings enter the code as orbital-dependent chemical potentials. They can be read in from a file, which is specified as \verb#MU_VECTOR#. In the file the level energies should be listed consecutively, in the order of the orbitals. For example, a two-orbital case with a small magnetic field $H=0.02$, half filled, for an interaction $U=4$, could be specified like this:
+\begin{verbatim}
+1.99 2.01
+\end{verbatim}
+After reading the on-site level energy it is printed to the standard output, as:
+\begin{verbatim}
+chemical potential with 2 orbitals: 
+1.99 2.01 
+\end{verbatim}
+The chemical potential can also be provided in the form of an hdf5 archive. To this end, set \verb#MU_IN_HDF5=1#. The level energies should be stored in a single array in the file path \verb#/MUvector#, in the order of the orbitals.
+
+\subsection{General density-density interaction matrices}
+\label{umatrix}
+In the simplest case, repulsion terms are $U$. This is the default case that is chosen if only the parameter \verb#U# is specified.
+
+In multiorbital problems, more complicated interactions are needed.
+In this case, the ``orbital index'' $i$, which runs from $0$ to $N_{\text{orb}}-1$ used in the code represents a combined spin-orbital index $i=\{\sigma,m\}$. For example, for a model with two physical orbitals and two spins, we have $N_{\text{orb}}=4$.
+The code in general makes no assumption on the order of spins and physical orbitals. 
+We recommend ordering these as follows: $1\uparrow, 1\downarrow, 2\uparrow, 2\downarrow$, which correspond to orbital indices $i=0,1,2,3$, respectively.
+The values of the interaction matrix can be specified in a file \verb#U_MATRIX#, which has $N_\text{orb}\times N_\text{orb}$ entries specifying the matrix elements $U_{ij}$ of the interaction term $\frac{1}{2}\sum_{ij}U_{ij}n_i n_j$.
+
+To see how the interaction matrix for the above ordering is built consider the following Hamiltonian:
+\begin{align}
+H_{U} &=\frac{1}{2}U\sum_{m,\sigma} n_{m\sigma}n_{m,-\sigma} \\ \nonumber &+ \frac{1}{2}U'\sum_{m\neq m',\sigma}n_{m,\sigma}n_{m',-\sigma}
+\\ \nonumber&+ \frac{1}{2}(U'-J)\sum_{m\neq m',\sigma} n_{m,\sigma}n_{m',\sigma}, 
+\end{align}
+\begin{equation}
+\hat{U}=\left(\begin{tabular}{llll}
+0 & U & U'-J & U'\\
+U & 0 & U' & U'-J\\
+U'-J & U' & 0 & U\\
+U' & U'-J & U & 0\\
+\end{tabular}\right)
+\end{equation}
+
+Choosing $U=4.0$, $U'=3.6$ and $J=0.2$, the file generating the interaction matrix of the example above is:
+\begin{verbatim}
+0.0 4.0 3.4 3.6
+4.0 0.0 3.6 3.4
+3.4 3.6 0.0 4.0
+3.6 3.4 4.0 0.0 
+\end{verbatim}
+After reading the interactions, they are printed to the standard output like this:
+\begin{verbatim}
+U matrix with 4 orbitals: 
+0 4 3.4 3.6 
+4 0 3.6 3.4 
+3.4 3.6 0 4 
+3.6 3.4 4 0
+chemical potential with 4 orbitals:
+5.5 5.5 5.5 5.5
+\end{verbatim}
+Since the above Hamiltonian is widely used, it is directly into the code. To use it, simply specify the parameters $U$,$U'$ and $J$ in the input file: adding the block
+\begin{verbatim}
+U =  4
+U'=3.6
+J=0.2
+\end{verbatim}
+produces the same output as above. For a single physical orbital, it reduces to the Hubbard interaction $Un_{\uparrow}n_{\downarrow}$.
+Note that when using the built-in Hamiltonian, the order of spins and orbitals \emph{is} relevant and has to be chosen as recommended above.
+For these interaction matrices, the condition for half-filling reads $\mu_{1/2}=\frac{1}{2}\sum_{i}\hat{U}_{ij}$ (which is independent of $j$). For the above example, $\mu_{1/2}=5.5$.
+The interaction matrix will be read from an hdf5 archive if \verb#UMATRIX_IN_HDF5=1#. The $N_{\text{orb}}^{2}$ values should be stored in the file path \verb#/Umatrix# in a one-dimensional array, where $U_{ij}$ is stored at position $iN_{\text{orb}}+j$, i.e. elements within a row are contiguous.
+
+\section{Detailed parameter description}
+
+\subsection{Mandatory parameters}
+The following parameters are required for any simulation. The code will not work unless all of them are provided.
+
+\begin{itemize}
+\item \verb#N_MEAS#=\{\emph{natural number}\} specifies how many updates need to be done between measurements. For e.g. \verb#N_MEAS=50#, $50$ modifications of the Monte Carlo configuration (such as segment insertions and removals) are attempted between measurements.
+\item \verb#SWEEPS#=\{\emph{natural number}\}is the total number of Monte Carlo sweeps. A sweep consists of \verb#N_MEAS# attempted modifications of the Monte Carlo configuration and a single the measurement of the observables. The code exits either after it has done at least \verb#SWEEPS# Monte Carlo sweeps or after the maximum time has been reached.
+\item \verb#MAX_TIME#=\{\emph{natural number}\} is the maximum runtime of the code, in seconds.
+\item \verb#THERMALIZATION#=\{\emph{natural number}\} is the number of thermalization steps. These are steps that are done at the beginning that are needed to reach the equilibrium distribution.
+\item \verb#N_ORBITALS#=\{\emph{natural number}\} is the number of (spin-)orbitals. For the single impurity Anderson model this is two (spin up and spin down), Cerium would have $14$.
+\item \verb#SEED#=\{\emph{natural number}\} is the random number seed. 
+\item \verb#N_TAU#=\{\emph{natural number}\} specifies the number $N_{\tau}$ of $\tau$-points on which the Green function is measured, and also indicates the number of $\tau$-points on which the hybridization function and the retarded interaction are specified. The imaginary time at index $n$ is given by $\tau_{n}=n\beta/N_{\tau}$, where $n=0,\ldots,N_{\tau}$, so that the first point (index $n=0$) specifies $G(\tau=0)$, the last point (index $n=N_{\tau}$ specifies $G(\tau=\beta)$. Note that the number of imaginary time points hence is $N_{\tau}+1$.
+\item \verb#N_HISTOGRAM_ORDERS#=\{\emph{natural number}\} is the maximum expansion order to which the order histogram is measured. 
+\item \verb#DELTA#=\{\emph{filename}\} specifies the name of the file which contains the hybridization function input data (in text format).
+\item \verb#MU#=\{\emph{real number}\} is the chemical potential or level energy for model Hamiltonians. On-site level energies can be specified differently (in particular in an orbital dependent way, see section on double counting). This parameter is ignored if a file with the chemical potential values is specified using the parameter \verb#MU_VECTOR#.
+\item \verb#U#=\{\emph{real number}\} is the on-site interaction. In this case it is a term $\sum_i n_{i\uparrow}n_{i\downarrow}$. As in the case of the chemical potential, this can be chosen differently, see section on double counting.
+\item \verb#BETA#=\{\emph{real number}\} specifies the inverse temperature $\beta=T^{-1}$.
+\end{itemize}
+
+\subsection{Optional parameters}
+
+\subsubsection{Physical parameters}
+
+These parameters are explained in Sec. \ref{umatrix}.
+\begin{itemize}
+\item \verb#J#=\{\emph{real number}\} specifies the interaction parameters $J$.
+\item \verb#U'#=\{\emph{real number}\} specifies the interaction parameters $U'$.
+\end{itemize}
+
+\subsubsection{Measurement control parameters}
+
+The following optional parameters control the different measurements implemented in the solver. For details on those measurements, see Sec. \ref{measurements}.
+\begin{itemize}
+\item \verb#MEASURE_time#=\{0,1\} activates the Green's function measurement in imaginary time. Note: This measurement is turned on by default.
+\item \verb#MEASURE_freq#=\{0,1\} activates the Green's function measurement on Matsubara frequencies. Requires \verb#N_MATSUBARA#.
+\item \verb#N_MATSUBARA#=\{\emph{natural number}\} The number $N_{\nu}$ of (fermionic) Matsubara frequencies $\nu_{n}=(2n+1)\pi/\beta$. The Green's function will be measured for all frequencies with $n=0,\ldots,N_{\nu}-1$.
+\item \verb#MEASURE_legendre#=\{0,1\} activates the measurement of coefficients of Green's function in the Legendre polynomial basis. Requires \verb#N_LEGENDRE# and \verb#N_MATSUBARA#.
+\item \verb#N_LEGENDRE#=\{\emph{natural number}\} specifies the number of Legendre coefficients to be measured. Coefficiencts with indices $l=0,\ldots,N_{l}-1$ will be measured.
+\item \verb#MEASURE_nn#=\{0,1\} controls the measurement of the equal-time density-density correlation function.
+\item \verb#MEASURE_nnt#=\{0,1\} turns on or off the measurement of the time dependent density-density correlation function. Requires \verb#N_nn#.
+\item \verb#N_nn#=\{\emph{natural number}\} specifies the number of imaginary time points for which the density-density correlation function is measured.
+\item \verb#MEASURE_g2w#=\{0,1\} turns on the measurement of the two-particle Green's function. Requires \verb#N_w2# and \verb#N_W#.
+\item \verb#MEASURE_h2w#=\{0,1\} turns on the measurement of the three-particle correlator $H$ (see Sec.\ref{}). Requires \verb#N_w2# and \verb#N_W#.
+\item \verb#N_w2#=\{\emph{natural number}\} specifies the number $\tilde{N}_{\nu}$ of \emph{fermionic} frequencies for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $n=-\tilde{N}_{\nu}/2,\ldots,\tilde{N}_{\nu}/2-1$.
+\item \verb#N_W#=\{\emph{natural number}\} specifies the number $N_{\omega}$ of \emph{bosonic} frequencies $\omega_{m}=2\pi m/\beta$ for the two-particle Green's function or the correlator $H$. These quantities are measured for frequencies with indices $m=0,\ldots N_{\omega}-1$.
+\item \verb#MEASURE_nnw#=\{0,1\} turns on the measurement of the susceptibility in frequency. Requires \verb#N_W#.
+\item \verb#MEASURE_sector_statistics#=\{0,1\} controls the measurement of the sector statistics.
+
+\subsubsection{Optional control parameters}
+
+\item \verb#SPINFLIP#=\{0,1\} specifies whether to perform spin flip updates. In such an update a segment is moved from one orbital to another, if the latter is empty.
+
+\item \verb#COMPUTE_VERTEX#=\{0,1\} specifies whether the reducible impurity vertex function should be calculated. This parameter requires \verb#MEASURE_g2w# or \verb#MEASURE_h2w# or both be set to $1$.
+
+\item \verb#TEXT_OUTPUT#=\{0,1\} specifies if the simulation results should be written to text-files in human-readable format (in addition to the hdf5 output).
+
+\item \verb#VERBOSE#=\{0,1\} When turned on, some additional information (e.g. which measurements are turned on) is displayed when starting the simulation.
+
+\item \verb#OUTPUT_PERIOD#=\{natural number\} If \verb#VERBOSE=1#, it specifies the number of sweeps after which simulation details of the master thread (acceptance ratios etc.) are printed to \verb#stdout#. The default value is $100\,000$.
+
+\item \verb#DELTA_IN_HDF5#=\{0,1\} specifies whether the hybridization function to be read from an hdf5 archive. The data must be stored in the path \verb#/Delta#. For details on the file format, see Sec. \ref{hybridization}.
+
+\item\verb#MU_VECTOR#=\{filename\} specifies the file name for a text file containing the orbital dependent chemical potentials. The file format is such that the chemical potentials for all orbitals are listed consecutively, separated either by a space or a new line. If this parameter is specified, the parameter \verb#MU# is ignored.
+
+\item\verb#MU_IN_HDF5#=\{0,1\} specifies whether the chemical potential should be read from an hdf5 archive. The data must be stored in the path \verb#/MUvector# as an array of length $N_{\text{orb}}$. See Sec. \ref{sec:mu} for more information.
+
+\item\verb#U_MATRIX#=\{filename\} specifies the file name for a text file containing the interaction matrix. For the file format, refer to Sec. \ref{umatrix}. If this parameter is specified, the parameter \verb#U# is ignored.
+
+\item\verb#UMATRIX_IN_HDF5#=\{0,1\} specifies whether the interaction matrix should be read from an hdf5 archive. The data must be stored in the path \verb#/Umatrix#.For the file format, see Sec. \ref{umatrix}.
+
+\item \verb#RET_INT_K#=\{\emph{filename}\} specifies the filename for the retarded interaction function $K$. When specified, this feature is automatically turned on.
+
+\item \verb#K_IN_HDF5#=\{0,1\} forces the retarded interaction to be read from an hdf5 archive. Overrides the filename given in \verb#RET_INT_K#.  The data must be stored in the path \verb#/Ret_int_K#. For the format, consult Sec. \ref{k_ret_int}.
+
+\item \verb#BASENAME#=\{\emph{name}\} changes the name of the output file when the Python module is used. The file will be called \emph{name}.out.h5 .
+
+\end{itemize}
+
+\section{Detailed description of measurements}
+\label{measurements}
+In this section, we describe the measurements supported by the code in detail. That is, we state what is measured exactly, and give the precise definition of the observable that we use, so that the code can be easily integrated into your projects. We further give some recommendations on how to use these measurements.	
+
+All measurements except for the one for the imaginary-time Green's function are performed once after \verb#N_MEAS# attempted configuration changes.
+
+\subsection{Imaginary-time Green's function}
+\label{gtmeas}
+
+We define the imaginary time Green's function as follows:
+\begin{equation}
+G_{i}(\tau) \Let -\langle T_{\tau}c_{i}(\tau)c_{i}^{\dagger}(0^{+})\rangle
+\label{Gtdef}
+\end{equation}
+The code measures this function by binning it on an equidistant grid on the interval $[0,\beta]$ with the number of bins $N_{\tau}$ specified by the parameter \verb#N_TAU#. The corresponding improved estimator
+\begin{equation}
+F_{i}(\tau) \Let -\frac{1}{2}\sum_{j}(U_{ij}+U_{ji})\langle T_{\tau}n_{j}(\tau)c_{i}(\tau)c_{i}^{\dagger}(0^{+})\rangle
+\label{Ftdef}
+\end{equation}
+is measured automatically.
+The bins of width $\beta/N_{\tau}$ are centered around the equidistant grid points at $\tau_{n}=n\beta/N_{\tau}$. Hence $\tau_{0}=0$ and $\tau_{N_{\tau}}=\beta$. Note that because of this choice, the first and the last bin only have half the width of a regular bin.
+As a consequence of the above definition, the density is given by
+$-G(\beta-0^{+})=G_{i}(\tau=0^{-})=-\langle T_{\tau} c_{i}(0^{-})c_{i}^{\dagger}(0^{+})\rangle = +\langle c_{i}^{\dagger}(0^{+}) c_{i}(0^{-})\rangle =\langle c_{i}^{\dagger} c_{i}\rangle = \langle n_{i} \rangle$.
+
+This measurement is very efficient and the performance of the algorithm is hardly influenced by number of bins, which hence can be chosen large. We recommend to use a number of bins of the order of at least $\sim 5\beta U$. The measurement is turned on by default, but can nevertheless be turned off by setting \verb#MEASURE_time=0#.
+
+The raw data of the measurement is stored in the hdf5 output file in the path \verb#/simulation/results/g_i/mean/value#, where $i$ is the orbital index. Note that the data at the interval endpoints has less statistics because of the smaller bin size. When using the raw data, the values at the interval endpoints have to be multiplied by two (since the effective bin size at the boundary is half of the regular size) to get the correct value. The data for all orbitals is stored in a single one-dimensional array, where successive $\tau$-points for a given orbital are consecutive in memory. The Green's function at time $\tau_{n}$, $n=0,\ldots,N_{\tau}$ and orbital $i=0,\ldots,N_{\text{orb}}-1$ is hence stored at position $i(N_{\tau}+1)+n$.
+During post processing, the data for $G(\tau)$ is written to the path \verb#/G_tau/0/mean/value# for orbital $0$ and likewise for the other orbitals in the output file. The values at the interval endpoints are thereby replaced by the corresponding values inferred from the densities.
+When \verb#TEXT_OUTPUT=1#, the processed Green's function data is written to a human-readable text file \verb#Gt.dat#, which allows for easy plotting, e.g. with gnuplot. The first column is the imaginary time and successive columns are listed in the order of the orbitals.
+
+\subsection{Frequency Space Measurements}
+
+The code measures the Fourier transform of Green's function 
+\begin{equation}
+G(\iom_{n}) = \int_{0}^{\beta} d\tau G(\tau) e^{\iom_{n}\tau},
+\end{equation}
+where $G(\tau)$ is defined as in \eqref{Gtdef}.
+
+Measurements in frequency space are relatively expensive, as $\exp(\iom_{n} (\tau_i-\tau_j))$ has to be evaluated at each measurement for each pair of operators (values for successive frequencies are generated by multiplication of these exponentials). Frequency space measurements are enabled by setting \verb#MEASURE_freq=1# and specifying \verb#N_MATSUBARA=512# for $N_{\nu}=512$ Matsubara frequencies. The Green's function is measured for frequencies $\nu_{n}$ with indices $n=0,\ldots,N_{\nu}-1$. The number of frequencies compatible with our above recommendation for the number of time slices is $N_{\nu}\sim 5\beta U/2\pi$.
+
+The improved estimators $F_{i}(\iom_n)$ described in Ref.~\onlinecite{Hafermann12} only cause a small overhead and are automatically measured (using the same definitions as given in that reference). The resulting $F(\iom_n)$ and $G(\iom_n)$, as well as the self-energy $\Sigma(\iom_n)$, are stored in the hdf5 file under \verb#/G_omega#, \verb#/F_omega#, and \verb#/S_omega#, respectively, where the actual data is in the subpath \verb#/i/mean/value# for orbital $i \in 0,\ldots,N_{\text{orb}}-1$. The data for each of these quantities is stored in \emph{two}-dimensional array with dimensions $N_{\nu}N_{\text{orb}}\times 2$. The index of the first dimension specifies the location $i N_{\nu}+n$ of the complex value for frequency $\nu_{n}$ and orbital $i$, and the second index $(\{0,1\})$ selects real or imaginary part.
+The raw data for $G(\iom_{n})$ and $F(\iom_{n})$ is stored in path \verb#simulation/results/<g/f>w_<re/im>_i#, where, e.g., the subpath is \verb#gw_re_0# for the real part of $G$ in orbital $0$.
+
+If text output is enabled (parameter \verb#TEXT_OUTPUT=1#), $G$, $F$, and $\Sigma$ are also written to the text files \verb#Gw.dat#, \verb#Fw.dat#, and \verb#Sw.dat#, respectively, where the first column is the Matsubara frequency and the $i$-th \emph{pair} of columns lists real and imaginary part of the $i$-th orbital.
+
+\subsection{Legendre Polynomial Measurements}
+The measurements can also be done using Legendre polynomials -- a method recently introduced by Boehnke {\it et al.}\cite{Boehnke11}.
+The code measures the coefficients of the expansion of Green's function in terms of orthogonal Legendre polynomials. These coefficients are defined as
+\begin{equation}
+G_{l} = \int_{0}^{\beta}d\tau G(\tau) P_{l}(x(\tau)) 
+\end{equation}
+where $x(\tau)=2\tau/\beta -1$. Note that this definition for the Legendre coefficients differs from the one in Ref.~\onlinecite{Boehnke11} by a factor $\sqrt{2l+1}$, which we omit to save time during the simulation and reintroduce during post processing.
+Legendre measurements are enabled by specifying \verb#MEASURE_legendre=1# and the number of Legendre coefficients $N_{l}$ through \verb#N_LEGENDRE#. 
+The improved estimators $F$ \cite{Hafermann12} are measured automatically.
+
+The raw data (i.e. the coefficients) for orbital $i$ are stored in the hdf5 output file in the path \verb#/simulation/results/gl_i# and \verb#/simulation/results/fl_i#. The actual values are stored in a one-dimensional array in the subpath \verb#/mean/value#. After the simulation, the quantities $G(\tau)$, $F(\tau)$ as well as $G(\iom_{n})$, $F(\iom_{n})$ and $\Sigma(\iom_{n})$ are evaluated from the Legendre coefficients and stored in the paths \verb#G_l_tau#, \verb#F_l_tau#, \verb#G_l_omega#, \verb#F_l_omega# and \verb#S_l_omega#, respectively. The values actual in orbital $i$ are found within the one-dimensional array stored in the subpath \verb#/i/mean/value#. For the evaluation, the number of imaginary time points and Matsubara frequencies is determined from the parameters \verb#N_TAU# and \verb#N_MATSUBARA#.
+If text output is enabled (parameter \verb#TEXT_OUTPUT=1#), $G$, $F$, and $\Sigma$ are also written to the text files \verb#Gtl.dat#, \verb#Ftl.dat#, \verb#Gwl.dat#, \verb#Fwl.dat#, and \verb#Swl.dat#.
+
+This measurement yields comparatively smooth curves, but as the results for different frequencies are correlated a precise error estimate and accurate control of the number of legendre coefficients considered is important.
+
+The number of Legendre coefficients required for the accurate representation of a given observable may depend on the quantity under consideration and is difficult to infer from looking at the coefficients themselves. Rather one should analyze the dependence of a given observable on the basis cutoff $N_{l}$. To this end, one can look at the files \verb#Gl_conv.dat# and \verb#Fl_conv.dat# which are written when text output is enabled. In the former, the Green's function at $\tau=0$ and $\tau=\beta/2$ is written as a function of the basis cutoff up to the maximum cutoff $N_{l}$. The latter contains the same for the correlator $F$. To get a feeling for the required cutoff, one should run a simulation at the desired parameters with a large cutoff $N_{l}$ and plot the data in these files.
+For a converged calculation and sufficiently large $N_{l}$, one should see an extended plateau, where the observable does not change as a function of the cutoff. For less coefficients, the expansion is not converged and for a larger number, Monte Carlo noise enters. The basis cutoff is well defined for an $N_{l}$ within the plateau.
+
+Recently, it has been proposed to improve this method by employing the Kernel polynomial method\cite{Huang12}. We do not provide an implementation here. While the method does damp spurious oscillations in the Green's function, it leads to rather large systematic errors in the moments.
+
+\subsection{Density}
+
+The densities are always measured. They are stored in the hdf5 file in path \verb#/simulation/results/density_i#. If text output is enabled, they are written to the file \verb#observables.dat#.
+
+\subsection{Susceptibility -- imaginary time}
+
+The time-dependent density-density correlation function, $\chi_{ij}(\tau)=\langle n_{i}(\tau)n_{j}(0)\rangle$, or susceptibility, is measured by setting \verb#MEASURE_nnt=1#. Only components with $j\leq i$ are measured. The spin and charge susceptibilities can be obtained as linear combinations of these correlation functions.
+The number of imaginary time points can be different from the one for Green's function and has to be specified through the mandatory parameter \verb#N_nn#. The imaginary-time grid is otherwise the same as for Green's function. Note however, that because of the way the algorithm works, these functions are not binned, but measured exactly at the grid points. Hence the raw data does not have to be rescaled at the interval endpoints (cf. Sec. \ref{gtmeas}).
+The raw data is stored in the hdf5 output file in the path \verb#simulation/results/nnt_i_j#, within the subpath \verb#/mean/value#. It is additionally written to the path \verb#/nnt_i_j# without modification.
+When text output is enabled, the data is written to the text file \verb|nnt.dat| for all $j\leq i$. The imaginary time is listed in column 1 and the susceptibility $\chi_{ij}(\tau)$ resides in column $1+j+\frac{1}{2}i(i+1)$, i.e. $\chi_{00}$ column 1, $\chi_{10}$ in column 2 and $\chi_{11}$ in column 3, etc.
+Alternatively to the imaginary time measurement, the susceptibility can be measured directly in frequency (see the following section).
+
+\subsection{Susceptibility -- frequency}
+In the frequency measurement for the susceptibility, the algorithm computes
+\begin{equation}
+\chi_{ij}(i\omega_{m}) = \int_{0}^{\beta} d\tau \chi_{ij}(\tau) e^{i\omega_{m}\tau}
+\end{equation}
+where $\omega_{m}=2m\pi/\beta$. Note that this measurement does not involve any time discretization. It is particularly useful and fastest if only the static susceptibility $\chi_{ij}(\omega=0)$ is desired.
+In most cases, i.e. if the perturbation order is not exceptionally large, it is still faster for a finite number of frequencies compared to the imaginary-time measurement (using $N_{\tau}$ time points and an ''equivalent`` number of frequency points $N_{\omega}\sim N_{\tau}/2\pi$, respectively).
+Only the real part is measured, since the function is symmetric around $\beta/2$.
+The measurement is turned on with \verb#MEASURE_nnw=1#. The number of bosonic frequencies is determined by the (mandatory) parameter \verb#N_W#. Note that the same parameter determines the number of bosonic frequencies for measurements of two-particle correlation functions (cf Sec. \ref{2particle}).
+The raw data is stored in the hdf5 output file in the path \verb#simulation/results/nnw_re_i_j#, within the subpath \verb#/mean/value#. It is additionally written to the path \verb#/nnw_re_i_j# without modification.
+When text output is enabled, the data is written to the text file \verb|nnw.dat| for all $j\leq i$. The frequency is listed in column 1 and the susceptibility $\chi_{ij}(\omega)$ resides in column $1+j+\frac{i}{2}(i+1)$.
+
+\subsection{Equal-time density-density correlation functions}
+
+The measurement for the density-density (equal-time) correlation functions $\langle n_{i}n_{j}\rangle$ is turned on by letting \verb#MEASURE_nn=1#. Although these are a special case of the time-dependent correlation functions above, we provide a separate measurement.
+They are measured for $j<i$ only, because the operators commute, $\langle n_{i}n_{j}\rangle=\langle n_{j}n_{i}\rangle$,  and $\langle n_{i}n_{i}\rangle = \langle n^{2}_{i}\rangle = \langle n_{i}\rangle$ would yield the density. The raw data is stored in the path \verb#/simulation/results/nn_i_j#. No further post processing occurs. When text output is enabled, the values are appended to the file \verb#observables.dat#.
+
+\subsection{Sector statistics measurement}
+The sector statistics give information on the fraction of (imaginary) time the impurity spends in a given state. The total number of possible states for this algorithm is $2^{N_{\text{orb}}}$. 
+We can represent any of these states in the form
+\begin{equation}
+|n_{0}=\{0,1\} n_{1}=\{0,1\}\ldots n_{N_{\text{orb}}-1}=\{0,1\}\rangle
+\end{equation}
+
+To be specific, for a two-orbital impurity, there are four different states: The impurity can be unoccupied, which corresponds to the state $|00\rangle$. Orbital 0 (spin up, say) can be occupied while orbital 1 (spin down) is empty, $|10\rangle$, or orbital 1 can be occupied with 0 being empty $|01\rangle$. Finally, the impurity can be doubly occupied, i.e. in state $|11\rangle$.
+The result of a calculation for such a system at half-filling could look as follows:
+\begin{verbatim}
+#state |n_1={0,1} n_2={0,1} ...> n_i={0,1}: \
+orbital i {empty,occupied}
+#rel weight (in %)
+0	18.9302	|00>
+1	31.0485	|10>
+2	31.0745	|01>
+3	18.9467	|11>
+\end{verbatim}
+To understand this, recall that in the atomic limit (no hybridization), the energy is given by $Un_{\uparrow}n_{\downarrow}-\mu(n_{\uparrow}+n_{\downarrow})$. Hence, at half filling, where $\mu=U/2$, the energy of the singly occupied states is $-\mu$ and hence they are degenerate. The unoccupied and doubly occupied states are degenerate as well, with energy $0$ and $U-2\mu=0$, respectively. Hence their contributions should be equal (within the Monte Carlo error).
+The singly occupied states are lower in energy and so their contribution is higher.
+Since the model is particle-hole symmetric, we further know that the time spent in states $|00\rangle$ and $|01\rangle$ must be the same as for $|10\rangle$ and $|11\rangle$, which can readily be seen from the data.
+The fraction the impurity spends in state $|11\rangle$ corresponds to the integrated overlap and hence should be equal to the equal-time correlation function $\langle n_{\downarrow}n_{\uparrow}\rangle$, as can be verified from the file \verb#observables.dat# (if \verb#MEASURE_nn=1#):
+\begin{verbatim}
+n0=0.499892;
+n1=0.500191;
+n1n0=0.189423;
+\end{verbatim}
+Note that the values are slightly different since they are measured in different ways. They will converge to one another as statistics is increased.
+
+The data is stored in the hdf5 output file in the path \verb#simulation/results/sector_statistics/mean/value# in a vector of length $2^{N_{\text{orb}}}$.
+The position of a given state in this vector is simply the decimal representation of the binary number encoding the state, i.e. the state $|01\rangle$ has the index $0\cdot 2^{0} + 1\cdot 2^{1}=2$. With text output enabled, a file \verb#sector_statistics.dat# as shown above is produced.
+
+\subsection{Two-particle correlation functions}
+\label{2particle}
+
+The use of two-particle correlation functions is gaining importance. They are used for calculating lattice susceptibilities within dynamical mean-field theory or novel diagrammatic extensions of DMFT.
+To meet these requirements, we provide a measurement for the two-particle Green's function:
+\begin{align}
+G^{(2)}_{ij}(\tau_{a},\tau_{b},\tau_{c},\tau_{d}) \Let \langle c_{i}(\tau_{a})c^{\dagger}_{i}(\tau_{b})c_{j}(\tau_{c})c^{\dagger}_{j}(\tau_{d})\rangle
+\end{align}
+where $G^{(2)}_{ij}$ is a shorthand notation for $G^{(2)}_{iijj}$. As a result of the fact that the hybridization is diagonal, the Green's function depends only on two independent orbital indices. An annihilator on orbital $i$ has to come in pair with a creator on the same orbital, otherwise the average is zero. To generate the orbital combinations $G^{(2)}_{ijji}$, relations of the form $G^{(2)}_{ijji}(\tau_{a},\tau_{b},\tau_{c},\tau_{d}) = -G^{(2)}_{iijj}(\tau_{a},\tau_{d},\tau_{c},\tau_{b})$ can be used (and the corresponding ones in frequency space).
+These functions are measured only for $j\leq i$, since measuring this quantity with indices $i$ and $j$ interchanged would yields exactly the same result, i.e. there is no gain through averaging. The diagonal quantities ($i=j$) are different for different orbitals even if they are degenerate due to the sampling error, so that they can (and should) be averaged if the orbitals are symmetry equivalent.
+
+Due to time translational invariance, the function depends on three independent time differences, or equivalently three independent frequencies. Because of memory restrictions, the actual measurement is performed in frequency space, for which we use the following definition of the Fourier transform:
+\begin{align}
+G^{(2)}_{ij}(\nu,\nu',\omega) &\Let \frac{1}{\beta}\int_{0}^{\beta}d\tau_{a}\int_{0}^{\beta} d\tau_{b}\int_{0}^{\beta} d\tau_{c}\int_{0}^{\beta} d\tau_{d}\, \\ \nonumber &\times G^{(2)}_{ij}(\tau_{a},\tau_{b},\tau_{c},\tau_{d}) \\ \nonumber &\times e^{i(\nu+\omega)\tau_{a}}e^{-i\nu\tau_{b}}e^{-i\nu'\tau_{c}}e^{-i(\nu'+\omega)\tau_{a}}
+\end{align}
+Here $\nu\equiv\nu_{n}=(2n+1)\pi/\beta$ and $\nu'$ are fermionic frequencies, whereas $\omega\equiv\omega_{m}=2m\pi/\beta$ is bosonic.
+The number of fermionic frequencies $N^{(2)}_{\nu}$ is specified through the parameter \verb#N_w2# and the number of bosonic ones ($N_{\omega}$) through \verb#N_W# (mind the capital ``W'').
+The vertex is measured for fermionic frequencies with indices $n=-N_{\nu}/2,\ldots,N_{\nu}/2-1$ and indices $m=0,\ldots N_{\omega}-1$ for the bosonic frequency. For negative bosonic frequencies, the relation $G^{(2)}_{ij}(\nu,\nu',-\omega)=G^{(2)*}_{ij}(-\nu,-\nu',\omega)$ holds.
+
+The real and imaginary part of the two-particle Green's function are stored in the hdf5 output file in the path \verb#simulation/results# as \verb#g2w_re_i_j# and \verb#g2w_im_i_j#, respectively ($j\leq i$). The actual data is stored in a one-dimensional array of dimension $N^{(2)}_{\nu}N^{(2)}_{\nu}N_{\omega}$  in the subpath \verb#/mean/value#. The value corresponding to frequencies $\nu_{n}$, $\nu'_{n'}$ and $\omega_{m}$ is stored at position $m(N^{(2)}_\nu)^{2} + (n+N^{(2)}_{\nu}/2)N^{(2)}_{\nu} + (n'+N^{(2)}_{\nu}/2)$ (note that $n=-N^{(2)}_{\nu}/2,\ldots, N^{(2)}_{\nu}/2-1$). When text output is enabled, the two-particle Green's function is written to the file \verb#g2w.dat#. The format allows to easily plot the data as a function of a single frequency using gnuplot, for example:
+\begin{verbatim}
+gnuplot> p "<cat g2w.dat |grep 'wp: 1 '|\
+grep 'W: 1 '| grep 'i: 0 j: 0' " u 2:11 w lp
+\end{verbatim}
+(note the whitespace in \verb#'W: 1 '#). Column 11 is the real part, column 12 the imaginary part. 
+%Colums 13 and 14 give the real and imaginary parts of the disconnected part $\beta[G_{i}(\nu+\omega)G_{j}(\nu')\delta_{\omega,0} - \delta_{ij}G_{i}(\nu+\omega)G(\nu')\delta_{\nu\nu'}]$ for reference.
+
+Due to the possibly large number of observables (frequencies) that have to be measured, this measurement may significantly slow down the code, or even exceed memory available to each process. In such cases, it may be desirable to use additional symmetries, if present, or altered frequency meshes.
+In addition, different methods may have different requirements and for these reasons, it is impossible to provide a one-fits-all implementation. However, the advanced user may regard the function \verb#void hybridization::measure_G2w# in the source file \verb#hybmeasurements.cpp# as an API and modify it according to her needs.
+
+The code may also be used to calculate the vertex function of the impurity model, which is defined as
+\begin{widetext}
+\begin{equation}
+\gamma_{ij}(\nu,\nu',\omega) = \frac{G^{(2)}_{ij}(\nu,\nu',\omega) - \beta[G_{i}(\nu+\omega)G_{j}(\nu')\delta_{\omega,0} - \delta_{ij}G_{i}(\nu+\omega)G(\nu')\delta_{\nu\nu'}]}{G_{i}(\nu+\omega)G_{i}(\nu)G_{j}(\nu')G_{j}(\nu'+\omega)}.
+\label{vertexdef}
+\end{equation}
+\end{widetext}
+We provide the measurement of the correlation function
+\begin{equation}
+H^{a}_{ij}(\tau_{1}\tau_{2}\tau_{3}\tau_{4}) \Let \langle n_{a}(\tau_{1})c_{i}(\tau_{1})c^{\dagger}_{i}(\tau_{2})c_{j}(\tau_{3})c^{\dagger}_{j}(\tau_{4})\rangle,
+\end{equation}
+which represents an improved estimator for the vertex function\cite{Hafermann12} and will be measured in frequency if \verb#MEASURE_h2w# is set to one.
+The vertex function is computed during post processing, if \verb#COMPUTE_VERTEX=1#. In addition, the frequency measurement (\verb#MEASURE_freq#) and at least one of the measurements \verb#MEASURE_g2w# or \verb#MEASURE_h2w# (or both) have to be turned on. The vertex will be evaluated according to the data available. Determining the vertex from $G^{(2)}$ only is least accurate. Using $G^{(2)}$ and $H$ is the most accurate. The vertex may also be calculated from $H$ only. This is somewhat less accurate, but saves a factor of $2$ in memory.
+The number of frequencies for the single-particle Green's function that enters Eq. \eqref{vertexdef}, has to fulfill the relation $N_{\nu}\leq N_{\nu}^{(2)}+N_{\omega}-1$, otherwise the code will not work.
+There are different ways to evaluate the vertex. Depending on which of the latter two measurements are turned on, the method that yields the most accurate results will be chosen.
+The function $H$ is stored analogously to the two-particle Green's function, as \verb#h2w_re_i_j# and \verb#h2w_im_i_j#, respectively and written to file \verb#h2w.dat# when text output is enabled.
+When evaluated, the vertex function is written to the hdf5 output file in the path \verb#/vertex_i_j# in a \emph{two}-dimensional array with dimensions $N_{\nu}^{(2)}N_{\nu}^{(2)}N_{\omega}\times 2$. The index of the first dimension specifies the postion $m(N^{(2)}_\nu)^{2} + (n+N^{(2)}_{\nu}/2)N^{(2)}_{\nu} + (n'+N^{(2)}_{\nu}/2)$ of the complex value for frequencies $\nu_{n}$, $\nu'_{n'}$ and $\omega_{m}$ and the second index $(\{0,1\})$ selects real or imaginary part.
+With text output enabled. the vertex is written to the file \verb#gammaw.dat#, in the same format as the two-particle Green's function.
+
+Note that this vertex function is the full (i.e. reducible) vertex of the impurity model. If the irreducible or even fully irreducible vertex is desired, this has to be obtained by inverting a Bethe-Salpeter equation or from inverse Parquet, respectively.
+
+\section{DMFT -- Specifying a self-consistency}
+To run the impurity solver in a DMFT self-consistency, the output $G(\tau)$ has to be input into a self-consistency condition and a hybridization function $\Delta(\tau)$ has to be produced.\cite{Georges96,Kotliar06} In the simplest case, for a DMFT self-consistency for the Bethe lattice with infinite coordination number (resulting in a semicircular density of states), we obtain $\Delta(\tau)=t^2G(\tau)$.
+Note that in our code, both $\Delta$ and $G(\tau)$ are negative for $\tau>0$.
+In practice, more elaborate self-consistency conditions are almost always needed. 
+Some of them are included in the ALPS DMFT framework, but in general they are user provided.
+
+\subsection{ALPS DMFT framework}
+
+The hybridization solver is used in several ALPS tutorials, which illustrate the use of the solver with the ALPS DMFT framework. This comprises the tutorials in the following directories:
+\begin{verbatim}
+dmft-01-intro
+dmft-02-hybridization
+dmft-04-mott
+dmft-05-osmt
+dmft-06-paramagnet/hyb
+dmft-08-lattices
+\end{verbatim}
+within the \verb#tutorials# subdirectory in the ALPS installation directory.
+
+\subsection{Python interface}
+
+Using alpspython together with the Python interface of the solver (the cthyb Python module) provides a very flexible framework for setting up any desired selfconsistency scheme.
+The selfconsistency is thereby implemented within a Python script which can be executed on a parallel machine using MPI.
+Two examples are given in the ALPS tutorials, i.e in the directories
+\begin{verbatim}
+/hybridization-02-retarded-interaction
+\end{verbatim}
+and
+\begin{verbatim}
+/hybridization-03-spinfreezing
+\end{verbatim}
+For how to run these tutorials, refer to Sec. \ref{pythoninterface}.
+
+\section{Specifying measurements}
+The following variables are measured by default:
+\begin{itemize}
+\item \verb#Sign#: The Monte Carlo fermionic Sign.
+\item \verb#order_histogram_total#: The histogram of expansion orders, containing all interaction vertices.
+\item \verb#order_histogram_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: the expansion order in each orbital
+\item \verb#density_i#: density in orbital $i$, wiht $i$ from $0$ to $N_{\text{orb}}-1$.
+
+%\item \verb#nnt#: unused.
+\item \verb#g_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: Green's function in imaginary time, binned on \verb#N_TAU# time slices between zero and $\beta$.
+\end{itemize}
+If the frequency measurement is enabled, the following variables are measured in addition:
+\begin{itemize}
+\item \verb#gw_re_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: Green's function in frequency, real part.
+\item \verb#gw_im_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: Green's function in frequency, imaginary part.
+\item \verb#fw_re_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: $F$ function for improved estimators in frequency, real part.
+\item \verb#fw_im_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: $F$ function for improved estimators in frequency, imaginary part.
+\end{itemize}
+If the legendre measurement is enabled, the following variables are measured in addition:
+\begin{itemize}
+\item \verb#gl_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: Legendre coefficients of Green's function $G$.
+\item \verb#fl_i#: with $i$ from $0$ to $N_{\text{orb}}-1$: Legendre coefficients of $F$ function for improved estimators.
+\end{itemize}
+These observables are written into a hdf5 file after the simulation exits. The standard hdf5 tools, \verb#h5ls -r# and \verb#h5dump# or \verb#h5dump -d /simulation/results/Sign/mean/value# will give their values.
+
+For all available measurements, we refer the reader to Sec. \ref{measurements}.
+
+\section{Analysis and Post-Processing}
+After the simulation exits, the simulation results have to be read in and evaluated. This is best done using one of the many hdf5 tools. The ALPS DMFT framework provides access from \verb#C++#, but Python
+tools (\verb#h5py# and similar) also work. The hybridization tutorials show how to use the ALPS Python hdf5 interface. Typically, the Green function, its error, and the densities need to be read in and post-processed.
+
+
+\subsection{Elementary checks: Expansion order and Sign problem}
+Each new run of the impurity solver should start with a check of the expansion order and the error on it. Plot the results of \verb#order_histogram_i# including error bars. Does the statistics  look good? is the expansion order reasonable? If there are degenerate orbitals, is their expansion order the same within error bars?
+For diagonal hybridizations, the Monte Carlo sign problem should be always one. As a rule of thumb: If your sign drops below about $0.75$, you have to be careful. If your sign is below $0.1$, your results are most likely too noisy to be useful.
+
+\subsection{Further checks: Errors of Green functions}
+In a next step, extract the Green function from the results and analyze them. Is the statistics good enough for your purposes? Do the error bars make sense? 
+If you use \verb#h5py#, you can extract the Green functions in $\tau$ from an output file \verb#sim.h5# using
+\begin{verbatim}
+import h5py
+h5_file = h5py.File("sim.h5", 'r')
+g_mean =h5_file["/simulation/results/\
+g_0/mean/value"].value
+g_error=h5_file["/simulation/results/\
+g_0/mean/error"].value
+\end{verbatim}
+Once you trust your Green functions, Fourier transform to frequency and analyze the self energy (which will be used in the self-consistency equations). The self energies are very sensitive.
+
+\subsection{Fourier transforms and high frequency tails}
+To get smooth and correct behavior you may need to use high frequency Fourier transform tricks (see e.g. the review, Ref.~\onlinecite{Gull11_review}). Further information can be found in the references cited in the review chapter X.I.
+
+\subsection{Running MaxEnt}
+The Maximum entropy method, or MaxEnt, is used to analytically continue imaginary frequency or imaginary time data to the real axis to produce spectral functions that are consistent with the imaginary time data within  statistical errors.\cite{Jarrell96} ALPS provides an implementation of a maximum entropy analytic continuation code. Note that MaxEnt is completely uncontrolled: no reliable error bars for the output exist. In addition, small differences in the input data will cause large differences in the output. Because of this, any conclusion drawn from continued data needs to be backed up by data on the imaginary axis, where error bars are available.
+
+A correct error propagation that includes both the errors and the covariance matrices of the Green's function is absolutely essential for reliable continuations. Additionally, it helps to continue the self-energies instead of the Green's functions\cite{Wang09gap}.
+
+A tutorial for the ALPS maxent code will be provided elsewhere. Fig.~\ref{pfile} shows a simple parameter file
+
+\begin{figure*}
+\begin{verbatim}
+N_ALPHA = 60 //the number of alphas between alpha min and max
+ALPHA_MIN = 0.05 //smallest alpha value to be evaluated
+ALPHA_MAX = 5 //largest alpha value to be evaluated
+NORM = 1.0 //normalization of the function to be continued
+OMEGA_MAX = 25 //frequency range, symmetric by default. specify omega_min otherwise
+KERNEL = fermionic //Maxent kernel
+BETA = 60.0 //inverse temperature
+NFREQ = 2001 //number of output frequencies
+NDAT = 512 //number of input data points
+FREQUENCY_GRID = Lorentzian //frequency grid, e.g. Lorentzian, Linear, ...
+DATASPACE =frequency //dataspace, e.g. imag time or frequency
+MAX_IT = 2000 //number of iterations for iterative minimization procedure
+DEFAULT_MODEL = "flat"
+{
+PARTICLE_HOLE_SYMMETRY = 1  //either the model is particle hole symmetric or not
+X_0 = -1.58151510066 //data point X_0, here the lowest frequency point
+X_1 = -1.19058822793
+...etc...
+X_511 = -0.0186270492461
+SIGMA_0 = 0.00526104728966 //errors of X_0
+SIGMA_1 = 0.00199036770537
+...etc...
+SIGMA_511 = 3.42643209543e-07
+}
+\end{verbatim}
+\caption{A simple parameter file for the maxent code.\label{pfile}}
+\end{figure*}
+
+
+\section{Scaling -- accessible problems}
+The algorithm scales cubically in matrix size (expansion order), and is therefore $O(n_o\beta^3)$ with a relatively small (but complicated) dependence of $U$. Typically problems
+with an expansion order of less than $400$ per orbital are easy to do.
+
+\section{What is NOT possible with the hybridization code}
+
+You cannot apply the code for calculations in the atomic limit, i.e. for vanishing hybridization.
+
+
+The following problems are not feasible at the moment:
+\begin{enumerate}
+\item Problems with non-diagonal hybridization functions
+\item Problems with general, non density-density interactions
+\end{enumerate}
+It is planned to extend the code to the first two types of impurity problems. The second type of impurity problems may be considered at a later stage.
+
+\section{Literature and Further Information}
+\begin{itemize}
+\item Dynamical mean field theory: please have a look at the original review\cite{Georges96} and the review by Kotliar {\it et al.}\cite{Kotliar06}. Introductory information can also be found in Antoine George's summer school lecture notes \cite{Georges04}.
+\item LDA+DMFT: Apart from Ref.~\onlinecite{Kotliar06}, Refs.~\onlinecite{Held06} and \onlinecite{Held07} are good places to start.
+\item Continuous-time methods: The review\cite{Gull11_review}, along with summer school lecture notes\cite{sherbrookenote} and PhD theses\cite{GullPhD} and the original literature.\cite{Rubtsov05,Rubtsov04,Werner06}
+\end{itemize}
+\section{When Problems Appear -- Troubleshooting}
+This code is still in beta stage and problems will appear. To report a problem please contact the ALPS user mailing list or \Emanuel via e-mail.
+
+\section{Publishing -- Citing the ALPS hybridization expansion code}
+Citations are important for us -- they mean that we can justify investing time into the development of the hybridization expansion code and other open source projects. A paper should acknowledge the use of the ALPS libraries, the use of the hybridization code, and the original algorithm paper. A citation line could be:
+
+{\it
+Our simulations used an open source implementation\cite{CPC_CTHYB} of the hybridization expansion continuous-time quantum Monte Carlo algorithm\cite{Werner06} and the ALPS\cite{ALPS20} libraries.
+}
+
+Or, alternatively:
+
+{\it
+Our simulations used the ALPS open source hybridization expansion code\cite{CPC_CTHYB,Werner06,ALPS20}.
+}
+
+%\section{Acknowledgements}
+
+%\appendix
+
+\bibliography{refs.bib}
+\end{document}
+
+
+\section{Introduction to impurity models}
+We refer the reader to the extensive literature on this subject. Here we merely repeat some of the introduction to impurity models of Ref.~\onlinecite{Gull11_review}, where the basic concepts are introduced.
+
+Quantum impurity models were introduced  to describe the properties of a nominally magnetic transition metal   ion embedded in a non-magnetic host metal.  A magnetic transition metal atom such  as Fe and Co  has a partly filled $d$ shell, and the intra-$d$ Coulomb interactions act to organize the electrons in the $d$-shell into a high-spin local moment configuration. Hopping from the $d$ shell to the metal or vice versa favors non-magnetic configurations and thus competes with the local interactions.  In 1961 P. W. Anderson \cite{Anderson61}, following important earlier work of \textcite{Friedel51,Friedel56},  wrote down a mathematical model (now referred to as the Anderson Impurity Model) which encodes this competition. Anderson's concept has proven enormously fruitful, with implications extending far beyond its original context of impurity magnetism.  Quantum impurity models are basic to nanoscience as representations of quantum dots and molecular conductors \cite{Hanson07} and have been used to understand the adsorption of atoms onto surfaces \cite{Brako81,Langreth91}. They are of theoretical interest as solvable examples of nontrivial quantum field theories \cite{Wilson75,Affleck08}  and in recent years have played an increasingly  important role in condensed matter physics  as auxiliary problems whose solution gives the  ``dynamical mean field" (DMFT) approximation to the properties of correlated electron materials such as high temperature copper-oxide and pnictide superconductors  \cite{Georges96,Held06,Kotliar06}.   
+
+A quantum impurity model (see e.g. \cite{MahanChapter4}) may be represented as a Hamiltonian with three basic terms: $H_\text{loc}$ which describes the ``impurity'': a system with a finite (typically small) number of degrees of freedom, $H_\text{bath}$ which describes the noninteracting but infinite (continuous spectrum) system to which the impurity is coupled, and $H_\text{hyb}$ which gives the coupling between the impurity and bath. Thus
+\begin{equation}
+H_\text{QI}=H_\text{loc}+H_\text{bath}+H_\text{hyb}.
+\label{HQI}
+\end{equation}
+%
+The physics represented by $H_\text{QI}$ is in general nontrivial because $\left[H_\text{loc},H_\text{hyb}\right]\neq 0$ (in physical terms,  coupling to the bath mixes the impurity eigenstates).   
+
+In the situation of primary physical interest $H_\text{loc}$ may be represented in terms of a set of single-particle fermion states labeled by quantum numbers $a=1,\ldots,N$ (including both spatial and spin degrees of freedom) and created by operators $d^\dagger_a$ as
+\begin{eqnarray}
+H_\text{loc}&=&H_\text{loc}^0+H_\text{loc}^I,\label{hloc}
+ \label{Hloc} \\
+H_\text{loc}^0&=&\sum_{ab} E^{ab}d^\dagger_a d_b,
+ \label{Hloc0}\\
+H_\text{loc}^I&=&\sum_{pqrs}I^{pqrs}d^\dagger_p d^\dagger_q d_r d_s+\ldots. \label{HlocI}
+\end{eqnarray}
+%ajmsept8 
+The $ab$ components of the matrix  ${\mathbf E}$ describe the bare level structure, $I$ parametrizes  electron electron interactions and the ellipsis denotes terms with $6$ or more fermion operators. In the context of the hybridization expansion, it will be important to distinguish between the general interactions of Eq.~(\ref{HlocI}) and `density-density' interactions,
+\begin{align}
+H_\text{loc,n}^I=\sum_{pq}I^{pq}n_p n_q. \label{Hlocn}
+\end{align}
+While more general versions of the hybridization expansion can simulate the terms in Eq.~\ref{HlocI}, this particular code is restricted to density-density type interactions. In particular, Hund coupling (spin exchange and pair hopping) terms are not accessible in this version. 
+
+$H_\text{bath}$ may be thought of as describing bands of itinerant electrons, each labeled by a one-dimensional momentum  coordinate $k$ or band energy $\varepsilon_k$ and an index (spin and orbital) $\alpha$. One usually writes
+\begin{equation}
+H_\text{bath}=\sum_{k\alpha} \varepsilon_{k\alpha}c^\dagger_{k\alpha}c_{k\alpha}.
+\end{equation}
+The most commonly used form of the mixing term, which is the one implemented in this code, is characterized by a hybridization matrix ${\bf V}$
+\begin{equation}
+H_\text{hyb}=\sum_{k\alpha b}{V}_k^{\alpha b}c^\dagger_{k\alpha}d_b +\text{H.c.}.
+\label{Hmix}
+\end{equation}
+
+The paradigmatic quantum impurity model is the single-impurity single-orbital Anderson model \cite{Anderson61}. In this model,  $H_\text{loc}$ describes a single orbital, so the label $a$ is spin up or down, $E^{ab}$ is (in the absence of magnetic fields) just a level energy  $\varepsilon_0$, and the  interaction term collapses to $Un_\uparrow n_\downarrow$. Thus
+\begin{eqnarray}\label{SIAM}
+H_\text{AIM}&=&\sum_\sigma \varepsilon_0d^\dagger_\sigma d_\sigma +Un_\uparrow n_\downarrow 
+\label{AIM} \\ \nonumber
+& +&\sum_{k\sigma}\Big(V_kc^\dagger_{k\sigma}d_\sigma+H.c.\Big) +\sum_{k\sigma}\varepsilon_k c^\dagger_{k\sigma}c_{k\sigma}.
+\end{eqnarray}
+
+Solving the quantum impurity model means computing the correlation functions of the $d$ operators. Of these the most important is the $d$ Green function ($T_\tau$ denotes time-ordering).
+\begin{equation}
+G_d^{ab}(\tau)=-\left\langle T_\tau d_a(\tau)d_b^\dagger(0)\right\rangle.
+\label{Gddef}
+\end{equation} 
+In the absence of interactions,  $G_d^{ab}(i\omega_n)=\mathcal{G}_d^{0,ab}(i\omega_n)\equiv[\left(i\omega_n-{\mathbf E}-{\mathbf \Delta} \right)^{-1}]_{ab}$. The effect of interactions may be parametrized by the self energy $\mathbf{\Sigma}(i\omega_n)=\left(\boldsymbol{\mathcal{G}}^0\right)^{-1}-\mathbf{G}^{-1}$. 
+
+Solving the quantum impurity model  is conceptually and algorithmically challenging. As Eq.~(\ref{SIAM}) demonstrates, a  quantum impurity model is  a quantum field theory in $0$ space $+$ $1$ time dimension. While $0+1$ dimensional quantum field theories are easier to solve than higher dimensional ones, they are still (in the general case) nontrivial. Only in a few cases are exact solutions known, and while in many more cases the form of the  ``universal'' low energy behavior has been determined, the dynamical mean field and nanoscience applications require information about behavior beyond the universal limit, as well as quantitative information about the parameters describing the universal limit.   A further complication is that   impurity models  typically involve several energy scales, including an interaction scale, often high, a hybridization scale, typically intermediate, and one or more dynamically generated  energy scales,  which in many cases are very low relative to the basic interaction and hybridization scales. A robust method which works for general models over a range of energy scales is required.  
