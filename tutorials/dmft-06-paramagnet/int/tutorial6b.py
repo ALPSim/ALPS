@@ -17,7 +17,7 @@ import pyalps
 parms=[]
 parms.append(
         { 
-          'ANTIFERROMAGNET'         : 0,
+          'ANTIFERROMAGNET'         : False,
           'CHECKPOINT'              : 'dump_int',
           'CONVERGED'               : 0.0025,
           'CONVERGENCE_CHECK_PERIOD': 500,
@@ -37,7 +37,7 @@ parms.append(
           'SEED'                    : 0, 
           'SITES'                   : 1,
           'SOLVER'                  : 'Interaction Expansion',
-          'SYMMETRIZATION'          : 1,
+          'SYMMETRIZATION'          : True,
           'U'                       : 3,
           't'                       : 0.707106781186547,
           'RECALC_PERIOD'           : 3000,

@@ -24,8 +24,6 @@ double WRun::work_done() const
 
 void WRun::start()
 {
-  green.resize(1+num_sites());
-  green=0.;
   measurements_done=skip_measurements;
 }
 

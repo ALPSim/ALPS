@@ -35,7 +35,8 @@ namespace dmrg_checkpoint {
 
 namespace fs = std::filesystem;
 
-const char* const meta_magic = "ALPS DMRG checkpoint 1";
+// Version 2: BMatrix files no longer hold the unused hash members.
+const char* const meta_magic = "ALPS DMRG checkpoint 2";
 // reruns that may fail to commit anything after resuming before the
 // checkpoint is taken to be what makes them fail
 const int max_resume_attempts = 2;
