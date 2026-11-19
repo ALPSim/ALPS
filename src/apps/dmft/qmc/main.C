@@ -38,6 +38,13 @@
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
+namespace {
+/// The external solvers that take the hybridization function Delta instead of G0.
+bool reads_hybridization_function(const std::string& program) {
+  return program == "hybridization" || program == "ct-hyb-segment";
+}
+}
+
 
 
 /// @brief The DMFT main program
@@ -100,7 +107,7 @@ int main(int argc, char** argv)
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-        } else if (parms["SOLVER"]=="hybridization" || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
+        } else if (reads_hybridization_function(program) || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
           std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
           parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
@@ -168,7 +175,8 @@ int main(int argc, char** argv)
         else {
           std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
-          if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+          if(reads_hybridization_function(std::filesystem::path(p).filename().string()))
+            parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
           solver_ptr.reset(new ExternalSolver(p));
         }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);

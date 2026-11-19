@@ -59,6 +59,10 @@ endif()
 # Components that need Eigen are built only when it was found, and each has its
 # own export, so only their consumers need Eigen. See src/alps/CMakeLists.txt.
 set(_alps_eigen_built "@ALPS_EIGEN_COMPONENTS@")
+# ALPS::cthyb_segment links ALPS::gf, whose export must be loaded first.
+if("cthyb_segment" IN_LIST ALPS_FIND_COMPONENTS AND NOT "gf" IN_LIST ALPS_FIND_COMPONENTS)
+  list(APPEND ALPS_FIND_COMPONENTS gf)
+endif()
 foreach(_alps_component IN ITEMS @ALPS_EIGEN_COMPONENT_NAMES@)
   set(ALPS_${_alps_component}_FOUND FALSE)
   if(NOT _alps_component IN_LIST ALPS_FIND_COMPONENTS)

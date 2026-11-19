@@ -11,6 +11,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,7 +37,7 @@ for b in [6., 12.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SITES'               : 1,
-              'SOLVER'              : 'hybridization',
+              'SOLVER'              : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),
               'SC_WRITE_DELTA'      : 1,
               'SYMMETRIZATION'      : 0,
               'U'                   : 3,

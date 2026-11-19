@@ -10,6 +10,7 @@
 # 
 # ****************************************************************************
 
+import os
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.plot
@@ -40,7 +41,7 @@ for u in [3.]:
                 'SWEEPS' : 10000,    # max. number of sweeps in a single iteration
                 'THERMALIZATION' : 500, # number of thermalization sweeps
                 'SEED' : 0,              # random seed
-                'SOLVER' : "hybridization",   # we take the hybridization impurity solver
+                'SOLVER' : os.environ.get('ALPS_CTHYB_SOLVER', 'hybridization'),   # we take the hybridization impurity solver
                 'SC_WRITE_DELTA' : 1,         # input for the hybridization impurity solver is the hybridization function Delta, which has to be written by the selfconsistency
                 'N_MEAS' : 5000,              # number of Monte Carlo steps between measurements
                 'N_HISTOGRAM_ORDERS' : 50,               # histogram size
