@@ -161,6 +161,18 @@ if(ALPS_BUILD_TESTING)
     alps_add_mpi_gtest(dmft_ctint_thermalization_mpi COMPONENT dmft RANKS 2 LABELS regression)
   endif()
 
+  # The exact diagonalization in dmft_exact_impurity.hpp needs Eigen, which
+  # comes with ALPS::gf.
+  if(TARGET ALPS::gf)
+    add_executable(dmft_cthyb_exact dmft_cthyb_exact.C)
+    target_link_libraries(dmft_cthyb_exact PRIVATE ALPS::cthyb ALPS::gf)
+    if(NOT ALPS_ENABLE_MPI)
+      alps_add_gtest(dmft_cthyb_exact COMPONENT dmft LABELS regression TIMEOUT 300)
+    else()
+      alps_add_mpi_gtest(dmft_cthyb_exact COMPONENT dmft RANKS 2 LABELS regression TIMEOUT 300)
+    endif()
+  endif()
+
   if(TARGET ALPS::cthyb_segment)
     add_executable(dmft_cthyb_segment_exact dmft_cthyb_segment_exact.C)
     target_link_libraries(dmft_cthyb_segment_exact PRIVATE ALPS::cthyb_segment)
