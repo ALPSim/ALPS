@@ -18,15 +18,18 @@ t2_result t2_test(const column<T> &diff,
         throw std::invalid_argument("Pools must be 1 or 2");
     if (nmeas <= 0)
         throw std::invalid_argument("Must have at least 1 measurement");
+
     if ((var.array() < -atol).any())
         throw std::invalid_argument("Variances must be positive");
 
     // remove data points where both the variance and difference are zero
-    // within atol while propagating intrinsic NaNs
+    // within atol while propagating intrinsic NaNs. Null directions of a
+    // covariance are removed before, where their scale is known
+    // (internal::drop_null_directions()).
     double t2 = 0;
     size_t nsize = 0;
     for (int i = 0; i != diff.rows(); ++i) {
-        if (std::abs(var[i]) < atol && std::norm(diff[i]) < atol)
+        if (std::abs(var[i]) <= atol && std::norm(diff[i]) <= atol)
             continue;
 
         t2 += std::norm(diff[i]) / var[i];

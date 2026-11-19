@@ -1,7 +1,7 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 # ALPSCore's ALEA tests, plus local regressions and coexistence with ALPS's ALEA.
 foreach(name compare_test fisher_f empty twogauss galois model result transform
-             stream_serializer)
+             stream_serializer testing)
   add_executable(aleav2_${name} ${name}.cpp)
   target_link_libraries(aleav2_${name} PRIVATE ALPS::aleav2)
   # The copies keep ALPSCore's TYPED_TEST_CASE, which GoogleTest 1.10 deprecated.
