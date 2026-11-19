@@ -324,6 +324,13 @@ struct observables_access
     static std::vector<std::string> &labels(observable &declaration) { return declaration.labels_; }
     static const std::vector<std::string> &labels(const observable &declaration) { return declaration.labels_; }
     static std::size_t &components(observable &declaration) { return declaration.components_; }
+    static bool &is_vector(observable &declaration) { return declaration.vector_; }
+    /** For a result that was just made and is not shared yet */
+    static void set_vector(observable_result &result)
+    {
+        const_cast<observable_result::impl &>(*result.impl_).declaration.vector_ = true;
+    }
+    static const bool &is_vector(const observable &declaration) { return declaration.vector_; }
     static std::size_t &num_bins(observable &declaration) { return declaration.num_bins_; }
     static const std::size_t &num_bins(const observable &declaration) { return declaration.num_bins_; }
     static bool &with_bins(observable &declaration) { return declaration.with_bins_; }

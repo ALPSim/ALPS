@@ -55,7 +55,7 @@ void write_header(hdf5::archive &ar, const std::string &group, const char *kind)
 
 void write_statistics(hdf5::archive &ar, const std::string &group, const observable_result &result)
 {
-    const bool scalar = result.size() == 1;
+    const bool scalar = result.is_scalar();
     write_values(ar, group + "/mean/value", result.mean_vector(), scalar);
     write_values(ar, group + "/mean/error", result.error_vector(), scalar);
     const std::vector<error_convergence> converged = result.converged_vector();
@@ -81,7 +81,7 @@ void write_plain(hdf5::archive &ar, const std::string &group, const observable_r
         return;
     }
 
-    const bool scalar = result.size() <= 1;
+    const bool scalar = result.is_scalar();
     write_header(ar, group, scalar ? "scalar" : "vector");
     ar[group + "/count"] << self.count;
     if (self.count == 0)
@@ -184,6 +184,9 @@ impl_pointer read_plain(hdf5::archive &ar, const std::string &group, const std::
     std::shared_ptr<observable_result::impl::stored_values> stored(new observable_result::impl::stored_values);
     stored->mean = read_values(ar, group + "/mean/value", 0);
     out->size = stored->mean.size();
+    // A vector with one component is stored as an array, a number is not.
+    const bool scalar = ar.is_scalar(group + "/mean/value");
+    access::is_vector(out->declaration) = !scalar;
     stored->error = read_values(ar, group + "/mean/error", out->size);
     stored->variance = read_values(ar, group + "/variance/value", out->size);
     stored->tau = read_values(ar, group + "/tau/value", out->size);
@@ -198,7 +201,7 @@ impl_pointer read_plain(hdf5::archive &ar, const std::string &group, const std::
             stored->convergence[i] = static_cast<error_convergence>(flags[i]);
     }
     if (ar.is_data(group + "/binning/error")) {
-        if (out->size == 1) {
+        if (scalar) {
             std::vector<double> flat;
             ar[group + "/binning/error"] >> flat;
             for (double error : flat)
@@ -223,7 +226,7 @@ impl_pointer read_plain(hdf5::archive &ar, const std::string &group, const std::
         if (has_binsize)
             ar[data + "/@binsize"] >> binsize;
         std::vector<std::vector<double> > bins;
-        if (out->size == 1) {
+        if (scalar) {
             std::vector<double> flat;
             ar[data] >> flat;
             for (double mean : flat)
@@ -311,7 +314,7 @@ void pack_declaration(byte_stream &out, const observable &declaration_)
     for (const std::string &label : access::labels(declaration))
         out << label;
     out << static_cast<uint64_t>(access::num_bins(declaration)) << static_cast<uint64_t>(access::components(declaration))
-        << uint64_t(access::with_bins(declaration))
+        << uint64_t(access::with_bins(declaration)) << uint64_t(access::is_vector(declaration))
         << uint64_t(access::is_histogram(declaration)) << access::min(declaration) << access::max(declaration);
 }
 
@@ -320,15 +323,16 @@ observable unpack_declaration(byte_stream &in)
     std::string name;
     in >> name;
     observable declaration(name);
-    uint64_t labels, num_bins, components, with_bins, is_histogram;
+    uint64_t labels, num_bins, components, with_bins, is_vector, is_histogram;
     in >> access::sign(declaration) >> labels;
     access::labels(declaration).resize(labels);
     for (std::string &label : access::labels(declaration))
         in >> label;
-    in >> num_bins >> components >> with_bins >> is_histogram >> access::min(declaration) >> access::max(declaration);
+    in >> num_bins >> components >> with_bins >> is_vector >> is_histogram >> access::min(declaration) >> access::max(declaration);
     access::num_bins(declaration) = num_bins;
     access::components(declaration) = components;
     access::with_bins(declaration) = with_bins != 0;
+    access::is_vector(declaration) = is_vector != 0;
     access::is_histogram(declaration) = is_histogram != 0;
     return declaration;
 }
@@ -360,7 +364,7 @@ void save_results(hdf5::archive &ar, const std::string &path, const result_set &
         write_plain(ar, path + "/" + hdf5_name_encode(signed_name(access::sign(self.declaration), named.first)),
                     access::make_result(raw));
 
-        write_header(ar, group, named.second.size() <= 1 ? "scalar" : "vector");
+        write_header(ar, group, named.second.is_scalar() ? "scalar" : "vector");
         ar[group + "/@sign"] << access::sign(self.declaration);
         ar[group + "/count"] << self.count;
         if (self.count != 0)
@@ -377,7 +381,7 @@ void save_result(hdf5::archive &ar, const std::string &group, const observable_r
         write_plain(ar, group, result);
         return;
     }
-    write_header(ar, group, result.size() <= 1 ? "scalar" : "vector");
+    write_header(ar, group, result.is_scalar() ? "scalar" : "vector");
     ar[group + "/count"] << self.count;
     if (self.count != 0)
         write_statistics(ar, group, result);
@@ -445,6 +449,7 @@ void save_checkpoint(hdf5::archive &ar, const std::string &path, const observabl
         ar[group + "/@sign"] << access::sign(declaration);
         ar[group + "/@bins"] << static_cast<uint64_t>(access::num_bins(declaration));
         ar[group + "/@components"] << static_cast<uint64_t>(access::components(declaration));
+        ar[group + "/@vector"] << uint64_t(access::is_vector(declaration));
         ar[group + "/@size"] << static_cast<uint64_t>(self.size);
         ar[group + "/@min"] << access::min(declaration);
         ar[group + "/@max"] << access::max(declaration);
@@ -487,6 +492,11 @@ void load_checkpoint(hdf5::archive &ar, const std::string &path, observable_set 
         ar[group + "/@bins"] >> num_bins;
         ar[group + "/@components"] >> components;
         access::components(declaration) = components;
+        if (ar.is_attribute(group + "/@vector")) {
+            uint64_t is_vector;
+            ar[group + "/@vector"] >> is_vector;
+            access::is_vector(declaration) = is_vector != 0;
+        }
         ar[group + "/@size"] >> size;
         ar[group + "/@min"] >> access::min(declaration);
         ar[group + "/@max"] >> access::max(declaration);

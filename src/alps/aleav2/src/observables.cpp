@@ -19,6 +19,7 @@ observable::observable(const std::string &name)
     , components_(0)
     , with_bins_(true)
     , histogram_(false)
+    , vector_(false)
     , min_(0)
     , max_(0)
 { }
@@ -219,6 +220,10 @@ std::vector<double> observable_result::binning_errors(std::size_t i) const
     return errors;
 }
 
+bool observable_result::is_scalar() const { return !impl_->declaration.vector_ && impl_->size <= 1; }
+
+bool observable_result::is_histogram() const { return impl_->declaration.histogram_; }
+
 const std::vector<std::uint64_t> &observable_result::histogram() const
 {
     if (!impl_->declaration.histogram_)
@@ -277,12 +282,15 @@ observable_result binary(const observable_result &a, const observable_result &b,
         throw std::invalid_argument("Results with " + std::to_string(na) + " and " + std::to_string(nb)
                                     + " components cannot be combined");
     }
-    return transform([na, nb, op](const std::vector<double> &x) {
+    observable_result out = transform([na, nb, op](const std::vector<double> &x) {
         std::vector<double> out(std::max(na, nb));
         for (size_t i = 0; i != out.size(); ++i)
             out[i] = op(x[na == 1 ? 0 : i], x[na + (nb == 1 ? 0 : i)]);
         return out;
     }, {a, b});
+    if (!a.is_scalar() || !b.is_scalar())
+        observables_access::set_vector(out);
+    return out;
 }
 
 double add(double x, double y) { return x + y; }
@@ -294,11 +302,14 @@ double divide(double x, double y) { return x / y; }
 
 observable_result apply(const std::function<double(double)> &f, const observable_result &a)
 {
-    return transform([f](const std::vector<double> &x) {
+    observable_result out = transform([f](const std::vector<double> &x) {
         std::vector<double> out(x.size());
         std::transform(x.begin(), x.end(), out.begin(), f);
         return out;
     }, {a});
+    if (!a.is_scalar())
+        observables_access::set_vector(out);
+    return out;
 }
 
 observable_result operator+(const observable_result &a, const observable_result &b) { return binary(a, b, add); }
@@ -339,6 +350,13 @@ void accumulator::add(const double *value, std::size_t size)
         *self.autocorr << make_adapter(sample);
         *self.batch << make_adapter(sample);
     }
+}
+
+void accumulator::add_vector(const double *value, std::size_t size)
+{
+    add(value, size);
+    if (impl_->declaration.components_ != 1)
+        impl_->declaration.vector_ = true;
 }
 
 std::uint64_t accumulator::count() const { return impl_->count(); }
@@ -457,6 +475,7 @@ void observable_set::merge(const result_set &other)
         }
         if (theirs.count == 0)
             continue;
+        mine.declaration.vector_ = mine.declaration.vector_ || theirs.declaration.vector_;
         if (theirs.stored) {
             throw std::invalid_argument(
                 quoted(named.first) + " was read from a result file. Runs are merged from their"

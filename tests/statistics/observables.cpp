@@ -5,6 +5,7 @@
 
 #include <alps/alea.hpp>
 #include <alps/alea/observables.hpp>
+#include <alps/alea/observables_io.hpp>
 
 #include <gtest/gtest.h>
 
@@ -12,6 +13,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <valarray>
 #include <vector>
 
 namespace {
@@ -302,4 +304,33 @@ TEST(Observables, HandlesAndFixedSizes)
 
     alps::alea::accumulator density(observable("n").signed_by("Sign"));
     EXPECT_THROW(density.result(), std::logic_error);
+}
+
+// A sample given as a vector makes the observable a vector, also with one
+// component, so that it is written as an array; packing, merging and
+// arithmetic keep that, and a reduction to one number is a number.
+TEST(Observables, OneComponentVectorStaysAVector)
+{
+    observable_set set;
+    set << observable("number") << observable("vector");
+    for (int i = 0; i != 256; ++i) {
+        set["number"] << double(i % 4);
+        set["vector"] << std::valarray<double>(double(i % 4), 1);
+    }
+    const alps::alea::result_set results = alps::alea::unpack(alps::alea::pack(set.results()));
+    EXPECT_TRUE(results["number"].is_scalar());
+    EXPECT_FALSE(results["vector"].is_scalar());
+    EXPECT_EQ(results["vector"].size(), 1u);
+    EXPECT_DOUBLE_EQ(results["vector"].mean_vector()[0], 1.5);
+    EXPECT_FALSE((2. * results["vector"]).is_scalar());
+
+    observable_set merged;
+    merged.merge(results);
+    EXPECT_FALSE(merged.results()["vector"].is_scalar());
+
+    const alps::alea::observable_result sum = alps::alea::transform(
+        [](const std::vector<double> &x) { return std::vector<double>(1, x[0] + x[1]); },
+        {results["number"], results["vector"]});
+    EXPECT_TRUE(sum.is_scalar());
+    EXPECT_DOUBLE_EQ(sum.mean(), 3.);
 }

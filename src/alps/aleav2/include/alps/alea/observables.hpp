@@ -41,6 +41,7 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <valarray>
 #include <vector>
 
 namespace alps { namespace hdf5 { class archive; } }
@@ -100,7 +101,7 @@ private:
     std::string name_, sign_;
     std::vector<std::string> labels_;
     std::size_t num_bins_, components_;
-    bool with_bins_, histogram_;
+    bool with_bins_, histogram_, vector_;
     std::int64_t min_, max_;
     friend observable histogram(const std::string &, std::int64_t, std::int64_t);
 };
@@ -124,9 +125,17 @@ public:
     /** Add a sample. A histogram counts the integer value given. */
     accumulator &operator<<(double value) { add(&value, 1); return *this; }
 
-    accumulator &operator<<(const std::vector<double> &value) { add(value.data(), value.size()); return *this; }
+    /** Add a sample of several components. The observable is then a vector, also if it has one component. */
+    accumulator &operator<<(const std::vector<double> &value) { add_vector(value.data(), value.size()); return *this; }
+
+    accumulator &operator<<(const std::valarray<double> &value)
+    {
+        add_vector(value.size() ? &value[0] : nullptr, value.size());
+        return *this;
+    }
 
     void add(const double *value, std::size_t size);
+    void add_vector(const double *value, std::size_t size);
 
     /** Number of samples */
     std::uint64_t count() const;
@@ -222,6 +231,12 @@ public:
     /** Number of components; 0 before the first sample */
     std::size_t size() const;
 
+    /**
+     * Is this a single number? An observable that took its samples as vectors
+     * is a vector, also with one component, and is written as one.
+     */
+    bool is_scalar() const;
+
     /** Number of samples */
     std::uint64_t count() const;
 
@@ -264,6 +279,8 @@ public:
      */
     std::vector<double> binning_errors(std::size_t i=0) const;
 
+    bool is_histogram() const;
+
     /** Counts of a histogram, from its minimum to its maximum */
     const std::vector<std::uint64_t> &histogram() const;
     std::int64_t histogram_min() const;
@@ -287,7 +304,7 @@ private:
  * A function of results by jackknife: `f` maps the means of all operands, one
  * after the other, to the means of the result. Every operand needs bins, and
  * the bins must hold the same numbers of samples; otherwise this throws
- * `std::invalid_argument`.
+ * `std::invalid_argument`. A result of one component is a number.
  */
 observable_result transform(const std::function<std::vector<double>(const std::vector<double> &)> &f,
                  const std::vector<observable_result> &operands);
