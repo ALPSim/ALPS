@@ -156,6 +156,15 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
       if(spin_symmetrize && (h!=0. || h_init!=0.))
         throw std::invalid_argument("sc.NAMBU with a Zeeman field (dca.H or dca.H_INIT) needs sc.SPIN_SYMMETRIZATION = false:"
                                     " the spin symmetrization assumes no field");
+      // The pairing field is (dca.ETA1 + i dca.ETA2) times the d-wave form factor
+      // cos kx - cos ky. Its phase is a global U(1) gauge choice: a complex field
+      // describes the same physics as the real field |eta|. G0(tau) and its tails
+      // are real, so a complex field would hand the solver a wrong G0(tau).
+      const double eta2 = parms["dca.ETA2"], eta2_init = parms["dca.ETA2_INIT"];
+      if(eta2!=0. || eta2_init!=0.)
+        throw std::invalid_argument("sc.NAMBU: a complex pairing field dca.ETA1 + i dca.ETA2 with the d-wave form factor"
+                                    " differs from the real field |eta| only by a global phase, and G0(tau) is real;"
+                                    " set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|.");
       std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
       NambuClusterTransformer T(parms);
       ImpuritySolver solver(solver_path,param_file_name, parms);

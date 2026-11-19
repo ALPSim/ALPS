@@ -278,4 +278,16 @@ TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
   }
 }
 
+// A complex d-wave pairing field is a global phase away from a real one, and
+// the G0(tau) handed to the solver is real; dca refuses dca.ETA2 != 0.
+TEST(LoopOptions, RefusesNambuComplexPairingField) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  for (const char* field : {"dca.ETA2", "dca.ETA2_INIT"}) {
+    const fs::path dir = run_dca(c, std::string("NambuEta2_") + field, 10, true,
+                                 std::string("sc.NAMBU = true\n") + field + " = 0.2\n", false);
+    EXPECT_NE(read_file(dir / "dca.log").find("set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|"), std::string::npos)
+        << field;
+  }
+}
+
 } // namespace
