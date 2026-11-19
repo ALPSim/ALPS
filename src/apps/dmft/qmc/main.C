@@ -91,14 +91,16 @@ int main(int argc, char** argv)
     parms["BASENAME"]=p.filename().string();
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
-    // ATOMIC made the built-in solver sample the atomic limit and ignore the
-    // bath in every iteration, while the loop built the self-energy and the
-    // next bath from the bath G0 (#347). It is no longer supported, in either
-    // loop or with any solver: external solvers would only receive it.
+    // ATOMIC made the interaction-expansion solver (the built-in one, or the
+    // interaction program as an external solver) sample the atomic limit and
+    // ignore the bath in every iteration, while the loop built the self-energy
+    // and the next bath from the bath G0 (#347). Other solvers ignored it. It
+    // is no longer supported, in either loop or with any solver.
     if (parms.defined("ATOMIC"))
-      throw std::invalid_argument("dmft no longer supports ATOMIC: it made the impurity solver "
-                                  "ignore the bath in every iteration, so the self-energy and "
-                                  "the self-consistency loop were wrong. Remove ATOMIC from the "
+      throw std::invalid_argument("dmft no longer supports ATOMIC. With the interaction-expansion "
+                                  "solver (SOLVER = \"Interaction Expansion\" or the interaction "
+                                  "program) it made the solver ignore the bath in every iteration "
+                                  "(#347); other solvers ignored it. Remove ATOMIC from the "
                                   "parameter file.");
 
     //perform selfconsistency loop in...

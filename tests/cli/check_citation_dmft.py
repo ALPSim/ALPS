@@ -1,4 +1,5 @@
-"""Check built-in solver selection notices before reading numerical input."""
+"""Check built-in solver selection notices, and the parameters dmft refuses,
+before reading numerical input."""
 import importlib.util
 import os
 from pathlib import Path
@@ -55,3 +56,20 @@ for solver in ("Hirsch-Fye", "Interaction Expansion", "hirschfye", "interaction"
                                 capture_output=True, timeout=45)
     assert result.returncode != 0, result.stdout
     assert "needs the Matsubara loop; set OMEGA_LOOP = 1" in result.stderr, result.stdout + result.stderr
+
+# dmft refuses ATOMIC in both loops, for any solver, before any computation (#347).
+# The missing G0 file stops a run that accepted ATOMIC before any QMC. The ATOMIC
+# message must be all dmft reports: a warning followed by a later error is not a
+# refusal.
+for solver, omega in (("Interaction Expansion", 1), ("hybridization", 0)):
+    for value in (0, 1):
+        with tempfile.TemporaryDirectory(prefix="alps-dmft-atomic-") as cwd:
+            Path(cwd, "parameters").write_text(
+                f'SOLVER="{solver}"\nOMEGA_LOOP={omega}\nN=8\nBETA=1\nATOMIC={value}\n'
+                'G0OMEGA_INPUT="missing-green-function"\nG0TAU_INPUT="missing-green-function"\n')
+            result = subprocess.run([sys.argv[1], "parameters"], cwd=cwd, text=True,
+                                    capture_output=True, timeout=45)
+        assert result.returncode != 0, result.stdout
+        error = result.stderr.strip()
+        assert error.startswith("dmft no longer supports ATOMIC") and "\n" not in error, \
+            result.stdout + result.stderr
