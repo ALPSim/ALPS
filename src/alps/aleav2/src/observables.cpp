@@ -3,6 +3,7 @@
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
  */
 #include "observables_impl.hpp"
+#include <alps/alea/observables_io.hpp>
 
 #include <memory>
 #include <ostream>
@@ -316,15 +317,49 @@ observable_result operator+(const observable_result &a, const observable_result 
 observable_result operator-(const observable_result &a, const observable_result &b) { return binary(a, b, subtract); }
 observable_result operator*(const observable_result &a, const observable_result &b) { return binary(a, b, multiply); }
 observable_result operator/(const observable_result &a, const observable_result &b) { return binary(a, b, divide); }
-observable_result operator+(const observable_result &a, double b) { return apply([b](double x) { return x + b; }, a); }
-observable_result operator-(const observable_result &a, double b) { return apply([b](double x) { return x - b; }, a); }
-observable_result operator*(const observable_result &a, double b) { return apply([b](double x) { return x * b; }, a); }
-observable_result operator/(const observable_result &a, double b) { return apply([b](double x) { return x / b; }, a); }
-observable_result operator+(double a, const observable_result &b) { return apply([a](double x) { return a + x; }, b); }
-observable_result operator-(double a, const observable_result &b) { return apply([a](double x) { return a - x; }, b); }
-observable_result operator*(double a, const observable_result &b) { return apply([a](double x) { return a * x; }, b); }
+namespace {
+
+/**
+ * scale * a + shift. A result with bins goes through the jackknife like any
+ * function. One without bins is transformed exactly: this is linear in a and
+ * involves nothing else, so it needs no assumption about correlations.
+ */
+observable_result affine(const observable_result &a, double scale, double shift)
+{
+    if (a.has_bins() || a.is_histogram() || a.count() == 0)
+        return apply([scale, shift](double x) { return scale * x + shift; }, a);
+    stored_numbers numbers;
+    numbers.count = a.count();
+    numbers.scalar = a.is_scalar();
+    numbers.labels = a.labels();
+    numbers.mean = a.mean_vector();
+    numbers.error = a.error_vector();
+    numbers.variance = a.variance_vector();
+    numbers.tau = a.tau_vector();
+    numbers.converged = a.converged_vector();
+    for (size_t i = 0; i != a.size(); ++i) {
+        numbers.mean[i] = scale * numbers.mean[i] + shift;
+        numbers.error[i] *= std::abs(scale);
+        numbers.variance[i] *= scale * scale;
+        std::vector<double> levels = a.binning_errors(i);
+        for (double &error : levels)
+            error *= std::abs(scale);
+        numbers.binning_errors.push_back(levels);
+    }
+    return stored_result("", numbers);
+}
+
+}
+
+observable_result operator+(const observable_result &a, double b) { return affine(a, 1., b); }
+observable_result operator-(const observable_result &a, double b) { return affine(a, 1., -b); }
+observable_result operator*(const observable_result &a, double b) { return affine(a, b, 0.); }
+observable_result operator/(const observable_result &a, double b) { return affine(a, 1. / b, 0.); }
+observable_result operator+(double a, const observable_result &b) { return affine(b, 1., a); }
+observable_result operator-(double a, const observable_result &b) { return affine(b, -1., a); }
+observable_result operator*(double a, const observable_result &b) { return affine(b, a, 0.); }
 observable_result operator/(double a, const observable_result &b) { return apply([a](double x) { return a / x; }, b); }
-observable_result operator-(const observable_result &a) { return apply([](double x) { return -x; }, a); }
+observable_result operator-(const observable_result &a) { return affine(a, -1., 0.); }
 
 // ACCUMULATOR
 

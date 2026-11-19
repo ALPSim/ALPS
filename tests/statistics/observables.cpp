@@ -334,3 +334,56 @@ TEST(Observables, OneComponentVectorStaysAVector)
     EXPECT_TRUE(sum.is_scalar());
     EXPECT_DOUBLE_EQ(sum.mean(), 3.);
 }
+
+// Scaling and shifting by a number is exact and needs no bins; any other
+// function of a result without bins is refused.
+TEST(Observables, ConstantsCombineWithResultsWithoutBins)
+{
+    observable_set set;
+    set << observable("plain").without_bins();
+    for (int i = 0; i != 100; ++i)
+        set["plain"] << double(i % 4);
+    const observable_result plain = set.results()["plain"];
+    const observable_result shifted = 1. - 2. * plain / 4. + 3.;
+    EXPECT_FALSE(shifted.has_bins());
+    EXPECT_EQ(shifted.count(), plain.count());
+    EXPECT_DOUBLE_EQ(shifted.mean(), 4. - plain.mean() / 2.);
+    EXPECT_DOUBLE_EQ(shifted.error(), plain.error() / 2.);
+    EXPECT_DOUBLE_EQ(shifted.variance_vector()[0], plain.variance_vector()[0] / 4.);
+    EXPECT_DOUBLE_EQ((-plain).mean(), -plain.mean());
+    EXPECT_THROW(1. / plain, std::invalid_argument);
+    EXPECT_THROW(plain * plain, std::invalid_argument);
+}
+
+// Independent runs joined: counts add up, the error is that of independent
+// runs, and bins of equal length are kept for functions of results.
+TEST(Observables, JoinedRunsKeepBinsOfEqualLength)
+{
+    std::vector<observable_result> runs, uneven;
+    for (int run = 0; run != 2; ++run) {
+        observable_set set;
+        set << observable("x").bins(8);
+        for (int i = 0; i != 1024 * (run + 1); ++i)
+            set["x"] << double((i * 7 + run) % 5);
+        (run == 0 ? runs : uneven).push_back(set.results()["x"]);
+        if (run == 0) {
+            observable_set twin;
+            twin << observable("x").bins(8);
+            for (int i = 0; i != 1024; ++i)
+                twin["x"] << double((i * 3) % 5);
+            runs.push_back(twin.results()["x"]);
+        }
+    }
+    const observable_result joined = alps::alea::join(runs);
+    EXPECT_EQ(joined.count(), 2048u);
+    EXPECT_DOUBLE_EQ(joined.mean(), (runs[0].mean() + runs[1].mean()) / 2.);
+    EXPECT_DOUBLE_EQ(joined.error(), std::hypot(runs[0].error(), runs[1].error()) / 2.);
+    ASSERT_TRUE(joined.has_bins());
+    EXPECT_EQ(joined.bin_means().size(), 16u);
+    const observable_result square = joined * joined;    // jackknife, bias corrected
+    EXPECT_NEAR(square.mean(), joined.mean() * joined.mean(), 0.1 * square.error());
+
+    const observable_result mixed = alps::alea::join({runs[0], uneven[0]});
+    EXPECT_EQ(mixed.count(), 1024u + 2048u);
+    EXPECT_FALSE(mixed.has_bins());
+}

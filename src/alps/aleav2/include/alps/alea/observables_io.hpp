@@ -55,11 +55,23 @@ struct stored_numbers
     std::vector<double> mean, error, variance, tau;
     std::vector<error_convergence> converged;
     std::vector<std::vector<double> > binning_errors;
+    std::uint64_t bin_size = 0;                   // samples in each bin
+    std::vector<std::vector<double> > bins;       // the bin means, in time order
 };
 
-/** A result of such numbers. Like results read with `load_results` it cannot be merged; it has no bins. */
+/**
+ * A result of such numbers. With bins it can enter functions of results, as
+ * results read with `load_results` can. It cannot be merged with runs.
+ */
 observable_result stored_result(const std::string &name, const stored_numbers &numbers);
 
+/**
+ * The results of independent runs as one: counts add up, the mean is the
+ * mean of all samples and its error that of independent runs. Bins of equal
+ * length are kept, in the order given, so that the result can enter functions
+ * of results; if their lengths differ, it has none. Histograms add their counts.
+ */
+observable_result join(const std::vector<observable_result> &runs);
 
 /** A histogram of the integers from `min`, with these counts */
 observable_result stored_histogram(const std::string &name, std::int64_t min, const std::vector<std::uint64_t> &counts);

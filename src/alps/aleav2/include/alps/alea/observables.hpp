@@ -309,7 +309,11 @@ private:
 observable_result transform(const std::function<std::vector<double>(const std::vector<double> &)> &f,
                  const std::vector<observable_result> &operands);
 
-/** Component by component; a result with one component combines with any */
+/**
+ * Component by component; a result with one component combines with any.
+ * Adding, subtracting, multiplying or dividing by a number also works for
+ * results without bins, exactly; other functions need bins.
+ */
 observable_result operator+(const observable_result &a, const observable_result &b);
 observable_result operator-(const observable_result &a, const observable_result &b);
 observable_result operator*(const observable_result &a, const observable_result &b);

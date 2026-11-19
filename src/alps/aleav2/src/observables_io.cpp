@@ -441,7 +441,82 @@ observable_result stored_result(const std::string &name, const stored_numbers &n
     }
     out->stored = stored;
 
+    if (!numbers.bins.empty()) {
+        if (numbers.bin_size == 0)
+            throw std::invalid_argument("The stored bins of '" + name + "' have no length");
+        batch_data<double> store(size, numbers.bins.size());
+        store.set_batch_size(numbers.bin_size);
+        for (size_t b = 0; b != numbers.bins.size(); ++b) {
+            if (numbers.bins[b].size() != size)
+                throw std::invalid_argument("The bins of '" + name + "' do not have the size of its mean");
+            for (size_t i = 0; i != size; ++i)
+                store.batch()(i, b) = numbers.bins[b][i] * double(numbers.bin_size);
+            store.count()(b) = numbers.bin_size;
+        }
+        out->batch.reset(new batch_result<double>(store));
+        out->parts.push_back(out->batch);
+        access::with_bins(out->declaration) = true;
+    }
     return access::make_result(out);
+}
+
+observable_result join(const std::vector<observable_result> &runs)
+{
+    if (runs.empty())
+        throw std::invalid_argument("join needs at least one result");
+    const observable_result &first = runs.front();
+    if (first.is_histogram()) {
+        std::vector<std::uint64_t> counts = first.histogram();
+        for (size_t r = 1; r != runs.size(); ++r) {
+            if (!runs[r].is_histogram() || runs[r].histogram_min() != first.histogram_min()
+                || runs[r].histogram().size() != counts.size())
+                throw std::invalid_argument("Only histograms of the same range can be joined");
+            for (size_t i = 0; i != counts.size(); ++i)
+                counts[i] += runs[r].histogram()[i];
+        }
+        return stored_histogram("", first.histogram_min(), counts);
+    }
+    stored_numbers numbers;
+    numbers.scalar = first.is_scalar();
+    numbers.labels = first.labels();
+    const size_t size = first.size();
+    numbers.mean.assign(size, 0.);
+    numbers.error.assign(size, 0.);
+    numbers.converged.assign(size, CONVERGED);
+    bool equal_bins = true;
+    for (const observable_result &run : runs) {
+        if (run.size() != size || run.is_histogram())
+            throw std::invalid_argument("Only results with the same number of components can be joined");
+        numbers.count += run.count();
+        // Own bins only: not those of a signed observable, which hold the
+        // samples times the sign, nor the parts of a function of results.
+        const observable_result::impl &parts = access::get(run);
+        equal_bins = equal_bins && run.has_bins() && run.sign().empty() && parts.parts.size() == 1
+                     && parts.batch && !parts.function && run.bin_size() == first.bin_size();
+    }
+    if (numbers.count == 0)
+        return stored_result("", numbers);
+    for (const observable_result &run : runs) {
+        if (run.count() == 0)
+            continue;
+        const double weight = double(run.count()) / double(numbers.count);
+        const std::vector<double> mean = run.mean_vector(), error = run.error_vector();
+        const std::vector<error_convergence> converged = run.converged_vector();
+        for (size_t i = 0; i != size; ++i) {
+            numbers.mean[i] += weight * mean[i];
+            numbers.error[i] += weight * weight * error[i] * error[i];
+            numbers.converged[i] = std::max(numbers.converged[i], converged[i]);
+        }
+    }
+    for (double &error : numbers.error)
+        error = std::sqrt(error);
+    if (equal_bins) {
+        numbers.bin_size = first.bin_size();
+        for (const observable_result &run : runs)
+            for (const std::vector<double> &bin : run.bin_means())
+                numbers.bins.push_back(bin);
+    }
+    return stored_result("", numbers);
 }
 
 observable_result stored_histogram(const std::string &name, std::int64_t min, const std::vector<std::uint64_t> &counts)
