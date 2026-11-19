@@ -94,6 +94,9 @@ void run(int argc, char **argv){
     throw std::invalid_argument("the self-energy has "+std::to_string(selfenergy_orig.mesh1().extent())
                                 +" Matsubara frequencies, but NMATSUBARA of the old parameter file is "
                                 +std::to_string(nfreq_old));
+  if(std::abs(selfenergy_orig.mesh1().beta()-beta_old)>1e-10*beta_old)
+    throw std::invalid_argument("the self-energy is given at beta="+std::to_string(selfenergy_orig.mesh1().beta())
+                                +", but BETA of the old parameter file is "+std::to_string(beta_old));
   std::vector<double> matsubara_freqs_old(nfreq_old);
   std::vector<double> matsubara_freqs_new(nfreq_new);
   for(int i=0;i<nfreq_old;++i) matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
