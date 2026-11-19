@@ -1,6 +1,13 @@
 #ifndef __DMTK_PRODUCT_H__
 #define __DMTK_PRODUCT_H__
 
+#include <vector>
+#include <map>
+#include <algorithm>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace dmtk
 {
 
@@ -990,6 +997,152 @@ product_term3(const ProductTerm<T> &pterm,
                 for(int j3 = 0; j3 < res_slice.size3(); j3++)
                   for(int j4 = 0; j4 < res_slice.size4(); j4++)
                     res_slice_hc(i1,i2,i3,i4) += dmtk::conj(coef)*v_slice_hc(i1,j2,j3,j4)*dmtk::conj(block1(i2,j2)*block2(i3,j3)*block3(i4,j4));
+    }
+  }
+}
+
+////////////////////////////////////////////////////////////////////
+// Applying a list of product terms in parallel
+//
+// Each term adds into one output block of res (res_space), and terms with
+// do_hc also into a second one (res_space_hc), chosen by mask_hc. Output
+// blocks are StateSpaces of res, so two blocks are either the same or
+// disjoint. The parts of all terms are grouped by output block and the
+// groups run in parallel (OpenMP): each block is written by one thread
+// only, with no locks and no private copies of res. Within a block the
+// parts keep the order of the term list, so the result does not depend on
+// the number of threads and equals that of the serial loop.
+////////////////////////////////////////////////////////////////////
+
+// One part of a product term, writing one output block: the term and the
+// mask_hc to apply it with.
+struct ProductWork
+{
+  int term;
+  int mask_hc;
+};
+
+// The parts writing one output block, in the order of the term list, and an
+// estimate of their cost, to start the most expensive groups first.
+struct ProductGroup
+{
+  std::vector<ProductWork> work;
+  double cost;
+  ProductGroup(): cost(0) {}
+};
+
+struct ProductGroupMoreCostly
+{
+  const std::vector<ProductGroup> *groups;
+  bool operator()(size_t a, size_t b) const
+    { return (*groups)[a].cost > (*groups)[b].cost; }
+};
+
+// Rough cost of one part: size of its input times the dimensions of its
+// operator blocks.
+template<class T>
+double
+product_work_cost(const ProductTerm<T> &t, const StateSpace &in)
+{
+  double c = double(in.dim());
+  const SubMatrix<T> *b[4] = { t.block1, t.block2, t.block3, t.block4 };
+  double d = 0;
+  for(int i = 0; i < t.nops && i < 4; i++) if(b[i]) d += b[i]->rows();
+  return c * std::max(d, 1.);
+}
+
+// Groups of parts by output block, and in order the groups sorted by
+// cost, most expensive first.
+template<class T>
+void
+group_product_terms(const std::vector<ProductTerm<T> > &terms, int mask_hc,
+        std::vector<ProductGroup> &groups, std::vector<size_t> &order)
+{
+  std::map<int, size_t> group_of;   // start of the output block -> group
+  groups.clear();
+  for(size_t i = 0; i < terms.size(); i++){
+    const ProductTerm<T> &t = terms[i];
+    int start[2], mask[2];
+    const StateSpace *in[2];
+    int n = 0;
+    if(t.nops == 1){
+      // a single operator writes res_space only; mask_hc selects its transpose
+      start[n] = t.res_space.start(); mask[n] = mask_hc; in[n] = &t.vspace; n++;
+    } else {
+      if(mask_hc & MASK_PRODUCT_DEFAULT){
+        start[n] = t.res_space.start(); mask[n] = MASK_PRODUCT_DEFAULT; in[n] = &t.vspace; n++;
+      }
+      if(t.do_hc && (mask_hc & MASK_PRODUCT_HC)){
+        start[n] = t.res_space_hc.start(); mask[n] = MASK_PRODUCT_HC; in[n] = &t.vspace_hc; n++;
+      }
+    }
+    for(int k = 0; k < n; k++){
+      std::map<int, size_t>::iterator it = group_of.find(start[k]);
+      if(it == group_of.end()){
+        it = group_of.insert(std::make_pair(start[k], groups.size())).first;
+        groups.push_back(ProductGroup());
+      }
+      ProductGroup &g = groups[it->second];
+      ProductWork w;
+      w.term = int(i);
+      w.mask_hc = mask[k];
+      g.work.push_back(w);
+      g.cost += product_work_cost(t, *in[k]);
+    }
+  }
+
+  order.resize(groups.size());
+  for(size_t i = 0; i < order.size(); i++) order[i] = i;
+  ProductGroupMoreCostly more_costly;
+  more_costly.groups = &groups;
+  std::sort(order.begin(), order.end(), more_costly);
+}
+
+// Scratch space for each OpenMP thread, kept between calls.
+template<class T>
+std::vector<DMTKglobals<T> > &
+product_scratch(int nthreads)
+{
+  static std::vector<DMTKglobals<T> > scratch;
+  if(int(scratch.size()) < nthreads) scratch.resize(nthreads);
+  return scratch;
+}
+
+// res += the product terms applied to v, with as many threads as OpenMP
+// allows (OMP_NUM_THREADS) and there are groups; serial without OpenMP. Not
+// to be called from several threads at once: the scratch space is shared.
+template<class T>
+void
+apply_product_terms(const std::vector<ProductTerm<T> > &terms,
+        const VectorState<T> &v, VectorState<T> &res, int mask_hc)
+{
+  std::vector<ProductGroup> groups;
+  std::vector<size_t> order;
+  group_product_terms(terms, mask_hc, groups, order);
+  const int ngroups = int(groups.size());
+
+#ifdef _OPENMP
+  const int nthreads = std::max(1, std::min(omp_get_max_threads(), ngroups));
+#else
+  const int nthreads = 1;
+#endif
+  // Allocated here, outside the parallel region: one per thread.
+  std::vector<DMTKglobals<T> > &scratch = product_scratch<T>(nthreads);
+
+#ifdef _OPENMP
+#pragma omp parallel num_threads(nthreads) if(nthreads > 1)
+#endif
+  {
+#ifdef _OPENMP
+    DMTKglobals<T> *my_scratch = &scratch[omp_get_thread_num()];
+#pragma omp for schedule(dynamic,1)
+#else
+    DMTKglobals<T> *my_scratch = &scratch[0];
+#endif
+    for(int g = 0; g < ngroups; g++){
+      const std::vector<ProductWork> &work = groups[order[g]].work;
+      for(size_t k = 0; k < work.size(); k++)
+        product_term(terms[work[k].term], v, res, work[k].mask_hc, my_scratch);
     }
   }
 }
