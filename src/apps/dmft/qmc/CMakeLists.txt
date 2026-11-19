@@ -94,6 +94,9 @@ target_link_libraries(dmft PRIVATE dmft_qmc_impl interaction_expansion_impl)
 target_link_libraries(hirschfye PRIVATE dmft_qmc_impl)
 
 target_link_libraries(hybridization PRIVATE ALPS::cthyb)
+
+# Segment-picture CT-HYB solver (ALPS::cthyb_segment and ct-hyb-segment)
+add_subdirectory(ct-hyb-segment)
 target_link_libraries(interaction PRIVATE ALPS::ctint)
 
 if(ALPS_BUILD_TESTING)
@@ -114,6 +117,26 @@ if(ALPS_BUILD_TESTING)
                  dmft_hilberttransformer_afm_multiband_numeric.C)
   target_link_libraries(dmft_hilberttransformer_afm_multiband_numeric PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_hilberttransformer_afm_multiband_numeric COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_hilberttransformer_insulating dmft_hilberttransformer_insulating.C)
+  target_link_libraries(dmft_hilberttransformer_insulating PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_hilberttransformer_insulating COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_hilberttransformer_uniform_field dmft_hilberttransformer_uniform_field.C)
+  target_link_libraries(dmft_hilberttransformer_uniform_field PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_hilberttransformer_uniform_field COMPONENT dmft LABELS regression)
+
+  # dmft stops when SYMMETRIZATION is on together with a field.
+  foreach(field H H_INIT)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dmft_symmetrized_${field}/parm"
+      "SOLVER = \"Hirsch-Fye\"\nOMEGA_LOOP = 1\nSYMMETRIZATION = true\nMAX_IT = 1\nCONVERGED = 0.001\n"
+      "BETA = 4\nU = 2\nt = 0.5\nMU = 0\nN = 16\nNMATSUBARA = 40\nSWEEPS = 100\nTHERMALIZATION = 10\n"
+      "${field} = 0.05\n")
+    add_test(NAME dmft_rejects_symmetrized_${field}
+             COMMAND dmft "${CMAKE_CURRENT_BINARY_DIR}/dmft_symmetrized_${field}/parm")
+    set_tests_properties(dmft_rejects_symmetrized_${field} PROPERTIES LABELS "dmft;regression" TIMEOUT 60
+      PASS_REGULAR_EXPRESSION "SYMMETRIZATION = true requires H = 0 and H_INIT = 0")
+  endforeach()
 
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
@@ -151,6 +174,16 @@ if(ALPS_BUILD_TESTING)
     add_executable(dmft_ctint_thermalization_mpi dmft_ctint_thermalization_mpi.C)
     target_link_libraries(dmft_ctint_thermalization_mpi PRIVATE ALPS::ctint)
     alps_add_mpi_gtest(dmft_ctint_thermalization_mpi COMPONENT dmft RANKS 2 LABELS regression)
+  endif()
+
+  if(TARGET ALPS::cthyb_segment)
+    add_executable(dmft_cthyb_segment_exact dmft_cthyb_segment_exact.C)
+    target_link_libraries(dmft_cthyb_segment_exact PRIVATE ALPS::cthyb_segment)
+    if(NOT ALPS_ENABLE_MPI)
+      alps_add_gtest(dmft_cthyb_segment_exact COMPONENT dmft LABELS regression TIMEOUT 300)
+    else()
+      alps_add_mpi_gtest(dmft_cthyb_segment_exact COMPONENT dmft RANKS 2 LABELS regression TIMEOUT 300)
+    endif()
   endif()
 endif()
 
