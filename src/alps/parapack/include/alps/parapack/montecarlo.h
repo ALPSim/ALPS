@@ -15,6 +15,7 @@
 #define PARAPACK_MONTECARLO_H
 
 #include "integer_range.h"
+#include <alps/input/parapack.hpp>
 
 #include <alps/expression.h>
 #include <alps/osiris.h>
@@ -28,11 +29,9 @@ public:
   typedef integer_range<unsigned int> range_type;
 
   mc_steps() : mcs_(0), sweep_("[0:]"), therm_(0) {}
-  mc_steps(alps::Parameters const& p) : mcs_(0),
-    sweep_(p.value_or_default("SWEEPS", "[65536:]"), p),
-    therm_(p.defined("THERMALIZATION") ? static_cast<int>(alps::evaluate("THERMALIZATION", p)) :
-      (sweep_.min BOOST_PREVENT_MACRO_SUBSTITUTION () >> 3)) {
-  }
+  mc_steps(alps::Parameters const& p) : mc_steps(input::read_mc_steps_parameters(p)) {}
+  explicit mc_steps(input::mc_steps_parameters const& p) : mcs_(0),
+    sweep_(p.sweeps), therm_(p.thermalization) {}
 
   void set_thermalization(int c) { therm_ = c; }
   void set_sweeps(unsigned int c) { sweep_ = range_type(c); }

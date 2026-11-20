@@ -20,6 +20,7 @@
 #include "permutation.h"
 #include "process.h"
 #include <alps/expression.h>
+#include <alps/input/parapack.hpp>
 #include <alps/osiris.h>
 
 #include <boost/lexical_cast.hpp>
@@ -101,41 +102,16 @@ public:
   typedef std::vector<double>::const_iterator const_iterator;
 
   inverse_temperature_set(alps::Parameters const& params) { init(params); }
-  void init(alps::Parameters const& params) {
+  void init(alps::Parameters const& params) { init(input::read_exchange_temperature_parameters(params)); }
+  void init(input::exchange_temperature_parameters const& params) {
     using std::sqrt;
-    int dist = -1;
-    // 0 : explicit
-    // 1 : equidistance in beta
-    // 2 : equidistance in 1/beta
-    // 3 : equidistance in sqrt(beta)
-    if (params.defined("TEMPERATURE_DISTRIBUTION_TYPE")) {
-      dist = static_cast<int>(params["TEMPERATURE_DISTRIBUTION_TYPE"]);
-    } else if (params.defined("BETA_MAX") && params.defined("BETA_MIN")) {
-      dist = 1;
-    } else if (params.defined("T_MAX") && params.defined("T_MIN")) {
-      dist = 2;
-    }
-    if (params.defined("INVERSE_TEMPERATURE_SET") || params.defined("TEMPERATURE_SET")) dist = 0;
-    if (dist < 0 || dist > 3)
-      boost::throw_exception(std::invalid_argument("illegal temperature distribution"));
-    if (params.defined("INVERSE_TEMPERATURE_SET")) {
-      read_vector_resize(params["INVERSE_TEMPERATURE_SET"], beta_);
-    } else if (params.defined("TEMPERATURE_SET")) {
-      read_vector_resize(params["TEMPERATURE_SET"], beta_);
-      for (int i = 0; i < beta_.size(); ++i) beta_[i] = 1 / beta_[i];
-    } else if (params.defined("NUM_REPLICAS")) {
-      int n = static_cast<int>(evaluate("NUM_REPLICAS", params));
-      double b_max = 0;
-      double b_min = 0;
-      if (params.defined("BETA_MAX") && params.defined("BETA_MIN")) {
-        b_max = evaluate("BETA_MAX", params);
-        b_min = evaluate("BETA_MIN", params);
-      } else if (params.defined("T_MAX") && params.defined("T_MIN")) {
-        b_max = 1 / evaluate("T_MIN", params);
-        b_min = 1 / evaluate("T_MAX", params);
-      } else {
-        boost::throw_exception(std::invalid_argument("MAX/MIN values of BETA (or T) not defined"));
-      }
+    int dist = params.distribution;
+    if (params.inverse_temperatures) {
+      beta_ = *params.inverse_temperatures;
+    } else {
+      int n = params.num_replicas;
+      double b_max = params.beta_max;
+      double b_min = params.beta_min;
       beta_.resize(n);
       if (dist == 2) {
         b_max = 1 / b_max;
@@ -151,8 +127,6 @@ public:
       } else if (dist == 3) {
         for (int i = 0; i < n; ++i) beta_[i] = beta_[i] * beta_[i];
       }
-    } else {
-      boost::throw_exception(std::invalid_argument("temperature set not defined"));
     }
     std::sort(beta_.begin(), beta_.end());
   }
@@ -380,47 +354,20 @@ class exchange_steps {
 public:
   typedef integer_range<unsigned int> range_type;
 
-  enum opttype_t { rate, population };
+  typedef input::exchange_parameters::optimization opttype_t;
+  static constexpr opttype_t rate = input::exchange_parameters::rate;
+  static constexpr opttype_t population = input::exchange_parameters::population;
 
-  exchange_steps(alps::Parameters const& p) : mcs_(0), stage_(0), count_(0),
-    exchange_(!static_cast<bool>(evaluate(p.value_or_default("NO_EXCHANGE", 0)))),
-    interval_(static_cast<int>(evaluate(p.value_or_default("EXCHANGE_INTERVAL", 1)))),
-    random_(static_cast<bool>(evaluate(p.value_or_default("RANDOM_EXCHANGE", 0)))),
-    optimize_(static_cast<bool>(p.value_or_default("OPTIMIZE_TEMPERATURE", 0)) ||
-              static_cast<bool>(p.value_or_default("TEMPERATURE_OPTIMIZATION", 0))),
-    sweep_(p.value_or_default("SWEEPS", "[65536:]"), p),
-    therm_(p.defined("THERMALIZATION") ?
-           static_cast<unsigned int>(alps::evaluate("THERMALIZATION", p)) :
-           (sweep_.min BOOST_PREVENT_MACRO_SUBSTITUTION () >> 3)),
-    optstep_(0), iteration_(0) {
+  exchange_steps(alps::Parameters const& p) : exchange_steps(input::read_exchange_parameters(p)) {}
+  explicit exchange_steps(input::exchange_parameters const& p) : mcs_(0), stage_(0), count_(0),
+    exchange_(p.exchange), interval_(p.interval), random_(p.random_exchange), optimize_(p.optimize),
+    sweep_(p.steps.sweeps), therm_(p.steps.thermalization), optstep_(0), iteration_(0) {
 
     if (exchange_ && optimize_) {
-      if (!p.defined("OPTIMIZATION_TYPE") || p["OPTIMIZATION_TYPE"] == "rate") {
-        opttype_ = rate;
-      } else if (p["OPTIMIZATION_TYPE"] == "population") {
-        opttype_ = population;
-      } else {
-        boost::throw_exception(
-          std::runtime_error("unknown OPIMIZATION_TYPE: " + p["OPTIMIZATION_TYPE"]));
-      }
-
-      if (p.defined("NUM_CLONES") &&
-          integer_range<uint32_t>(p["NUM_CLONES"]).max BOOST_PREVENT_MACRO_SUBSTITUTION () > 1)
-        boost::throw_exception(std::logic_error("temperature optimization and multipile clones"
-                                                " are exclusive"));
-
-      int m;
-      if (opttype_ == rate) {
-        factor_ = p.value_or_default("BLOCK_SWEEP_FACTOR", 1);
-        iteration_ =
-          static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 1)) + 1;
-        m = p.value_or_default("INITIAL_BLOCK_SWEEPS", therm_);
-      } else {
-        factor_ = p.value_or_default("BLOCK_SWEEP_FACTOR", 2);
-        iteration_ =
-          static_cast<unsigned int>(p.value_or_default("OPTIMIZATION_ITERATIONS", 7)) + 1;
-        m = p.value_or_default("INITIAL_BLOCK_SWEEPS", (2 << 8));
-      }
+      opttype_ = p.optimization_type;
+      factor_ = p.block_sweep_factor;
+      iteration_ = p.optimization_iterations + 1;
+      int m = p.initial_block_sweeps;
       optstep_ = 0;
       block_.resize(iteration_);
       for (int i = 0; i < iteration_; ++i, m = static_cast<int>(factor_ * m)) {

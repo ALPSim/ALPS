@@ -34,8 +34,8 @@ void spinmodel_helper<RG, LG, WH>::init(alps::Parameters const& p, lattice_helpe
   lat.generate_virtual_graph(mp, mp.has_d_term());
 
   // weight table
-  alps::Parameters params(p);
-  if (frustrated_ && !params.defined("FORCE_SCATTER")) params["FORCE_SCATTER"] = 0.1;
+  alps::input::looper_weight_parameters params = alps::input::read_looper_weight_parameters(p);
+  if (frustrated_ && !params.force_scatter) params.force_scatter = 0.1;
   weight_helper_t wt(mp, lat, params);
   chooser_.init(wt, is_path_integral);
 

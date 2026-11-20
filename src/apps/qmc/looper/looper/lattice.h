@@ -13,6 +13,7 @@
 #define LOOPER_LATTICE_H_
 
 #include "alternating_tensor.h"
+#include <alps/input/looper.hpp>
 #include <alps/lattice.h>
 #include <alps/parapack/integer_range.h>
 #include <boost/throw_exception.hpp>
@@ -654,11 +655,12 @@ template<typename RG>
 void lattice_helper<RG>::convert_type(alps::Parameters const& p) {
   typedef typename graph_traits<RG>::site_descriptor site_descriptor;
   typedef typename graph_traits<RG>::bond_descriptor bond_descriptor;
-  if (p.value_or_default("USE_SITE_INDICES_AS_TYPES", false)) {
+  alps::input::looper_model_parameters const options = alps::input::read_looper_model_parameters(p);
+  if (options.use_site_indices_as_types) {
     BOOST_FOREACH(site_descriptor s, sites(helper_.graph()))
       put(site_type_t(), helper_.graph(), s, s);
   }
-  if (p.value_or_default("USE_BOND_INDICES_AS_TYPES", false)) {
+  if (options.use_bond_indices_as_types) {
     BOOST_FOREACH(bond_descriptor b, bonds(helper_.graph()))
       put(bond_type_t(), helper_.graph(), b, get(bond_index_t(), helper_.graph(), b));
   }

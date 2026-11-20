@@ -21,6 +21,7 @@
 
 #include <utility> // Boost.Math 1.76 includes this inside a namespace.
 #include <boost/math/constants/constants.hpp>
+#include <alps/input/simplemc.hpp>
 #include <alps/parapack/worker.h>
 #include <alps/parapack/util.h> // for alps::id2string
 
@@ -32,28 +33,22 @@ private:
 public:
   xy_worker(alps::Parameters const& params) : super_type(params), mcs_(params),
     spins_(num_sites()) {
-    beta_ = (params.defined("T") ? 1 / evaluate("T", params) : 0);
-    field_ = (params.defined("H") ? evaluate("H", params) : 0);
     // table of coupling constants
     int num_types = 0;
     bond_iterator itr, itr_end;
     for (boost::tie(itr, itr_end) = bonds(); itr != itr_end; ++itr)
       num_types = std::max(num_types, int(bond_type(*itr)) + 1);
-    coupling_.clear();
-    coupling_.resize(num_types, (params.defined("J")) ? evaluate("J", params) : 1);
-    for (int t = 0; t < num_types; ++t) {
-      std::string name = std::string("J") + boost::lexical_cast<std::string>(t);
-      if (params.defined(name)) coupling_[t] = evaluate(name, params);
-    }
+    alps::input::simplemc_parameters const input = alps::input::read_simplemc_parameters(params, num_types);
+    beta_ = input.beta;
+    field_ = input.field;
+    coupling_ = input.couplings;
 
     // random initial spins
     for (int s = 0; s < num_sites(); ++s) spins_[s] = std::polar(1.0, 2 * boost::math::constants::pi<double>() * uniform_01());
     update_energy();
 
-    snapshot_interval_ =
-      (params.defined("SNAPSHOT_INTERVAL") ? evaluate("SNAPSHOT_INTERVAL", params) : 0);
-    snapshot_basename_ = params["BASE_NAME"] + ".clone" +
-      alps::id2string(static_cast<int>(params["CLONE_ID"]));
+    snapshot_interval_ = input.snapshot_interval;
+    snapshot_basename_ = input.base_name + ".clone" + alps::id2string(input.clone_id);
   }
   virtual ~xy_worker() {}
 
