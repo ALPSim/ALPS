@@ -56,7 +56,7 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
     t_(params["t"]),
     t2_(params["tprime"]),
     n_flavors_(params["FLAVORS"]),
-    epsilon_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()]),
+    epsilon_kckl_(n_cluster_sites(), n_lattice_momenta()),
     weight_kl_(n_lattice_momenta()),
     nfreq_(params["NMATSUBARA"]),
     beta_(params["BETA"]),
@@ -74,7 +74,7 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
     eta2_init_(params["dca.ETA2_INIT"]),
     eta1_(params["dca.ETA1"]),
     eta2_(params["dca.ETA2"]),
-    dwave_prefactor_kckl_(boost::extents[n_cluster_sites()][n_lattice_momenta()])
+    dwave_prefactor_kckl_(n_cluster_sites(), n_lattice_momenta())
 {
   if(dimension()!=2) throw std::logic_error("careful. self consistency has d=2 symmetry factors built in! do you know what you're doing?");
 
@@ -83,7 +83,7 @@ NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):Clu
       std::vector<double> k(dimension());
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      dwave_prefactor_kckl_[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+      dwave_prefactor_kckl_(kc,kl)= cos(k[0]) - cos(k[1]); //cos kx - cos ky
     }
   }
 }
@@ -227,27 +227,6 @@ void NambuClusterTransformer::compute_noninteracting_G0(cluster_nambu_matsubara_
   attach_bare_tail(G0_omega, h_init_, eta1_init_, eta2_init_);
 }
 
-template<typename GFW, typename GFT> void ClusterTransformer::initial_G0(GFW &G0_omega, GFT &G0_tau)const{
-  if(read_initial_G0(G0_omega)) return;
-
-  if(initial_g0_=="FREE")
-    compute_noninteracting_G0(G0_omega);
-  else if (initial_g0_=="ISOLATED")
-    compute_isolated_cluster_G0(G0_omega);
-  else
-    throw std::invalid_argument("choose FREE or ISOLATED as initial G0 parameters or provide an input hdf5 file");
-
-  {
-    alps::hdf5::archive ar(g0_input_path_, "w");
-    G0_omega.save(ar, "/G0");
-
-    std::ofstream G0_omega_input_file("G0_omega_input.dat"); G0_omega_input_file<<G0_omega;
-  }
-  {
-    alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
-    std::ofstream G0_tau_input_file("G0_tau_input.dat"); G0_tau_input_file<<G0_tau;
-  }
-}
 
 void NormalStateClusterTransformer::attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster) const{
   alps::gf::k_sigma_gf c1(G0.mesh2(), G0.mesh3());
@@ -690,7 +669,7 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           std::complex<double> zeta = iomega_n + mu_;
-          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_[kc()][kl]-sigma(w, kc,  f));
+          G(w, kc,f) += weight_kl_[kl]/(zeta-epsilon_kckl_(kc(),kl)-sigma(w, kc,  f));
         }
         G(w, kc, f) /= n_cluster_cells();
       }
@@ -751,10 +730,10 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
         std::complex<double> iomega_n(0, G.mesh1().points()[w()]);
         for (int kl=0; kl<n_lattice_momenta(); ++kl) {
           double prefactor=weight_kl_[kl]/n_cluster_cells();
-          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_[kc()  ][kl])-sigma(w, kc  , alps::gf::index(0), spin);
+          Ginv(0,0)= iomega_n + (mu_ -epsilon_kckl_(kc()  ,kl))-sigma(w, kc  , alps::gf::index(0), spin);
           Ginv(0,1)= spin_factor*h/2.+ mu_stag                         -sigma(w, kc  , alps::gf::index(1), spin);
           Ginv(1,0)= spin_factor*h/2. +mu_stag                         -sigma(w, kc+1, alps::gf::index(0), spin);
-          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_[kc()+1][kl])-sigma(w, kc+1, alps::gf::index(1), spin);
+          Ginv(1,1)= iomega_n + (mu_ -epsilon_kckl_(kc()+1,kl))-sigma(w, kc+1, alps::gf::index(1), spin);
           Ginv.invert();
           G(w, kc  ,alps::gf::index(0), spin) += prefactor*Ginv(0,0);
           G(w, kc  ,alps::gf::index(1), spin) += prefactor*Ginv(0,1);
@@ -822,14 +801,14 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
       G(w, kc, dn,dn) = 0.;
       std::complex<double> iomega_n(0, (2.*w()+1.)*M_PI/beta_);
       for (int kl=0; kl<n_lattice_momenta(); ++kl) {
-        double prefactor=dwave_prefactor_kckl_[kc()][kl];
+        double prefactor=dwave_prefactor_kckl_(kc(),kl);
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu_ + h -epsilon_kckl_[kc()][kl]-sigma(w, kc, up,up),
+        {iomega_n + mu_ + h -epsilon_kckl_(kc(),kl)-sigma(w, kc, up,up),
           -sigma(w, kc, up,dn) - prefactor*std::complex<double>( eta1, eta2),
           -sigma(w, kc, dn,up) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu_ + h +epsilon_kckl_[kc()][kl]-sigma(w, kc, dn,dn)};
+          iomega_n - mu_ + h +epsilon_kckl_(kc(),kl)-sigma(w, kc, dn,dn)};
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G(w, kc, up,up) += weight_kl_[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
         G(w, kc, up,dn) -= weight_kl_[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
@@ -853,7 +832,7 @@ void ClusterTransformer::compute_integration_weight_and_dispersion(){
     for (int kl=0; kl<n_lattice_momenta(); ++kl) {
       for (unsigned int d=0; d<dimension(); ++d)
         k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsilon_kckl_[kc][kl]=epsilon(k);
+      epsilon_kckl_(kc,kl)=epsilon(k);
     }
   }
   for (int kl=0; kl<n_lattice_momenta(); ++kl) {
@@ -884,14 +863,14 @@ void ClusterTransformer::compute_dispersion_weights(){
 }
 
 double ClusterTransformer::dispersion(int kc, int kl) const{
-  if (kl>=0) return epsilon_kckl_[kc][kl];
+  if (kl>=0) return epsilon_kckl_(kc,kl);
   std::vector<double> K(dimension());
   for (unsigned int d=0; d<dimension(); ++d)
     K[d] = cluster_momentum(kc,d);
   return epsilon(K);
 }
 double NambuClusterTransformer::dwave_prefactor(int kc, int kl) const{
-  if (kl>=0) return dwave_prefactor_kckl_[kc][kl];
+  if (kl>=0) return dwave_prefactor_kckl_(kc,kl);
   return cos(cluster_momentum(kc,0)) - cos(cluster_momentum(kc,1));
 }
 double ClusterTransformer::epsilon(const std::vector<double> &k) const
@@ -1023,8 +1002,6 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
 }
 
 //create some instances for libcluster:
-template void ClusterTransformer::initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega, cluster_nambu_itime_kspace_gf &G0_tau)const;
-template void ClusterTransformer::initial_G0(cluster_matsubara_kspace_gf &G0_omega, cluster_itime_kspace_gf &G0_tau)const;
 
 void DoubleCellClusterTransformer::symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const{
 //  throw std::logic_error("Emanuel please implement the afm k-space symmetrization here");
@@ -1033,102 +1010,23 @@ void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_ks
 //  throw std::logic_error("Emanuel please implement the charge order k-space symmetrization here");
 }
 void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
+  const alps::gf::index K(0), KQ(1), up(0), dn(1);
   if (afm_symmetry_){
-  //std::ios_base::app
-  std::ofstream test_file("test",std::ios_base::app);
-  test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl;
-  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
-          //DD component
-          std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-                                  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
-     
-         //OD component
-          std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                  +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;       
-//           if (w ==0 ){
-//            std::cout<<"DD"<< G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-//                           << G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-//                           <<  -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))<<std::endl;
-
-//            std::cout<<"OD"<< G(w, kc  ,alps::gf::index(1), alps::gf::index(0))
-//                           <<-G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-//                           << G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))
-//                           <<-G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))<<std::endl;
-//           }
-
-  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-  //        G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=-std::conj(GK);
-  //        G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=-std::conj(GK);
-
-  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-  //        G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=-GKQ;
-  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-  //        G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=-GKQ;
-  
-     }
-    }
-   ;
+    // The AFM order distinguishes the spins; nothing is symmetrized.
   }else if(charge_order_symmetry_){
-#ifndef ALPS_HAVE_MPI
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-#else
-  int mpi_init; MPI_Initialized(&mpi_init);
-  if(mpi_init){
-  int rank; MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  if(rank==0){
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-  }
-  }else{
-     { std::ofstream test_file("testCO",std::ios_base::app); test_file<<" "<< real(G(alps::gf::matsubara_index (0), alps::gf::momentum_index (0)+2  ,alps::gf::index(1), alps::gf::index(0)))<<std::endl; }
-  }
-#endif
-
-
+    // Charge order: G is the same for both spins, and G(K,K+Q) = G(K+Q,K).
     for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
-     for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
-         // Below was used for CO p-h case 
-         //DD component
-         // std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc  ,alps::gf::index(0), alps::gf::index(1))
-         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0)))
-         //                         -std::conj(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))))/4.;
-     
-         //OD component
-         // std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-         //                         +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-
-
-         //Less generic symmetry which works for both p-h and non-p-h cases
-            //DD component: only spin symmetrization
-            std::complex<double> GK=(G(w, kc  ,alps::gf::index(0), alps::gf::index(0))
-                                     +G(w, kc  ,alps::gf::index(0), alps::gf::index(1)))/2.;
-            std::complex<double> GkQkQ=(G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))
-                                        +G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1)))/2.;
-            //OD component Gup=Gdn, and Gkkq=Gkqk
-            std::complex<double> GKQ=(G(w, kc  ,alps::gf::index(1), alps::gf::index(0))+G(w, kc  ,alps::gf::index(1), alps::gf::index(1))
-                                +G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))+G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1)))/4.;
-
-
-
-           
-
-           G(w, kc  ,alps::gf::index(0), alps::gf::index(0))=GK;
-           G(w, kc  ,alps::gf::index(0), alps::gf::index(1))=GK;
-           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(0))=GkQkQ;
-           G(w, kc+1  ,alps::gf::index(1), alps::gf::index(1))=GkQkQ;
-
-           G(w, kc  ,alps::gf::index(1), alps::gf::index(0))=GKQ;
-           G(w, kc  ,alps::gf::index(1), alps::gf::index(1))=GKQ;
-           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(0))=GKQ;
-           G(w, kc+1  ,alps::gf::index(0), alps::gf::index(1))=GKQ;
-  
-     }
+      for (alps::gf::momentum_index kc(0); kc<G.mesh2().extent(); kc+=2) {
+        const std::complex<double> G_K_K   = (G(w, kc  , K , up) + G(w, kc  , K , dn))/2.;
+        const std::complex<double> G_KQ_KQ = (G(w, kc+1, KQ, up) + G(w, kc+1, KQ, dn))/2.;
+        const std::complex<double> G_K_KQ  = (G(w, kc  , KQ, up) + G(w, kc  , KQ, dn)
+                                            + G(w, kc+1, K , up) + G(w, kc+1, K , dn))/4.;
+        G(w, kc  , K , up) = G(w, kc  , K , dn) = G_K_K;
+        G(w, kc+1, KQ, up) = G(w, kc+1, KQ, dn) = G_KQ_KQ;
+        G(w, kc  , KQ, up) = G(w, kc  , KQ, dn) = G_K_KQ;
+        G(w, kc+1, K , up) = G(w, kc+1, K , dn) = G_K_KQ;
+      }
     }
-
-   ;
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
 cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_space(const double_cell_itime_kspace_gf& G) const{
@@ -1156,3 +1054,5 @@ cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_spa
   return G_rs;
 }
 
+template bool ClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const;
+template bool ClusterTransformer::read_initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const;

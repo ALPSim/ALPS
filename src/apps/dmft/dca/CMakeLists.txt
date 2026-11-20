@@ -22,8 +22,7 @@ add_library(alps_dca STATIC
 target_include_directories(alps_dca PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libcluster"
     "${CMAKE_CURRENT_SOURCE_DIR}/libselfconsistency"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver"
-    "${CMAKE_CURRENT_SOURCE_DIR}/blas_classes")
+    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver")
 target_link_libraries(alps_dca PUBLIC ALPS::alps ALPS::gf)
 # alps/gf/flagcheck.hpp asks consumers to choose its debug checks, as ALPS::gf does.
 target_compile_definitions(alps_dca PUBLIC
@@ -87,4 +86,14 @@ if(ALPS_BUILD_TESTING)
     DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
   add_dependencies(dca_noninteracting_loop_test dca dca_free_solver)
   alps_add_gtest(dca_noninteracting_loop_test COMPONENT dmft LABELS regression TIMEOUT 300)
+  add_executable(dca_constant_sigma_solver tests/constant_sigma_solver.cpp)
+  target_link_libraries(dca_constant_sigma_solver PRIVATE alps_dca)
+  add_executable(dca_interacting_loop_test tests/interacting_loop_test.cpp)
+  target_link_libraries(dca_interacting_loop_test PRIVATE alps_dca)
+  target_compile_definitions(dca_interacting_loop_test PRIVATE
+    DCA_EXECUTABLE="$<TARGET_FILE:dca>"
+    DCA_CONSTANT_SIGMA_SOLVER="$<TARGET_FILE:dca_constant_sigma_solver>"
+    DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
+  add_dependencies(dca_interacting_loop_test dca dca_constant_sigma_solver)
+  alps_add_gtest(dca_interacting_loop_test COMPONENT dmft LABELS regression TIMEOUT 300)
 endif()

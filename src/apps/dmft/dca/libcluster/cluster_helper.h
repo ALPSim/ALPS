@@ -19,8 +19,7 @@
 #include "alps/params.hpp"
 #include "alps/hdf5/pointer.hpp"
 
-#include "blasheader.h"
-#include "general_matrix.h"
+#include <Eigen/Dense>
 #include "alps/hdf5.hpp"
 
 #include "cluster_graph.h"
@@ -30,16 +29,29 @@ class ClusterHelper : private alps_graph
 {
 public:
   
+  /// Row-major, so that the HDF5 layout of the cluster tables stays that of
+  /// the matrix class used before (size1, size2 and the values row by row).
   template <typename T> struct Matrix
   {
-    typedef blas::general_matrix<T> Type;
-    
-    static Type inverse(Type M){return M.invert();}
-    
-    static Type multiply(Type M1, Type M2) {
-      return M1*M2;
+    typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> Type;
+
+    static Type inverse(const Type &M){return M.inverse();}
+
+    /// the largest absolute value of the entries, 0 for an empty matrix
+    static double max_abs(const Type &M){ return M.size() ? double(M.cwiseAbs().maxCoeff()) : 0.; }
+
+    static void save(alps::hdf5::archive &ar, const std::string &path, const Type &M){
+      ar << alps::make_pvp(path + "/size1", int(M.rows()));
+      ar << alps::make_pvp(path + "/size2", int(M.cols()));
+      ar << alps::make_pvp(path + "/values", M.data(), std::size_t(M.size()));
     }
-    static double norm_1(const Type &M){ return M.max();}
+    static void load(alps::hdf5::archive &ar, const std::string &path, Type &M){
+      int size1, size2;
+      ar >> alps::make_pvp(path + "/size1", size1);
+      ar >> alps::make_pvp(path + "/size2", size2);
+      M.resize(size1, size2);
+      ar >> alps::make_pvp(path + "/values", M.data(), std::size_t(M.size()));
+    }
   };
   static void define_parameters(alps::params &p);
   
@@ -66,7 +78,7 @@ public:
   bool bipartite() const { return bipartite_; }
   int n_cluster_sites() const { return alps_graph::unit_cell_volume(); }
   int n_cluster_cells() const { return alps_graph::volume(); }
-  int n_lattice_momenta() const { return lattice_momenta_.size1(); }
+  int n_lattice_momenta() const { return lattice_momenta_.rows(); }
   int dimension() const { return alps_graph::dimension(); }
   int cluster_momentum_approximation(std::vector<double> k) const;
   
