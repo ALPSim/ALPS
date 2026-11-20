@@ -59,7 +59,10 @@ CASES = {
          {"ALGORITHM": '"loop; sse"', "L": 8, "J": 1, "SWEEPS": 200000, "SEED": 4712}, HEISENBERG_8),
     ],
     "dirloop_sse": [
-        ("Heisenberg L=8", {"L": 8, "J": 1, "SWEEPS": 200000, "SEED": 4721},
+        # INITIAL_CUTOFF: the operator string only grows during thermalization
+        # (#299), and on about 1 seed in 40 this case stops with "nnonzero
+        # reached the maximum value" without it.
+        ("Heisenberg L=8", {"L": 8, "J": 1, "INITIAL_CUTOFF": 100, "SWEEPS": 200000, "SEED": 4721},
          {name: HEISENBERG_8[name] for name in
           ("Energy Density", "Magnetization^2", "Staggered Magnetization^2", "Susceptibility")}),
         ("XXZ L=4 Jz=2 h=0.3", {"L": 4, "Jz": 2, "Jxy": 1, "h": 0.3, "SWEEPS": 200000, "SEED": 4722},
