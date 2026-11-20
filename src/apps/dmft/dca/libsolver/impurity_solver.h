@@ -16,7 +16,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <boost/lexical_cast.hpp>
 #include "alps/hdf5.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/params.hpp"
@@ -81,7 +80,7 @@ private:
     std::cerr << "Calling external solver as: " <<  command.str()<<std::endl;
     int result = std::system(command.str().c_str());
     if (result)
-      throw std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command.str());
+      throw std::runtime_error("System error code " +std::to_string(result) + " encountered when executing command:\n"+command.str());
     {
     std::ifstream check(outfile_str_.c_str());
     if(!check.good())

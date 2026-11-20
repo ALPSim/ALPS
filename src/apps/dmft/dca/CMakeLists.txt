@@ -38,19 +38,32 @@ install(FILES libcluster/cluster.xml libcluster/cluster1d.xml libcluster/cluster
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/dca COMPONENT applications)
 
 # Tools that interpolate a converged self-energy onto another cluster, to start
-# a new calculation from it. They need GSL for the splines.
+# a new calculation from it. They need GSL for the splines; like the optional
+# archive tool, they are installed with the tools only when GSL is found.
 find_package(GSL QUIET)
 if(GSL_FOUND)
+  set(dca_tools)
   foreach(kind IN ITEMS normal sc)
     add_executable(sigma_interpolate_${kind} AuxiliaryPrograms/sigma_interpolate_${kind}.cpp)
     target_link_libraries(sigma_interpolate_${kind} PRIVATE alps_dca GSL::gsl)
+    list(APPEND dca_tools sigma_interpolate_${kind})
   endforeach()
-  # Optional tools: installed, but not exported or bundled with the applications,
-  # whose set does not depend on optional dependencies.
-  install(TARGETS sigma_interpolate_normal sigma_interpolate_sc
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT applications)
+  install(TARGETS ${dca_tools}
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+  if(ALPS_BUILD_TESTING)
+    # Both tools, with fewer and more frequencies than the self-energy has.
+    add_executable(dca_interpolation_tools_test tests/interpolation_tools_test.cpp)
+    target_link_libraries(dca_interpolation_tools_test PRIVATE alps_dca)
+    target_compile_definitions(dca_interpolation_tools_test PRIVATE
+      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml"
+      DCA_INTERPOLATE_NORMAL="$<TARGET_FILE:sigma_interpolate_normal>"
+      DCA_INTERPOLATE_SC="$<TARGET_FILE:sigma_interpolate_sc>")
+    add_dependencies(dca_interpolation_tools_test ${dca_tools})
+    alps_add_gtest(dca_interpolation_tools_test COMPONENT dmft LABELS regression)
+  endif()
 else()
-  message(STATUS "GSL not found: sigma_interpolate_normal and sigma_interpolate_sc are not built")
+  message(STATUS "GSL not found: sigma_interpolate_normal, sigma_interpolate_sc and dca_interpolation_tools_test are not built")
 endif()
 
 if(ALPS_BUILD_TESTING)

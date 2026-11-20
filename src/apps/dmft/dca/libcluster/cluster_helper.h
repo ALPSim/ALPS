@@ -14,14 +14,14 @@
 #pragma once
 
 #include <set>
-#include "boost/tuple/tuple.hpp"
+#include <tuple>
 
 #include "alps/params.hpp"
 #include "alps/hdf5/pointer.hpp"
 
 #include "blasheader.h"
 #include "general_matrix.h"
-#include "dump.h"
+#include "alps/hdf5.hpp"
 
 #include "cluster_graph.h"
 

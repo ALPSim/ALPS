@@ -84,36 +84,10 @@ public:
     inline double *values() {return values_; }
     void exp( double c){
       //std::cout<<"exp-ing for c: "<<c<<std::endl;
-#ifdef VECLIB
-      //osx veclib exp
-      //for(int i=0;i<size_;++i){ values_[i]*=c; }
-      int one=1;
-      blas::dscal_(&size_,&c,values_,&one);
-      vecLib::vvexp(values_, values_, &size_); 
-#else
-#ifdef ACML
-      //amd acml vector exp
-      double *scaled_values=new double[size_];
-      daxpy_(&size_, &c, values_, &inc, scaled_values, &inc);
-      acml::vrda_exp(size_, scaled_values, values_);
-      delete[] scaled_values;
-#else
-#ifdef MKL
-      //intel MKL vector exp
-      double *scaled_values=new double[size_];
-      memset(scaled_values, 0,sizeof(double)*size_);
-      int inc=1;
-      daxpy_(&size_, &c, values_, &inc, scaled_values, &inc);
-      mkl::vdExp(size_, scaled_values, values_);
-      delete[] scaled_values;
-#else
       //pedestrian method
       for(int i=0;i<size_;++i){
         values_[i]=std::exp(c*values_[i]);
       }
-#endif
-#endif
-#endif
     }
     void exp(const double &c, const blas::vector &v){
       resize(v.size());
@@ -131,12 +105,6 @@ public:
       size_=new_size;
       values_=size_>0?new double[size_]:0;
     }
-#ifdef ALPS_NGS_HDF5_HPP
-    void save(alps::hdf5::archive &ar)const{
-      ar << alps::make_pvp("size", size());
-      ar << alps::make_pvp("values", &(operator()(0)), size());
-    }
-#endif //ALPS_NGS_HDF5_HPP
 
 private:
     int size_; //current size of matrix
