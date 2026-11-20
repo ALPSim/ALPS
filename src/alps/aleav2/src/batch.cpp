@@ -112,6 +112,20 @@ public:
             coarsen();
     }
 
+    /** Full batches to the first columns and the partial batch to column `last` */
+    void store_aligned(batch_data<T> &data, size_t last) const
+    {
+        if (full_.size() > last)
+            throw std::logic_error("More batches than columns");
+        for (size_t i = 0; i != full_.size(); ++i) {
+            data.batch().col(i) = full_[i];
+            data.count()(i) = count_[i];
+        }
+        data.batch().col(last) = partial_;
+        data.count()(last) = partial_count_;
+        data.set_batch_size(batch_size_);
+    }
+
     /** Write to columns starting at `begin`; returns the number of full batches */
     size_t store(batch_data<T> &data, size_t begin=0) const
     {
@@ -408,21 +422,19 @@ void batch_result<T>::reduce(const reducer &r, bool pre_commit, bool post_commit
     internal::check_valid(*this);
     const reducer_setup setup = r.get_setup();
 
-    // Each instance writes its batches to its own columns of a wider store, so
-    // that the sum over instances puts them side by side: `slots` columns for
-    // full batches and one for the partial batch.
+    // The runs are independent, so the i-th batches of all instances add up to
+    // one batch of the combined run. All instances coarsen to a common batch
+    // size and the sums are taken column by column: the buffer has the same
+    // `num_batches() + 1` columns at any number of instances (the extra column
+    // pools the partial batches).
     if (pre_commit) {
-        reduce_num_batches_ = num_batches();
-        size_t slots = reduce_num_batches_;
-        if (setup.count > 1)
-            slots = std::max<size_t>(2, std::min<size_t>(slots, 2 * slots / setup.count));
-
+        reduce_num_batches_ = r.get_max(num_batches());
         batch_list<T> mine(*store_);
-        mine.fit(slots);
+        mine.fit(reduce_num_batches_);
         mine.coarsen_to(r.get_max(mine.batch_size()));
 
-        store_.reset(new batch_data<T>(size(), setup.count * (slots + 1)));
-        mine.store(*store_, setup.pos * (slots + 1));
+        store_.reset(new batch_data<T>(size(), reduce_num_batches_ + 1));
+        mine.store_aligned(*store_, reduce_num_batches_);
         r.reduce(view<T>(store_->batch().data(), store_->batch().size()));
         r.reduce(view<uint64_t>(store_->count().data(), store_->num_batches()));
     }

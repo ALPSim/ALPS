@@ -88,8 +88,14 @@ TEST(MpiReduce, AleaV2Batch)
 
     EXPECT_EQ(reduced.count(), s.length * s.size);
     EXPECT_NEAR(reduced.mean()[0], s.mean, 1e-13);
-    EXPECT_NEAR(expected.stderror()[0], reduced.stderror()[0], 1e-10 * expected.stderror()[0]);
+    // The i-th batches of the ranks add up, where a serial merge appends them:
+    // the two estimates are equally good, not equal.
+    EXPECT_NEAR(1.0, reduced.stderror()[0] / expected.stderror()[0], 0.2);
     expect_calibrated(reduced.stderror()[0], s);
+    // The reduction keeps the batches of one run, at any number of ranks.
+    const batch_result<double> one = fill<batch_acc<double> >(s, 0).result();
+    EXPECT_EQ(reduced.store().num_batches(), one.store().num_batches());
+    EXPECT_EQ(reduced.store().batch_size(), one.store().batch_size());
 }
 
 // Ranks with runs of different lengths, as after a time limit: rank r holds
@@ -124,10 +130,12 @@ TEST(MpiReduce, AleaV2UnequalRuns)
         EXPECT_EQ(autocorr_reduced.level(level).count(), total_length) << "level " << level;
     EXPECT_EQ(batch_reduced.count(), total_length);
     EXPECT_NEAR(batch_reduced.mean()[0], sum / total_length, 1e-13);
-    // The longest run alone fills all 256 batches with 128 samples each. With
-    // the others appended, neighbours are added once.
-    EXPECT_EQ(batch_reduced.store().batch_size(), 256u);
-    EXPECT_EQ(batch_reduced.store().count()(0), 256u);
+    // The longest run alone fills all 256 batches with 128 samples each. The
+    // shorter runs add to its first batches; none is coarsened.
+    EXPECT_EQ(batch_reduced.store().num_batches(), 256u);
+    EXPECT_EQ(batch_reduced.store().batch_size(), 128u);
+    EXPECT_EQ(batch_reduced.store().count()(0), 128u * s.size);
+    EXPECT_EQ(batch_reduced.store().count()(255), 128u);
 }
 
 // The observable layer: a set reduced over the ranks is the set of the runs
@@ -163,7 +171,7 @@ TEST(MpiReduce, ObservableSet)
 
     EXPECT_EQ(reduced["x"].count(), s.length * s.size);
     EXPECT_NEAR(reduced["x"].mean(), s.mean, 1e-13);
-    EXPECT_NEAR(reduced["x"].error(), expected["x"].error(), 1e-10 * expected["x"].error());
+    EXPECT_NEAR(1.0, reduced["x"].error() / expected["x"].error(), 0.2);
     expect_calibrated(reduced["x"].error(), s);
     EXPECT_NEAR(reduced["plain"].error(), expected["plain"].error(), 1e-10 * expected["plain"].error());
     EXPECT_EQ(reduced["h"].histogram(), expected["h"].histogram());
@@ -171,7 +179,7 @@ TEST(MpiReduce, ObservableSet)
     EXPECT_NEAR(reduced["late"].mean_vector()[1], expected["late"].mean_vector()[1], 1e-13);
     // The bins of the reduced set line up for a function of results.
     const observable_result square = reduced["x"] * reduced["x"], expected_square = expected["x"] * expected["x"];
-    EXPECT_NEAR(square.error(), expected_square.error(), 1e-10 * expected_square.error());
+    EXPECT_NEAR(1.0, square.error() / expected_square.error(), 0.2);
 }
 
 TEST(MpiReduce, Accumulators)
