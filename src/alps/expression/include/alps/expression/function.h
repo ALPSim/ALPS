@@ -18,6 +18,8 @@
 #define ALPS_EXPRESSION_FUNCTION_H
 
 #include <alps/expression/expression_fwd.h>
+#include <sstream>
+#include <stdexcept>
 
 namespace alps {
 namespace expression {
@@ -93,6 +95,13 @@ Evaluatable<T>* Function<T>::partial_evaluate_replace(const Evaluator<T>& p, boo
 template<class T>
 typename Function<T>::value_type Function<T>::value(const Evaluator<T>& p, bool isarg) const
 {
+  // evaluate_function of an unknown function returns it unevaluated and
+  // calls value() on it again, until the stack overflows (issue #385)
+  if (!can_evaluate(p,isarg)) {
+    std::ostringstream text;
+    output(text);
+    throw std::runtime_error("Cannot evaluate " + text.str());
+  }
   value_type val=p.evaluate_function(name_,args_,isarg);
   return val;
 }
