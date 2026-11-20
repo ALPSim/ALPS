@@ -763,9 +763,9 @@ bool WRun::annihilate_worm()
 
   double pacc;
   if (nonlocal) {
-    cyclic_iterator start = w0-1;
-    double wcp =  num > 0 ? worm_creation_probability(t1, time, s, state2, state1) :
-      worm_creation_probability(start->time(), time, s, state2, state1);
+    // The reverse of create_worm, which integrates the weight of the new
+    // segment from the creation time t1, also when the site has no other kink.
+    double wcp = worm_creation_probability(t1, time, s, state2, state1);
     pacc=eta/(creation_matrix_element(state1,state2>state1,s) * beta * wcp);
   }
   else {
