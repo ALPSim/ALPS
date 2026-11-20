@@ -62,6 +62,14 @@ if(TARGET dmrg)
   set_tests_properties(dmrg.invalid_parameter PROPERTIES LABELS "dmrg;cli"
     TIMEOUT 60 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
 
+  add_test(NAME dmrg.measure_other_site
+    COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:dmrg>"
+      "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-DWORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/measure_other_site"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/measure_other_site.cmake")
+  set_tests_properties(dmrg.measure_other_site PROPERTIES LABELS "dmrg;cli"
+    TIMEOUT 60 ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+
   add_test(NAME dmrg.same_seed
     COMMAND "${CMAKE_COMMAND}" "-DAPP=$<TARGET_FILE:dmrg>"
       "-DXML_PATH=${PROJECT_SOURCE_DIR}/src/alps/resources"
