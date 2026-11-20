@@ -49,10 +49,10 @@ The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYR
 | --- | --- | --- |
 | `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied |
 | `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied with the local changes listed below; `mpi.hpp` is installed only by MPI builds |
-| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` |
+| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` and the hypothesis-test fixes in `testing.cpp` |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied |
 | `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied, except that `core.hpp` gains an include (see below) |
-| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp` |
+| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp`; `model.cpp` follows the new return type of `internal::pool_var` |
 | `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Adapted to enforce absolute matrix tolerances; shared test support |
 | `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
@@ -60,7 +60,7 @@ ALPSCore keeps `view.hpp` and the serialization headers in its utilities
 module. In ALPS only ALEA v2 uses them, so they live here, at ALPSCore's include
 spellings.
 
-The CMake files, `tests/coexistence.cpp` and this README are ALPS's own.
+The CMake files, `tests/coexistence.cpp`, `tests/testing.cpp` and this README are ALPS's own.
 
 ### Local changes
 
@@ -75,6 +75,28 @@ observables. Nonzero steps retain their existing behavior. `propagation.hpp`
 documents this extension. Regression tests check the Jacobian at zero and large
 coordinates and preserve zero variance through identity transformations for
 variance, covariance, autocorrelation and batch results.
+
+The hypothesis tests (`testing.hpp`, `src/testing.cpp`, `internal/pooling.hpp`)
+are corrected; `tests/testing.cpp` checks them against hand-computed statistics
+and their false-alarm rate:
+
+- A result with a covariance is rotated into its principal axes with the
+  adjoint of the eigenvectors. The imported code multiplied a column by a
+  matrix, which is undefined for more than one component, and returned a
+  dangling reference to a `cov_result`'s covariance.
+- `test_mean(result1, result2)` uses the covariance of the difference of the
+  means, C1/N1 + C2/N2, with the Krishnamoorthy-Yu degrees of freedom (Welch's
+  test for one component). The imported pooled form assumed equal variances,
+  divided only one of the two covariances by the degrees of freedom, and
+  took N1 N2/(N1 + N2) observations.
+- `t2_result::pvalue()` is two-sided: twice the smaller tail. It returned the
+  smaller tail, which rejects twice as often as the level says, and 1 instead
+  of NaN when there were too few observations.
+- Exactly correlated components (duplicates, sums, symmetric points) make
+  the covariance singular. Its null directions are dropped where the
+  rounding level is known, from the variances and means of the results,
+  instead of by an absolute tolerance, so the test does not depend on the
+  units of the data. `test_mean`'s `atol` defaults to 0.
 
 The shared `near.hpp` helper now enforces an absolute error bound for each matrix
 entry instead of a relative matrix norm. `compare_test.cpp` adds regression
