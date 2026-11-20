@@ -66,7 +66,7 @@ TEST(DmftRegression, ctint_exact_diagonalization) {
   p.supply("NMATSUBARA_MEASUREMENTS", "20");
   p.supply("SWEEPS", "10000000");
   p.supply("THERMALIZATION", "1000");
-  p.supply("MAX_TIME", "600");
+  p.supply("MAX_TIME", "240");  // below the CTest TIMEOUT of 300 s
   p.supply("SEED", "13");
   const std::string output = (temporary.path() / "ctint.out.h5").string();
   alps::solvers::ctint(p, output);

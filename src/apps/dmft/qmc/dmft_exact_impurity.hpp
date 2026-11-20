@@ -12,6 +12,8 @@
 
 #include "dmft_hypothesis.hpp"
 
+#include <alps/config.h>  // ALPS_HAVE_MPI, for is_master()
+
 #include <Eigen/Dense>
 
 #include <bitset>

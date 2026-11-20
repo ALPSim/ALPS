@@ -8,6 +8,8 @@
 // their error bars. The sweeps make an off-by-one in the segment insertion's
 // proposal ratio about ten error bars in the densities; it runs about 8 s in
 // a Release build, the solver being slower per sweep than CT-HYB-SEGMENT.
+// Unoptimized builds are about 30 times slower and run a third of the sweeps;
+// the comparison stays valid with larger error bars.
 
 #include "dmft_exact_impurity.hpp"
 
@@ -26,6 +28,11 @@ using namespace exact_impurity;
 namespace {
 const int n_tau = 200;
 const double mu = 1. + U / 2;
+#ifdef NDEBUG
+const char * const sweeps = "600000";
+#else
+const char * const sweeps = "200000";
+#endif
 }
 
 TEST(DmftRegression, cthyb_exact_diagonalization) {
@@ -39,9 +46,9 @@ TEST(DmftRegression, cthyb_exact_diagonalization) {
   p.supply("N_TAU", std::to_string(n_tau));
   p.supply("DELTA", write_delta_text(temporary.path(), n_tau));
   p.supply("N_MEAS", "20");
-  p.supply("SWEEPS", "600000");
+  p.supply("SWEEPS", sweeps);
   p.supply("THERMALIZATION", "20000");
-  p.supply("MAX_TIME", "600");
+  p.supply("MAX_TIME", "240");  // below the CTest TIMEOUT of 300 s
   p.supply("SEED", "11");
   const std::string output = (temporary.path() / "cthyb.out.h5").string();
   alps::solvers::cthyb(p, output);
