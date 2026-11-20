@@ -13,11 +13,11 @@ name: CI
 permissions:
   contents: read
   packages: read   # CI images on ghcr.io (.github/ci-images)
-# Change detection on push diffs against github.event.before only, so a
-# cancelled master run would leave its commits untested. Cancel PR runs only.
+# Pushes run every area without a recorded pass for its exact fingerprint, so a
+# superseded master run can be cancelled: the next push tests what it skipped.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event.pull_request.number || (github.event_name == 'workflow_dispatch' && github.run_id) || github.ref }}
+  cancel-in-progress: true
 jobs:
   changes:
     name: Select affected areas
@@ -52,7 +52,10 @@ jobs:
     - id: fp
       name: Detect changes and fingerprint areas
       env:
-        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        # Pushes and manual runs pass no base, which marks every area affected:
+        # an area then skips only on a recorded pass of its exact fingerprint,
+        # so a failure on master keeps running until it is fixed.
+        BASE: ${{ github.event.pull_request.base.sha }}
       run: |
         export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
         python3 .github/scripts/ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"
@@ -329,7 +332,7 @@ jobs:
         # In a container job, github.workspace is the host's path. GITHUB_WORKSPACE is the
         # container's, where the cache steps restore and save _build/ccache.
         echo "CCACHE_DIR=$GITHUB_WORKSPACE/_build/ccache" >> "$GITHUB_ENV"
-        { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
+        { cat /etc/os-release; "$CXX" --version; ls /opt/boost/lib 2>/dev/null || true; ls /opt/nfft/lib 2>/dev/null || true; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
         "$CXX" --version | head -1
     - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -338,11 +341,12 @@ jobs:
         path: _build/ccache
         key: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: platform-${{ matrix.image }}-${{ steps.toolchain.outputs.key }}-
+    # The images provide NFFT3 in /opt/nfft (.github/ci-images/install.sh).
     - name: Build and test native code
       run: |
         cmake --preset dev -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
-          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DALPS_ENABLE_NFFT=ON
         cmake --build _build/ci
         ctest --test-dir _build/ci --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Compiler cache statistics
@@ -401,15 +405,18 @@ jobs:
         cmake --preset mpi -B _build/ci \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/ci/install" \
           -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_BUILD_APPLICATIONS=ON -DMPIEXEC_PREFLAGS=--oversubscribe
-        cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
+        cmake --build _build/ci --target observableset_mpi parameters_mpi mc_runner_mpi comm_mpi filelock_mpi halt_mpi info_test_mpi message_mpi process_mpi collect_mpi dmft_ctint_thermalization_mpi dmft_cthyb_segment_exact mc_runner params_hdf5 params_plain_group osiris_dump_serialization citation_runtime \
           mpi_utils_env mpi_utils_comm mpi_utils_bcast mpi_utils_reduce mpi_utils_env_exceptions1 mpi_utils_env_exceptions2 aleav2_mpi_twogauss \
           gf_one_index_gf_test_mpi gf_four_index_gf_test_mpi gf_four_index_gf_test_mismatched_mpi gf_four_index_gf_test_mismatched-tail_mpi \
           gf_multiarray_bcast_mpi gf_mesh_test_mpi gf_new_test_mpi gf_new_tail_test_mpi \
           accumulators_mpi_merge accumulators_mpi_merge_uneven accumulators_repeated_merge accumulators_zero_vector_mpi \
           params_serialize_variant_mpi params_dictionary_bcast_mpi params_bcast_mpi \
-          mc_sum_mpi mc_reduce mc_signed_obs mc_custom_scheduler mc_reduce_unavailable_results
+          mc_sum_mpi mc_reduce mc_signed_obs mc_custom_scheduler mc_reduce_unavailable_results \
+          spinmc qwl qwl_evaluate
     - name: Test two- and three-rank MPI
       run: ctest --test-dir _build/ci -L '^mpi$' -LE '^cli$' --output-on-failure --output-junit mpi.xml --no-tests=error
+    - name: Test the legacy scheduler with two and three ranks
+      run: ctest --test-dir _build/ci -R '(^|[.])scheduler_[a-z_]+_mpi$' --output-on-failure --output-junit scheduler-mpi.xml --no-tests=error
     - name: Test serial behavior with MPI enabled
       run: ctest --test-dir _build/ci -R '^[^.]+\.(mc_runner|params_hdf5|params_plain_group|osiris_dump_serialization)\.'
         --output-on-failure --output-junit ctest.xml --no-tests=error
@@ -424,6 +431,13 @@ jobs:
           -DALPS_DIR="$PWD/_build/sdk/install/share/alps"
         cmake --build _build/consumer
         ctest --test-dir _build/consumer --output-on-failure --output-junit "$PWD/_build/ci/sdk.xml" --no-tests=error
+    - name: Check the parapack MPI tutorials against the installed SDK
+      run: |
+        cmake --install _build/sdk --component tutorials
+        cmake -S _build/sdk/install/share/alps/tutorials/examples -B _build/examples -DCMAKE_BUILD_TYPE=Release \
+          -DALPS_DIR="$PWD/_build/sdk/install/share/alps" -DMPIEXEC_PREFLAGS=--oversubscribe
+        cmake --build _build/examples --target exchange
+        ctest --test-dir _build/examples -R '^exchange_mpi$' --output-on-failure --output-junit "$PWD/_build/ci/tutorials-mpi.xml" --no-tests=error
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
@@ -448,10 +462,12 @@ jobs:
   macos:
     needs: changes
     if: needs.changes.outputs.macos_run == 'true'
-    runs-on: macos-15
+    # The VT Mac mini runs one throw-away macOS 15 VM per job. Fork pull requests,
+    # and every job while the repo variable VT_MACOS is 'off', use GitHub's macos-15.
+    runs-on: ${{ (github.event.pull_request.head.repo.fork || vars.VT_MACOS == 'off') && 'macos-15' || 'vt-macos' }}
     timeout-minutes: 90
     env:
-      CMAKE_BUILD_PARALLEL_LEVEL: 2
+      CMAKE_BUILD_PARALLEL_LEVEL: ${{ (github.event.pull_request.head.repo.fork || vars.VT_MACOS == 'off') && '2' || '4' }}
       CC: clang
       CXX: clang++
     steps:
@@ -508,12 +524,12 @@ jobs:
       with:
         persist-credentials: false
     - uses: ./.github/actions/setup-native
-    - name: Install compiler cache
-      run: sudo apt-get install -y ccache
+    - name: Install compiler cache and NFFT
+      run: sudo apt-get install -y ccache libnfft3-dev libfftw3-dev
     - name: Identify compiler and dependency ABI
       id: toolchain
       run: |
-        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*'; } > "$RUNNER_TEMP/toolchain"
+        { "$CXX" --version; dpkg-query -W 'libboost*' 'libhdf5*' 'libnfft3*'; } > "$RUNNER_TEMP/toolchain"
         echo "key=$(sha256sum "$RUNNER_TEMP/toolchain" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
     - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       id: cache
@@ -525,12 +541,13 @@ jobs:
     # The other native jobs build Release, where assert() is compiled out.
     # This one keeps assertions on and builds the applications too, so a
     # failing assert in dmrg, spinmc or the QMC codes fails CI instead of
-    # silently continuing in the Release binaries.
+    # silently continuing in the Release binaries. It also builds
+    # CT-HYB-SEGMENT's optional NFFT measurements, which no other job does.
     - name: Build and test with assertions enabled
       run: |
         cmake --preset debug -B _build/debug \
           -DCMAKE_INSTALL_PREFIX="$PWD/_build/debug/install" \
-          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF
+          -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_SCAN_FOR_MODULES=OFF -DALPS_ENABLE_MPI=OFF -DALPS_ENABLE_NFFT=ON
         cmake --build _build/debug
         ctest --test-dir _build/debug --output-on-failure --output-junit ctest.xml --no-tests=error
     - name: Compiler cache statistics
@@ -643,7 +660,9 @@ jobs:
         key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
   status:
     name: CI
-    if: always()
+    # A superseded master run is cancelled and its status skipped, not failed;
+    # the next push tests what it left out. On a PR the status always reports.
+    if: ${{ github.event_name == 'pull_request' && always() || !cancelled() }}
     needs:
     - changes
     - static

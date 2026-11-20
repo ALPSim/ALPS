@@ -15,8 +15,11 @@
 #define PARAPACK_OPTION_H
 
 #include <alps/export.h>
+#include <alps/cli/options.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/program_options.hpp>
+#include <iosfwd>
+#include <string>
+#include <vector>
 #include "types.h"
 
 namespace alps {
@@ -24,7 +27,7 @@ namespace parapack {
 
 struct ALPS_DECL option {
   option(int argc, char** argv, bool for_evaluate = false);
-  boost::program_options::options_description desc;
+  alps::cli::options desc;
   bool for_evaluate;
   bool show_help, show_license;
   boost::posix_time::time_duration time_limit;

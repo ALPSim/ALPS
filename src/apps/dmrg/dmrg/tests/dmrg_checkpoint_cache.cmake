@@ -169,10 +169,11 @@ run_dmrg(params "" "")
 expect_refused(params "other parameters" "belongs to other parameters")
 expect("EXISTS \"${params_checkpoint}/progress\"" "checkpoint of other parameters was removed")
 
-# A checkpoint of another format version.
+# A checkpoint of another format version. Version 1 is the format before
+# BMatrix files lost their unused hash members.
 run_dmrg(version "" "kill:4")
 file(READ "${version_checkpoint}/meta" meta)
-string(REPLACE "ALPS DMRG checkpoint 1" "ALPS DMRG checkpoint 0" meta "${meta}")
+string(REPLACE "ALPS DMRG checkpoint 2" "ALPS DMRG checkpoint 1" meta "${meta}")
 file(WRITE "${version_checkpoint}/meta" "${meta}")
 set_resume(version)
 run_dmrg(version "" "")

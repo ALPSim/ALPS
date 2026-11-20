@@ -37,4 +37,13 @@ if(ALPS_BUILD_TESTING AND TARGET parameter2xml AND TARGET convert2xml)
       -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/graph_lattice.cmake")
   set_tests_properties(worm_graph_lattice PROPERTIES LABELS "worm" TIMEOUT 120
     ENVIRONMENT "OMP_NUM_THREADS=1")
+  add_test(NAME worm_green_function_refused
+    COMMAND ${CMAKE_COMMAND}
+      "-Dworm=$<TARGET_FILE:worm>"
+      "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+      "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+      "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/green-function"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/green_function.cmake")
+  set_tests_properties(worm_green_function_refused PROPERTIES LABELS "worm" TIMEOUT 120
+    ENVIRONMENT "OMP_NUM_THREADS=1")
 endif()

@@ -72,7 +72,67 @@ void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& s
   p["DMFT_FRAMEWORK"]=1;
 }
 
-ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms) 
+// ct-hyb-segment reads the same /Delta as hybridization, but differs in its
+// parameters: its own options carry a "cthyb." prefix, its sweeps are single
+// updates rather than N_MEAS updates, it adds U/2 to MU, and it reads U,
+// Uprime and cthyb.J (or a dense U_MATRIX). The interaction matrix and orbital
+// energies of the DMFT loop are therefore passed explicitly, as /Umatrix and
+// /MUvector in the input file.
+void prepare_parms_for_cthyb_segment(alps::Parameters& p, alps::hdf5::archive& solver_input) {
+  const unsigned long n_meas = static_cast<unsigned long>(p["N_MEAS"]);
+  for (const char* counter : {"SWEEPS", "THERMALIZATION"}) {
+    const std::string prefixed = std::string("cthyb.") + counter;
+    if (p.defined(counter) && !p.defined(prefixed))
+      p[prefixed] = static_cast<unsigned long>(p[counter]) * n_meas;
+  }
+  static const char* const options[] = {
+    "N_MEAS", "N_HISTOGRAM_ORDERS", "N_LEGENDRE",
+    "N_W", "N_w2", "N_nn", "MEASURE_freq", "MEASURE_time", "MEASURE_legendre",
+    "MEASURE_g2w", "MEASURE_h2w", "MEASURE_nn", "MEASURE_nnt", "MEASURE_nnw",
+    "MEASURE_sector_statistics", "COMPUTE_VERTEX", "SPINFLIP", "GLOBALFLIP",
+    "ACCURATE_COVARIANCE", "TEXT_OUTPUT", "RET_INT_K", "K_IN_HDF5", "BASEPATH"};
+  for (const char* option : options) {
+    const std::string prefixed = std::string("cthyb.") + option;
+    if (p.defined(option) && !p.defined(prefixed))
+      p[prefixed] = p[option];
+  }
+  // As for hybridization, G(tau) is measured and Fourier transformed here with
+  // the high-frequency tail; the measured G(i omega_n) is noisy at large n.
+  if (!p.defined("cthyb.MEASURE_freq"))
+    p["cthyb.MEASURE_freq"] = 0;
+  const unsigned n_orbital = static_cast<unsigned>(p["FLAVORS"]);
+  const U_matrix U(p);
+  std::vector<double> u_matrix(n_orbital * n_orbital);
+  for (unsigned i = 0; i < n_orbital; ++i)
+    for (unsigned j = 0; j < n_orbital; ++j)
+      u_matrix[i * n_orbital + j] = U(i, j);
+  solver_input << alps::make_pvp("/Umatrix", u_matrix);
+  p["U_MATRIX"] = p["INFILE"];
+  p["UMATRIX_IN_HDF5"] = 1;
+
+  const double mu = p["MU"];
+  const double h = static_cast<double>(p.value_or_default("H", 0.));
+  std::vector<double> mu_vector(n_orbital);
+  for (unsigned f = 0; f < n_orbital; ++f)
+    mu_vector[f] = mu + U.mu_shift() + (h == 0 ? 0. : (f % 2 ? h : -h));
+  solver_input << alps::make_pvp("/MUvector", mu_vector);
+  p["MU_VECTOR"] = p["INFILE"];
+  p["MU_IN_HDF5"] = 1;
+  p.erase("MU");
+
+  p["cthyb.DELTA"] = p["INFILE"];
+  p["cthyb.DELTA_IN_HDF5"] = 1;
+  p["cthyb.DMFT_FRAMEWORK"] = 1;
+}
+
+void ExternalSolver::prepare_parms(alps::Parameters& p, alps::hdf5::archive& solver_input) const {
+  if (exe_.filename() == "ct-hyb-segment")
+    prepare_parms_for_cthyb_segment(p, solver_input);
+  else
+    prepare_parms_for_hybridization(p, solver_input);
+}
+
+ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms)
 {
   alps::Parameters p(parms);
   unsigned int n_tau=(unsigned int)parms["N"];
@@ -110,7 +170,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
       Delta_itime.write_hdf5(solver_input, "/Delta");
       std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, static_cast<double>(p["BETA"]), diagonal);
       
-      prepare_parms_for_hybridization(p,solver_input);
+      prepare_parms(p,solver_input);
     } else {
       G0.write_hdf5(solver_input, "/G0");
     }
@@ -170,7 +230,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       std::ofstream Delta_matsubara_file("Im_delta_matsubara.dat"); print_imag_green_matsubara(Delta_matsubara_file, Delta_matsubara, beta, diagonal);
       std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, beta, diagonal);
       
-      prepare_parms_for_hybridization(p,solver_input);
+      prepare_parms(p,solver_input);
     }
     G0_omega.write_hdf5(solver_input, "/G0");
   }
