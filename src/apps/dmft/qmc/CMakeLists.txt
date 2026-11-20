@@ -122,6 +122,22 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_hilberttransformer_insulating PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_hilberttransformer_insulating COMPONENT dmft LABELS regression)
 
+  add_executable(dmft_hilberttransformer_uniform_field dmft_hilberttransformer_uniform_field.C)
+  target_link_libraries(dmft_hilberttransformer_uniform_field PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_hilberttransformer_uniform_field COMPONENT dmft LABELS regression)
+
+  # dmft stops when SYMMETRIZATION is on together with a field.
+  foreach(field H H_INIT)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dmft_symmetrized_${field}/parm"
+      "SOLVER = \"Hirsch-Fye\"\nOMEGA_LOOP = 1\nSYMMETRIZATION = true\nMAX_IT = 1\nCONVERGED = 0.001\n"
+      "BETA = 4\nU = 2\nt = 0.5\nMU = 0\nN = 16\nNMATSUBARA = 40\nSWEEPS = 100\nTHERMALIZATION = 10\n"
+      "${field} = 0.05\n")
+    add_test(NAME dmft_rejects_symmetrized_${field}
+             COMMAND dmft "${CMAKE_CURRENT_BINARY_DIR}/dmft_symmetrized_${field}/parm")
+    set_tests_properties(dmft_rejects_symmetrized_${field} PROPERTIES LABELS "dmft;regression" TIMEOUT 60
+      PASS_REGULAR_EXPRESSION "SYMMETRIZATION = true requires H = 0 and H_INIT = 0")
+  endforeach()
+
   add_executable(dmft_interaction_expansion_choice dmft_interaction_expansion_choice.C)
   alps_add_gtest(dmft_interaction_expansion_choice COMPONENT dmft LABELS regression)
 

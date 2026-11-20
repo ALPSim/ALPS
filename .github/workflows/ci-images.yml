@@ -26,7 +26,8 @@ env:
 jobs:
   image:
     name: alps-ci:${{ matrix.name }}
-    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
+    # Forks have no ift-vm runner and use GitHub's.
+    runs-on: ${{ (github.repository != 'ALPSim/ALPS' || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
@@ -68,7 +69,7 @@ jobs:
           -t "$TAG" .
         docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3; test -f /opt/nfft/include/nfft3.h && ldconfig -p | grep -q libnfft3'
     - name: Push
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' && github.repository == 'ALPSim/ALPS'
       env:
         TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}

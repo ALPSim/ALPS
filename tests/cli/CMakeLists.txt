@@ -32,6 +32,11 @@ if(Python_Interpreter_FOUND)
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_p2h5.py" "$<TARGET_FILE:p2h5>")
     set_tests_properties(p2h5_cli PROPERTIES TIMEOUT 60 LABELS "cli")
   endif()
+  if(TARGET dmft)
+    add_test(NAME dmft_parm_rewrite
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_parm_rewrite.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_parm_rewrite PROPERTIES TIMEOUT 240 LABELS "cli")
+  endif()
   if(TARGET spinmc)
     add_test(NAME scheduler_sweeps_spinmc
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_sweeps.py"
@@ -44,10 +49,10 @@ if(Python_Interpreter_FOUND)
           "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
       set_tests_properties(scheduler_sweeps_spinmc_mpi PROPERTIES TIMEOUT 120 PROCESSORS 2 LABELS "cli;scheduler;mpi")
     endif()
-    add_test(NAME spinmc_nonsymmetric_coupling
-      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"
+    add_test(NAME spinmc_exact
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_exact.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
-    set_tests_properties(spinmc_nonsymmetric_coupling PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
+    set_tests_properties(spinmc_exact PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
     add_test(NAME spinmc_cluster_magnetization
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_cluster.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
