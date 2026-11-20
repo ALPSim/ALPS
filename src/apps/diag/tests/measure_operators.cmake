@@ -7,6 +7,8 @@
 # "Splus:Sminus" is not symmetric in its operators: its on-site value is
 # 1/2 + <Sz>, and would be 1/2 - <Sz> with the two swapped. The chain is open
 # because local measurements are skipped on translation-invariant lattices.
+# A second task measures the structure factor of the Sz_total = 0 ground state,
+# where its values differ between momenta; for Sz_total = 1 they are all 1/4.
 # Usage: cmake -DAPP=<fulldiag> -DXML_PATH=<resources> -DWORK_DIR=<dir> -P ...
 
 set(ENV{ALPS_XML_PATH} "${XML_PATH}")
@@ -28,8 +30,19 @@ file(WRITE "${WORK_DIR}/task.in.xml" "<SIMULATION><PARAMETERS>
 <PARAMETER name=\"MEASURE_STRUCTURE_FACTOR[Structure factor]\">Sz</PARAMETER>
 </PARAMETERS></SIMULATION>
 ")
+file(WRITE "${WORK_DIR}/task2.in.xml" "<SIMULATION><PARAMETERS>
+<PARAMETER name=\"LATTICE\">open chain lattice</PARAMETER>
+<PARAMETER name=\"MODEL\">spin</PARAMETER>
+<PARAMETER name=\"L\">4</PARAMETER>
+<PARAMETER name=\"J\">1</PARAMETER>
+<PARAMETER name=\"CONSERVED_QUANTUMNUMBERS\">Sz</PARAMETER>
+<PARAMETER name=\"Sz_total\">0</PARAMETER>
+<PARAMETER name=\"MEASURE_STRUCTURE_FACTOR[Structure factor]\">Sz</PARAMETER>
+</PARAMETERS></SIMULATION>
+")
 file(WRITE "${WORK_DIR}/job.in.xml" "<JOB><OUTPUT file=\"job.out.xml\"/>"
-  "<TASK status=\"new\"><INPUT file=\"task.in.xml\"/><OUTPUT file=\"task.out.xml\"/></TASK></JOB>\n")
+  "<TASK status=\"new\"><INPUT file=\"task.in.xml\"/><OUTPUT file=\"task.out.xml\"/></TASK>"
+  "<TASK status=\"new\"><INPUT file=\"task2.in.xml\"/><OUTPUT file=\"task2.out.xml\"/></TASK></JOB>\n")
 
 execute_process(COMMAND "${APP}" --write-xml job.in.xml WORKING_DIRECTORY "${WORK_DIR}"
   RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE err)
@@ -82,3 +95,13 @@ expect("Spin correlations" "( 0 ) -- ( 3 )" 0.176776694 0.176776696)
 expect("Transverse correlations" "( 0 ) -- ( 0 )" 0.926776694 0.926776696)
 expect("Transverse correlations" "( 0 ) -- ( 3 )" -0.073223306 -0.073223304)
 expect("Structure factor" "( 0 )" 0.249999999 0.250000001)
+
+# Sz_total = 0 (singlet ground state, E = -(3 + 2 sqrt(3))/4): S(q) = 0,
+# 0.188996, 0.622008, 0.188996 at q = 0, pi/2, pi, -pi/2, from an independent
+# diagonalization of the six-state sector
+file(READ "${WORK_DIR}/task2.out.xml" xml)
+between(ground "${xml}" "<EIGENSTATE number=\"0\">" "</EIGENSTATE>")
+expect("Structure factor" "( 0 )" -0.000000001 0.000000001)
+expect("Structure factor" "( 1.5708 )" 0.188995765 0.188995767)
+expect("Structure factor" "( 3.14159 )" 0.622008467 0.622008469)
+expect("Structure factor" "( -1.5708 )" 0.188995765 0.188995767)
