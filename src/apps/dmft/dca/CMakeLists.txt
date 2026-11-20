@@ -22,8 +22,7 @@ add_library(alps_dca STATIC
 target_include_directories(alps_dca PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/libcluster"
     "${CMAKE_CURRENT_SOURCE_DIR}/libselfconsistency"
-    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver"
-    "${CMAKE_CURRENT_SOURCE_DIR}/blas_classes")
+    "${CMAKE_CURRENT_SOURCE_DIR}/libsolver")
 target_link_libraries(alps_dca PUBLIC ALPS::alps ALPS::gf)
 # alps/gf/flagcheck.hpp asks consumers to choose its debug checks, as ALPS::gf does.
 target_compile_definitions(alps_dca PUBLIC
@@ -38,23 +37,36 @@ install(FILES libcluster/cluster.xml libcluster/cluster1d.xml libcluster/cluster
   DESTINATION ${CMAKE_INSTALL_DATADIR}/alps/dca COMPONENT applications)
 
 # Tools that interpolate a converged self-energy onto another cluster, to start
-# a new calculation from it. They need GSL for the splines.
+# a new calculation from it. They need GSL for the splines; like the optional
+# archive tool, they are installed with the tools only when GSL is found.
 find_package(GSL QUIET)
 if(GSL_FOUND)
+  set(dca_tools)
   foreach(kind IN ITEMS normal sc)
     add_executable(sigma_interpolate_${kind} AuxiliaryPrograms/sigma_interpolate_${kind}.cpp)
     target_link_libraries(sigma_interpolate_${kind} PRIVATE alps_dca GSL::gsl)
+    list(APPEND dca_tools sigma_interpolate_${kind})
   endforeach()
-  # Optional tools: installed, but not exported or bundled with the applications,
-  # whose set does not depend on optional dependencies.
-  install(TARGETS sigma_interpolate_normal sigma_interpolate_sc
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT applications)
+  install(TARGETS ${dca_tools}
+    RUNTIME_DEPENDENCY_SET alps_runtime
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT tools)
+  if(ALPS_BUILD_TESTING)
+    # Both tools, with fewer and more frequencies than the self-energy has.
+    add_executable(dca_interpolation_tools_test tests/interpolation_tools_test.cpp)
+    target_link_libraries(dca_interpolation_tools_test PRIVATE alps_dca)
+    target_compile_definitions(dca_interpolation_tools_test PRIVATE
+      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml"
+      DCA_INTERPOLATE_NORMAL="$<TARGET_FILE:sigma_interpolate_normal>"
+      DCA_INTERPOLATE_SC="$<TARGET_FILE:sigma_interpolate_sc>")
+    add_dependencies(dca_interpolation_tools_test ${dca_tools})
+    alps_add_gtest(dca_interpolation_tools_test COMPONENT dmft LABELS regression)
+  endif()
 else()
-  message(STATUS "GSL not found: sigma_interpolate_normal and sigma_interpolate_sc are not built")
+  message(STATUS "GSL not found: sigma_interpolate_normal, sigma_interpolate_sc and dca_interpolation_tools_test are not built")
 endif()
 
 if(ALPS_BUILD_TESTING)
-  foreach(test IN ITEMS cluster_helper_test cluster_transform_test
+  foreach(test IN ITEMS cluster_helper_test cluster_transform_test bare_tail_test
                         double_cell_transform_test normal_state_transform_test)
     add_executable(dca_${test} tests/${test}.cpp)
     target_link_libraries(dca_${test} PRIVATE alps_dca)
@@ -74,4 +86,14 @@ if(ALPS_BUILD_TESTING)
     DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
   add_dependencies(dca_noninteracting_loop_test dca dca_free_solver)
   alps_add_gtest(dca_noninteracting_loop_test COMPONENT dmft LABELS regression TIMEOUT 300)
+  add_executable(dca_constant_sigma_solver tests/constant_sigma_solver.cpp)
+  target_link_libraries(dca_constant_sigma_solver PRIVATE alps_dca)
+  add_executable(dca_interacting_loop_test tests/interacting_loop_test.cpp)
+  target_link_libraries(dca_interacting_loop_test PRIVATE alps_dca)
+  target_compile_definitions(dca_interacting_loop_test PRIVATE
+    DCA_EXECUTABLE="$<TARGET_FILE:dca>"
+    DCA_CONSTANT_SIGMA_SOLVER="$<TARGET_FILE:dca_constant_sigma_solver>"
+    DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
+  add_dependencies(dca_interacting_loop_test dca dca_constant_sigma_solver)
+  alps_add_gtest(dca_interacting_loop_test COMPONENT dmft LABELS regression TIMEOUT 300)
 endif()

@@ -10,14 +10,12 @@
 #include<cmath>
 #include<cstdlib>
 
-#include "boost/program_options.hpp"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
 
 #include "cluster.h"
 #include<Eigen/Dense>
-#include"blasheader.h"
 
 //take a vector and interpolate it using GSL in the middle, add constants to the back, and extrapolate parabolically for the first few frequencies if they are outside of the known interval
 std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues);
@@ -36,7 +34,7 @@ void define_parameters_pfile(alps::params &p){
   define_dca_parameters(p);
 }
 
-int main(int argc, char **argv){
+void run(int argc, char **argv){
   alps::params p(argc, (const char**)argv);
   define_parameters_commandline(p);
   if (p.help_requested(std::cout)) {
@@ -52,20 +50,17 @@ int main(int argc, char **argv){
   //general error check
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
-  double h_old=parms_old["H"];
   double nsites_old=parms_old["dca.SITES"];
-  int nfreq_old = parms_new["NMATSUBARA"];
+  int nfreq_old = parms_old["NMATSUBARA"];
   
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
-  double h_new=parms_new["H"];
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["dca.SITES"];
   
   std::cout<<"main parameters: "<<std::endl;
   std::cout<<"new beta: "<<beta_new<<"(old: "<<beta_old<<")"<<std::endl;
   std::cout<<"new mu: "<<mu_new<<"(old: "<<mu_old<<")"<<std::endl;
-  std::cout<<"new h: "<<h_new<<"(old: "<<h_old<<")"<<std::endl;
 
   //create old and new cluster transformers
   NormalStateClusterTransformer CT_old(parms_old);
@@ -94,19 +89,24 @@ int main(int argc, char **argv){
   selfenergy_kspace_interp=selfenergy_orig;
   
   //interpolate for new temperature
-  double nfreq_max=std::max(nfreq_old, nfreq_new);
-  std::vector<double> matsubara_freqs_old(nfreq_max);
-  std::vector<double> matsubara_freqs_new(nfreq_max);
-  for(int i=0;i<nfreq_max;++i){
-    matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
-    matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
-  }
+  // The self-energy is given on the old frequencies and wanted on the new ones.
+  if(selfenergy_orig.mesh1().extent()!=nfreq_old)
+    throw std::invalid_argument("the self-energy has "+std::to_string(selfenergy_orig.mesh1().extent())
+                                +" Matsubara frequencies, but NMATSUBARA of the old parameter file is "
+                                +std::to_string(nfreq_old));
+  if(std::abs(selfenergy_orig.mesh1().beta()-beta_old)>1e-10*beta_old)
+    throw std::invalid_argument("the self-energy is given at beta="+std::to_string(selfenergy_orig.mesh1().beta())
+                                +", but BETA of the old parameter file is "+std::to_string(beta_old));
+  std::vector<double> matsubara_freqs_old(nfreq_old);
+  std::vector<double> matsubara_freqs_new(nfreq_new);
+  for(int i=0;i<nfreq_old;++i) matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
+  for(int i=0;i<nfreq_new;++i) matsubara_freqs_new[i]=(2.*i+1)*M_PI/beta_new;
 
   for(alps::gf::momentum_index j(0);j<nsites_new;++j){
     for(alps::gf::index flavor(0);flavor<2;++flavor){
-      std::vector<double> sigma_real(nfreq_new);
-      std::vector<double> sigma_imag(nfreq_new);
-      for(alps::gf::matsubara_index i(0);i<nfreq_new;++i){
+      std::vector<double> sigma_real(nfreq_old);
+      std::vector<double> sigma_imag(nfreq_old);
+      for(alps::gf::matsubara_index i(0);i<nfreq_old;++i){
         sigma_real[i()]=selfenergy_kspace_interp(i,j,flavor).real();
         sigma_imag[i()]=selfenergy_kspace_interp(i,j,flavor).imag();
         std::cout<<"setting from: "<<std::complex<double>(sigma_real[i()], sigma_imag[i()])<<std::endl;
@@ -138,22 +138,16 @@ int main(int argc, char **argv){
 }
 
 std::vector<double> solve_parabola(const std::vector<double> &xvalues, const std::vector<double> &yvalues){
-  int size=3, one=1;
-  Eigen::Matrix< double , 3, 3> M;
-  M(0,0)=xvalues[0]*xvalues[0]; M(0,1)=xvalues[0]; M(0,2)=1;
-  M(1,0)=xvalues[1]*xvalues[1]; M(1,1)=xvalues[1]; M(1,2)=1;
-  M(2,0)=xvalues[2]*xvalues[2]; M(2,1)=xvalues[2]; M(2,2)=1;
-  
-  std::vector<double> Z(size);
-  Z[0]=yvalues[0]; Z[1]=yvalues[1]; Z[2]=yvalues[2];
-  
-  std::vector<int> ipiv(size);
-  int info=0;
+  Eigen::Matrix3d M;
+  M << xvalues[0]*xvalues[0], xvalues[0], 1,
+       xvalues[1]*xvalues[1], xvalues[1], 1,
+       xvalues[2]*xvalues[2], xvalues[2], 1;
+  const Eigen::Vector3d Z(yvalues[0], yvalues[1], yvalues[2]);
 
-  lapack::dgesv_(&size, &one, &(M(0,0)),&size, &(ipiv[0]), &(Z[0]), &size, &info);
-  if(info) throw std::runtime_error("dgesv info is nonzero.");
-  
-  return Z;
+  const Eigen::FullPivLU<Eigen::Matrix3d> lu(M);
+  if(!lu.isInvertible()) throw std::runtime_error("solve_parabola: the three x values are not distinct.");
+  const Eigen::Vector3d coefficients = lu.solve(Z);
+  return std::vector<double>(coefficients.data(), coefficients.data()+3);
 }
 double evaluate_parabola(const std::vector<double> coefficients, double xvalue){
   return coefficients[0]*xvalue*xvalue+coefficients[1]*xvalue+coefficients[2];
@@ -180,4 +174,14 @@ std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, co
   gsl_interp_accel_free (acc);
   
   return newyvalues;
+}
+
+int main(int argc, char **argv){
+  try {
+    run(argc, argv);
+    return 0;
+  } catch (const std::exception& e) {
+    std::cerr << argv[0] << ": " << e.what() << std::endl;
+    return 1;
+  }
 }

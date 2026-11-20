@@ -350,6 +350,21 @@ TEST(ParameterInputWrite, TextRoundTripKeepsEveryValue) {
     }
 }
 
+// Values whose text starts like a comment (// ... or /* ... */) must be
+// quoted on output so the reader does not treat them as comments and they
+// round-trip character for character. See needs_quotes in parameter.C.
+TEST(ParameterInputWrite, CommentLikeValuesAreQuotedAndRoundTrip) {
+    alps::testing::TemporaryDirectory dir;
+    auto const file = dir.path() / "parm";
+    alps::write_parameter_file(file.string(),
+        make_parameters({{"PATH", "//host/share"}, {"EXPR", "/*x*/y"}, {"L", "4"}}));
+    std::string const written = read_text(file);
+    EXPECT_NE(written.find("PATH = \"//host/share\";"), std::string::npos) << written;
+    EXPECT_NE(written.find("EXPR = \"/*x*/y\";"), std::string::npos) << written;
+    EXPECT_EQ(values(read_text_file(file)),
+              (value_map{{"PATH", "//host/share"}, {"EXPR", "/*x*/y"}, {"L", "4"}}));
+}
+
 TEST(ParameterInputWrite, TextReplacesPreviousContents) {
     alps::testing::TemporaryDirectory dir;
     auto const file = dir.path() / "parm";

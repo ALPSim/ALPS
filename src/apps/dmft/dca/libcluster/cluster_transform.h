@@ -10,7 +10,9 @@
 
 #pragma once
 
-#include <boost/multi_array.hpp>
+#include <Eigen/Dense>
+#include <fstream>
+#include "alps/gf/fourier.hpp"
 #include "cluster_graph.h"
 #include "cluster_helper.h"
 
@@ -31,6 +33,17 @@ typedef alps::gf::itime_k_sigma1_sigma2_gf_with_tail double_cell_itime_kspace_gf
 
 void define_dca_parameters(alps::params &p);
 
+/// A table of values at cluster momentum kc plus lattice momentum kl.
+class kckl_table{
+public:
+  kckl_table(int n_kc, int n_kl): n_kl_(n_kl), values_(std::size_t(n_kc)*n_kl, 0.){}
+  double &operator()(int kc, int kl){ return values_[std::size_t(kc)*n_kl_+kl]; }
+  double operator()(int kc, int kl) const{ return values_[std::size_t(kc)*n_kl_+kl]; }
+private:
+  int n_kl_;
+  std::vector<double> values_;
+};
+
 //The Cluster transformer presents a framework for operator(), which does the Hilbert transform..
 class ClusterTransformer : public ClusterHelper
 {
@@ -45,26 +58,10 @@ public:
   ///mesh points for the real-space mesh of a DCA cluster transformer
   alps::gf::real_space_index_mesh real_space_mesh() const;
 
-  template<typename GFW, typename GFT> void initial_G0(GFW &G0_omega, GFT &G0_tau) const;
 
   ///dispersion relation for t and t' in 1, 2, and 3 d.
   double epsilon(const std::vector<double> &k) const;
-  ///mass imbalance spin-dependent dispersion
-  double epsilon_flavor(const std::vector<double> &k, unsigned int flavor) const;
-  ///dispersion relation for a system with an additional phase
-  double epsilon_phi(const std::vector<double> &k, const std::vector<double> &phi) const;
 
-  ///attach the DCA cluster high frequency behavior for the non-interacting GF
-  virtual void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const {throw std::logic_error("this should be implemented in an inherited class");}
-  ///attach the DCA cluster high frequency behavior for the interacting GF
-  virtual void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
-  virtual void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const {throw std::logic_error("this should be implemented in an inherited class");}
-  ///take a Green's function in k-space and transform it to real space
-  virtual cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
-  virtual cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
-  virtual cluster_matsubara_kspace_gf transform_into_k_space(const cluster_matsubara_realspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
-  ///take a double cell Green's function in k-space and transform it to real space
-  virtual cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const {throw std::logic_error("this should be implemented in an inherited class");}
   ///reading input file
   template<typename GF> bool read_initial_G0(GF &G0_omega) const;
 
@@ -74,38 +71,79 @@ protected:
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   ///get epsilon(k) and the simpson integration weights on the BZ
   void compute_integration_weight_and_dispersion();
-  ///initialize the vector phi with phases
-  void setup_phase_vector(const alps::params &p);
 
   ///compute the center of gravity of the bands etc (used for high frequency analysis)
   void compute_dispersion_weights();
 
+  ///the dispersion at cluster momentum kc plus lattice momentum kl; kl<0 means at the cluster momentum itself
+  double dispersion(int kc, int kl) const;
+  /// The moments m1=<H> and m2=<H^2> of the bare Hamiltonian H(kl) over the
+  /// coarse-graining patch of cluster momentum kc, with the weights of the
+  /// k-sum. The bare G0 = (<(iw - H - Sigma)^-1>^-1 + Sigma)^-1 then has the tail
+  /// 1/iw + m1/(iw)^2 + m2/(iw)^3 for any Sigma. For the isolated cluster,
+  /// H is taken at the cluster momentum only (hamiltonian(-1)).
+  template<class M, class F> void bare_moments(int kc, bool isolated_cluster, F hamiltonian, M &m1, M &m2) const{
+    if (isolated_cluster) {
+      m1 = hamiltonian(-1);
+      m2 = m1*m1;
+      return;
+    }
+    m1.setZero(); m2.setZero();
+    for (int kl=0; kl<n_lattice_momenta(); ++kl) {
+      const double w = weight_kl_[kl]/n_cluster_cells();
+      const M H = hamiltonian(kl);
+      m1 += w*H;
+      m2 += w*H*H;
+    }
+  }
 
-  ///compute G0 from an atomic solution
-  virtual void compute_isolated_cluster_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");}
-  virtual void compute_isolated_cluster_G0(cluster_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");}
-  ///compute G0 from a noninteracting solution
-  virtual void compute_noninteracting_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
-  virtual void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const{ throw std::logic_error("this should be called in a subclass");};
+
+  /// The starting G0 of the loop, and its Fourier transform: read from
+  /// dca.G0_OMEGA_INPUT if that exists, otherwise computed by free (the
+  /// noninteracting lattice) or isolated (the isolated cluster), as
+  /// dca.INITIAL_G0 says, and then written to dca.G0_OMEGA_INPUT.
+  template<typename GFW, typename GFT, typename FREE, typename ISOLATED>
+  void initial_G0(GFW &G0_omega, GFT &G0_tau, FREE free, ISOLATED isolated) const{
+    if(read_initial_G0(G0_omega)) return;
+    if(initial_g0_=="FREE")
+      free(G0_omega);
+    else if (initial_g0_=="ISOLATED")
+      isolated(G0_omega);
+    else
+      throw std::invalid_argument("choose FREE or ISOLATED as initial G0 parameters or provide an input hdf5 file");
+    {
+      alps::hdf5::archive ar(g0_input_path_, "w");
+      G0_omega.save(ar, "/G0");
+      std::ofstream G0_omega_input_file("G0_omega_input.dat"); G0_omega_input_file<<G0_omega;
+    }
+    alps::gf::fourier_frequency_to_time(G0_omega, G0_tau);
+    std::ofstream G0_tau_input_file("G0_tau_input.dat"); G0_tau_input_file<<G0_tau;
+  }
+  /// Green's functions on the frequency and imaginary-time meshes of the loop,
+  /// with the given index meshes after the momentum mesh.
+  template<typename GFW, typename... INDEX> GFW make_matsubara_gf(INDEX... index) const{
+    return GFW(typename GFW::gf_type(alps::gf::matsubara_positive_mesh(beta_, nfreq_), momentum_mesh(), index...));
+  }
+  template<typename GFT, typename... INDEX> GFT make_itime_gf(int n_tau, INDEX... index) const{
+    return GFT(typename GFT::gf_type(alps::gf::itime_mesh(beta_, n_tau), momentum_mesh(), index...));
+  }
+
 
   ///chemical potential
   double mu_;
   double half_filling_;
-  ///t is the basic energy unit of the hopping. t2 is the tprime. t_flavor is only used for mass imbalance
-  double t_, t2_,t_flavor_;
+  ///t is the basic energy unit of the hopping. t2 is the tprime.
+  double t_, t2_;
   double beta_;
   ///interaction is needed for high frequency information in the Fourier transform; same for the V
   double U_;
   double V_;
   int n_flavors_;
   int nfreq_;
-  bool use_phase_;
-  bool use_imbalance_;
 
-  ///dispersion, appropriately binned for cluster point, lattice point (belonging to cluster), and spin (ignored in nambu case)
-  boost::multi_array<double,3> epsilon_kckl_;
+  ///dispersion, binned by cluster momentum and lattice momentum (belonging to the cluster)
+  kckl_table epsilon_kckl_;
   std::vector<double> weight_kl_;
-  std::vector<double> phi_;
 
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
@@ -116,8 +154,19 @@ protected:
 };
 class NormalStateClusterTransformer: public ClusterTransformer{
 public:
+  typedef cluster_matsubara_kspace_gf matsubara_gf;
+  typedef cluster_itime_kspace_gf itime_gf;
+
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
   NormalStateClusterTransformer(const alps::params& params): ClusterTransformer(params){}
+
+  matsubara_gf make_matsubara_gf() const { return ClusterTransformer::make_matsubara_gf<matsubara_gf>(alps::gf::index_mesh(n_flavors_)); }
+  itime_gf make_itime_gf(int n_tau) const { return ClusterTransformer::make_itime_gf<itime_gf>(n_tau, alps::gf::index_mesh(n_flavors_)); }
+  void initial_G0(matsubara_gf &G0_omega, itime_gf &G0_tau) const{
+    ClusterTransformer::initial_G0(G0_omega, G0_tau,
+                                   [this](matsubara_gf &G){ compute_noninteracting_G0(G); },
+                                   [this](matsubara_gf &G){ compute_isolated_cluster_G0(G); });
+  }
   ///virtual destructor
   virtual ~NormalStateClusterTransformer() {}
   
@@ -145,7 +194,7 @@ public:
   void compute_noninteracting_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
-  void attach_bare_tail(cluster_matsubara_kspace_gf &G0) const;
+  void attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster=false) const;
   ///attach the DCA cluster high frequency behavior for the interacting GF
   void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
 
@@ -155,8 +204,6 @@ public:
   cluster_itime_realspace_gf transform_into_real_space(const cluster_itime_kspace_gf& G) const;
   cluster_itime_kspace_gf transform_into_k_space(const cluster_itime_realspace_gf& G) const;
 
-  ///perform the DCA self-consistency cycle
-  cluster_matsubara_kspace_gf operator()(const cluster_matsubara_kspace_gf &G_omega, const cluster_matsubara_kspace_gf &G0_omega) const;
 
 private:
   //symmetrization in momentum space - for the normal state GF
@@ -245,16 +292,26 @@ public:
 
 class DoubleCellClusterTransformer: public ClusterTransformer{
 public:
+  typedef double_cell_matsubara_kspace_gf matsubara_gf;
+  typedef double_cell_itime_kspace_gf itime_gf;
+
   ///Constructor: a cluster transformer has no internal components, everything is delegated to the ClusterHelper
   DoubleCellClusterTransformer(const alps::params& params):
     ClusterTransformer(params),h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
     mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]), afm_symmetry_(params["dca.AFM_SELFCONSISTENCY"]), charge_order_symmetry_(params["dca.CO_SELFCONSISTENCY"]){
-    if(use_phase_) throw std::invalid_argument("use phase should not be used in the double unit cell framework.");
     if(afm_symmetry_ && mu_stag_!=0) throw std::invalid_argument("do not use staggered mu in AFM Self-consistency");
     if(charge_order_symmetry_ && h_!=0) throw std::invalid_argument("do not use magnetic field in CO Self-consistency");
   }
   ///virtual destructor
   virtual ~DoubleCellClusterTransformer() {}
+
+  matsubara_gf make_matsubara_gf() const { return ClusterTransformer::make_matsubara_gf<matsubara_gf>(alps::gf::index_mesh(n_flavors_), alps::gf::index_mesh(n_flavors_)); }
+  itime_gf make_itime_gf(int n_tau) const { return ClusterTransformer::make_itime_gf<itime_gf>(n_tau, alps::gf::index_mesh(n_flavors_), alps::gf::index_mesh(n_flavors_)); }
+  void initial_G0(matsubara_gf &G0_omega, itime_gf &G0_tau) const{
+    ClusterTransformer::initial_G0(G0_omega, G0_tau,
+                                   [this](matsubara_gf &G){ compute_noninteracting_G0(G); },
+                                   [this](matsubara_gf &G){ compute_isolated_cluster_G0(G); });
+  }
 
 
   ///compute G0 from an atomic solution
@@ -289,7 +346,7 @@ public:
 
 private:
   ///attach a tail to the noninteracting GF
-  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag) const;
+  void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
   ///attach a tail to the interacting GF
   void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
   ///perform the AFM symmetrization
@@ -319,15 +376,18 @@ class NambuClusterTransformer : public ClusterTransformer{
 public:
   NambuClusterTransformer(const alps::params& params);
   ///virtual destructor
-  virtual ~NambuClusterTransformer(){};///perform the self-consistency transform. In need of a bit of refactoring; this is not nice.
-  cluster_nambu_matsubara_kspace_gf operator()(const cluster_nambu_matsubara_kspace_gf & G_omega,
-                                                      const cluster_nambu_matsubara_kspace_gf &G0_omega,
-                                                      cluster_nambu_matsubara_kspace_gf &selfenergy,
-                                                      double &mu, const double h, const double eta1, const double eta2,
-                                                      const double beta, const bool use_selfenergy){ throw std::logic_error("a nambu k-space transform is not implemented for this transformer");}
-  cluster_nambu_itime_kspace_gf symmetrize(const cluster_nambu_itime_kspace_gf& G) const{ throw std::logic_error("not implemented");}
-  cluster_nambu_matsubara_kspace_gf symmetrize(const cluster_nambu_matsubara_kspace_gf& G) const{ throw std::logic_error("not implemented");}
-  
+  virtual ~NambuClusterTransformer(){}
+
+  typedef cluster_nambu_matsubara_kspace_gf matsubara_gf;
+  typedef cluster_nambu_itime_kspace_gf itime_gf;
+  matsubara_gf make_matsubara_gf() const { return ClusterTransformer::make_matsubara_gf<matsubara_gf>(alps::gf::index_mesh(n_flavors_), alps::gf::index_mesh(n_flavors_)); }
+  itime_gf make_itime_gf(int n_tau) const { return ClusterTransformer::make_itime_gf<itime_gf>(n_tau, alps::gf::index_mesh(n_flavors_), alps::gf::index_mesh(n_flavors_)); }
+  void initial_G0(matsubara_gf &G0_omega, itime_gf &G0_tau) const{
+    ClusterTransformer::initial_G0(G0_omega, G0_tau,
+                                   [this](matsubara_gf &G){ compute_noninteracting_G0(G); },
+                                   [this](matsubara_gf &G){ compute_isolated_cluster_G0(G); });
+  }
+
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(cluster_nambu_matsubara_kspace_gf& G) const;
 
@@ -353,12 +413,12 @@ public:
     return matsubara_k_sum_adjust_mu(G, sigma, eta1_, eta2_, target_density);
   }
   //Real space and k-space transformers for the Nambu Green's function
-  virtual cluster_nambu_matsubara_realspace_gf nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
-  virtual cluster_nambu_matsubara_kspace_gf nambu_transform_into_k_space(const cluster_nambu_matsubara_realspace_gf& G) const{ throw std::logic_error("not implemented");}
-  virtual cluster_nambu_itime_realspace_gf nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
-  virtual cluster_nambu_itime_kspace_gf nambu_transform_into_k_space(const cluster_nambu_itime_realspace_gf& G) const{ throw std::logic_error("not implemented");}
+  cluster_nambu_matsubara_realspace_gf nambu_transform_into_real_space(const cluster_nambu_matsubara_kspace_gf& G) const;
+  cluster_nambu_itime_realspace_gf nambu_transform_into_real_space(const cluster_nambu_itime_kspace_gf& G) const;
 
-  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h) const;
+  void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h, double eta1, double eta2, bool isolated_cluster=false) const;
+  ///the d-wave form factor cos kx - cos ky at cluster momentum kc plus lattice momentum kl; kl<0 means at the cluster momentum itself
+  double dwave_prefactor(int kc, int kl) const;
   // TODO: h should also enter interacting tail
   void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
   void symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const;
@@ -379,7 +439,7 @@ private:
   ///superconducting bias field eta2
   double eta2_;
   ///buffered d-wave prefactor stored at the lattice momenta
-  boost::multi_array<double,2>  dwave_prefactor_kckl_;
+  kckl_table dwave_prefactor_kckl_;
 };
 
   
@@ -389,7 +449,7 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
                                                     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
   std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
       for (typename GF::mesh3_type::index_type flavor(0); flavor<G.mesh3().extent(); ++flavor) {
         typename GF::value_type av=0;
@@ -411,7 +471,7 @@ template<class GF,class TAIL> void NormalStateClusterTransformer::symmetrize_hel
                                                     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
   std::set<pair_class_type>::const_iterator itc, itc_end;
-  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+  for(std::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
     for (typename GF::mesh1_type::index_type freq(0); freq<G.mesh1().extent(); ++freq) {
       for (typename GF::mesh4_type::index_type flavor(0); flavor<G.mesh4().extent(); ++flavor) {
         typename GF::value_type av=0;

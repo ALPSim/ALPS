@@ -91,6 +91,18 @@ int main(int argc, char** argv)
     parms["BASENAME"]=p.filename().string();
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
+    // ATOMIC made the interaction-expansion solver (the built-in one, or the
+    // interaction program as an external solver) sample the atomic limit and
+    // ignore the bath in every iteration, while the loop built the self-energy
+    // and the next bath from the bath G0 (#347). Other solvers ignored it. It
+    // is no longer supported, in either loop or with any solver.
+    if (parms.defined("ATOMIC"))
+      throw std::invalid_argument("dmft no longer supports ATOMIC. With the interaction-expansion "
+                                  "solver (SOLVER = \"Interaction Expansion\" or the interaction "
+                                  "program) it made the solver ignore the bath in every iteration "
+                                  "(#347); other solvers ignored it. Remove ATOMIC from the "
+                                  "parameter file.");
+
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
       // SYMMETRIZATION averages the two spins of every Green's function, which
@@ -139,6 +151,9 @@ int main(int argc, char** argv)
           
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss;
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd;
+        // The solver keeps a reference to its factory, so every factory has to
+        // live as long as solver_ptr.
+        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> hirschfye_factory;
 
         boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
         if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
@@ -172,8 +187,7 @@ int main(int argc, char** argv)
         }
         else if (parms["SOLVER"]=="Hirsch-Fye") {
           std::cout<<"solving Hirsch Fye"<<std::endl;
-          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-          solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(hirschfye_factory,parms,argc,argv));
           // Built-in solvers print no notice of their own; external solvers do.
           if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
         }
@@ -193,7 +207,15 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    alps::write_parameter_file(input, parms);
+    // Rewrite the input parameter file in its own format. If it cannot be
+    // rewritten (for example a read-only input file) warn instead of failing:
+    // the results are intact and BASENAME.h5 is still written below.
+    try {
+      alps::write_parameter_file(input, parms);
+    } catch (std::exception const& exc) {
+      std::cerr << "Warning: could not rewrite parameter file '" << input
+                << "': " << exc.what() << "\n";
+    }
     if (basename+".h5" != input)
       alps::write_parameter_file(basename+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS
