@@ -23,14 +23,14 @@
 // Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
 namespace cthyb_segment {
 
-void evaluate_basics(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_gtau(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_freq(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_legendre(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_nnt(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_nnw(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_sector_statistics(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
-void evaluate_2p(const alps::accumulators::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_basics(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_gtau(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_freq(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_legendre(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_nnt(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_nnw(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_sector_statistics(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
+void evaluate_2p(const alps::alea::result_set &results, const alps::params &parms, alps::hdf5::archive &solver_output);
 
 inline std::complex<double> t(int n, int l){//transformation matrix from Legendre to Matsubara basis
   std::complex<double> i_c(0., 1.);

@@ -20,11 +20,12 @@
 // Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
 namespace cthyb_segment {
 
-using alps::accumulators::max_bin_number;
-
-typedef alps::accumulators::FullBinningAccumulator<std::vector<double> > vec_obs_t;
-typedef alps::accumulators::FullBinningAccumulator<double> obs_t;
-typedef alps::accumulators::MeanAccumulator<std::vector<double> > simple_vec_t;
+namespace {
+// Binning analysis and 128 bins; the two-particle functions only need means.
+alps::alea::observable vec_obs_t(const std::string &name) { return alps::alea::observable(name); }
+alps::alea::observable obs_t(const std::string &name) { return alps::alea::observable(name); }
+alps::alea::observable simple_vec_t(const std::string &name) { return alps::alea::observable(name).without_bins(); }
+}
 
 
 void hybridization::create_measurements(){//called once in the constructor
