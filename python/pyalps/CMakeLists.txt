@@ -50,7 +50,21 @@ endif()
 if(PYALPS_BUNDLE_APPLICATIONS)
   list(APPEND _alps_components applications)
 endif()
-find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components})
+# CT-HYB-SEGMENT needs Eigen, so an SDK may have been built without it.
+set(_alps_optional_components "")
+if(PYALPS_BUILD_SOLVERS)
+  list(APPEND _alps_optional_components cthyb_segment)
+endif()
+# CT-HYB-SEGMENT (module and program) links the shared ALPS::gf, which is not
+# one of the core runtime libraries, so the wheel has to bundle it as well.
+if(PYALPS_BUILD_SOLVERS OR PYALPS_BUNDLE_APPLICATIONS)
+  list(APPEND _alps_optional_components gf)
+endif()
+find_package(ALPS ${PYALPS_VERSION_CORE} EXACT REQUIRED CONFIG COMPONENTS ${_alps_components}
+  OPTIONAL_COMPONENTS ${_alps_optional_components})
+if(ALPS_gf_FOUND)
+  list(APPEND ALPS_RUNTIME_TARGETS ALPS::gf)
+endif()
 if(NOT ALPS_VERSION VERSION_EQUAL PYALPS_VERSION_CORE)
   message(FATAL_ERROR "pyalps ${PYALPS_VERSION_CORE} requires a matching ALPS SDK; found ${ALPS_VERSION}")
 endif()
@@ -106,6 +120,9 @@ if(PYALPS_BUILD_SOLVERS)
   pyalps_add_module(maxent_c cpp/maxent_c.cpp ALPS::maxent)
   pyalps_add_module(cthyb cpp/cthyb.cpp ALPS::cthyb)
   pyalps_add_module(ctint cpp/ctint.cpp ALPS::ctint)
+  if(ALPS_cthyb_segment_FOUND)
+    pyalps_add_module(cthyb_segment cpp/cthyb_segment.cpp ALPS::cthyb_segment)
+  endif()
 endif()
 
 # A package-specific name avoids DLL/SONAME collisions with other nanobind users.

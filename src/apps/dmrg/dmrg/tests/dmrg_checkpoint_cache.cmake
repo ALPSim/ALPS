@@ -140,10 +140,11 @@ expect("params_output MATCHES \"it belongs to other parameters\"" "checkpoint of
 expect("NOT params_output MATCHES \"resuming\"" "resumed from a checkpoint of other parameters")
 expect("NOT EXISTS \"${params_checkpoint}\"" "run with other parameters left a checkpoint")
 
-# A checkpoint of another format version is discarded, not resumed.
+# A checkpoint of another format version is discarded, not resumed. Version
+# 1 is the format before BMatrix files lost their unused hash members.
 run_dmrg(version "" "kill:4")
 file(READ "${version_checkpoint}/meta" meta)
-string(REPLACE "ALPS DMRG checkpoint 1" "ALPS DMRG checkpoint 0" meta "${meta}")
+string(REPLACE "ALPS DMRG checkpoint 2" "ALPS DMRG checkpoint 1" meta "${meta}")
 file(WRITE "${version_checkpoint}/meta" "${meta}")
 run_dmrg(version "" "")
 expect("version_exit EQUAL 0" "run after version change failed:\n${version_output}")

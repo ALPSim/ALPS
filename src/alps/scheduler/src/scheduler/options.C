@@ -16,15 +16,35 @@
 #include <alps/scheduler/options.h>
 #include <alps/utilities/copyright.hpp>
 #include <alps/cli.hpp>
+#include <alps/cli/options.hpp>
 #include <boost/limits.hpp>
 #include <boost/throw_exception.hpp>
-#include <boost/program_options.hpp>
+#include <iostream>
 #include <stdexcept>
 
 namespace alps {
 namespace scheduler {
 
-namespace po = boost::program_options;
+namespace {
+
+// The options every scheduler program takes; Options adds the job file.
+cli::options declare_options(NoJobfileOptions& o)
+{
+  cli::options desc("Allowed options");
+  desc.flag("help", "produce help message")
+    .flag("license,l", "print license conditions")
+    .flag("mpi", "run in parallel using MPI")
+    .value("checkpoint-time", o.checkpoint_time, 1800, "time between checkpoints")
+    .value("Tmin", o.min_check_time, 60, "minimum time between checks whether a simulation is finished")
+    .value("Tmax", o.max_check_time, 900, "maximum time between checks whether a simulation is finished")
+    .value("time-limit,T", o.time_limit, 0, "time limit for the simulation")
+    .value("Nmin", o.min_cpus, 1, "minimum number of CPUs per simulation")
+    .value("Nmax", o.max_cpus, (std::numeric_limits<int>::max)(), "maximum number of CPUs per simulation")
+    .flag("write-xml", "write results to XML files");
+  return desc;
+}
+
+}
 
 NoJobfileOptions::NoJobfileOptions()
   : min_check_time(60),
@@ -50,35 +70,19 @@ NoJobfileOptions::NoJobfileOptions(int argc, char** argv, const std::string& cit
 {
   if (argc) {
   
-  po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help", "produce help message")
-    ("license,l", "print license conditions") 
-    ("mpi", "run in parallel using MPI") 
-    ("checkpoint-time", po::value<double>(&checkpoint_time)->default_value(1800),"time between checkpoints")
-    ("Tmin", po::value<double>(&min_check_time)->default_value(60),"minimum time between checks whether a simulation is finished")
-    ("Tmax", po::value<double>(&max_check_time)->default_value(900),"maximum time between checks whether a simulation is finished")
-    ("time-limit,T", po::value<double>(&time_limit)->default_value(0),"time limit for the simulation")
-    ("Nmin", po::value<int>(&min_cpus)->default_value(1),"minimum number of CPUs per simulation")
-    ("Nmax", po::value<int>(&max_cpus)->default_value((std::numeric_limits<int>::max)()),"maximum number of CPUs per simulation")
-    ("write-xml","write results to XML files");
+  cli::options desc = declare_options(*this);
   if (alps::handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) {
     valid = false;
     return;
   }
-  po::positional_options_description p;
-  p.add("input-file", 1);
-  
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-  po::notify(vm);
+  desc.parse(argc, argv);
 
-  if (vm.count("mpi")) {
+  if (desc.count("mpi")) {
     use_mpi = true;
   }
 
 #ifdef ALPS_HAVE_HDF5
-  if (vm.count("write-xml"))
+  if (desc.count("write-xml"))
     write_xml = true;
 #else
   write_xml=true;
@@ -106,37 +110,20 @@ Options::Options(int argc, char** argv, const std::string& citation_component)
   if (argc) {
   std::string filename;
   
-  po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help", "produce help message")
-    ("license,l", "print license conditions") 
-    ("mpi", "run in parallel using MPI") 
-    ("checkpoint-time", po::value<double>(&checkpoint_time)->default_value(1800),"time between checkpoints")
-    ("Tmin", po::value<double>(&min_check_time)->default_value(60),"minimum time between checks whether a simulation is finished")
-    ("Tmax", po::value<double>(&max_check_time)->default_value(900),"maximum time between checks whether a simulation is finished")
-    ("time-limit,T", po::value<double>(&time_limit)->default_value(0),"time limit for the simulation")
-    ("Nmin", po::value<int>(&min_cpus)->default_value(1),"minimum number of CPUs per simulation")
-    ("Nmax", po::value<int>(&max_cpus)->default_value((std::numeric_limits<int>::max)()),"maximum number of CPUs per simulation")
-    ("write-xml","write results to XML files")
-    ("input-file", po::value<std::string>(&filename), "input file");
+  cli::options desc = declare_options(*this);
+  desc.value("input-file", filename, "input file").positional("input-file");
   if (alps::handle_cli_information(argc, argv, citation_component, [&] { std::cout << desc << "\n"; })) {
     valid = false;
     return;
   }
-  po::positional_options_description p;
-  p.add("input-file", 1);
-  
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-  po::notify(vm);    
+  desc.parse(argc, argv);
 
-
-  if (vm.count("mpi")) {
+  if (desc.count("mpi")) {
     use_mpi = true;
   }
 
 #ifdef ALPS_HAVE_HDF5
-  if (vm.count("write-xml"))
+  if (desc.count("write-xml"))
     write_xml = true;
 #else
   write_xml=true;

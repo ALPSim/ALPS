@@ -71,6 +71,7 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
   set(BUILD_SHARED_LIBS ON)
 endif()
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
+option(ALPS_ENABLE_NFFT "Use NFFT3 for CT-HYB-SEGMENT frequency measurements" OFF)
 option(ALPS_BUILD_EXTENSIVE_TESTS "Build expensive graph and HDF5 type-matrix tests" OFF)
 option(ALPS_ENABLE_SANITIZERS "Instrument ALPS and tests with address/undefined sanitizers" OFF)
 if(ALPS_ENABLE_SANITIZERS)
@@ -105,12 +106,11 @@ endif()
 string(TIMESTAMP ALPS_YEAR "%Y" UTC)
 
 find_package(Threads REQUIRED)
-set(ALPS_BOOST_COMPONENTS serialization program_options)
 if(ALPS_ENABLE_MPI)
   find_package(MPI REQUIRED COMPONENTS CXX)
   set(ALPS_HAVE_MPI 1)
 endif()
-find_package(Boost 1.76 CONFIG REQUIRED COMPONENTS ${ALPS_BOOST_COMPONENTS})
+find_package(Boost 1.76 CONFIG REQUIRED)
 
 # FindHDF5 supplies HDF5::HDF5 and preserves the provider's configurations.
 # Keep the manylinux_2_28 system package within the supported source-build range.

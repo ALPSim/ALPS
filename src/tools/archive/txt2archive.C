@@ -13,52 +13,47 @@
 
 #include <alps/parser/xmlstream.h>
 #include <alps/parser/xslt_path.h>
-#include <boost/program_options.hpp>
+#include <alps/cli/options.hpp>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-namespace po = boost::program_options;
 using namespace alps;
 
 int main(int argc, char** argv) {
   try {
 
-  po::options_description desc("Required/allowed options");
-  desc.add_options()
-    ("help,h", "produce help message")
-    ("name,n", po::value<std::string>(), "name of simulation")
-    ("version,v", po::value<std::string>(), "version information of application")
-    ("xaxis,x", po::value<std::string>(), "name of xaxis, or parameter [required]")
-    ("yaxis,y", po::value<std::string>(), "name of yaxis, or observable [required]")
-    ("with-error,e", "specify if observable has error bar")
-    ("input-file,i", po::value<std::string>(), "input text file [required]");
-  po::positional_options_description p;
-  p.add("input-file", 1);
+  cli::options desc("Required/allowed options");
+  desc.flag("help,h", "produce help message")
+    .value<std::string>("name,n", "name of simulation")
+    .value<std::string>("version,v", "version information of application")
+    .value<std::string>("xaxis,x", "name of xaxis, or parameter [required]")
+    .value<std::string>("yaxis,y", "name of yaxis, or observable [required]")
+    .flag("with-error,e", "specify if observable has error bar")
+    .value<std::string>("input-file,i", "input text file [required]")
+    .positional("input-file");
+  desc.parse(argc, argv);
 
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("help")) {
+  if (desc.count("help")) {
     std::cerr << desc << std::endl;
     std::exit(0);
   }
 
-  if (!vm.count("input-file") || !vm.count("xaxis") || !vm.count("yaxis")) {
+  if (!desc.count("input-file") || !desc.count("xaxis") || !desc.count("yaxis")) {
     std::cerr << "txt2archive: invalid options\n" << desc << std::endl;
     std::exit(-1);
   }
 
   // read from file
-  std::ifstream is(vm["input-file"].as<std::string>().c_str());
+  std::ifstream is(desc.get<std::string>("input-file").c_str());
   if (!is) throw std::runtime_error("Cannot open input text file");
-  bool with_error = vm.count("with-error");
+  bool with_error = desc.count("with-error");
 
   // output to Archive XML
-  std::string xaxis = vm["xaxis"].as<std::string>();
-  std::string yaxis = vm["yaxis"].as<std::string>();
+  std::string xaxis = desc.get<std::string>("xaxis");
+  std::string yaxis = desc.get<std::string>("yaxis");
 
   oxstream os(std::cout);
   os << header("UTF-8");
@@ -67,13 +62,13 @@ int main(int argc, char** argv) {
      << xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
      << attribute("xsi:noNamespaceSchemaLocation",
                         "http://xml.comp-phys.org/2008/6/archive.xsd");
-  if (vm.count("name"))
-    os << attribute("name", vm["name"].as<std::string>());
+  if (desc.count("name"))
+    os << attribute("name", desc.get<std::string>("name"));
 
-  if (vm.count("version"))
+  if (desc.count("version"))
     os << start_tag("VERSION")
        << attribute("type", "application")
-       << attribute("string", vm["version"].as<std::string>())
+       << attribute("string", desc.get<std::string>("version"))
        << end_tag("VERSION");
 
   std::string str;

@@ -19,6 +19,7 @@
 #include <alps/osiris/std/vector.h>
 
 #include <boost/throw_exception.hpp>
+#include <cstring>
 #include <stdexcept>
 
 namespace alps {
