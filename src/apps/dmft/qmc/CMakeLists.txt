@@ -145,6 +145,9 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)
   alps_add_gtest(dmft_ctint_sz_results COMPONENT dmft LABELS regression)
 
+  # The exact diagonalization in dmft_exact_impurity.hpp uses Eigen.
+  find_package(Eigen3 CONFIG QUIET)
+
   # The serial solver stops after SWEEPS; under MPI it stops at the adapter's
   # scheduled checks, where a rank can still be thermalizing.
   if(NOT ALPS_ENABLE_MPI)
@@ -156,9 +159,9 @@ if(ALPS_BUILD_TESTING)
     target_link_libraries(dmft_ctint_thermalization PRIVATE ALPS::ctint)
     alps_add_gtest(dmft_ctint_thermalization COMPONENT dmft LABELS regression)
 
-    if(TARGET ALPS::gf)
+    if(TARGET Eigen3::Eigen)
       add_executable(dmft_ctint_exact dmft_ctint_exact.C)
-      target_link_libraries(dmft_ctint_exact PRIVATE ALPS::ctint ALPS::gf)
+      target_link_libraries(dmft_ctint_exact PRIVATE ALPS::ctint Eigen3::Eigen)
       alps_add_gtest(dmft_ctint_exact COMPONENT dmft LABELS regression TIMEOUT 300)
     endif()
   else()
@@ -167,11 +170,9 @@ if(ALPS_BUILD_TESTING)
     alps_add_mpi_gtest(dmft_ctint_thermalization_mpi COMPONENT dmft RANKS 2 LABELS regression)
   endif()
 
-  # The exact diagonalization in dmft_exact_impurity.hpp needs Eigen, which
-  # comes with ALPS::gf.
-  if(TARGET ALPS::gf)
+  if(TARGET Eigen3::Eigen)
     add_executable(dmft_cthyb_exact dmft_cthyb_exact.C)
-    target_link_libraries(dmft_cthyb_exact PRIVATE ALPS::cthyb ALPS::gf)
+    target_link_libraries(dmft_cthyb_exact PRIVATE ALPS::cthyb Eigen3::Eigen)
     if(NOT ALPS_ENABLE_MPI)
       alps_add_gtest(dmft_cthyb_exact COMPONENT dmft LABELS regression TIMEOUT 300)
     else()
@@ -181,7 +182,7 @@ if(ALPS_BUILD_TESTING)
 
   if(TARGET ALPS::cthyb_segment)
     add_executable(dmft_cthyb_segment_exact dmft_cthyb_segment_exact.C)
-    target_link_libraries(dmft_cthyb_segment_exact PRIVATE ALPS::cthyb_segment)
+    target_link_libraries(dmft_cthyb_segment_exact PRIVATE ALPS::cthyb_segment Eigen3::Eigen)
     if(NOT ALPS_ENABLE_MPI)
       alps_add_gtest(dmft_cthyb_segment_exact COMPONENT dmft LABELS regression TIMEOUT 300)
     else()
