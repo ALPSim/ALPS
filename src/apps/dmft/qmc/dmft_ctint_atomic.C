@@ -8,10 +8,14 @@
 // evaluation now uses the same atomic G0. This test runs the Hubbard atom at
 // half filling without INFILE and MU, in both measurement modes, and checks
 // that G(tau) is the one of a run that reads G0 = 1/(i w_n) from INFILE with
-// MU = 0, and the exact result. It also checks that INFILE, MU, H, EPS_f and
-// EPSSQ_f given with ATOMIC=1 change nothing.
+// MU = 0, and the exact result. The solver writes no errors for G(tau), so
+// that comparison has a fixed tolerance; in the Matsubara measurement mode
+// the densities and the double occupancy, which have errors, are compared
+// with the exact values in units of their error bars. It also checks that
+// INFILE, MU, H, EPS_f and EPSSQ_f given with ATOMIC=1 change nothing.
 
-#include <gtest/gtest.h>
+#include "dmft_hypothesis.hpp"
+
 #include <alps/testing/temporary_directory.hpp>
 
 #include <alps/hdf5/archive.hpp>
@@ -45,6 +49,11 @@ struct working_directory {
 // G(tau) of one flavor of the Hubbard atom U (n_up - 1/2)(n_down - 1/2)
 double exact_green(double tau) {
   return -0.5 * (std::exp(-tau * U / 2) + std::exp(-(beta - tau) * U / 2)) / (1 + std::exp(-beta * U / 2));
+}
+
+// <n_up n_down> of the Hubbard atom: the doubly occupied state over Z
+double exact_double_occupancy() {
+  return 0.5 * std::exp(-beta * U / 4) / (std::exp(-beta * U / 4) + std::exp(beta * U / 4));
 }
 
 alps::params atomic_parameters(bool histogram) {
@@ -112,6 +121,22 @@ TEST(DmftRegression, ctint_atomic_without_infile) {
     // The largest error over 40 seeds is 0.019 in either measurement mode.
     for (int t = 0; t <= n_tau; t += 5)
       EXPECT_NEAR(g[t], exact_green(beta * t / n_tau), 0.05) << "tau index " << t;
+
+    if (!histogram) {
+      alps::hdf5::archive ar(output, "r");
+      std::vector<double> densities, density_errors;
+      double double_occupancy, double_occupancy_error;
+      ar >> alps::make_pvp("/simulation/results/densities/mean/value", densities)
+         >> alps::make_pvp("/simulation/results/densities/mean/error", density_errors)
+         >> alps::make_pvp("/simulation/results/density_correlation/mean/value", double_occupancy)
+         >> alps::make_pvp("/simulation/results/density_correlation/mean/error", double_occupancy_error);
+      ASSERT_EQ(densities.size(), 2u);
+      ASSERT_EQ(density_errors.size(), 2u);
+      mc_hypothesis::family family(3);
+      for (int f = 0; f < 2; ++f)
+        family.expect("density " + std::to_string(f), densities[f], density_errors[f], 0.5);
+      family.expect("<n_up n_down>", double_occupancy, double_occupancy_error, exact_double_occupancy());
+    }
   }
 }
 
