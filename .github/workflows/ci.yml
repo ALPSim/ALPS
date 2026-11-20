@@ -13,11 +13,11 @@ name: CI
 permissions:
   contents: read
   packages: read   # CI images on ghcr.io (.github/ci-images)
-# Change detection on push diffs against github.event.before only, so a
-# cancelled master run would leave its commits untested. Cancel PR runs only.
+# Pushes run every area without a recorded pass for its exact fingerprint, so a
+# superseded master run can be cancelled: the next push tests what it skipped.
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.event.pull_request.number || (github.event_name == 'workflow_dispatch' && github.run_id) || github.ref }}
+  cancel-in-progress: true
 jobs:
   changes:
     name: Select affected areas
@@ -52,7 +52,10 @@ jobs:
     - id: fp
       name: Detect changes and fingerprint areas
       env:
-        BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        # Pushes and manual runs pass no base, which marks every area affected:
+        # an area then skips only on a recorded pass of its exact fingerprint,
+        # so a failure on master keeps running until it is fixed.
+        BASE: ${{ github.event.pull_request.base.sha }}
       run: |
         export TOOLCHAIN="$RUNNER_OS-$RUNNER_ARCH-${ImageOS:-}-${ImageVersion:-}"
         python3 .github/scripts/ci/fingerprint.py --base "$BASE" --head HEAD >> "$GITHUB_OUTPUT"
@@ -428,6 +431,13 @@ jobs:
           -DALPS_DIR="$PWD/_build/sdk/install/share/alps"
         cmake --build _build/consumer
         ctest --test-dir _build/consumer --output-on-failure --output-junit "$PWD/_build/ci/sdk.xml" --no-tests=error
+    - name: Check the parapack MPI tutorials against the installed SDK
+      run: |
+        cmake --install _build/sdk --component tutorials
+        cmake -S _build/sdk/install/share/alps/tutorials/examples -B _build/examples -DCMAKE_BUILD_TYPE=Release \
+          -DALPS_DIR="$PWD/_build/sdk/install/share/alps" -DMPIEXEC_PREFLAGS=--oversubscribe
+        cmake --build _build/examples --target exchange
+        ctest --test-dir _build/examples -R '^exchange_mpi$' --output-on-failure --output-junit "$PWD/_build/ci/tutorials-mpi.xml" --no-tests=error
     - name: Summarize tests
       run: python .github/scripts/junit_summary.py '_build/ci/*.xml' '_build/mpi/*.xml'
       if: always()
@@ -650,7 +660,9 @@ jobs:
         key: pass-packaging-${{ needs.changes.outputs.packaging_key }}
   status:
     name: CI
-    if: always()
+    # A superseded master run is cancelled and its status skipped, not failed;
+    # the next push tests what it left out. On a PR the status always reports.
+    if: ${{ github.event_name == 'pull_request' && always() || !cancelled() }}
     needs:
     - changes
     - static

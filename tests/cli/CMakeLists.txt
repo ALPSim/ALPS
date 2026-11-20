@@ -44,10 +44,10 @@ if(Python_Interpreter_FOUND)
           "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "2" ${MPIEXEC_PREFLAGS})
       set_tests_properties(scheduler_sweeps_spinmc_mpi PROPERTIES TIMEOUT 120 PROCESSORS 2 LABELS "cli;scheduler;mpi")
     endif()
-    add_test(NAME spinmc_nonsymmetric_coupling
-      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_coupling.py"
+    add_test(NAME spinmc_exact
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_exact.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
-    set_tests_properties(spinmc_nonsymmetric_coupling PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
+    set_tests_properties(spinmc_exact PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
     add_test(NAME spinmc_cluster_magnetization
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_cluster.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
