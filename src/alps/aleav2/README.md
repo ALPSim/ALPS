@@ -49,10 +49,10 @@ The imported copyright and license notices are retained in [COPYRIGHT.TXT](COPYR
 | --- | --- | --- |
 | `alea/include/alps/alea.hpp` | `include/alps/alea.hpp` | Copied |
 | `alea/include/alps/alea/**` | `include/alps/alea/**` | Copied with the local changes listed below; `mpi.hpp` is installed only by MPI builds |
-| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` |
+| `alea/src/*.cpp` (13 files) | `src/` | Copied except for the zero-step correction in `propagation.cpp` and the hypothesis-test fixes in `testing.cpp` |
 | `utilities/include/alps/common/view.hpp` | `include/alps/common/view.hpp` | Copied |
 | `utilities/include/alps/serialization/{core,eigen,util}.hpp` | `include/alps/serialization/` | Copied, except that `core.hpp` gains an include (see below) |
-| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp` |
+| `alea/test/*.cpp` (10 files), `alea/test/dataset.hpp` | `tests/` | Copied with local regression cases in `transform.cpp` and `compare_test.cpp`; `model.cpp` follows the new return type of `internal::pool_var` |
 | `utilities/include/alps/testing/near.hpp` | `tests/support/alps/testing/near.hpp` in the repository root | Adapted to enforce absolute matrix tolerances; shared test support |
 | `COPYRIGHT.TXT`, `LICENSE.TXT` | here | Copied |
 
@@ -60,7 +60,7 @@ ALPSCore keeps `view.hpp` and the serialization headers in its utilities
 module. In ALPS only ALEA v2 uses them, so they live here, at ALPSCore's include
 spellings.
 
-The CMake files, `tests/coexistence.cpp` and this README are ALPS's own.
+The CMake files, `tests/coexistence.cpp`, `tests/testing.cpp` and this README are ALPS's own.
 
 ### Local changes
 
