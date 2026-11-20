@@ -1,4 +1,5 @@
 // Copyright (C) 2005-2026 by Emanuel Gull
+// Copyright (C) 2026 by Tobias Wolf
 // ALPS Project: https://alps.comp-phys.org/
 // SPDX-License-Identifier: MIT
 
@@ -14,6 +15,7 @@
 // of G0. With the spin symmetrization on and a Sigma that differs between the
 // spins, dca must hand the spin average of the solver's G to Dyson's equation.
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
@@ -112,8 +114,13 @@ fs::path run_dca(const std::string& dir_name, const std::string& extra_parameter
         << "solver.INFILE_H5GF = alps_solver_in.h5gf\nsolver.OUTFILE_H5GF = alps_solver_out.h5gf\n"
         << extra_parameters;
   parms.close();
-  const std::string command = "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
-  EXPECT_EQ(std::system(command.c_str()), 0) << "dca failed, see " << (dir / "dca.log");
+  // The working directory is changed here rather than with "cd" in the
+  // command, which would not change drives under cmd.exe.
+  const fs::path cwd = fs::current_path();
+  fs::current_path(dir);
+  const int status = std::system("\"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1");
+  fs::current_path(cwd);
+  EXPECT_EQ(status, 0) << "dca failed, see " << (dir / "dca.log");
   return dir;
 }
 
@@ -180,6 +187,7 @@ TEST_P(InteractingLoop, ConvergesWithTheSolversSelfEnergy) {
   const sigma_case& c = GetParam();
   const bool normal = c.framework == "NORMAL", nambu = c.framework == "NAMBU";
   const int stride = normal || nambu ? 1 : 2;
+  const int spins = nambu ? 1 : 2;  // a Nambu block holds both spins
   const fs::path dir = run_dca("InteractingLoop_" + c.framework, parameters(c));
   if (HasFailure()) return;
   for (int it = 0; it < 3; ++it)
@@ -194,7 +202,7 @@ TEST_P(InteractingLoop, ConvergesWithTheSolversSelfEnergy) {
     for (alps::gf::matsubara_index w(0); w < n_matsubara; ++w) {
       const double omega = normal ? S_normal.mesh1().points()[w()] : S_block.mesh1().points()[w()];
       for (int K = 0; K < sites; K += stride)
-        for (int s = 0; s < 2; ++s) {
+        for (int s = 0; s < spins; ++s) {
           const block found = normal ? element(S_normal, w, K, s) : element(S_block, w, K, s, nambu);
           const auto Kv = normal ? S_normal.mesh2().points() : S_block.mesh2().points();
           const block expected = sigma(c, omega, s, Kv(K, 0), Kv(K, 1));
@@ -209,15 +217,32 @@ TEST_P(InteractingLoop, ConvergesWithTheSolversSelfEnergy) {
   // coarse-graining patches. On Betts2D-4A these are the squares of side pi
   // around the cluster momenta, and Sigma in a patch is that of its cluster
   // momentum. Gauss-Legendre in each patch converges fast, as the lattice G is
-  // smooth inside a patch.
+  // smooth inside a patch. The patches are taken to be those of Betts2D-4A,
+  // so the cluster momenta must be its four, (0 or pi, 0 or pi).
   const fs::path last = dir / "Greens_2.h5";
   const auto G_normal = normal ? load<cluster_matsubara_kspace_gf>(last, "/G_komega") : cluster_matsubara_kspace_gf();
   const auto G_block = normal ? block_gf() : load<block_gf>(last, "/G_komega");
   const auto Kv = normal ? G_normal.mesh2().points() : G_block.mesh2().points();
+  ASSERT_EQ(Kv.shape()[0], std::size_t(sites));
+  {
+    std::vector<int> corners;
+    for (int K = 0; K < sites; ++K) {
+      int corner = 0;
+      for (int d = 0; d < 2; ++d) {
+        const double k = std::remainder(Kv(K, d), 2. * M_PI);  // in [-pi, pi]
+        ASSERT_TRUE(std::abs(k) < 1e-12 || std::abs(std::abs(k) - M_PI) < 1e-12)
+            << "cluster momentum " << K << " is not one of Betts2D-4A's; the patches below assume them";
+        corner += (std::abs(k) > 1. ? 1 : 0) << d;
+      }
+      corners.push_back(corner);
+    }
+    std::sort(corners.begin(), corners.end());
+    ASSERT_EQ(corners, (std::vector<int>{0, 1, 2, 3})) << "the cluster momenta are not Betts2D-4A's four";
+  }
   const std::vector<std::pair<double, double>> rule = gauss_legendre(patch_points);
   for (alps::gf::matsubara_index w(0); w < n_matsubara; w += 7) {
     const double omega = normal ? G_normal.mesh1().points()[w()] : G_block.mesh1().points()[w()];
-    for (int s = 0; s < 2; ++s) {
+    for (int s = 0; s < spins; ++s) {
       block reference = block::Zero();
       std::vector<block> patch_reference(sites, block::Zero());
       for (int K = 0; K < sites; ++K) {

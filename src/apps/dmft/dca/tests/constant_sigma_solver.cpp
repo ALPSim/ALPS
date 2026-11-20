@@ -1,4 +1,5 @@
 // Copyright (C) 2005-2026 by Emanuel Gull
+// Copyright (C) 2026 by Tobias Wolf
 // ALPS Project: https://alps.comp-phys.org/
 // SPDX-License-Identifier: MIT
 
@@ -23,6 +24,9 @@
 //
 // The solver also checks that the G0_tau it gets is the Fourier transform of
 // its G0, and stops with an error if it is not.
+//
+// --MU, which dca passes with sc.ADJUST_MU, is accepted and ignored: the
+// chemical potential enters only through G0, which dca computes with it.
 
 #include <cmath>
 #include <complex>
@@ -182,7 +186,8 @@ void solve(const std::string& infile, const std::string& outfile, framework_t fr
 
 int main(int argc, char** argv) {
   try {
-    if (argc < 2) throw std::invalid_argument("usage: constant_sigma_solver <parameter file> [--MU=<mu>]");
+    if (argc < 2)
+      throw std::invalid_argument("usage: constant_sigma_solver <parameter file> [--MU=<mu> (ignored)]");
     alps::params p{std::string(argv[1])};
     p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf", "input file");
     p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf", "output file");
