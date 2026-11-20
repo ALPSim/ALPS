@@ -175,11 +175,18 @@ std::vector<double> observable_result::binning_errors(std::size_t i) const
     // A ratio or another function of results has no binning analysis.
     if (!impl_->autocorr || impl_->function)
         return errors;
-    // Levels with one batch only say nothing.
-    for (size_t level = 0; level != impl_->autocorr->nlevel(); ++level) {
-        if (impl_->autocorr->level(level).observations() >= 2)
-            errors.push_back(impl_->autocorr->level(level).stderror()(i));
+    // Levels with one batch only say nothing. Each level is evaluated for all
+    // components at once, so asking for every component stays linear.
+    if (!impl_->binning) {
+        std::shared_ptr<std::vector<std::vector<double> > > table(new std::vector<std::vector<double> >);
+        for (size_t level = 0; level != impl_->autocorr->nlevel(); ++level) {
+            if (impl_->autocorr->level(level).observations() >= 2)
+                table->push_back(to_vector(impl_->autocorr->level(level).stderror()));
+        }
+        impl_->binning = table;
     }
+    for (const std::vector<double> &level : *impl_->binning)
+        errors.push_back(level.at(i));
     return errors;
 }
 

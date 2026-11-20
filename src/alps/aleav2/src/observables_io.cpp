@@ -112,7 +112,8 @@ void write_plain(hdf5::archive &ar, const std::string &group, const observable_r
     std::vector<std::vector<double> > table;
     for (size_t i = 0; i != result.size(); ++i) {
         const std::vector<double> errors = result.binning_errors(i);
-        table.resize(errors.size(), std::vector<double>(result.size()));
+        if (table.size() < errors.size())
+            table.resize(errors.size(), std::vector<double>(result.size()));
         for (size_t level = 0; level != errors.size(); ++level)
             table[level][i] = errors[level];
     }

@@ -104,6 +104,10 @@ struct observable_result::impl
     error_convergence convergence;      // worst of the parts, without the own
     mutable batch_pointer evaluated;
 
+    // The binning analysis of `autocorr`: one row per bin length with at
+    // least two bins, one column per component. Evaluated once, on demand.
+    mutable std::shared_ptr<const std::vector<std::vector<double> > > binning;
+
     // A result read from a file has the numbers that were stored, and bins if
     // the file has them. It has none of the accumulated data above.
     struct stored_values
