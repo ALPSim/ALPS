@@ -13,7 +13,6 @@ protected:
     alps::params p;
     L_=20;
     p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-    p["dca.LATTICE_DUMP"] = "./cluster.h5";
     p["dca.LATTICE"] = "Betts2D-4A";
     p["dca.SITES"]=4;
     p["dca.L"] = L_;
