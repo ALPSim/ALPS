@@ -92,41 +92,57 @@ cluster_matsubara_kspace_gf load(const fs::path& file, const std::string& path) 
   return G;
 }
 
+// Run dca in the directory dir_name and return that directory.
+fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it = 10,
+                 bool write_iterations = true, const std::string& extra_parameters = "",
+                 bool expect_success = true) {
+  const fs::path dir = fs::absolute(dir_name);
+  fs::remove_all(dir);
+  fs::create_directories(dir);
+  std::ofstream parms(dir / "params.ini");
+  parms << "BETA = " << beta << "\n"
+        << "MU = " << mu << "\n"
+        << "U = 0\n"
+        << "t = " << t << "\n"
+        << "tprime = " << c.tprime << "\n"
+        << "N = 128\n"
+        << "NMATSUBARA = " << n_matsubara << "\n"
+        << "FLAVORS = 2\n"
+        << "dca.LATTICE = " << c.lattice << "\n"
+        << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_DIR << "/" << c.library << "\n"
+        << "dca.SITES = " << c.sites << "\n"
+        << "dca.L = " << c.L << "\n"
+        << "dca.INITIAL_G0 = ISOLATED\n"
+        << "dca.G0_OMEGA_INPUT = G0_omega.h5\n"
+        << "dca.G0_OMEGA_OUTPUT = G0_omega.h5\n"
+        << "sc.MAX_IT = " << max_it << "\n"
+        << "sc.SELFCONSISTENCY_CONVERGENCE = 1e-8\n"
+        << "sc.WRITE_ITERATIONS = " << (write_iterations ? "true" : "false") << "\n"
+        << "solver.SOLVER = " << DCA_FREE_SOLVER << "\n"
+        << "solver.INFILE_H5GF = alps_solver_in.h5gf\n"
+        << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n"
+        << extra_parameters;
+  parms.close();
+  const std::string command =
+      "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
+  const int status = std::system(command.c_str());
+  if (expect_success)
+    EXPECT_EQ(status, 0) << "dca failed, see " << (dir / "dca.log");
+  else
+    EXPECT_NE(status, 0) << "dca did not fail, see " << (dir / "dca.log");
+  return dir;
+}
+
+std::string read_file(const fs::path& file) {
+  std::ifstream in(file);
+  std::stringstream text;
+  text << in.rdbuf();
+  return text.str();
+}
+
 class NoninteractingLoop : public ::testing::TestWithParam<cluster_case> {
 protected:
-  // Run dca in its own directory and return that directory.
-  fs::path run_dca() {
-    const cluster_case& c = GetParam();
-    const fs::path dir = fs::absolute(c.lattice);
-    fs::remove_all(dir);
-    fs::create_directories(dir);
-    std::ofstream parms(dir / "params.ini");
-    parms << "BETA = " << beta << "\n"
-          << "MU = " << mu << "\n"
-          << "U = 0\n"
-          << "t = " << t << "\n"
-          << "tprime = " << c.tprime << "\n"
-          << "N = 128\n"
-          << "NMATSUBARA = " << n_matsubara << "\n"
-          << "FLAVORS = 2\n"
-          << "dca.LATTICE = " << c.lattice << "\n"
-          << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_DIR << "/" << c.library << "\n"
-          << "dca.SITES = " << c.sites << "\n"
-          << "dca.L = " << c.L << "\n"
-          << "dca.INITIAL_G0 = ISOLATED\n"
-          << "dca.G0_OMEGA_INPUT = G0_omega.h5\n"
-          << "dca.G0_OMEGA_OUTPUT = G0_omega.h5\n"
-          << "sc.MAX_IT = 10\n"
-          << "sc.SELFCONSISTENCY_CONVERGENCE = 1e-8\n"
-          << "solver.SOLVER = " << DCA_FREE_SOLVER << "\n"
-          << "solver.INFILE_H5GF = alps_solver_in.h5gf\n"
-          << "solver.OUTFILE_H5GF = alps_solver_out.h5gf\n";
-    parms.close();
-    const std::string command =
-        "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
-    EXPECT_EQ(std::system(command.c_str()), 0) << "dca failed, see " << (dir / "dca.log");
-    return dir;
-  }
+  fs::path run_dca() { return ::run_dca(GetParam(), GetParam().lattice); }
 };
 
 TEST_P(NoninteractingLoop, ConvergesToCoarseGrainedLatticeGreensFunction) {
@@ -220,5 +236,58 @@ INSTANTIATE_TEST_SUITE_P(
         if (ch == '-') ch = '_';
       return name;
     });
+
+// The loop needs three iterations here. Stopped earlier by sc.MAX_IT, dca says
+// so and exits normally: a run for a fixed number of iterations is the usual
+// way to use it, and convergence is checked afterwards.
+TEST(LoopOptions, StopsAtMaxIt) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "MaxIt_Betts2D-4A", 1);
+  if (HasFailure()) return;
+  EXPECT_TRUE(fs::exists(dir / "Greens_0.h5"));
+  EXPECT_FALSE(fs::exists(dir / "Greens_1.h5"));
+  EXPECT_NE(read_file(dir / "dca.log").find("dca stopped after sc.MAX_IT=1 iterations"),
+            std::string::npos);
+}
+
+// sc.WRITE_ITERATIONS=false writes only the G0 to continue from; a converged
+// run says that it converged.
+TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "NoIterationFiles_Betts2D-4A", 10, false);
+  if (HasFailure()) return;
+  EXPECT_TRUE(fs::exists(dir / "G0_omega.h5"));
+  EXPECT_FALSE(fs::exists(dir / "Greens_0.h5"));
+  EXPECT_FALSE(fs::exists(dir / "selfenergy_0"));
+  EXPECT_FALSE(fs::exists(dir / "G_omega"));
+  const std::string log = read_file(dir / "dca.log");
+  EXPECT_NE(log.find("iteration 2: change of G"), std::string::npos);
+  EXPECT_NE(log.find("dca stopped: the change of G"), std::string::npos);
+  EXPECT_EQ(log.find("sc.MAX_IT=10 iterations"), std::string::npos);
+}
+
+// In Nambu space the spin symmetrization assumes no Zeeman field; with one,
+// dca refuses to run instead of removing the field from G0 in every iteration.
+TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  for (const char* field : {"dca.H", "dca.H_INIT"}) {
+    const fs::path dir = run_dca(c, std::string("NambuField_") + field, 10, true,
+                                 std::string("sc.NAMBU = true\n") + field + " = 0.3\n", false);
+    EXPECT_NE(read_file(dir / "dca.log").find("needs sc.SPIN_SYMMETRIZATION = false"), std::string::npos)
+        << field;
+  }
+}
+
+// A complex d-wave pairing field is a global phase away from a real one, and
+// the G0(tau) handed to the solver is real; dca refuses dca.ETA2 != 0.
+TEST(LoopOptions, RefusesNambuComplexPairingField) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  for (const char* field : {"dca.ETA2", "dca.ETA2_INIT"}) {
+    const fs::path dir = run_dca(c, std::string("NambuEta2_") + field, 10, true,
+                                 std::string("sc.NAMBU = true\n") + field + " = 0.2\n", false);
+    EXPECT_NE(read_file(dir / "dca.log").find("set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|"), std::string::npos)
+        << field;
+  }
+}
 
 } // namespace

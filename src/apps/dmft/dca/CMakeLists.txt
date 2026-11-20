@@ -67,7 +67,7 @@ else()
 endif()
 
 if(ALPS_BUILD_TESTING)
-  foreach(test IN ITEMS cluster_helper_test cluster_transform_test
+  foreach(test IN ITEMS cluster_helper_test cluster_transform_test bare_tail_test
                         double_cell_transform_test normal_state_transform_test)
     add_executable(dca_${test} tests/${test}.cpp)
     target_link_libraries(dca_${test} PRIVATE alps_dca)
