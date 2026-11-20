@@ -271,6 +271,7 @@ private:
     size_t reduce_num_batches_ = 0;     // number of batches before a reduction
 
     friend class batch_acc<T>;
+    friend class result_set;    // reduces a whole set in one commit
 };
 
 /** Check if two results are identical */

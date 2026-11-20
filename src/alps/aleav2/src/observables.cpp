@@ -4,6 +4,9 @@
  */
 #include "observables_impl.hpp"
 
+#include <memory>
+#include <vector>
+
 namespace alps { namespace alea {
 
 
@@ -444,52 +447,145 @@ std::vector<std::string> result_set::names() const
     return names;
 }
 
-void result_set::reduce(const reducer &r)
+namespace {
+
+/**
+ * Groups the small reductions of a whole result set into one per type until
+ * `commit`. The interface allows a reducer to defer; this one does so for any
+ * reducer it wraps, without holding a copy of the large ones: those are
+ * passed on at once, as their cost is the data and not the latency.
+ */
+class grouping_reducer : public reducer
 {
+public:
+    explicit grouping_reducer(const reducer &inner) : inner_(inner) { }
+
+    reducer_setup get_setup() const override { return inner_.get_setup(); }
+    int64_t get_max(int64_t value) const override { return inner_.get_max(value); }
+    void reduce(view<double> data) const override { defer(data, doubles_); }
+    void reduce(view<int32_t> data) const override { defer(data, ints_); }
+    void reduce(view<int64_t> data) const override { defer(data, longs_); }
+
+    void commit() const override
+    {
+        flush(doubles_);
+        flush(ints_);
+        flush(longs_);
+        inner_.commit();
+    }
+
+private:
+    static const size_t small = 4096;
+
+    template <typename T>
+    void defer(view<T> data, std::vector<view<T> > &pending) const
+    {
+        if (data.size() > small)
+            inner_.reduce(data);
+        else if (data.size() != 0)
+            pending.push_back(data);
+    }
+
+    template <typename T>
+    void flush(std::vector<view<T> > &pending) const
+    {
+        size_t total = 0;
+        for (const view<T> &data : pending)
+            total += data.size();
+        std::vector<T> packed;
+        packed.reserve(total);
+        for (const view<T> &data : pending)
+            packed.insert(packed.end(), data.data(), data.data() + data.size());
+        if (total != 0)
+            inner_.reduce(view<T>(packed.data(), packed.size()));
+        size_t offset = 0;
+        for (view<T> &data : pending) {
+            std::copy(packed.begin() + offset, packed.begin() + offset + data.size(), data.data());
+            offset += data.size();
+        }
+        pending.clear();
+    }
+
+    const reducer &inner_;
+    mutable std::vector<view<double> > doubles_;
+    mutable std::vector<view<int32_t> > ints_;
+    mutable std::vector<view<int64_t> > longs_;
+};
+
+}
+
+void result_set::reduce(const reducer &outer)
+{
+    // All observables first post their reductions, then one commit sends the
+    // small ones together, then each collects its result.
+    const grouping_reducer r(outer);
     const reducer_setup setup = r.get_setup();
+    struct pending
+    {
+        std::shared_ptr<observable_result::impl> reduced;
+        std::vector<int64_t> counts;
+        std::unique_ptr<autocorr_result<double> > autocorr;
+        std::unique_ptr<batch_result<double> > batch;
+        std::unique_ptr<var_result<double> > simple;
+    };
     std::map<std::string, std::shared_ptr<observable_result::impl> > parts;
+    std::vector<pending> all;
+    all.reserve(impl_->results.size());
     for (const auto &named : impl_->results) {
         const observable_result::impl &mine = *named.second.impl_;
         if (mine.stored)
             throw std::invalid_argument(quoted(named.first) + " was read from a result file and cannot be reduced");
-        std::shared_ptr<observable_result::impl> reduced(new observable_result::impl(mine.declaration));
-        parts[named.first] = reduced;
+        all.emplace_back();
+        pending &p = all.back();
+        p.reduced.reset(new observable_result::impl(mine.declaration));
+        parts[named.first] = p.reduced;
 
         if (mine.declaration.histogram_) {
-            std::vector<int64_t> counts(mine.counts.begin(), mine.counts.end());
-            r.reduce(view<int64_t>(counts.data(), counts.size()));
-            r.commit();
-            reduced->counts.assign(counts.begin(), counts.end());
-            reduced->size = counts.size();
-            reduced->count = std::accumulate(counts.begin(), counts.end(), uint64_t(0));
+            p.counts.assign(mine.counts.begin(), mine.counts.end());
+            r.reduce(view<int64_t>(p.counts.data(), p.counts.size()));
             continue;
         }
 
         // An instance without samples does not know the number of components.
-        reduced->size = r.get_max(mine.size);
-        if (reduced->size == 0)
+        p.reduced->size = r.get_max(mine.size);
+        if (p.reduced->size == 0)
             continue;
-        if (mine.size != 0 && mine.size != reduced->size)
+        if (mine.size != 0 && mine.size != p.reduced->size)
             throw std::invalid_argument(quoted(named.first) + " differs in size between instances");
         if (mine.declaration.with_bins_) {
-            autocorr_result<double> autocorr = mine.autocorr
-                ? *mine.autocorr : autocorr_acc<double>(reduced->size).finalize();
-            batch_result<double> batch = mine.batch
-                ? *mine.batch : batch_acc<double>(reduced->size, mine.declaration.num_bins_).finalize();
-            autocorr.reduce(r);
-            batch.reduce(r);
-            if (setup.have_result) {
-                reduced->count = autocorr.count();
-                reduced->autocorr.reset(new autocorr_result<double>(autocorr));
-                reduced->batch.reset(new batch_result<double>(batch));
-                reduced->parts.push_back(reduced->batch);
-            }
+            p.autocorr.reset(new autocorr_result<double>(mine.autocorr
+                ? *mine.autocorr : autocorr_acc<double>(p.reduced->size).finalize()));
+            p.batch.reset(new batch_result<double>(mine.batch
+                ? *mine.batch : batch_acc<double>(p.reduced->size, mine.declaration.num_bins_).finalize()));
+            p.autocorr->reduce(r, true, false);
+            p.batch->reduce(r, true, false);
         } else {
-            var_result<double> simple = mine.simple ? *mine.simple : var_acc<double>(reduced->size).finalize();
-            simple.reduce(r);
+            p.simple.reset(new var_result<double>(mine.simple
+                ? *mine.simple : var_acc<double>(p.reduced->size).finalize()));
+            p.simple->reduce(r, true, false);
+        }
+    }
+    r.commit();
+    for (pending &p : all) {
+        observable_result::impl &reduced = *p.reduced;
+        if (reduced.declaration.histogram_) {
+            reduced.counts.assign(p.counts.begin(), p.counts.end());
+            reduced.size = p.counts.size();
+            reduced.count = std::accumulate(p.counts.begin(), p.counts.end(), uint64_t(0));
+        } else if (p.autocorr) {
+            p.autocorr->reduce(r, false, true);
+            p.batch->reduce(r, false, true);
             if (setup.have_result) {
-                reduced->count = simple.count();
-                reduced->simple.reset(new var_result<double>(simple));
+                reduced.count = p.autocorr->count();
+                reduced.autocorr.reset(p.autocorr.release());
+                reduced.batch.reset(p.batch.release());
+                reduced.parts.push_back(reduced.batch);
+            }
+        } else if (p.simple) {
+            p.simple->reduce(r, false, true);
+            if (setup.have_result) {
+                reduced.count = p.simple->count();
+                reduced.simple.reset(p.simple.release());
             }
         }
     }

@@ -287,6 +287,7 @@ private:
 
     friend class var_acc<T,Strategy>;
     friend class autocorr_result<T>;
+    friend class result_set;    // reduces a whole set in one commit
 };
 
 /** Check if two results are identical */

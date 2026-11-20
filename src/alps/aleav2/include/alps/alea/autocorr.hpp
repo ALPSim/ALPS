@@ -254,6 +254,7 @@ private:
     std::vector<level_result_type> level_;
 
     friend class autocorr_acc<T>;
+    friend class result_set;    // reduces a whole set in one commit
 };
 
 /** Check if two results are identical */
