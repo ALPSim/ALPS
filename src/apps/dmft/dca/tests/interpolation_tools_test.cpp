@@ -6,13 +6,15 @@
 // to a run with other parameters. Here the old run has NMATSUBARA = 64 and
 // the new one 32 or 128 at the same BETA, so the new frequencies are old ones
 // or lie above them: the interpolated self-energy must equal the old one
-// where they coincide and its last value above the old range.
+// where they coincide and its last value above the old range. A self-energy
+// whose beta is not the old BETA must be refused.
 
 #include <complex>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <sstream>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -21,7 +23,6 @@
 #include "alps/params.hpp"
 
 #include "cluster_transform.h"
-#include "test_dump_file.h"
 
 namespace {
 
@@ -30,21 +31,20 @@ namespace fs = std::filesystem;
 const double beta = 5.;
 const int n_old = 64;
 
-void write_parameters(const fs::path& file, int n_matsubara, const std::string& dump) {
+void write_parameters(const fs::path& file, int n_matsubara) {
   std::ofstream f(file);
   f << "BETA = " << beta << "\nMU = 0.3\nU = 2\nt = 1\nN = 100\nNMATSUBARA = " << n_matsubara << "\n"
     << "dca.LATTICE = Betts2D-4A\ndca.SITES = 4\ndca.L = 8\n"
-    << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_LIBRARY << "\ndca.LATTICE_DUMP = " << dump << "\n"
+    << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_LIBRARY << "\n"
     << "dca.G0_OMEGA_INPUT = G0.h5\ndca.G0_OMEGA_OUTPUT = G0.h5\n";
 }
 
-alps::params transformer_parameters(const std::string& dump) {
+alps::params transformer_parameters() {
   alps::params p;
   p["dca.L"] = 8;
   p["dca.LATTICE"] = "Betts2D-4A";
   p["dca.SITES"] = 4;
   p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-  p["dca.LATTICE_DUMP"] = dump;
   p["MU"] = 0.3;
   p["t"] = 1.;
   p["tprime"] = 0.;
@@ -74,24 +74,57 @@ std::complex<double> sigma_value(int w, int k, int a, int b) {
   return (0.3 + 0.1 * k + 0.05 * a - 0.02 * b) + (1.5 + 0.1 * a * b) / iw;
 }
 
-// Runs a tool in its own directory: interpolate from n_old to n_new.
-fs::path run_tool(const std::string& tool, const std::string& name, int n_new, const std::string& extra,
-                  const std::function<void(alps::hdf5::archive&, const std::string&)>& write_sigma) {
-  const fs::path dir = fs::absolute(name);
+void write_normal_sigma(alps::hdf5::archive& ar, double sigma_beta) {
+  NormalStateClusterTransformer T(transformer_parameters());
+  cluster_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma_gf(
+      alps::gf::matsubara_positive_mesh(sigma_beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(2)));
+  for (alps::gf::matsubara_index w(0); w < n_old; ++w)
+    for (alps::gf::momentum_index k(0); k < 4; ++k)
+      for (alps::gf::index f(0); f < 2; ++f) sigma(w, k, f) = sigma_value(w(), k(), f(), 0);
+  sigma.save(ar, "/Sigma");
+}
+
+void write_nambu_sigma(alps::hdf5::archive& ar, double sigma_beta) {
+  NambuClusterTransformer T(transformer_parameters());
+  cluster_nambu_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma1_sigma2_gf(
+      alps::gf::matsubara_positive_mesh(sigma_beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(2),
+      alps::gf::index_mesh(2)));
+  for (alps::gf::matsubara_index w(0); w < n_old; ++w)
+    for (alps::gf::momentum_index k(0); k < 4; ++k)
+      for (alps::gf::index a(0); a < 2; ++a)
+        for (alps::gf::index b(0); b < 2; ++b) sigma(w, k, a, b) = sigma_value(w(), k(), a(), b());
+  sigma.save(ar, "/Sigma");
+}
+
+// Runs a tool in its own directory dir, interpolating a self-energy given at
+// sigma_beta from n_old to n_new frequencies, and returns its exit status.
+// The working directory is changed here rather than with "cd" in the command,
+// which would not change drives under cmd.exe.
+int run_tool(const std::string& tool, const fs::path& dir, int n_new, const std::string& extra,
+             double sigma_beta, const std::function<void(alps::hdf5::archive&, double)>& write_sigma) {
   fs::remove_all(dir);
   fs::create_directories(dir);
-  const std::string dump = (dir / "cluster.h5").string();
-  write_parameters(dir / "old.ini", n_old, dump);
-  write_parameters(dir / "new.ini", n_new, dump);
+  write_parameters(dir / "old.ini", n_old);
+  write_parameters(dir / "new.ini", n_new);
   {
     alps::hdf5::archive ar((dir / "sigma.h5").string(), "w");
-    write_sigma(ar, dump);
+    write_sigma(ar, sigma_beta);
   }
-  const std::string command = "cd \"" + dir.string() + "\" && \"" + tool +
+  const std::string command = "\"" + tool +
                               "\" --pfile_old=old.ini --pfile_new=new.ini --sigma=sigma.h5 --g0=out.h5 " +
                               extra + " > tool.log 2>&1";
-  EXPECT_EQ(std::system(command.c_str()), 0) << "see " << (dir / "tool.log");
-  return dir;
+  const fs::path cwd = fs::current_path();
+  fs::current_path(dir);
+  const int status = std::system(command.c_str());
+  fs::current_path(cwd);
+  return status;
+}
+
+std::string read_file(const fs::path& file) {
+  std::ifstream f(file);
+  std::stringstream s;
+  s << f.rdbuf();
+  return s.str();
 }
 
 // The value the interpolation must give at new frequency w.
@@ -101,17 +134,9 @@ class InterpolationTools : public ::testing::TestWithParam<int> {};
 
 TEST_P(InterpolationTools, NormalState) {
   const int n_new = GetParam();
-  const fs::path dir = run_tool(DCA_INTERPOLATE_NORMAL, "normal_" + std::to_string(n_new), n_new, "",
-                                [](alps::hdf5::archive& ar, const std::string& dump) {
-    NormalStateClusterTransformer T(transformer_parameters(dump));
-    cluster_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma_gf(
-        alps::gf::matsubara_positive_mesh(beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(2)));
-    for (alps::gf::matsubara_index w(0); w < n_old; ++w)
-      for (alps::gf::momentum_index k(0); k < 4; ++k)
-        for (alps::gf::index f(0); f < 2; ++f) sigma(w, k, f) = sigma_value(w(), k(), f(), 0);
-    sigma.save(ar, "/Sigma");
-  });
-  if (HasFailure()) return;
+  const fs::path dir = fs::absolute("normal_" + std::to_string(n_new));
+  ASSERT_EQ(run_tool(DCA_INTERPOLATE_NORMAL, dir, n_new, "", beta, write_normal_sigma), 0)
+      << "see " << (dir / "tool.log");
   cluster_matsubara_kspace_gf result;
   alps::hdf5::archive ar((dir / "out.h5").string(), "r");
   result.load(ar, "/Sigma");
@@ -126,19 +151,9 @@ TEST_P(InterpolationTools, NormalState) {
 TEST_P(InterpolationTools, Nambu) {
   const int n_new = GetParam();
   const double factor = 2.;  // mult_anomalous
-  const fs::path dir = run_tool(DCA_INTERPOLATE_SC, "nambu_" + std::to_string(n_new), n_new,
-                                "--mult_anomalous=2", [](alps::hdf5::archive& ar, const std::string& dump) {
-    NambuClusterTransformer T(transformer_parameters(dump));
-    cluster_nambu_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma1_sigma2_gf(
-        alps::gf::matsubara_positive_mesh(beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(2),
-        alps::gf::index_mesh(2)));
-    for (alps::gf::matsubara_index w(0); w < n_old; ++w)
-      for (alps::gf::momentum_index k(0); k < 4; ++k)
-        for (alps::gf::index a(0); a < 2; ++a)
-          for (alps::gf::index b(0); b < 2; ++b) sigma(w, k, a, b) = sigma_value(w(), k(), a(), b());
-    sigma.save(ar, "/Sigma");
-  });
-  if (HasFailure()) return;
+  const fs::path dir = fs::absolute("nambu_" + std::to_string(n_new));
+  ASSERT_EQ(run_tool(DCA_INTERPOLATE_SC, dir, n_new, "--mult_anomalous=2", beta, write_nambu_sigma), 0)
+      << "see " << (dir / "tool.log");
   cluster_nambu_matsubara_kspace_gf result;
   alps::hdf5::archive ar((dir / "out.h5").string(), "r");
   result.load(ar, "/Sigma");
@@ -156,5 +171,20 @@ TEST_P(InterpolationTools, Nambu) {
 
 // Fewer and more frequencies than the old run.
 INSTANTIATE_TEST_SUITE_P(NewMatsubara, InterpolationTools, ::testing::Values(32, 128));
+
+// A self-energy at another beta than the old BETA lives on other frequencies.
+TEST(InterpolationToolsBeta, NormalStateRefusesOtherBeta) {
+  const fs::path dir = fs::absolute("normal_other_beta");
+  EXPECT_NE(run_tool(DCA_INTERPOLATE_NORMAL, dir, n_old, "", 2 * beta, write_normal_sigma), 0);
+  EXPECT_NE(read_file(dir / "tool.log").find("BETA of the old parameter file"), std::string::npos)
+      << read_file(dir / "tool.log");
+}
+
+TEST(InterpolationToolsBeta, NambuRefusesOtherBeta) {
+  const fs::path dir = fs::absolute("nambu_other_beta");
+  EXPECT_NE(run_tool(DCA_INTERPOLATE_SC, dir, n_old, "", 2 * beta, write_nambu_sigma), 0);
+  EXPECT_NE(read_file(dir / "tool.log").find("BETA of the old parameter file"), std::string::npos)
+      << read_file(dir / "tool.log");
+}
 
 }  // namespace

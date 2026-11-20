@@ -14,7 +14,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "test_dump_file.h"
 #include "cluster_transform.h"
 #include "alps/params.hpp"
 
@@ -30,7 +29,6 @@ alps::params common_parameters() {
   p["dca.LATTICE"] = "Betts2D-8A";
   p["dca.SITES"] = n_sites;
   p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-  p["dca.LATTICE_DUMP"] = test_dump_file();
   p["MU"] = 0.3;
   p["t"] = 1.;
   p["tprime"] = -0.25;

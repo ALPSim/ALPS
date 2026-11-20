@@ -916,8 +916,9 @@ void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf
     for(alps::gf::index f1(0); f1<2; f1++) {
       for(alps::gf::index f2(0); f2<2; f2++) {
         c1(k,f1,f2) = f1()==f2() ? 1. : 0.;
-        // The tails and G(tau) are real, so only real pairing fields
-        // (dca.ETA2=0) are represented; the imaginary part is dropped.
+        // The tails and G(tau) are real, so only real pairing fields are
+        // represented. A complex field with this form factor is a global phase
+        // away from a real one; dca refuses dca.ETA2 != 0 (perform_cluster_loop).
         c2(k,f1,f2) = m1(f1(),f2()).real();
         c3(k,f1,f2) = m2(f1(),f2()).real();
       }

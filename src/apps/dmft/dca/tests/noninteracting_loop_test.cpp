@@ -411,19 +411,23 @@ TEST_P(BlockLoop, ConvergesToCoarseGrainedLatticeGreensFunction) {
     ASSERT_LT(std::abs(G_2.data().data()[i] - G0_1.data().data()[i]), 1e-12);
 
   // Every element of every block, against the patch average of the 2x2
-  // lattice G over dca's lattice momenta, read from its cluster cache. Only
-  // that k grid is shared with dca; the dispersion and fields are the test's
-  // own. This checks the off-diagonal elements, whose sign the zone average
-  // below cannot see (it vanishes for the d-wave F).
+  // lattice G over dca's lattice momenta, set up here with dca's ClusterHelper
+  // for the same cluster and dca.L. Only that k grid is shared with dca; the
+  // dispersion and fields are the test's own. This checks the off-diagonal
+  // elements, whose sign the zone average below cannot see (it vanishes for
+  // the d-wave F).
   {
-    alps::hdf5::archive ar((dir / "cluster.h5").string(), "r");
-    const std::string table = "/" + c.cluster.lattice + "/L" + std::to_string(c.cluster.L) + "/lattice_momenta";
-    int rows, columns;
-    ar[table + "/size1"] >> rows;
-    ar[table + "/size2"] >> columns;
-    ASSERT_EQ(columns, dim + 1);  // the momentum and its weight
+    alps::params p;
+    p["dca.LATTICE"] = c.cluster.lattice;
+    p["dca.LATTICE_LIBRARY"] = std::string(DCA_CLUSTER_DIR) + "/" + c.cluster.library;
+    p["dca.SITES"] = c.cluster.sites;
+    p["dca.L"] = c.cluster.L;
+    p["dca.AFM_SELFCONSISTENCY"] = false;
+    const ClusterHelper helper(p);
+    const int rows = helper.n_lattice_momenta(), columns = dim + 1;  // the momentum and its weight
     std::vector<double> lattice(std::size_t(rows) * columns);
-    ar >> alps::make_pvp(table + "/values", lattice.data(), lattice.size());
+    for (int l = 0; l < rows; ++l)
+      for (int d = 0; d < columns; ++d) lattice[l * columns + d] = helper.lattice_momentum(l, d);
     for (alps::gf::matsubara_index w(0); w < n_matsubara; w += 7) {
       const double omega = G_2.mesh1().points()[w()];
       for (int K = 0; K < n_sites; K += stride()) {
@@ -512,6 +516,18 @@ TEST(LoopOptions, AllowsNambuFieldWithoutSpinSymmetrization) {
                                "sc.NAMBU = true\ndca.H = 0.3\nsc.SPIN_SYMMETRIZATION = false\n");
   if (HasFailure()) return;
   EXPECT_NE(read_file(dir / "dca.log").find("dca stopped: the change of G"), std::string::npos);
+}
+
+// A complex d-wave pairing field is a global phase away from a real one, and
+// the G0(tau) handed to the solver is real; dca refuses dca.ETA2 != 0.
+TEST(LoopOptions, RefusesNambuComplexPairingField) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  for (const char* field : {"dca.ETA2", "dca.ETA2_INIT"}) {
+    const fs::path dir = run_dca(c, std::string("NambuEta2_") + field, 10, true,
+                                 std::string("sc.NAMBU = true\n") + field + " = 0.2\n", false);
+    EXPECT_NE(read_file(dir / "dca.log").find("set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|"), std::string::npos)
+        << field;
+  }
 }
 
 } // namespace
