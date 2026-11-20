@@ -37,8 +37,8 @@ namespace fs = std::filesystem;
 
 // Version 2: BMatrix files no longer hold the unused hash members.
 const char* const meta_magic = "ALPS DMRG checkpoint 2";
-// reruns that may fail to commit anything after resuming before the
-// checkpoint is taken to be what makes them fail
+// resumed runs that may fail before completing their first iteration
+// before the checkpoint is taken to be what makes them fail
 const int max_resume_attempts = 2;
 
 // Last committed iteration of a regular sweep, the state of the Lanczos
@@ -48,13 +48,16 @@ struct Position { int sweep; int dir; int iter; long random_state; long seed; };
 typedef std::map<std::string, std::vector<double> > Series;
 
 // Everything that makes a checkpoint invalid for another run. Parameters that
-// only affect where or how results are written are left out, and so is SEED:
+// only affect where or how results are written are left out, and so is the
+// sweep schedule (SWEEPS and the states kept), so that a run kept with
+// KEEP_CHECKPOINT can be continued with more sweeps or states. So is SEED:
 // parameter2xml and pyalps.writeInputFiles choose a new one on each call. A
 // resumed run continues with the generator state of the run it resumes.
 inline std::string fingerprint(const alps::Parameters& parms, const std::string& hamiltonian, const char* version)
 {
   static const char* const ignored[] = {"CHECKPOINT", "TEMP_DIRECTORY", "VERBOSE", "SAVE_MPS", "SEED",
-                                         "SCRATCH_IN_MEMORY", "RESUME"};
+                                         "SCRATCH_IN_MEMORY", "RESUME", "KEEP_CHECKPOINT",
+                                         "SWEEPS", "STATES", "MAXSTATES", "NUMSTATES"};
   std::vector<std::pair<std::string, std::string> > values;
   for (alps::Parameters::const_iterator it = parms.begin(); it != parms.end(); ++it) {
     if (std::find(std::begin(ignored), std::end(ignored), it->key()) != std::end(ignored))
@@ -239,10 +242,11 @@ public:
                       "Set RESUME=1 to resume from it, or delete the directory to start over.");
       std::string written_by;
       bool readable = read_meta(entry_, written_by);
-      if (resume_) {
+      if (resume_ && !has_progress)
+        std::cout << "ALPS DMRG: RESUME=1, but this task has no checkpoint in " << entry_.string()
+                  << "; it starts from the beginning." << std::endl;
+      if (resume_ && has_progress) {
         const std::string start_over = "; delete the directory and set RESUME=0 to start over.";
-        if (!has_progress)
-          throw Refusal("RESUME=1, but there is no checkpoint to resume from in " + entry_.string() + ".");
         if (!readable)
           throw Refusal("RESUME=1, but the checkpoint in " + entry_.string()
                         + " is unreadable or from another version" + start_over);
@@ -256,7 +260,7 @@ public:
             problem = "it holds no completed iteration";
           else if (!count_attempt())
             problem = "the last " + std::to_string(max_resume_attempts)
-                      + " runs that resumed from it failed before the next checkpoint";
+                      + " runs that resumed from it failed before completing an iteration";
         } catch (const std::exception& e) {
           problem = std::string("it is damaged (") + e.what() + ")";
         }
@@ -312,6 +316,21 @@ public:
       throw std::runtime_error("DMRG run interrupted by a signal");
   }
 
+  // Called after every DMRG iteration. A resumed run that completes one no
+  // longer counts against the retry limit, which is meant for a checkpoint
+  // that makes the run fail before it gets anywhere, not for a run that is
+  // killed later (by a time limit or the out-of-memory killer, say).
+  void iteration_done()
+  {
+    if (!active_) return;
+    ++iterations_;
+    simulate_iteration();
+    if (progressed_) return;
+    progressed_ = true;
+    std::error_code error;
+    fs::remove(entry_ / "attempts", error);
+  }
+
   // With SCRATCH_IN_MEMORY the files are only written to the checkpoint when
   // asked: true if SIGTERM, SIGINT, SIGQUIT, SIGUSR1 or SIGUSR2 arrived since
   // the last call. A termination request makes the next commit() end the run.
@@ -330,10 +349,18 @@ public:
     return requested;
   }
 
-  void succeeded()
+  // The checkpoint is removed, or with keep (KEEP_CHECKPOINT) kept for a
+  // continuation if it holds a commit.
+  void succeeded(bool keep = false)
   {
     if (!active_) return;
     active_ = false;
+    if (keep && !record_.empty()) {
+      release();
+      std::cout << "ALPS DMRG: checkpoint kept in " << entry_.string() << ". To continue the sweeps, "
+                   "rerun with RESUME=1 and a larger SWEEPS; delete the directory when it is no longer needed." << std::endl;
+      return;
+    }
     std::error_code error;
     fs::remove_all(entry_, error);
     if (error)
@@ -496,8 +523,19 @@ private:
     if (action == "memory-usr1") std::raise(SIGUSR1);
   }
 
+  // ALPS_DMRG_CHECKPOINT_TEST=kill-iter:<n> raises SIGKILL at the n-th
+  // iteration_done() call, before a first call clears the retry count.
+  void simulate_iteration() const
+  {
+    const char* test = std::getenv("ALPS_DMRG_CHECKPOINT_TEST");
+    if (test && std::strncmp(test, "kill-iter:", 10) == 0 && std::atoi(test + 10) == iterations_)
+      std::raise(SIGKILL);
+  }
+
   bool enabled_ = true;
   bool resume_ = false;
+  bool progressed_ = false;
+  int iterations_ = 0;
   bool active_ = false;
   bool terminate_ = false;
   int polls_ = 0;

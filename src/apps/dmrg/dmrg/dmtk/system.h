@@ -41,6 +41,7 @@
 #include <sstream>
 #include <fstream>
 #include <iterator>
+#include <set>
 #include "virtualdisk.h"
 
 #include <filesystem>
@@ -120,6 +121,7 @@ class System
     bool _in_warmup;
     bool _use_vdisk;
     mutable VirtualDisk _disk;   // mutable: write_*() are const
+    mutable std::set<std::string> _vdisk_changed;  // since the last dump_vdisk()
 
     size_t dir;
     int _sweep;
@@ -462,15 +464,28 @@ class System
     bool use_vdisk() const { return _use_vdisk; }
 
     // Stage every in-memory file in tmp_files for its next commit().
-    void dump_vdisk() const
+    // Only the files written since the last dump: the others are already
+    // committed. Returns how many were staged.
+    size_t dump_vdisk() const
     {
-      for(VirtualDisk::const_iterator it = _disk.begin(); it != _disk.end(); ++it){
-        const char *name = it->first.c_str();
+      for(std::set<std::string>::const_iterator it = _vdisk_changed.begin(); it != _vdisk_changed.end(); ++it){
+        const char *name = it->c_str();
+        const std::string &contents = _disk[*it];
         std::ofstream out(tmp_files.get_write_filename(name), std::ios::out|std::ios::binary);
-        out.write(it->second.data(), it->second.size());
+        out.write(contents.data(), contents.size());
         out.close();
         if(!out) tmp_files.write_failed(name);
       }
+      size_t n = _vdisk_changed.size();
+      _vdisk_changed.clear();
+      return n;
+    }
+
+    // The Lanczos vectors and the iteration log are never checkpointed; with
+    // SCRATCH_IN_MEMORY they stay off the checkpoint directory.
+    const char *scratch_filename(const char *name) const
+    {
+      return _use_vdisk ? tmp_files.get_scratch_filename(name) : tmp_files.get_filename(name);
     }
 
     // Read files committed by tmp_files into memory, to resume from them.
@@ -565,6 +580,7 @@ class System
         std::ostringstream out(std::ios::out|std::ios::binary);
         body(out);
         _disk[name] = out.str();
+        _vdisk_changed.insert(name);
         return true;
       }
       std::ofstream out(tmp_files.get_write_filename(name), std::ios::out|std::ios::binary);
@@ -627,7 +643,7 @@ class System
     void read_status() 
     {
       const char *file = "system.dat"; 
-      bool ok = read_file(file, [&](std::istream &inputfile){
+      read_file(file, [&](std::istream &inputfile){
         inputfile.read((char *)&_numsweeps, sizeof(size_t));
         _sweeps.resize(2,_numsweeps+1);
         for(int i = 1; i <= _numsweeps; i++){
@@ -648,7 +664,6 @@ class System
         qnt.read(inputfile);
         qn.read(inputfile);
       });
-      if(ok) read_gs(gs,iter,dir == LEFT2RIGHT ? LEFT : RIGHT);
     }
 
     void write(std::ostream &s) const
@@ -945,7 +960,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   start();
@@ -1184,7 +1199,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
 
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   cout << "===========================================\n";
@@ -1323,7 +1338,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "Last iteration to get a symmetric block B(L/2-1)..B(L/2-1)\n";
 
@@ -1555,7 +1570,7 @@ System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool u
     }
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "TOTAL SIZE : " << size() << " " << lnow << endl;
   outputfile << "LEFT BLOCK SIZE : " << _b1->lattice().size() << " " << _b1->n_orbitals() << endl;
@@ -1763,7 +1778,7 @@ System<T>::diagonalize(bool use_seed)
 
   if(gs.size() > 1) {
 //    verif_hamiltonian<T, System<T>, VectorState<T> >(*this, _state[0]);
-    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, tmp_files.get_filename(file));
+    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, scratch_filename(file));
     gs = _state[0];
   } else {
     gs = T(1);
@@ -1784,7 +1799,7 @@ System<T>::diagonalize(bool use_seed)
   } 
 
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile << _b1->lattice().size() << " " << _b2->lattice().size() << " " << _b3->lattice().size() << " " <<  _b4->lattice().size() << endl;
@@ -1892,7 +1907,7 @@ System<T>::build_target_states(int /*pos*/)
     _project_states.resize(i+1);
     for(int j = 0; j <= i; j++) _project_states[j] = &_target[j];
 
-    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, 1, a, b, n, tol, _use_seed, true, tmp_files.get_filename(file));
+    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, 1, a, b, n, tol, _use_seed, true, scratch_filename(file));
     _target[i+1] = _state[0];
 
     _project = false;
@@ -2208,7 +2223,7 @@ System<T>::truncate(int position, int new_size)
 
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile.precision(10);
@@ -2650,7 +2665,7 @@ System<T>::rotate(int position, Block<T>& b)
   }
   char file[255];
   snprintf(file, sizeof(file), "iter_%s.dat",_name);
-  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
+  ofstream outputfile(scratch_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile << "Rotation time: " << clock.TotalTime().c_str() << endl;

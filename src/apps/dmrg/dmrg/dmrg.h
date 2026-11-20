@@ -151,6 +151,12 @@ private:
   // SCRATCH_IN_MEMORY: scratch files in memory instead of on disk; they are
   // checkpointed only on SIGTERM, SIGINT, SIGQUIT, SIGUSR1 or SIGUSR2
   bool use_vdisk;
+  // KEEP_CHECKPOINT: keep the checkpoint after a successful run, to continue it
+  bool keep_checkpoint;
+  // the last regular sweep iteration, for KEEP_CHECKPOINT with SCRATCH_IN_MEMORY
+  bool have_position = false;
+  dmrg_checkpoint::Position last_position;
+  std::string last_note;
   std::vector<std::vector<value_type> > mps_tensors;
   std::vector<std::vector<std::size_t> > mps_shapes;
 
@@ -179,6 +185,7 @@ handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
 template<class value_type>
 void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >& S)
 {
+  checkpoint.iteration_done();
   // warmup and the final sweep are redone after a failure
   if (!in_sweeps || S.in_warmup() || !checkpoint.active())
     return;
@@ -186,12 +193,16 @@ void DMRGTask<value_type>::checkpoint_iteration(const dmtk::System<value_type >&
   std::ostringstream note;
   note << "sweep " << at.sweep << "/" << num_sweeps << ", "
        << (at.dir == dmtk::LEFT2RIGHT ? "left-to-right" : "right-to-left") << " iteration " << at.iter;
+  last_position = at;
+  last_note = note.str();
+  have_position = true;
   // in-memory files reach the checkpoint only when a signal asks for it
   if (use_vdisk) {
     if (!checkpoint.checkpoint_requested())
       return;
-    std::cout << "ALPS DMRG: writing in-memory files to the checkpoint after " << note.str() << std::endl;
-    S.dump_vdisk();
+    std::size_t n = S.dump_vdisk();
+    std::cout << "ALPS DMRG: writing " << n << " changed in-memory files to the checkpoint after "
+              << note.str() << std::endl;
   }
   checkpoint.commit(dmrg_checkpoint::write_progress(at, note.str(), iteration_measurements));
 }
@@ -248,7 +259,9 @@ void DMRGTask<value_type>::define_parameters(alps::params& parameters)
     parameters.define<std::string>("TEMP_DIRECTORY", "directory for scratch files");
   // a run given TEMP_DIRECTORY keeps its files there, as before checkpoints
   parameters.define<bool>("SCRATCH_IN_MEMORY", false,
-                          "keep the block, density-matrix and wave-function files in memory instead of on disk (no checkpoints)");
+                          "keep the block, density-matrix and wave-function files in memory instead of on disk; with checkpoints, they are written to the checkpoint only when a signal asks for one");
+  parameters.define<bool>("KEEP_CHECKPOINT", false,
+                          "keep the checkpoint after a successful run, to continue it with RESUME=1 and a larger SWEEPS");
   parameters.define<bool>("RESUME", false,
                           "resume from the checkpoint of an earlier run of this task");
   parameters.define<bool>("CHECKPOINT", !parameters.supplied("TEMP_DIRECTORY"),
@@ -294,6 +307,9 @@ void DMRGTask<value_type>::init()
       boost::throw_exception(std::invalid_argument("RESUME and START_SWEEP cannot be used together"));
   }
   use_vdisk = settings["SCRATCH_IN_MEMORY"].as<bool>();
+  keep_checkpoint = settings["KEEP_CHECKPOINT"].as<bool>();
+  if (keep_checkpoint && !checkpoint.enabled())
+    boost::throw_exception(std::invalid_argument("KEEP_CHECKPOINT=1 needs checkpoints, which CHECKPOINT=0 or TEMP_DIRECTORY turn off"));
 
   // read number of states
   nwarmup = settings["NUM_WARMUP_STATES"].as<int>();
@@ -612,16 +628,17 @@ void DMRGTask<value_type>::dostep()
   hami = hami.reorder_terms();
   if(verbose)
     cout << hami.description() << endl;
+  if (use_vdisk)
+    dmtk::tmp_files.set_scratch_dir(temp_directory ? temp_directory->c_str()
+                                                   : alps::temp_directory_path().string().c_str());
   if (checkpoint.enabled()) {
     if (!checkpoint.open(dmrg_checkpoint::fingerprint(parms, hami.description(), DMRG_VERSION), infilename)) {
-      if (checkpoint.resume())
-        boost::throw_exception(std::runtime_error("RESUME=1, but the checkpoint cannot be used (see above)"));
       use_temporary_directory();
     }
     else if (use_vdisk)
       std::cout << "ALPS DMRG: with SCRATCH_IN_MEMORY=1 a checkpoint is written only on SIGTERM, SIGINT, "
                    "SIGQUIT, SIGUSR1 or SIGUSR2" << std::endl;
-    else if (temp_directory)
+    else if (temp_directory && !use_vdisk)
       std::cout << "ALPS DMRG: TEMP_DIRECTORY is not used while checkpoints are on; set CHECKPOINT=0 to use it" << std::endl;
   }
 
@@ -684,6 +701,14 @@ void DMRGTask<value_type>::dostep()
     S.run(nwarmup);
   }
   in_sweeps = false;
+  // KEEP_CHECKPOINT: the in-memory files after the last regular iteration,
+  // where a continuation with more sweeps starts (on disk they are committed)
+  if (use_vdisk && keep_checkpoint && have_position && checkpoint.active()) {
+    std::size_t n = S.dump_vdisk();
+    std::cout << "ALPS DMRG: KEEP_CHECKPOINT: writing " << n << " changed in-memory files to the checkpoint after "
+              << last_note << std::endl;
+    checkpoint.commit(dmrg_checkpoint::write_progress(last_position, last_note, iteration_measurements));
+  }
   if(S.store_products()) S.set_full_sweep(true);
   S.corr += meas_terms;
   S.final_sweep(num_states[num_states.size()-1], dmtk::RIGHT2LEFT, 1, true); 
@@ -707,7 +732,7 @@ void DMRGTask<value_type>::dostep()
     throw;
   }
   dmtk::tmp_files.cleanup();
-  checkpoint.succeeded();
+  checkpoint.succeeded(keep_checkpoint);
 }
 
 

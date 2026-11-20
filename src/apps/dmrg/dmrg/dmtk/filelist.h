@@ -180,6 +180,29 @@ class FileList {
 
     void write_failed(const char* input) { _failed_writes.push_back(input); }
 
+    // Directory for files that are never checkpointed, even while the other
+    // files go to a checkpoint entry (see get_scratch_filename).
+    void set_scratch_dir(const char* dir)
+    {
+      std::filesystem::path path = std::filesystem::absolute(dir);
+      if (!std::filesystem::is_directory(path))
+        boost::throw_exception(std::runtime_error("ALPS DMRG temporary directory does not exist: " + path.string()));
+      scratch_dir = path;
+    }
+
+    // A temporary file in the scratch directory, removed by cleanup(); the
+    // usual file if no scratch directory was set.
+    const char* get_scratch_filename(const char* input)
+    {
+      if (scratch_dir.empty()) return get_filename(input);
+      auto old = _scratch_filenames.find(input);
+      if (old != _scratch_filenames.end()) return old->second.c_str();
+      std::string name(input);
+      name = name.substr(0, name.find_first_of('.'));
+      auto entry = _scratch_filenames.emplace(input, alps::temporary_filename((scratch_dir / name).string()));
+      return entry.first->second.c_str();
+    }
+
     // Make all staged files and the caller's record the state a rerun resumes from.
     void commit(const std::string& record)
     {
@@ -221,7 +244,12 @@ class FileList {
           std::cerr << "ALPS DMRG could not remove temporary file " << entry.second
                     << ": " << error.message() << std::endl;
       }
+      for (const auto& entry : _scratch_filenames) {
+        std::error_code error;
+        std::filesystem::remove(entry.second, error);
+      }
       _tmp_filenames.clear();
+      _scratch_filenames.clear();
       _staged.clear();
       _failed_writes.clear();
       in_entry = false;
@@ -232,11 +260,13 @@ class FileList {
     static std::string suffix(unsigned long generation) { return ".new." + std::to_string(generation); }
 
     std::map<std::string, std::string> _tmp_filenames;
+    std::map<std::string, std::string> _scratch_filenames;
     std::map<std::string, std::string> _staged;
     // name and size of every file the last commit left in the entry
     std::map<std::string, std::uintmax_t> _committed;
     std::vector<std::string> _failed_writes;
     std::filesystem::path temp_dir;
+    std::filesystem::path scratch_dir;
     bool in_entry = false;
     unsigned long generation = 0;
 };
