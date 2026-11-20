@@ -3,6 +3,8 @@
  * All rights reserved. Use is subject to license terms. See LICENSE.TXT
  */
 #include <alps/alea/variance.hpp>
+
+#include <type_traits>
 #include <alps/alea/util.hpp>
 #include <alps/alea/serialize.hpp>
 
@@ -190,6 +192,35 @@ template <typename T, typename Str>
 void var_acc<T,Str>::add_bundle(var_acc<T,Str> *cascade)
 {
     typename bind<Str, T>::abs2_op abs2;
+
+    if (std::is_same<T, double>::value && std::is_same<Str, circular_var>::value) {
+        // The common case in one pass over memory instead of five, with the
+        // same arithmetic: a level of a large vector observable does not fit
+        // in cache, so the separate passes below cost a pass each.
+        const size_t n = size();
+        const uint64_t count = current_.count();
+        double *sum = reinterpret_cast<double *>(current_.sum().data());
+        double *data = reinterpret_cast<double *>(store_->data().data());
+        double *data2 = reinterpret_cast<double *>(store_->data2().data());
+        double *up = cascade != nullptr ? reinterpret_cast<double *>(cascade->current_.sum().data()) : nullptr;
+        for (size_t i = 0; i != n; ++i) {
+            const double value = sum[i];
+            data[i] += value;
+            data2[i] += value * value / count;
+            if (up != nullptr)
+                up[i] += value;
+            sum[i] = 0;
+        }
+        store_->count() += count;
+        store_->count2() += count * count;
+        current_.count() = 0;
+        if (cascade != nullptr) {
+            cascade->current_.count() += count;
+            if (cascade->current_.is_full())
+                cascade->add_bundle(cascade + 1);
+        }
+        return;
+    }
 
     // add batch to average and squared
     store_->data().noalias() += current_.sum();
