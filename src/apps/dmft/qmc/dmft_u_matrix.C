@@ -225,3 +225,30 @@ TEST_F(DmftUMatrix, cthyb_segment_gets_the_matrix_and_mu_per_flavor) {
   EXPECT_EQ(in.u_matrix, two_band_matrix);
   EXPECT_EQ(in.mu_vector, (std::vector<double>{3.5, 3.5, 2.5, 2.5}));
 }
+
+// With a retarded interaction the solvers shift U -> U - 2K'(0) and
+// mu -> mu + K'(0), so half filling is at sum_j U(f,j)/2 - FLAVORS K'(0).
+TEST_F(DmftUMatrix, retarded_interaction_shifts_mu) {
+  const double Kp0 = 0.3;
+  std::vector<double> K(11), Kp(11);
+  for (int i = 0; i <= 10; ++i) {
+    const double x = i / 10.;
+    K[i] = x * (1 - x);            // K(0) = K(beta) = 0
+    Kp[i] = Kp0 * (1 - 2 * x);
+  }
+  {
+    alps::hdf5::archive ar("K.h5", "w");
+    ar << alps::make_pvp("/Ret_int_K", K) << alps::make_pvp("/Ret_int_Kp", Kp);
+  }
+  // ct-hyb-segment, as the solver option
+  alps::Parameters p = with_file(issue_matrix);
+  p["cthyb.RET_INT_K"] = "K.h5";
+  p["cthyb.K_IN_HDF5"] = 1;
+  EXPECT_EQ(prepare("ct-hyb-segment", p).mu_vector, std::vector<double>(4, 0.5 + 2.375 - 4 * Kp0));
+  // hybridization, unprefixed, two flavors: U/2 - 2K'(0)
+  alps::Parameters q = parameters(2);
+  q["U"] = 3.;
+  q["RET_INT_K"] = "K.h5";
+  q["K_IN_HDF5"] = 1;
+  EXPECT_DOUBLE_EQ(static_cast<double>(prepare("hybridization", q).parameters["MU"]), 0.5 + 1.5 - 2 * Kp0);
+}
