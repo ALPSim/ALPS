@@ -7,10 +7,11 @@
 
 #include <alps/accumulators.hpp>
 
-/// The Sz_i, Sz2_i and Sz0_Szi accumulators of sites 0 to n_site-1 measure
-/// the value times the sign. ALPS 3.0 measured them as signed observables,
-/// whose results are divided by the mean sign. Divide each of these results
-/// that has measurements by the "Sign" result, so they keep that meaning.
-void divide_sz_results_by_sign(alps::accumulators::result_set & results, unsigned int n_site);
+/// Every observable of the Green's function, density and Sz measurements is
+/// accumulated as value times the configuration's sign. Divide each of these
+/// results that has measurements by the "Sign" result (with jackknife), so
+/// they are the physical expectation values <O> = <O sign> / <sign>.
+void divide_signed_results_by_sign(alps::accumulators::result_set & results,
+                                   unsigned int n_site, unsigned int n_flavors);
 
 #endif

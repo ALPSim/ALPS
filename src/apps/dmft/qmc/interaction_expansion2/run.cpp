@@ -76,7 +76,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
-    divide_sz_results_by_sign(results, ctint.sites);
+    divide_signed_results_by_sign(results, ctint.sites, ctint.flavors);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);
