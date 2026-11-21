@@ -126,6 +126,11 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_u_matrix PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_u_matrix COMPONENT dmft LABELS regression)
 
+  add_executable(dmft_retarded_interaction dmft_retarded_interaction.C)
+  target_link_libraries(dmft_retarded_interaction PRIVATE ALPS::cthyb)
+  target_include_directories(dmft_retarded_interaction PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  alps_add_gtest(dmft_retarded_interaction COMPONENT dmft LABELS regression)
+
   add_executable(dmft_hilberttransformer_uniform_field dmft_hilberttransformer_uniform_field.C)
   target_link_libraries(dmft_hilberttransformer_uniform_field PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_hilberttransformer_uniform_field COMPONENT dmft LABELS regression)
