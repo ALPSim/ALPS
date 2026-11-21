@@ -63,7 +63,8 @@ void InteractionExpansion::reset_perturbation_series()
     vertices_backup.push_back(vertices[i]);
   }
   vertices.clear();
-  sign=1;
+  // The vertices, and so the sign of the configuration, stay the same: keep
+  // the sign. Setting it to 1 here lost it whenever it was negative.
   for(spin_t z=0;z<n_flavors;++z){
     resize(M[z].matrix(),0,0);
   }
