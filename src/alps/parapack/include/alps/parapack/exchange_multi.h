@@ -434,13 +434,13 @@ public:
 protected:
   std::pair<int, int> calc_nrep(int id) const {
     int nrep = beta_.size();
-    int n = nrep / comm_.size();
+    int n = nrep / head_.size();
     int f;
-    if (id < nrep - n * comm_.size()) {
+    if (id < nrep - n * head_.size()) {
       ++n;
       f = n * id;
     } else {
-      f = (nrep - n * comm_.size()) + n * id;
+      f = (nrep - n * head_.size()) + n * id;
     }
     return std::make_pair(n, f);
   }

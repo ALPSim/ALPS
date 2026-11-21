@@ -36,6 +36,7 @@ import pyalps
 
 EXPECTED_BUNDLED_PROGRAMS = {
     "checksign",
+    "dca",
     "dirloop_sse",
     "dmft",
     "dmrg",
@@ -43,6 +44,7 @@ EXPECTED_BUNDLED_PROGRAMS = {
     "fulldiag_evaluate",
     "hirschfye",
     "hybridization",
+    "ct-hyb-segment",
     "interaction",
     "loop",
     "qwl",

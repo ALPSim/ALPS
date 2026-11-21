@@ -15,6 +15,8 @@
 /* $Id$ */
 
 #include <alps/scheduler/scheduler.h>
+#include <chrono>
+#include <thread>
 
 namespace alps {
 namespace scheduler {
@@ -80,6 +82,7 @@ int SerialScheduler::run()
 
       task_time = second_clock::local_time();
       int task_finished=0;
+      bool was_idle = false;
       ptime next_check=second_clock::local_time();
       ptime last_checkpoint=second_clock::local_time();
         
@@ -91,6 +94,14 @@ int SerialScheduler::run()
         }              
          
         theTask->run();
+
+        // the local run has just finished its work: check now instead of at the next poll
+        bool const idle = theTask->idle();
+        if (idle && !was_idle)
+          next_check=second_clock::local_time()-seconds(1);
+        else if (idle)
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        was_idle = idle;
           
         if(time_limit >0. && second_clock::local_time()>end_time) {
           std::cout << "Time limit exceeded\n";

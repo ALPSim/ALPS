@@ -22,7 +22,7 @@ parms=[]
 for b in [6., 12.]:
     parms.append(
             { 
-              'ANTIFERROMAGNET'     : 1,
+              'ANTIFERROMAGNET'     : True,
               'CONVERGED'           : 0.005,
               'FLAVORS'             : 2,
               'H'                   : 0,
@@ -36,7 +36,7 @@ for b in [6., 12.]:
               'SEED'                : 0, 
               'SITES'               : 1,
               'SOLVER'              : 'hirschfye',
-              'SYMMETRIZATION'      : 0,
+              'SYMMETRIZATION'      : False,
               'TOLERANCE'           : 0.001,
               'U'                   : 3,
               't'                   : 0.707106781186547,

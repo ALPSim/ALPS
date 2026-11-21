@@ -115,15 +115,8 @@ struct clone_create_msg_t {
   Parameters params;
   std::string base;
   bool is_new;
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-  template<class Archive>
-  void save(Archive & ar, const unsigned int) const {
-    ar & task_id & clone_id & group_id & params & base & is_new;
-  }
-  template<class Archive>
-  void load(Archive & ar, const unsigned int) {
-    ar & task_id & clone_id & group_id & params & base & is_new;
-  }
+  void save(ODump& dp) const { dp << task_id << clone_id << group_id << params << base << is_new; }
+  void load(IDump& dp) { dp >> task_id >> clone_id >> group_id >> params >> base >> is_new; }
 };
 
 struct clone_info_msg_t {
@@ -134,8 +127,8 @@ struct clone_info_msg_t {
   cid_t clone_id;
   gid_t group_id;
   clone_info info;
-  template<typename Archive>
-  void serialize(Archive & ar, const unsigned int) { ar & task_id & clone_id & group_id & info; }
+  void save(ODump& dp) const { dp << task_id << clone_id << group_id << info; }
+  void load(IDump& dp) { dp >> task_id >> clone_id >> group_id >> info; }
 };
 
 struct clone_halt_msg_t {
@@ -144,8 +137,8 @@ struct clone_halt_msg_t {
   tid_t task_id;
   cid_t clone_id;
   gid_t group_id;
-  template<typename Archive>
-  void serialize(Archive & ar, const unsigned int) { ar & task_id & clone_id & group_id; }
+  void save(ODump& dp) const { dp << task_id << clone_id << group_id; }
+  void load(IDump& dp) { dp >> task_id >> clone_id >> group_id; }
 };
 
 class ALPS_DECL clone_mpi : public abstract_clone {

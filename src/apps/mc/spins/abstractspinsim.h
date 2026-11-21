@@ -32,6 +32,14 @@ struct update_info_type
   double m2_;
 };
 
+// Tells a ferromagnetic from an antiferromagnetic coupling by its sign. A
+// scalar coupling uses its value: its determinant J^N is positive for either
+// sign of J when N is even.
+template<class T, int N>
+inline double coupling_sign(const MIdMatrix<T,N>& J) { return J.getElement_nc(0,0); }
+template<class MAT>
+inline double coupling_sign(const MAT& J) { return J.det(); }
+
  
 template<class MAT>
 class AbstractSpinSim : public alps::scheduler::LatticeMCRun<> {
@@ -69,10 +77,12 @@ protected:
   boost::vector_property_map<double,site_type_map> spinfactor_; /* S */
   boost::vector_property_map<MAT,site_type_map> selfinteraction_; /* D */
   boost::vector_property_map<MAT,bond_type_map> couplings_; /* J */ 
-  boost::vector_property_map<double,bond_type_map> couplings_det; /* |J| */
+  boost::vector_property_map<double,bond_type_map> couplings_det; /* sign of J, positive for a ferromagnetic bond */
   std::vector<site_descriptor> bond_source_; /* stored source of each bond */
  
   bool use_error_limit;
+  mutable uint64_t error_checked_at_; // sweeps_done_ at the last error estimate
+  mutable double wd_error_cached_;
   bool ferromagnetic_;
   bool antiferromagnetic_;
   bool quantum_convention_;
@@ -97,6 +107,8 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   selfinteraction_(boost::get(alps::site_type_t(),graph())),
   couplings_(boost::get(alps::bond_type_t(),graph())),
   couplings_det(boost::get(alps::bond_type_t(),graph())),
+  error_checked_at_(0),
+  wd_error_cached_(0.),
   ferromagnetic_(true),
   antiferromagnetic_(true),
   quantum_convention_(parms.defined("CONVENTION") && parms["CONVENTION"]=="quantum"),
@@ -196,11 +208,13 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
       bond_type[*b] = num_bond_types;
       this_J = this_J * (quantum_convention_ ? 1. : -1.);
       couplings_[*b]=this_J;
-      double det = this_J.det();
-      couplings_det[*b] = det;
-      if (det>0.)
+      // this_J multiplies +S_i.S_j here, so a positive coupling is antiferromagnetic
+      double sign = coupling_sign(this_J);
+      // is_frustrated() takes a positive value as a ferromagnetic bond
+      couplings_det[*b] = -sign;
+      if (sign>0.)
         ferromagnetic_=false;
-      else if (det<0.)
+      else if (sign<0.)
         antiferromagnetic_=false;
       num_bond_types++;
     }
@@ -222,7 +236,8 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   else if (parms["UPDATE"]=="local")
     cluster_updates_=false;
   else if (parms["UPDATE"]=="")
-    cluster_updates_ = !alps::is_frustrated(graph(),couplings_det);
+    // the cluster update ignores the field, so it is only a default without one
+    cluster_updates_ = !has_magnetic_field_ && !alps::is_frustrated(graph(),couplings_det);
   else
     boost::throw_exception(std::runtime_error("Illegal update type " + std::string(parms["UPDATE"])));
 
@@ -270,7 +285,13 @@ double AbstractSpinSim<MAT>::work_done() const {
     return 0.;
   double wd_error = 0.0;
   double wd_sweeps = 0.0;
-  if (use_error_limit) {
+  // The scheduler asks after every sweep, and the error estimate is costly:
+  // update it every 100 sweeps.
+  if (use_error_limit && sweeps_done_ < error_checked_at_ + 100)
+    wd_error = wd_error_cached_;
+  else if (use_error_limit) {
+    error_checked_at_ = sweeps_done_;
+    wd_error_cached_ = 0.;
     alps::RealObservable myObs;
 #ifndef BOOST_NO_EXCEPTIONS
     try {
@@ -289,7 +310,7 @@ double AbstractSpinSim<MAT>::work_done() const {
     double current_error = myObs.error();
     double error_limit = parms["ERROR_LIMIT"];
     double tmp = error_limit/current_error;
-    wd_error = tmp*tmp;
+    wd_error = wd_error_cached_ = tmp*tmp;
   }
   double good_sweeps = sweeps_done_-thermalization_sweeps_;
   wd_sweeps = (good_sweeps)/double(sweeps_);

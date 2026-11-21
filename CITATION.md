@@ -33,10 +33,14 @@ The framework paper applies to every component. A paper serving several roles is
 | `dmft` | [metzner1989](#metzner1989), [georges1992](#georges1992), [georges1996](#georges1996) | [gull2011cpc](#gull2011cpc) | — |
 | `interaction` | [rubtsov2005](#rubtsov2005), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc) | — |
 | `hybridization` | [werner2006](#werner2006), [gull2011](#gull2011) | [gull2011cpc](#gull2011cpc), [hafermann2013](#hafermann2013) | — |
+| `cthyb_segment` | [werner2006](#werner2006), [gull2011](#gull2011) | [hafermann2013](#hafermann2013) | — |
 | `hirschfye` | [hirschfye1986](#hirschfye1986) | [gull2011cpc](#gull2011cpc) | — |
 | `maxent` | [bryan1990](#bryan1990), [jarrell1996](#jarrell1996) | [levy2017maxent](#levy2017maxent) | — |
+| `dca` | [maier2005](#maier2005) | [gull2009dca](#gull2009dca), [gull2013dca](#gull2013dca) | — |
 
 Cite the relevant impurity-solver references as well when using a solver through the DMFT driver.
+
+Cite the relevant impurity-solver references as well when using a solver through the DCA loop.
 
 ## References
 
@@ -175,6 +179,18 @@ M. Jarrell, J. E. Gubernatis, "Bayesian inference and the analytic continuation 
 ### levy2017maxent
 
 R. Levy, J. P. F. LeBlanc, E. Gull, "Implementation of the maximum entropy method for analytic continuation." Computer Physics Communications 215, 149–155 (2017). https://doi.org/10.1016/j.cpc.2017.01.018
+
+### maier2005
+
+T. Maier et al., "Quantum cluster theories." Reviews of Modern Physics 77, 1027–1080 (2005). https://doi.org/10.1103/RevModPhys.77.1027
+
+### gull2009dca
+
+E. Gull et al., "Momentum-sector-selective metal-insulator transition in the eight-site dynamical mean-field approximation to the Hubbard model in two dimensions." Physical Review B 80, 245102 (2009). https://doi.org/10.1103/PhysRevB.80.245102
+
+### gull2013dca
+
+E. Gull, O. Parcollet, A. J. Millis, "Superconductivity and the pseudogap in the two-dimensional Hubbard model." Physical Review Letters 110, 216405 (2013). https://doi.org/10.1103/PhysRevLett.110.216405
 
 ## Policy provenance
 

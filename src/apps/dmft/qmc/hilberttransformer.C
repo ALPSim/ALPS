@@ -73,7 +73,10 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
   int n_flavor=parms.value_or_default("FLAVORS", 2);
   itime_green_function_t G0_tau(n_time+1, n_flavor);
   
-  if (parms.defined("G0TAU_INPUT") && parms["G0TAU_INPUT"].length()>0) {
+  const bool g0_input = parms.defined("G0TAU_INPUT") && parms["G0TAU_INPUT"].length()>0;
+  if (g0_input && static_cast<bool>(parms.value_or_default("INSULATING", false)))
+    throw std::invalid_argument("INSULATING and G0TAU_INPUT both set the initial G0; set only one.");
+  if (g0_input) {
     std::cout<<"reading initial G0_tau"<<std::endl;
     std::ifstream check(parms["G0TAU_INPUT"].c_str());
     if(!check.is_open()) {
@@ -122,7 +125,12 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
   double h = static_cast<double>(parms.value_or_default("H",0.));
   matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
 
-  if (parms.defined("INSULATING")) {
+  const bool insulating = parms.value_or_default("INSULATING", false);
+  const bool g0_input = parms.defined("G0OMEGA_INPUT") && parms["G0OMEGA_INPUT"].length()>0;
+  if (insulating && g0_input)
+    throw std::invalid_argument("INSULATING and G0OMEGA_INPUT both set the initial G0; set only one.");
+
+  if (insulating) {
     std::cout<<"calculating insulating initial G0_omega"<<std::endl;
     for(unsigned int i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
@@ -132,7 +140,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
       }
     }
   }
-  else if (parms.defined("G0OMEGA_INPUT") && parms["G0OMEGA_INPUT"].length()>0) {
+  else if (g0_input) {
     std::cout<<"reading initial G0_omega"<<std::endl;
     std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
     if(!check.is_open()) {
@@ -174,7 +182,9 @@ matsubara_green_function_t GeneralFSHilbertTransformer::operator()(const matsuba
       double wn=(2.*w+1)*boost::math::constants::pi<double>()/beta;
       for(spin_t f=0; f<G_omega.nflavor(); ++f){
         Sigma(0,f)=1./G0_omega(w,f)-1./G_omega(w,f);
-        std::complex<double> zeta=std::complex<double>(mu-h,wn)-Sigma(0,f);
+        // Uniform field: flavor 0 sees mu-h and flavor 1 sees mu+h, as on the
+        // impurity side and in the AFM branch below.
+        std::complex<double> zeta=std::complex<double>(mu+(f%2 ? h : -h),wn)-Sigma(0,f);
         
         G_omega_new(0,f)=bandstruct->HilbertIntegral_PM(zeta,f);
         G0_omega(w,f)=1./(1./G_omega_new(0,f)+Sigma(0,f));
@@ -231,6 +241,16 @@ matsubara_green_function_t SemicircleFSHilbertTransformer::operator()(const mats
     for(unsigned i=0; i<G_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
       G0_omega(i,0) =1./(iw + mu - bandstruct.second_moment(0)*G_omega(i,0));
+    }
+  }
+  else if(!AFM){
+    // Without Neel order every flavor couples to its own G; the uniform field
+    // shifts flavor 0 by -h and flavor 1 by +h.
+    for(unsigned flavor=0;flavor<G_omega.nflavor();++flavor){
+      for(unsigned i=0; i<G_omega.nfreq(); i++) {
+        std::complex<double> iw(0.,(2*i+1)*boost::math::constants::pi<double>()/beta);
+        G0_omega(i,flavor) =1./(iw + mu + (flavor%2 ? h : -h) - bandstruct.second_moment(flavor)*G_omega(i,flavor));
+      }
     }
   }
   else{

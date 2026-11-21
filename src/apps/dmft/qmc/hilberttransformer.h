@@ -155,7 +155,8 @@ private:
 class SemicircleFSHilbertTransformer : public FrequencySpaceHilbertTransformer {
 public:
   SemicircleFSHilbertTransformer(alps::Parameters& parms)
-    : bandstruct(parms) 
+    : AFM(parms.value_or_default("ANTIFERROMAGNET",false)),
+      bandstruct(parms)
   {
     bandstruct.set_parms(parms);
   }
@@ -168,6 +169,7 @@ public:
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms) const;
   
 private:
+  bool AFM;
   SemicircleBandstructure bandstruct;
 };
 

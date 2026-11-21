@@ -1,8 +1,11 @@
 #!/bin/bash
 # Installs the CI build environment inside a ci-images Dockerfile build (as root).
 # PACKAGES: extra distribution packages (the matrix compilers); BOOST: a pinned Boost
-# version to build into /opt/boost when the distribution's is too old.
+# version whose headers go into /opt/boost when the distribution's is too old; NFFT: the
+# pinned NFFT3 version, which CT-HYB-SEGMENT can use (ALPS_ENABLE_NFFT). Few distributions
+# package NFFT3, so it is built into /opt/nfft everywhere.
 set -euxo pipefail
+: "${NFFT:?NFFT must name a version pinned in dependencies.json}"
 . /etc/os-release
 python=python3
 venv_args=()
@@ -17,7 +20,7 @@ case $ID in
     apt-get install -y --no-install-recommends \
       ca-certificates curl git tar zstd xz-utils file build-essential gfortran ccache pkg-config \
       python3 python3-venv python3-dev libhdf5-dev libblas-dev liblapack-dev libsqlite3-dev \
-      libeigen3-dev libxml2-utils xsltproc $boost_pkg $PACKAGES
+      libeigen3-dev libfftw3-dev libxml2-utils xsltproc $boost_pkg $PACKAGES
     rm -rf /var/lib/apt/lists/*
     ;;
   rocky|almalinux|rhel|centos)
@@ -30,7 +33,7 @@ case $ID in
     dnf install -y --setopt=install_weak_deps=False \
       ca-certificates git tar zstd xz file gcc gcc-c++ gcc-gfortran make ccache pkgconf \
       python3.12 python3.12-devel hdf5-devel blas-devel lapack-devel sqlite-devel \
-      eigen3-devel libxslt libxml2 $boost_pkg $PACKAGES
+      eigen3-devel fftw-devel libxslt libxml2 $boost_pkg $PACKAGES
     dnf clean all
     ;;
   fedora)
@@ -42,7 +45,7 @@ case $ID in
     dnf install -y --setopt=install_weak_deps=False \
       ca-certificates git tar zstd xz file gcc gcc-c++ gcc-gfortran make ccache pkgconf \
       python3 python3-devel hdf5-devel flexiblas-devel sqlite-devel \
-      eigen3-devel libxslt libxml2 python3-numpy python3-h5py python3-lxml python3-packaging \
+      eigen3-devel fftw-devel libxslt libxml2 python3-numpy python3-h5py python3-lxml python3-packaging \
       python3-pyyaml python3-jsonschema python3-pytest $boost_pkg $PACKAGES
     dnf clean all
     venv_args=(--system-site-packages)
@@ -61,7 +64,10 @@ esac
 /opt/ci-venv/bin/python -c 'import numpy, h5py, lxml, yaml, jsonschema, pytest'
 
 if [[ -n $BOOST ]]; then
-  # Built with the distribution's default compiler: libstdc++'s ABI serves gcc and clang.
   PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py "boost-$BOOST" /opt/boost
 fi
 mkdir -p /opt/boost
+
+PATH=/opt/ci-venv/bin:$PATH /opt/ci-venv/bin/python /tmp/ci/.github/scripts/prepare_dependencies.py "nfft-$NFFT" /opt/nfft
+echo /opt/nfft/lib > /etc/ld.so.conf.d/alps-nfft.conf
+ldconfig

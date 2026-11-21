@@ -51,7 +51,7 @@ TEST(DmftRegression, hilberttransformer_afm_multiband_numeric) {
   }
 
   alps::Parameters parms;
-  parms["ANTIFERROMAGNET"] = 1;
+  parms["ANTIFERROMAGNET"] = "true";
   parms["FLAVORS"]         = 4;   // two bands
   parms["DOSFILE"]         = dosfile;
 

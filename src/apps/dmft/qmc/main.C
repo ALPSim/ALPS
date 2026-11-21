@@ -38,6 +38,13 @@
 
 #include "interaction_expansion/interaction_expansion.hpp"
 
+namespace {
+/// The external solvers that take the hybridization function Delta instead of G0.
+bool reads_hybridization_function(const std::string& program) {
+  return program == "hybridization" || program == "ct-hyb-segment";
+}
+}
+
 
 
 /// @brief The DMFT main program
@@ -84,8 +91,28 @@ int main(int argc, char** argv)
     parms["BASENAME"]=p.filename().string();
     const std::string basename = static_cast<std::string>(parms["BASENAME"]);
 
+    // ATOMIC made the interaction-expansion solver (the built-in one, or the
+    // interaction program as an external solver) sample the atomic limit and
+    // ignore the bath in every iteration, while the loop built the self-energy
+    // and the next bath from the bath G0 (#347). Other solvers ignored it. It
+    // is no longer supported, in either loop or with any solver.
+    if (parms.defined("ATOMIC"))
+      throw std::invalid_argument("dmft no longer supports ATOMIC. With the interaction-expansion "
+                                  "solver (SOLVER = \"Interaction Expansion\" or the interaction "
+                                  "program) it made the solver ignore the bath in every iteration "
+                                  "(#347); other solvers ignored it. Remove ATOMIC from the "
+                                  "parameter file.");
+
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
+      // SYMMETRIZATION averages the two spins of every Green's function, which
+      // undoes any field and leaves the impurity and lattice sides inconsistent.
+      if (parms.value_or_default("SYMMETRIZATION",false)
+          && (static_cast<double>(parms.value_or_default("H",0.))!=0.
+              || static_cast<double>(parms.value_or_default("H_INIT",0.))!=0.))
+        throw std::invalid_argument("SYMMETRIZATION = true requires H = 0 and H_INIT = 0: symmetrization "
+                                    "averages the spins, so a field cannot act. For a magnetic field set "
+                                    "SYMMETRIZATION = false.");
       if(!parms.value_or_default("OMEGA_LOOP",false)){
         //...imaginary time tau
         // Hirsch-Fye and CT-INT, built in or external, read G0 in Matsubara
@@ -100,7 +127,7 @@ int main(int argc, char** argv)
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hybridization") {
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-        } else if (parms["SOLVER"]=="hybridization" || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
+        } else if (reads_hybridization_function(program) || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
           std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
           parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
@@ -115,15 +142,18 @@ int main(int argc, char** argv)
       else {
         //perform self consistency loop in Matsubara frequency omega
         if (parms.value_or_default("ANTIFERROMAGNET",false) && parms.value_or_default("SYMMETRIZATION",false)) { 
-          std::cerr<<"ERROR: incompatible parameters: ANTIFERROMAGNET==1 (true)  and  SYMMETRIZATION==1 (true)"<<std::endl
-                   <<"  for simulation in PM phase set: SYMMETRIZATION=1, ANTIFERROMAGNET=0."<<std::endl
-                   <<"  for simulation in FM phase set: SYMMETRIZATION=0, ANTIFERROMAGNET=0."<<std::endl
-                   <<"  for simulation in AFM phase set: SYMMETRIZATION=0, ANTIFERROMAGNET=1."<<std::endl;
-          throw std::logic_error("Incompatible parameters: ANTIFERROMAGNET==1,  SYMMETRIZATION==1.");
+          std::cerr<<"ERROR: incompatible parameters: ANTIFERROMAGNET = true and SYMMETRIZATION = true"<<std::endl
+                   <<"  for simulation in PM phase set: SYMMETRIZATION = true, ANTIFERROMAGNET = false."<<std::endl
+                   <<"  for simulation in FM phase set: SYMMETRIZATION = false, ANTIFERROMAGNET = false."<<std::endl
+                   <<"  for simulation in AFM phase set: SYMMETRIZATION = false, ANTIFERROMAGNET = true."<<std::endl;
+          throw std::logic_error("Incompatible parameters: ANTIFERROMAGNET = true, SYMMETRIZATION = true.");
         }
           
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss;
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd;
+        // The solver keeps a reference to its factory, so every factory has to
+        // live as long as solver_ptr.
+        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> hirschfye_factory;
 
         boost::shared_ptr<FrequencySpaceHilbertTransformer> transform_ptr;
         if (parms.value_or_default("SEMICIRCLE_HILBERT",false)) {
@@ -157,8 +187,7 @@ int main(int argc, char** argv)
         }
         else if (parms["SOLVER"]=="Hirsch-Fye") {
           std::cout<<"solving Hirsch Fye"<<std::endl;
-          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-          solver_ptr.reset(new alps::ImpuritySolver(factory,parms,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(hirschfye_factory,parms,argc,argv));
           // Built-in solvers print no notice of their own; external solvers do.
           if (alps::cli_is_master()) alps::print_citations(std::cout, "hirschfye");
         }
@@ -168,7 +197,8 @@ int main(int argc, char** argv)
         else {
           std::string p(parms["SOLVER"]);
           std::cout<<"using external solver: "<<p<<std::endl;
-          if(parms["SOLVER"]=="hybridization") parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+          if(reads_hybridization_function(std::filesystem::path(p).filename().string()))
+            parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
           solver_ptr.reset(new ExternalSolver(p));
         }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
@@ -177,7 +207,15 @@ int main(int argc, char** argv)
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
     }    
-    alps::write_parameter_file(input, parms);
+    // Rewrite the input parameter file in its own format. If it cannot be
+    // rewritten (for example a read-only input file) warn instead of failing:
+    // the results are intact and BASENAME.h5 is still written below.
+    try {
+      alps::write_parameter_file(input, parms);
+    } catch (std::exception const& exc) {
+      std::cerr << "Warning: could not rewrite parameter file '" << input
+                << "': " << exc.what() << "\n";
+    }
     if (basename+".h5" != input)
       alps::write_parameter_file(basename+".h5", parms);
 #ifndef BOOST_NO_EXCEPTIONS

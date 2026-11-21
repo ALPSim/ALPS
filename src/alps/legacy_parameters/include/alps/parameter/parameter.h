@@ -73,14 +73,6 @@ public:
   /// returns the value
   const value_type& value() const { return value_; }
 
-  /// support for Boost serialization
-  template<class Archive>
-  void serialize(Archive& ar, const unsigned int) {
-    std::string v = static_cast<std::string>(value_);
-    ar & key_ & v;
-    value_ = v;
-  }
-  
 private:
   key_type key_;
   value_type value_;

@@ -15,8 +15,7 @@ target_sources(alps_containers INTERFACE
     include/alps/fixed_capacity_traits.h
     include/alps/fixed_capacity_vector.h
     include/alps/multi_array/io.hpp
-    include/alps/multi_array/multi_array.hpp
-    include/alps/multi_array/serialization.hpp)
+    include/alps/multi_array/multi_array.hpp)
 
 if(ALPS_BUILD_TESTING)
   add_subdirectory(tests)

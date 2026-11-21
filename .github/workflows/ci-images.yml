@@ -10,7 +10,6 @@ name: CI images
     paths:
     - .github/ci-images/**
     - .github/scripts/prepare_dependencies.py
-    - .github/scripts/build-boost.sh
     - .github/dependencies.json
     - .github/workflows/ci-images.yml
   schedule:
@@ -21,10 +20,14 @@ permissions:
   packages: write
 concurrency:
   group: ci-images-${{ github.ref }}
+env:
+  # NFFT3 is built from source in every image; its checksum is pinned in dependencies.json.
+  NFFT: 3.6.0
 jobs:
   image:
     name: alps-ci:${{ matrix.name }}
-    runs-on: ${{ vars.IFT_RUNNERS == 'off' && 'ubuntu-24.04' || 'ift-vm' }}
+    # Forks have no ift-vm runner and use GitHub's.
+    runs-on: ${{ (github.repository != 'ALPSim/ALPS' || vars.IFT_RUNNERS == 'off') && 'ubuntu-24.04' || 'ift-vm' }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
@@ -62,11 +65,11 @@ jobs:
         TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
       run: |
         docker build --pull -f .github/ci-images/Dockerfile \
-          --build-arg BASE="$BASE" --build-arg PACKAGES="$PACKAGES" --build-arg BOOST="$BOOST" \
+          --build-arg BASE="$BASE" --build-arg PACKAGES="$PACKAGES" --build-arg BOOST="$BOOST" --build-arg NFFT="$NFFT" \
           -t "$TAG" .
-        docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3'
+        docker run --rm "$TAG" bash -c 'cmake --version | head -1; python --version; ls /opt/boost/lib 2>/dev/null | head -3; test -f /opt/nfft/include/nfft3.h && ldconfig -p | grep -q libnfft3'
     - name: Push
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/master' && github.repository == 'ALPSim/ALPS'
       env:
         TAG: ghcr.io/alpsim/alps-ci:${{ matrix.name }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}

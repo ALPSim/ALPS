@@ -17,6 +17,8 @@
 /* $Id$ */
 
 #include <alps/scheduler/scheduler.h>
+#include <alps/scheduler/types.h>
+#include <alps/osiris/mpdump.h>
 #include <alps/config.h>
 #include <cstdio>
 
@@ -49,6 +51,18 @@ int MPPScheduler::run()
   running_tasks=0;
 
   int all_done=0;
+  AbstractTask* idle_task=0; // the local task, once its local run has no work left
+
+  // a task on another process sends MCMP_task_idle when its local run is done
+  auto receive_idle_notices = [this]() {
+    while (IMPDump::probe(MCMP_task_idle)) {
+      IMPDump notice;
+      notice.receive(MCMP_task_idle);
+      for (unsigned int i=0;i<active.size();i++)
+        if (active[i].where.size() && active[i].where[0] == notice.sender())
+          active[i].next_check=second_clock::local_time()-seconds(1);
+    }
+  };
 
   ptime last_checkpoint=second_clock::local_time();
   if(time_limit>0.)
@@ -84,10 +98,25 @@ int MPPScheduler::run()
     all_done=(running_tasks==0);
     
     // do some work on the local simulation
-    if(theTask)
+    if(theTask) {
       theTask->run();
+      // the local run has just finished its work: check its task now instead
+      // of at the next poll
+      bool const idle = theTask->idle();
+      if (idle && theTask != idle_task) {
+        for (unsigned int i=0;i<active.size();i++)
+          if (tasks[active[i].number] == theTask)
+            active[i].next_check=second_clock::local_time()-seconds(1);
+      }
+      else if (idle)
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      idle_task = idle ? theTask : 0;
+    }
     else
     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    // a task on another process reports that its local run is done: check it now
+    receive_idle_notices();
 
     // check if tasks have finished
 
@@ -105,6 +134,7 @@ int MPPScheduler::run()
     }
   }
   
+  receive_idle_notices(); // a late notice of a task that has finished
   checkpoint();
   if(active.size()) {
     if(all_done)
