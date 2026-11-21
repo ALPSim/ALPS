@@ -16,6 +16,7 @@
 #include <alps/testing/temporary_directory.hpp>
 
 #include "selfconsistency.h"
+#include "types.h"
 
 #include <alps/parameter.h>
 
@@ -24,6 +25,7 @@
 #include <filesystem>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -123,8 +125,8 @@ alps::Parameters parameters(int max_it, double converged) {
 
 class DmftConvergence : public ::testing::Test {
 protected:
-  // dmft sets std::cout to 20 digits; the messages print their numbers in
-  // their own precision.
+  // A solver may leave std::cout at another precision (Hirsch-Fye left 20
+  // digits); the messages print their numbers at the default precision.
   void SetUp() { precision = std::cout.precision(20); }
   void TearDown() { std::cout.precision(precision); }
   std::streamsize precision;
@@ -223,4 +225,43 @@ TEST_F(DmftConvergence, tau_loops_nan) {
       expect_contains(e.what(), "in iteration 2");
     }
   }
+}
+
+// The restart files (G0omega_output, G0tau_output) are read back with
+// G0OMEGA_INPUT and G0TAU_INPUT. They were written with 6 digits.
+TEST_F(DmftConvergence, restart_file_round_trip) {
+  matsubara_green_function_t G(n_matsubara, 2), read(n_matsubara, 2);
+  itime_green_function_t G_tau(n_tau + 1, 2), read_tau(n_tau + 1, 2);
+  for (unsigned f = 0; f < 2; ++f) {
+    for (unsigned w = 0; w < n_matsubara; ++w)
+      G(w, f) = std::complex<double>(1. / (3. + w + f), -std::sqrt(2.) / (7. + w));
+    for (unsigned t = 0; t <= n_tau; ++t)
+      G_tau(t, f) = -std::exp(-0.1 * t - f) / 3.;
+  }
+  G.write("G0omega");
+  read.read("G0omega");
+  G_tau.write("G0tau");
+  read_tau.read("G0tau");
+  for (unsigned f = 0; f < 2; ++f) {
+    for (unsigned w = 0; w < n_matsubara; ++w)
+      EXPECT_EQ(read(w, f), G(w, f)) << "frequency " << w << ", flavor " << f;
+    for (unsigned t = 0; t <= n_tau; ++t)
+      EXPECT_EQ(read_tau(t, f), G_tau(t, f)) << "tau index " << t << ", flavor " << f;
+  }
+}
+
+// The printers of Green's functions set 20 digits on the stream they were
+// given and left them, so the Hirsch-Fye solver's "green result is: " left
+// std::cout at 20 digits. They now print 15 (digits10) and restore it.
+TEST_F(DmftConvergence, printers_restore_precision) {
+  itime_green_function_t G(n_tau + 1, 2);
+  for (unsigned f = 0; f < 2; ++f)
+    for (unsigned t = 0; t <= n_tau; ++t)
+      G(t, f) = 1. / 3.;
+  std::ostringstream out;
+  out.precision(4);
+  out << G;
+  EXPECT_EQ(out.precision(), 4);
+  EXPECT_NE(out.str().find("0.333333333333333"), std::string::npos) << out.str();
+  EXPECT_EQ(out.str().find("0.3333333333333333"), std::string::npos) << out.str();
 }

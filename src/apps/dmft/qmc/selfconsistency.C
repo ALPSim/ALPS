@@ -81,7 +81,7 @@ inline void update_max_diff(double& max_diff, double diff)
 void report_convergence(double max_diff, double converged, int iteration, int max_it,
                         bool compared, std::string const& restart)
 {
-  // in its own stream: dmft sets std::cout to 20 digits
+  // in its own stream, at the default precision, whatever a solver left on std::cout
   std::ostringstream msg;
   if (!compared)
     msg<<"DMFT loop stopped after "<<iteration<<" iteration (MAX_IT = "<<max_it
