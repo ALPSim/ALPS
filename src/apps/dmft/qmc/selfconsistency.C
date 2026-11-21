@@ -25,6 +25,12 @@
 #include "types.h"
 #include <sys/types.h> 
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
+#include <complex>
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
                                  /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
                                  ///
                                  /// @param parms contains the ALPS parameters needed for the simulation.
@@ -33,6 +39,63 @@
                                  /// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
                                  /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
+
+
+namespace {
+bool is_finite(double x) { return std::isfinite(x); }
+bool is_finite(std::complex<double> const& x) { return std::isfinite(x.real()) && std::isfinite(x.imag()); }
+
+/// Throws if an entry of G is NaN or infinite. A loop that goes on with it
+/// computes its difference to the last iteration from NaN, which compares
+/// false with everything, and so ended as converged.
+template <class T>
+void check_finite(green_function<T> const& G, char const* name, int iteration)
+{
+  for (unsigned f=0; f<G.nflavor(); ++f)
+    for (unsigned s2=0; s2<G.nsite(); ++s2)
+      for (unsigned s1=0; s1<G.nsite(); ++s1)
+        for (unsigned t=0; t<G.ntime(); ++t)
+          if (!is_finite(G(t,s1,s2,f))) {
+            std::ostringstream msg;
+            msg<<"dmft: "<<name<<" is not finite ("<<G(t,s1,s2,f)<<" at index "<<t
+               <<", sites "<<s1<<" "<<s2<<", flavor "<<f<<") ";
+            if (iteration==0)
+              msg<<"before the first iteration.";
+            else if (iteration==1)
+              msg<<"in iteration 1.";
+            else
+              msg<<"in iteration "<<iteration<<". The files of the earlier iterations are kept.";
+            throw std::runtime_error(msg.str());
+          }
+}
+
+/// Raises max_diff to diff. Written so that a NaN diff is taken, not skipped.
+inline void update_max_diff(double& max_diff, double diff)
+{
+  if (!(diff <= max_diff))
+    max_diff = diff;
+}
+
+/// Prints why the loop ended. A loop that reaches MAX_IT ends normally, with
+/// the results of its last iteration, but says so.
+void report_convergence(double max_diff, double converged, int iteration, int max_it,
+                        bool compared, std::string const& restart)
+{
+  // in its own stream: dmft sets std::cout to 20 digits
+  std::ostringstream msg;
+  if (!compared)
+    msg<<"DMFT loop stopped after "<<iteration<<" iteration (MAX_IT = "<<max_it
+       <<") without a convergence check, which needs two iterations.";
+  else if (max_diff <= converged)
+    msg<<"DMFT loop converged after "<<iteration<<" iterations: max diff "<<max_diff
+       <<" <= CONVERGED = "<<converged<<".";
+  else
+    msg<<"DMFT loop NOT converged: MAX_IT = "<<max_it<<" iterations reached, last max diff "
+       <<max_diff<<" > CONVERGED = "<<converged<<". The results are those of the last "
+       <<"iteration; to continue, rerun with "<<restart<<".";
+  std::cout<<msg.str()<<std::endl;
+}
+}
 
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert)
 {
@@ -47,6 +110,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   std::string basename=parms["BASENAME"];
   if (parms.defined("H_INIT")) parms["H"]=parms["H_INIT"];
   itime_green_function_t G0_tau = hilbert.initial_G0(parms);
+  check_finite(G0_tau, "the initial G0_tau", 0);
   itime_green_function_t G_tau = G0_tau;
   itime_green_function_t G0_tau_old(G0_tau);
   int iteration_ctr=0;
@@ -58,25 +122,27 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
     G_tau = solver.solve(G0_tau, parms);
+    check_finite(G_tau, "G_tau from the impurity solver", iteration_ctr);
     //std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G0_tau= hilbert(G_tau, mu, h, beta);
+    check_finite(G0_tau, "G0_tau from the Hilbert transform", iteration_ctr);
     parms["H"]=h;
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
-        if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
-          max_diff = std::abs(G0_tau(i,f)-G0_tau_old(i,f));
+        update_max_diff(max_diff, std::abs(G0_tau(i,f)-G0_tau_old(i,f)));
       }
     }	
     std::cout<<"maximum difference in G0_tau is: "<<max_diff<<std::endl;
     print_tau_green_functions(basename, iteration_ctr, G0_tau_old, G_tau, beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
-  std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
+  const std::string g0_output = parms.value_or_default("G0TAU_output", "G0tau_output");
+  report_convergence(max_diff, converged, iteration_ctr, max_it, true, "G0TAU_INPUT = " + g0_output);
   // write G0 (to be read in as an input for a new simulation)
-  G0_tau.write(parms.value_or_default("G0TAU_output", "G0tau_output").c_str());
+  G0_tau.write(g0_output.c_str());
 }
 
 
@@ -94,6 +160,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
   std::string basename=parms["BASENAME"];
   if (parms.defined("H_INIT")) parms["H"]=parms["H_INIT"];
   itime_green_function_t G_tau = hilbert.initial_G0(parms);
+  check_finite(G_tau, "the initial G0_tau", 0);
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
   double max_diff;
@@ -104,23 +171,24 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
     
     std::cout<<"running solver"<<std::endl;
     G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
+    check_finite(G_tau, "G_tau from the impurity solver", iteration_ctr);
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
 
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
-        if (fabs(G_tau(i,f)-G_tau_old(i,f)) > max_diff)
-          max_diff = fabs(G_tau(i,f)-G_tau_old(i,f));
+        update_max_diff(max_diff, std::abs(G_tau(i,f)-G_tau_old(i,f)));
       }
     }
     std::cout<<"maximum difference in G_tau is: "<<max_diff<<std::endl;
     print_dressed_tau_green_functions(basename, iteration_ctr, G_tau, beta);
     parms["H"]=h;
   } while (max_diff > converged && iteration_ctr < max_it);
-  std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
+  const std::string g_output = parms.value_or_default("G0TAU_output", "G0tau_output");
+  report_convergence(max_diff, converged, iteration_ctr, max_it, true, "G0TAU_INPUT = " + g_output);
   // write G (to be read in as an input for a new simulation)
-  G_tau.write(parms.value_or_default("G0TAU_output", "G0tau_output").c_str());
+  G_tau.write(g_output.c_str());
 
 }
 
@@ -153,6 +221,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   
   if (parms.defined("H_INIT")) parms["H"]=parms["H_INIT"];
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
+  check_finite(G0_omega, "the initial G0_omega", 0);
   G0_omega = hilbert.symmetrize(G0_omega, symmetrization);
   
   //define multiple vectors
@@ -180,6 +249,8 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
     G0_tau_old = G0_tau;
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    check_finite(G_omega, "G_omega from the impurity solver", iteration_ctr);
+    check_finite(G_tau, "G_tau from the impurity solver", iteration_ctr);
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G_omega = hilbert.symmetrize(G_omega, symmetrization);
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
@@ -201,7 +272,9 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
       parms["H"]=h;
       FourierTransformer::generate_transformer(parms, fourier_ptr);
     }
+    check_finite(G0_omega, "G0_omega from the Hilbert transform", iteration_ctr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
+    check_finite(G0_tau, "G0_tau from the Fourier transform of G0_omega", iteration_ctr);
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
       std::cout<<"comparing old and new result."<<std::endl;
@@ -210,8 +283,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
         for(unsigned int i2=0;i2<n_site;++i2){
           for(unsigned int i1=0;i1<n_site;++i1){
             for(unsigned int w=0;w<n_matsubara;++w){
-              if (std::abs(G_omega(w,i1,i2,o)-G_omega_old(w,i1,i2,o)) > max_diff)
-                max_diff = std::abs(G_omega(w,i1,i2,o)-G_omega_old(w,i1,i2,o));
+              update_max_diff(max_diff, std::abs(G_omega(w,i1,i2,o)-G_omega_old(w,i1,i2,o)));
             }
           }
         }
@@ -221,8 +293,11 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
     }
     print_all_green_functions(basename, iteration_ctr, G0_omega_old, G_omega, G0_tau_old, G_tau, beta);
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
+  const std::string g0_output = parms.value_or_default("G0OMEGA_output", "G0omega_output");
+  report_convergence(max_diff, converged, iteration_ctr, max_it, iteration_ctr > 1,
+                     "G0OMEGA_INPUT = " + g0_output);
   // write G0 (to be read as an input Green function)
-  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G0_omega.write(g0_output.c_str());
 }
 
 
