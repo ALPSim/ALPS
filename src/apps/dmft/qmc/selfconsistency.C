@@ -142,7 +142,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   const std::string g0_output = parms.value_or_default("G0TAU_output", "G0tau_output");
   report_convergence(max_diff, converged, iteration_ctr, max_it, true, "G0TAU_INPUT = " + g0_output);
   // write G0 (to be read in as an input for a new simulation)
-  G0_tau.write(g0_output.c_str());
+  G0_tau.write(g0_output.c_str(), beta);
 }
 
 
@@ -188,7 +188,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
   const std::string g_output = parms.value_or_default("G0TAU_output", "G0tau_output");
   report_convergence(max_diff, converged, iteration_ctr, max_it, true, "G0TAU_INPUT = " + g_output);
   // write G (to be read in as an input for a new simulation)
-  G_tau.write(g_output.c_str());
+  G_tau.write(g_output.c_str(), beta);
 
 }
 
@@ -237,7 +237,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   fourier_ptr->backward_ft(G0_tau, G0_omega);
   
   if (parms.defined("G0TAU_input"))           // it is not needed to store it by default, as it will be stored in the 1st iteration as G0_tau_1
-    G0_tau.write((parms["G0TAU_input"]).c_str());
+    G0_tau.write((parms["G0TAU_input"]).c_str(), beta);
   
   double max_diff=0.;	
   int iteration_ctr = 0;
@@ -297,7 +297,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   report_convergence(max_diff, converged, iteration_ctr, max_it, iteration_ctr > 1,
                      "G0OMEGA_INPUT = " + g0_output);
   // write G0 (to be read as an input Green function)
-  G0_omega.write(g0_output.c_str());
+  G0_omega.write(g0_output.c_str(), beta);
 }
 
 
