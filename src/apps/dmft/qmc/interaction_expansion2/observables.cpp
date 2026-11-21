@@ -82,9 +82,9 @@ void InteractionExpansion::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-    // Measured as value times sign. NGS's signed observables divided their
-    // mean by the mean sign; alps::solvers::ctint divides the results by the
-    // "Sign" result with divide_sz_results_by_sign before saving them.
+    // Measured as value times sign, like every observable but "Sign" and
+    // the diagnostics; alps::solvers::ctint divides the results by the
+    // "Sign" result with divide_signed_results_by_sign before saving them.
     measurements << FullBinningAccumulator<double>(sz_name.str().c_str());
     measurements << FullBinningAccumulator<double>(sz2_name.str().c_str());
     measurements << FullBinningAccumulator<double>(sz0_szj_name.str().c_str());
@@ -99,24 +99,49 @@ void InteractionExpansion::initialize_observables(void)
 }
 
 
-void divide_sz_results_by_sign(alps::accumulators::result_set & results, unsigned int n_site)
+void divide_signed_results_by_sign(alps::accumulators::result_set & results,
+                                   unsigned int n_site, unsigned int n_flavors)
 {
   if(!results.has("Sign"))
     return;
   // A copy, since dividing by a result adds jackknife bins to it.
   alps::accumulators::result_wrapper const sign(results["Sign"]);
+  std::vector<std::string> names;
+  names.push_back("densities");
+  names.push_back("density_correlation");
+  names.push_back("n_i n_j");
+  for(unsigned int z=0;z<n_flavors;++z){
+    names.push_back("densities_"+boost::lexical_cast<std::string>(z));
+    for(unsigned int k=0;k<n_site;++k){
+      std::stringstream wk_real, wk_imag, density;
+      wk_real<<"Wk_real_"<<z<<"_"<<k<<"_"<<k;
+      wk_imag<<"Wk_imag_"<<z<<"_"<<k<<"_"<<k;
+      density<<"density_"<<z;
+      if (n_site>1) density<<"_"<<k;
+      names.push_back(wk_real.str());
+      names.push_back(wk_imag.str());
+      names.push_back(density.str());
+      for(unsigned int j=0;j<n_site;++j){
+        std::stringstream w;
+        w<<"W_"<<z<<"_"<<k<<"_"<<j;
+        names.push_back(w.str());
+      }
+    }
+  }
   for(unsigned int i=0;i<n_site;++i){
     std::stringstream sz_name, sz2_name, sz0_szj_name;
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-    std::string const names[] = {sz_name.str(), sz2_name.str(), sz0_szj_name.str()};
-    // Only the imaginary-time measurement fills them, and the MPI adapter
-    // leaves out observables that no rank measured.
-    for(std::string const & name : names)
-      if(results.has(name) && results[name].count())
-        results[name] /= sign;
+    names.push_back(sz_name.str());
+    names.push_back(sz2_name.str());
+    names.push_back(sz0_szj_name.str());
   }
+  // Each method fills only some of them, and the MPI adapter leaves out
+  // observables that no rank measured.
+  for(std::string const & name : names)
+    if(results.has(name) && results[name].count())
+      results[name] /= sign;
 }
 
 
