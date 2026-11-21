@@ -123,21 +123,32 @@ int main(int argc, char** argv)
             || program=="hirschfye" || program=="interaction")
           throw std::invalid_argument("SOLVER = " + solver
                                       + " needs the Matsubara loop; set OMEGA_LOOP = 1");
-        SemicircleHilbertTransformer transform(parms);
-        boost::shared_ptr<ImpuritySolver> solver_ptr;
-        if (parms["SOLVER"]=="Hybridization") {
+        if (solver=="Hybridization")
           throw std::invalid_argument("The internal hybridization solver has been replaced by a standalone hybridzation solver.\nPlease use the \'hybridization\' program");
-        } else if (reads_hybridization_function(program) || static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA",false))) {
-          std::string p(parms["SOLVER"]);
-          std::cout<<"using external solver: "<<p<<std::endl;
-          parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
-          solver_ptr.reset(new ExternalSolver(p));
-          F_selfconsistency_loop(parms, *solver_ptr, transform);
-        } else {
-            /*std::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-          solver_ptr.reset(new ExternalSolver(/*std::filesystem::absolute(*/p/*)*/));
-          selfconsistency_loop(parms, *solver_ptr, transform);
-        }
+        // The imaginary-time loop builds the next hybridization function from
+        // the Bethe-lattice condition Delta(tau) = t^2 G(tau) (ExternalSolver),
+        // so it ran the Bethe lattice whatever TWODBS or DOSFILE said (#388,
+        // case 3). L and tprime only act together with TWODBS. The Matsubara
+        // loop has the general Hilbert transform.
+        for (const char* lattice : {"TWODBS", "DOSFILE"})
+          if (parms.defined(lattice))
+            throw std::invalid_argument(std::string("The imaginary-time loop (OMEGA_LOOP = 0) supports only the "
+                                        "Bethe lattice (semicircular DOS), and would ignore ") + lattice
+                                        + "; set OMEGA_LOOP = 1 for " + lattice + ".");
+        // Other solvers got G0(tau) and needed an imaginary-time Hilbert
+        // transform, which exists only for the Matsubara loop: the run failed
+        // after the first solver run (SemicircleHilbertTransformer::operator()).
+        if (!reads_hybridization_function(program)
+            && !static_cast<bool>(parms.value_or_default("SC_WRITE_DELTA", false)))
+          throw std::invalid_argument("SOLVER = " + solver + " needs the Matsubara loop; set OMEGA_LOOP = 1. "
+                                      "The imaginary-time loop (OMEGA_LOOP = 0) supports only solvers that read "
+                                      "the hybridization function (hybridization, ct-hyb-segment, or "
+                                      "SC_WRITE_DELTA = 1).");
+        SemicircleHilbertTransformer transform(parms);
+        std::cout<<"using external solver: "<<solver<<std::endl;
+        parms["SC_WRITE_DELTA"]=1; //we need the hybridization function for this solver
+        boost::shared_ptr<ImpuritySolver> solver_ptr(new ExternalSolver(solver));
+        F_selfconsistency_loop(parms, *solver_ptr, transform);
       }
       else {
         //perform self consistency loop in Matsubara frequency omega
