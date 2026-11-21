@@ -122,6 +122,11 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_hilberttransformer_insulating PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_hilberttransformer_insulating COMPONENT dmft LABELS regression)
 
+  add_executable(dmft_input_files dmft_input_files.C)
+  target_link_libraries(dmft_input_files PRIVATE ALPS::cthyb)
+  target_include_directories(dmft_input_files PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  alps_add_gtest(dmft_input_files COMPONENT dmft LABELS regression)
+
   add_executable(dmft_selfconsistency_convergence dmft_selfconsistency_convergence.C selfconsistency.C)
   target_link_libraries(dmft_selfconsistency_convergence PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_selfconsistency_convergence COMPONENT dmft LABELS regression)
