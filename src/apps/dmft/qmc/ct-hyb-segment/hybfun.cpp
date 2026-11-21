@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include"hybfun.hpp"
+#include "../text_table.h"
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -86,27 +87,15 @@ void hybfun::read_hybridization_function(const alps::params &p){
       }
     }
   }
-  else{//read from text file
+  else{//read from text file: N+1 rows of a label and one value per flavor
     std::ifstream infile(fname.c_str());
     if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open hybridization file (text format) ") + p["cthyb.DELTA"].as<std::string>() + " for Delta function"));
+      throw(std::invalid_argument(std::string("could not open hybridization file (text format) ") + fname + " for Delta function"));
     }
-    for (std::size_t i=0; i<ntime(); i++) {
-      if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + p["cthyb.DELTA"].as<std::string>() + ". probably wrong number of lines"));
-      }
-      double dummy;
-      infile >> dummy;
-      //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
-      for (std::size_t j=0; j<nflavor(); j++){
-        if(!infile.good()){
-          throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + p["cthyb.DELTA"].as<std::string>() + ". probably wrong number of columns"));
-        }
-        double delta;
-        infile >> delta;
-        operator()(i,j)=delta;
-      }
-    }
+    const std::vector<double> values = text_table::read_table<double>(infile, ntime(), nflavor(), "hybridization file", fname);
+    for (std::size_t i=0; i<ntime(); i++)
+      for (std::size_t j=0; j<nflavor(); j++)
+        operator()(i,j)=values[i*nflavor()+j];
   }
 }
 
