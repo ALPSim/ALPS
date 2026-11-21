@@ -44,11 +44,34 @@ ExternalSolver::ExternalSolver(const std::filesystem::path& executable)
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape);
 
+namespace {
+/// The orbital energy of each flavor for the impurity solver: MU plus the
+/// shift sum_j U(f,j)/2 of that flavor, which puts half filling at MU = 0
+/// for every flavor, minus or plus the field H. It says so once per run.
+std::vector<double> orbital_energies(const U_matrix& U, double mu, double h, unsigned n_orbital) {
+  std::vector<double> energies(n_orbital);
+  for (unsigned f = 0; f < n_orbital; ++f)
+    energies[f] = mu + U.mu_shift(f) + (h == 0 ? 0. : (f % 2 ? h : -h));
+  static bool reported = false;
+  if (!reported) {
+    reported = true;
+    std::cout << "dmft: MU is measured from half filling: the impurity solver gets the orbital energy "
+                 "MU + sum_j U(f,j)/2" << (h == 0 ? "" : " -+ H") << " for flavor f, so MU = 0 is half filling "
+                 "for every flavor. Orbital energies:";
+    for (unsigned f = 0; f < n_orbital; ++f)
+      std::cout << " " << energies[f];
+    std::cout << std::endl;
+  }
+  return energies;
+}
+}
+
 void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& solver_input) {
   double mu=p["MU"];
   U_matrix U(p);
   double h = static_cast<double>(p.value_or_default("H",0.));
   unsigned n_orbital=static_cast<unsigned>(p["FLAVORS"]);
+  const std::vector<double> mu_vector = orbital_energies(U, mu, h, n_orbital);
   
   //changed convention in the hybridization solvers:
   p["N_MATSUBARA"]=p["NMATSUBARA"];
@@ -56,14 +79,9 @@ void prepare_parms_for_hybridization(alps::Parameters& p, alps::hdf5::archive& s
   p["N_ORBITALS"]=p["FLAVORS"];
   p["DELTA_IN_HDF5"]=1;
   p["DELTA"]=p["INFILE"];
-  if (h==0) {
-    p["MU"]=mu+U.mu_shift();
+  if (h==0 && U.uniform_mu_shift()) {
+    p["MU"]=mu_vector[0];
   } else {
-    std::vector<double> mu_vector(n_orbital);
-    for (int f = 0; f < n_orbital; ++f) {
-      double hsign = f%2 ? h : -h;
-      mu_vector[f]=mu+U.mu_shift()+hsign;
-    }
     p["MU_VECTOR"]=p["INFILE"];
     p["MU_IN_HDF5"]=1;
     solver_input<<alps::make_pvp("/MUvector",mu_vector);
@@ -112,9 +130,7 @@ void prepare_parms_for_cthyb_segment(alps::Parameters& p, alps::hdf5::archive& s
 
   const double mu = p["MU"];
   const double h = static_cast<double>(p.value_or_default("H", 0.));
-  std::vector<double> mu_vector(n_orbital);
-  for (unsigned f = 0; f < n_orbital; ++f)
-    mu_vector[f] = mu + U.mu_shift() + (h == 0 ? 0. : (f % 2 ? h : -h));
+  const std::vector<double> mu_vector = orbital_energies(U, mu, h, n_orbital);
   solver_input << alps::make_pvp("/MUvector", mu_vector);
   p["MU_VECTOR"] = p["INFILE"];
   p["MU_IN_HDF5"] = 1;
