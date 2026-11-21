@@ -234,14 +234,14 @@ The general algorithm for phonons is given in Ref.~\onlinecite{Werner07holstein}
 Providing the retarded interaction function and its derivative is optional. This feature is enabled by providing a filename through the parameter \verb#RET_INT_K#.
 $K(\tau)$ and $K'(\tau)$ are provided either through a text file, or, if the (optional) parameter \verb#K_IN_HDF5# is set to 1, within an hdf5 archive.
 The file format in both cases is similar as for the hybridization function. The text file should provide \emph{three} columns. The first column is the time or index (the actual value is ignored), the second column is the tabulated value of $K(\tau)$ and the third column gives the corresponding value of $K'(\tau)$.
-Likewise, the array in the hdf5 file should provide the $N_{\tau}+1$ values of $K$ and $K'$ within the paths \verb#Ret_int_K# for $K(\tau)$ and \verb#Ret_int_Kp# for $K'(\tau)$.
+Likewise, the array in the hdf5 file should provide the $N_{\tau}+1$ values of $K$ and $K'$ within the paths \verb#Ret_int_K# for $K(\tau)$ and \verb#Ret_int_Kp# for $K'(\tau)$. The text file has exactly $N_{\tau}+1$ lines, and each array exactly $N_{\tau}+1$ values; a file of another length is an error, as are values that are not finite, a negative $K$, and $K(0)\neq 0$ or $K(\beta)\neq 0$.
 Note that there is no orbital dependence because the retarded interaction couples to all orbitals equally.
 
 In case of a retarded interaction, the Hartree self-energy is given by
 \begin{align}
 \Sigma^{\text{H}}_{i} = - 2K'(0^{+})\sum_{i}\langle n_{i}\rangle +\frac{1}{2}\sum_{j}U_{ij}\langle n_{j}\rangle ,
 \end{align}
-so that in the particle-hole symmetric case an input chemical potential to $\mu=-2K'(0^{+})+\sum_{j}U_{ij}/2$ (which is independent of $i$) will give a half-filled system. The chemical potential is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
+so that in the particle-hole symmetric case an input chemical potential $\mu=-N_\text{orb}K'(0^{+})+\sum_{j}U_{ij}/2$ will give a half-filled system, where $N_\text{orb}$ is the number of orbitals (flavors): at half filling $\sum_{i}\langle n_{i}\rangle=N_\text{orb}/2$. For a single band with two spins this is $\mu=-2K'(0^{+})+U/2$. The chemical potential is provided through the input parameters \verb#U# and \verb#MU# or input the corresponding input files.
 The treatment of the retarded interaction requires the static interaction and chemical potential to be shifted by $U_{ij}\to U_{ij}-2K'(0)$ for $i\neq j$ and $\mu\to \mu+K'(0)$, respectively. This is done internally by the solver and does not have to be done by the user. The shifted values will be printed to screen as ``effective'' interaction and chemical potential.
 
 \subsection{Orbital chemical potential / double counting terms}
