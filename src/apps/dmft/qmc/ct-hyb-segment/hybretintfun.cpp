@@ -13,6 +13,9 @@
  *****************************************************************************/
 
 #include"hybretintfun.hpp"
+#include "../retarded_interaction.h"
+
+#include <algorithm>
 
 // Internal to ALPS::cthyb_segment: keeps its classes apart from ALPS::cthyb's.
 namespace cthyb_segment {
@@ -38,9 +41,7 @@ green_function<double>(p["N"].as<int>()+1, 1, 2)//2 "flavors": K and K'
 }
 
 void ret_int_fun::interaction_K_function_sanity_check(void){
-for(std::size_t i=0; i<ntime();++i)
-  for(std::size_t j=0; j<nflavor();++j)
-    if(operator()(i,j) < 0. && j==0) throw std::invalid_argument("Problem with retarded interaction function: RET_INT_K(\\tau) < 0. K should always be positive!");
+  // read_retarded_interaction checks the length, K >= 0 and K(0) = K(beta) = 0.
 }
 
 //this routine reads in the retarded interaction function, either from a text file or from an hdf5 file (for easy passing of binary data).
@@ -48,40 +49,11 @@ for(std::size_t i=0; i<ntime();++i)
 //the retarded interaction function is in imaginary time and always positive both for negative and positive times. It is also symmetric.
 void ret_int_fun::read_interaction_K_function(const alps::params &p){
   if(!p.exists("cthyb.RET_INT_K")) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
-  std::string fname=p["cthyb.RET_INT_K"];
-  if(p.exists("cthyb.K_IN_HDF5") && p["cthyb.K_IN_HDF5"]){//attempt to read from h5 archive
-    alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
-    std::vector<double> tmp(ntime());
-    ar["/Ret_int_K"] >> tmp;
-    for(std::size_t i=0; i<ntime(); i++)
-      operator()(i,0)=tmp[i];
-    tmp.clear();
-    ar["/Ret_int_Kp"] >> tmp;
-    for(std::size_t i=0; i<ntime(); i++)
-      operator()(i,1)=tmp[i];
-    tmp.clear();
-  }
-  else{//read from text file
-    std::ifstream infile(fname.c_str());
-    if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open retarded interaction file (text format) ") + p["cthyb.RET_INT_K"].as<std::string>()));
-    }
-    for (std::size_t i=0; i<ntime(); i++) {
-      if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + p["cthyb.RET_INT_K"].as<std::string>() + ". probably wrong number of lines"));
-      }
-      double dummy;
-      infile >> dummy;
-      //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
-      for (std::size_t j=0; j<nflavor(); j++){
-        if(!infile.good()){
-          throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + p["cthyb.RET_INT_K"].as<std::string>() + ". probably wrong number of columns"));
-        }
-        double delta;
-        infile >> delta;
-        operator()(i,j)=delta;
-      }
-    }
+  const bool in_hdf5 = p.exists("cthyb.K_IN_HDF5") && p["cthyb.K_IN_HDF5"].as<bool>();
+  const retarded_interaction r = read_retarded_interaction(p["cthyb.RET_INT_K"].as<std::string>(), in_hdf5, ntime()-1);
+  for(std::size_t i=0; i<ntime(); i++){
+    operator()(i,0)=r.K[i];
+    operator()(i,1)=r.Kp[i];
   }
 }
 
@@ -97,7 +69,8 @@ double ret_int_fun::interpolate(double time) const{
   time=std::abs(time);
 
   double n = time/beta_*(ntime()-1);
-  int n_lower = (int)n; // interpolate linearly between n_lower and n_lower+1
+  // at time = beta, interpolate on the last interval instead of reading past the end
+  int n_lower = std::min((int)n, (int)ntime()-2); // interpolate linearly between n_lower and n_lower+1
 
   return operator()(n_lower,0) + (n-n_lower)*(operator()(n_lower+1,0)-operator()(n_lower,0));
 }
@@ -108,7 +81,8 @@ double ret_int_fun::interpolate_deriv(double time) const{
   if(time<0.) return -1.*interpolate_deriv(-time);
 
   double n = time/beta_*(ntime()-1);
-  int n_lower = (int)n; // interpolate linearly between n_lower and n_lower+1
+  // at time = beta, interpolate on the last interval instead of reading past the end
+  int n_lower = std::min((int)n, (int)ntime()-2); // interpolate linearly between n_lower and n_lower+1
 
   return operator()(n_lower,1) + (n-n_lower)*(operator()(n_lower+1,1)-operator()(n_lower,1));
 }
