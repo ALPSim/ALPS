@@ -13,6 +13,9 @@
  *****************************************************************************/
 
 #include"hybretintfun.hpp"
+#include "../retarded_interaction.h"
+
+#include <algorithm>
 //construct a retarded interaction function. ntime: number of time slices.
 //noffidag_orbitals: number of offdiagonal orbitals. ndiag_orbitals: number
 //of diagonal orbitals. 
@@ -35,10 +38,7 @@ green_function<double>(input.n_tau+1, 1, 2)//2 "flavors": K and K'
 }
 
 void ret_int_fun::interaction_K_function_sanity_check(void){
-for(std::size_t i=0; i<ntime();++i)
-  for(std::size_t j=0; j<nflavor();++j)
-    if(operator()(i,j) < 0. && j==0) throw std::invalid_argument("Problem with retarded interaction function: RET_INT_K(\\tau) < 0. K should always be positive!");
-if(operator()(0,0)!=0.) throw std::invalid_argument("Problem with retarded interaction function: RET_INT_K(\\tau=0) must be zero.");
+  // read_retarded_interaction checks the length, K >= 0 and K(0) = K(beta) = 0.
 }
 
 //this routine reads in the retarded interaction function, either from a text file or from an hdf5 file (for easy passing of binary data).
@@ -46,40 +46,10 @@ if(operator()(0,0)!=0.) throw std::invalid_argument("Problem with retarded inter
 //the retarded interaction function is in imaginary time and always positive both for negative and positive times. It is also symmetric.
 void ret_int_fun::read_interaction_K_function(const alps::input::hybridization_parameters &input){
   if(input.ret_int_k.empty()) throw(std::invalid_argument(std::string("Parameter RET_INT_K missing, filename for retarded interaction function not specified.")));
-  std::string fname=input.ret_int_k;
-  if(input.k_in_hdf5){//attempt to read from h5 archive
-    alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
-    std::vector<double> tmp(ntime());
-    ar>>alps::make_pvp("/Ret_int_K",tmp);
-      for(std::size_t i=0; i<ntime(); i++)
-        operator()(i,0)=tmp[i];
-    tmp.clear();
-    ar>>alps::make_pvp("/Ret_int_Kp",tmp);
-      for(std::size_t i=0; i<ntime(); i++)
-        operator()(i,1)=tmp[i];
-    tmp.clear();
-  }
-  else{//read from text file
-    std::ifstream infile(fname.c_str());
-    if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open retarded interaction file (text format) ") + input.ret_int_k));
-    }
-    for (std::size_t i=0; i<ntime(); i++) {
-      if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + input.ret_int_k + ". probably wrong number of lines"));
-      }
-      double dummy;
-      infile >> dummy;
-      //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
-      for (std::size_t j=0; j<nflavor(); j++){
-        if(!infile.good()){
-          throw(std::invalid_argument(std::string("could not read retarded interaction file (text format) ") + input.ret_int_k + ". probably wrong number of columns"));
-        }
-        double delta;
-        infile >> delta;
-        operator()(i,j)=delta;
-      }
-    }
+  const retarded_interaction r = read_retarded_interaction(input.ret_int_k, input.k_in_hdf5, ntime()-1);
+  for(std::size_t i=0; i<ntime(); i++){
+    operator()(i,0)=r.K[i];
+    operator()(i,1)=r.Kp[i];
   }
 }
 
@@ -95,7 +65,8 @@ double ret_int_fun::interpolate(double time) const{
   time=std::abs(time);
 
   double n = time/beta_*(ntime()-1);
-  int n_lower = (int)n; // interpolate linearly between n_lower and n_lower+1
+  // at time = beta, interpolate on the last interval instead of reading past the end
+  int n_lower = std::min((int)n, (int)ntime()-2); // interpolate linearly between n_lower and n_lower+1
 
   return operator()(n_lower,0) + (n-n_lower)*(operator()(n_lower+1,0)-operator()(n_lower,0));
 }
@@ -106,7 +77,8 @@ double ret_int_fun::interpolate_deriv(double time) const{
   if(time<0.) return -1.*interpolate_deriv(-time);
 
   double n = time/beta_*(ntime()-1);
-  int n_lower = (int)n; // interpolate linearly between n_lower and n_lower+1
+  // at time = beta, interpolate on the last interval instead of reading past the end
+  int n_lower = std::min((int)n, (int)ntime()-2); // interpolate linearly between n_lower and n_lower+1
 
   return operator()(n_lower,1) + (n-n_lower)*(operator()(n_lower+1,1)-operator()(n_lower,1));
 }
