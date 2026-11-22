@@ -96,6 +96,19 @@ protected:
       m2 += w*H*H;
     }
   }
+  /// The tail of the coarse-grained G = <(iw - H(kl) - Sigma)^-1> over the
+  /// patch, for a self-energy with tail Sigma = s0 + s1/(iw): G = 1/iw +
+  /// c2/(iw)^2 + c3/(iw)^3 with c2 = m1 + s0 and c3 = m2 + m1 s0 + s0 m1 +
+  /// s0^2 + s1, where m1 = <H>, m2 = <H^2> (bare_moments). It holds for any
+  /// interaction, unlike a Hartree guess (#449).
+  template<class M> static void ksum_tail(const M &m1, const M &m2, const M &s0, const M &s1, M &c2, M &c3){
+    c2 = m1 + s0;
+    c3 = m2 + m1*s0 + s0*m1 + s0*s0 + s1;
+  }
+  /// Whether G has the tail orders lo to hi.
+  template<class GF> static bool has_tail(const GF &G, int lo, int hi){
+    return G.min_tail_order()!=alps::gf::TAIL_NOT_SET && G.min_tail_order()<=lo && G.max_tail_order()>=hi;
+  }
 
 
   /// The starting G0 of the loop, and its Fourier transform: read from
@@ -195,8 +208,8 @@ public:
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
   void attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster=false) const;
-  ///attach the DCA cluster high frequency behavior for the interacting GF
-  void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
+  ///attach the tail of the k-sum G for a self-energy with the tail orders 0 and 1
+  void attach_ksum_tail(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const;
 
   //Real space and k-space transformers for the Green's functions
   cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
@@ -213,8 +226,8 @@ private:
   template<class GF, class TAIL> void symmetrize_helper_real_space(alps::gf::four_index_gf_with_tail<GF,TAIL> &G,
                                                         const std::pair<std::set<pair_class_type>::const_iterator,
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
-  ///given a chemical potential, compute the density (assuming a tail for the target density)
-  double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site);
+  ///given a chemical potential, compute the density per site of the k-sum G
+  double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma);
 
   /**
     *  optimized Fourier transformation from reciprocal space to real space
@@ -350,10 +363,14 @@ private:
   void check_momentum_pairs() const;
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
-  ///attach a tail to the interacting GF
-  void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
-  ///given a chemical potential, compute the density (assuming a tail for the target density)
-  double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site);
+  ///attach the tail of the k-sum G for a self-energy with the tail orders 0 and 1
+  void attach_ksum_tail(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const;
+  ///perform the AFM symmetrization
+  void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
+  ///perform the CO symmetrization
+  void symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const;
+  ///given a chemical potential, compute the density per site of the k-sum G
+  double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag);
 
   ///initial magnetic field value
   const double h_init_;
