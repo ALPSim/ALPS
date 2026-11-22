@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -36,10 +37,6 @@ public:
   static void define_parameters(alps::params &p){
     p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf","Filename for temporary file");
     p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf","Filename for temporary file");
-  }
-  template<typename CTF> void write_cluster_info(const CTF& clustertransformer){
-    alps::hdf5::archive solver_input(infile_str_, "w");
-    clustertransformer.write_hdf5(solver_input, "/cluster");
   }
   template<typename MGF, typename IGF> void solve(const MGF& G0_omega, const IGF &G0_tau, MGF &G_omega, IGF &G_tau){
     std::cout<<"entering solve() command."<<std::endl;
@@ -91,9 +88,20 @@ private:
     for(const typename GF::value_type *it=G.data().data(); it !=G.data().data()+G.data().num_elements(); it++)
       if(std::isnan(std::abs(*it)) || std::isinf(std::abs(*it))) throw std::runtime_error("encountered nan or inf in GF");
   }
+  /// s as one word for the shell: in single quotes, with each ' as '\''
+  static std::string shell_quote(const std::string &s){
+    std::string quoted = "'";
+    for (char c : s) quoted += (c == '\'' ? std::string("'\\''") : std::string(1, c));
+    return quoted + "'";
+  }
   /// call the executable
   void call_solver(){
-    std::stringstream  command; command << launch_command_ << " " << param_file_name_<< " --MU="<<mu_;
+    // solver.SOLVER is a command line (it may hold a launcher such as mpirun);
+    // the parameter file is one argument, quoted for the shell, and MU has the
+    // digits that read back as the same double (#460).
+    std::stringstream  command;
+    command.precision(std::numeric_limits<double>::max_digits10);
+    command << launch_command_ << " " << shell_quote(param_file_name_) << " --MU=" << mu_;
     std::cerr << "Calling external solver as: " <<  command.str()<<std::endl;
     int result = std::system(command.str().c_str());
     if (result)

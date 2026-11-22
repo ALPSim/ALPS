@@ -13,8 +13,10 @@
 #include "alps/params.hpp"
 
 #include <filesystem>
+#include <fstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 struct working_directory {
@@ -84,6 +86,16 @@ protected:
 
 // A "solver" that copies ready.h5 to the output file.
 const std::string copy_solver = "cp ready.h5 out.h5 #";
+
+// One that also writes its arguments, one per line, to args.txt.
+const std::string recording_solver = "sh -c 'printf \"%s\\n\" \"$@\" > args.txt; cp ready.h5 out.h5' sh";
+
+std::vector<std::string> lines(const std::string& file) {
+  std::ifstream in(file);
+  std::vector<std::string> result;
+  for (std::string line; std::getline(in, line);) result.push_back(line);
+  return result;
+}
 }
 
 TEST_F(ImpuritySolverTest, ReadsTheOutputAndRemovesTheFiles) {
@@ -137,4 +149,22 @@ TEST_F(ImpuritySolverTest, AcceptsGTauOnAnotherTauGrid) {
   green_functions g = noninteracting(16);
   ImpuritySolver solver(copy_solver, "params.ini", parameters(16));
   EXPECT_EQ(solve_error(solver, g), "");
+}
+
+// The MU passed to the solver is the one of the loop, to the last digit (it
+// was rounded to 6 digits), and the parameter file name reaches the solver as
+// one argument, even with a space or a quote in it (#460).
+TEST_F(ImpuritySolverTest, PassesMuExactlyAndTheParameterFileAsOneArgument) {
+  green_functions g = noninteracting(16);
+  write_output("ready.h5", g);
+  ImpuritySolver solver(recording_solver, "my par'ams.ini", parameters(16));
+  const double mu = -0.43804012345678912;
+  solver.adjust_mu(mu);
+  green_functions out = g;
+  solver.solve(g.G_omega, g.G_tau, out.G_omega, out.G_tau);
+  const std::vector<std::string> args = lines("args.txt");
+  ASSERT_EQ(args.size(), 2u);
+  EXPECT_EQ(args[0], "my par'ams.ini");
+  ASSERT_EQ(args[1].substr(0, 5), "--MU=");
+  EXPECT_EQ(std::stod(args[1].substr(5)), mu) << args[1];
 }
