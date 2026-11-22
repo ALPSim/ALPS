@@ -135,6 +135,13 @@ fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it 
   return dir;
 }
 
+int count_lines_containing(const std::string& text, const std::string& part) {
+  std::istringstream in(text);
+  int n = 0;
+  for (std::string line; std::getline(in, line);) n += line.find(part) != std::string::npos;
+  return n;
+}
+
 std::string read_file(const fs::path& file) {
   std::ifstream in(file);
   std::stringstream text;
@@ -266,6 +273,26 @@ TEST(LoopOptions, WritesNoIterationFilesWhenAskedNotTo) {
   EXPECT_NE(log.find("iteration 2: change of G"), std::string::npos);
   EXPECT_NE(log.find("dca stopped: the change of G"), std::string::npos);
   EXPECT_EQ(log.find("sc.MAX_IT=10 iterations"), std::string::npos);
+}
+
+// dca.G0_OMEGA_OUTPUT holds the G0 for the next iteration also when the loop
+// stops because it converged. With a tolerance this loose the first
+// iteration converges, and no G0 was written at all (#465). That G0 is the
+// coarse-grained lattice G0, not the isolated cluster's G0 the loop started
+// from.
+TEST(LoopOptions, WritesTheLastG0WhenConverged) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "ConvergedG0Output", 10, false,
+                               "sc.SELFCONSISTENCY_CONVERGENCE = 1e10\ndca.G0_OMEGA_OUTPUT = G0_out.h5\n");
+  if (HasFailure()) return;
+  const std::string log = read_file(dir / "dca.log");
+  EXPECT_NE(log.find("dca stopped: the change of G"), std::string::npos) << log;
+  EXPECT_EQ(log.find("iteration 1"), std::string::npos) << log;
+  EXPECT_EQ(count_lines_containing(log, "spin symmetrization is"), 1) << log;
+  ASSERT_TRUE(fs::exists(dir / "G0_out.h5"));
+  const cluster_matsubara_kspace_gf G0_out = load(dir / "G0_out.h5", "/G0");
+  const cluster_matsubara_kspace_gf G0_start = load(dir / "G0_omega.h5", "/G0");
+  EXPECT_GT((G0_out - G0_start).norm(), 1e-3);
 }
 
 // In Nambu space the spin symmetrization assumes no Zeeman field; with one,

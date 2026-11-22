@@ -69,7 +69,12 @@ after each iteration. The solver reads the same parameter file as `dca`.
 
 Each iteration also writes the Green's functions and self-energy as text
 (`G0_omega_<n>`, `G_omega_<n>`, `selfenergy_<n>`, ...) and to `Greens_<n>.h5`,
-unless `sc.WRITE_ITERATIONS` is `false`. dca prints the change of G in every
+unless `sc.WRITE_ITERATIONS` is `false`. The Matsubara Green's functions
+(`G_omega_<n>`, `G0_omega_<n>`, `selfenergy_<n>`) are symmetrized over the
+spins (`sc.SPIN_SYMMETRIZATION`) and the cluster's point group; `G_tau_<n>` and
+`G_tau` are the solver's G(τ) as it returned them, without these
+symmetrizations. After every iteration, also the last one, dca writes the G0
+for the next iteration to `dca.G0_OMEGA_OUTPUT`. dca prints the change of G in every
 iteration; it stops when the change is below `sc.SELFCONSISTENCY_CONVERGENCE`
 or after `sc.MAX_IT` iterations, which is the usual way to run it: run a fixed
 number of iterations and judge convergence afterwards. dca says which of the
