@@ -301,6 +301,7 @@ public:
     mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]), afm_symmetry_(params["dca.AFM_SELFCONSISTENCY"]), charge_order_symmetry_(params["dca.CO_SELFCONSISTENCY"]){
     if(afm_symmetry_ && mu_stag_!=0) throw std::invalid_argument("do not use staggered mu in AFM Self-consistency");
     if(charge_order_symmetry_ && h_!=0) throw std::invalid_argument("do not use magnetic field in CO Self-consistency");
+    check_momentum_pairs();
   }
   ///virtual destructor
   virtual ~DoubleCellClusterTransformer() {}
@@ -345,6 +346,8 @@ public:
   cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const;
 
 private:
+  ///the blocks of G are (K, K+Q): check that momentum 2m+1 is momentum 2m plus Q
+  void check_momentum_pairs() const;
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
   ///attach a tail to the interacting GF

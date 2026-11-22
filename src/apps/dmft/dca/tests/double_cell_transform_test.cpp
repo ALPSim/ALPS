@@ -184,3 +184,47 @@ TEST_F(DoubleUnitCellTransformTest, CompareNonintClusterSolutionToNormalStateFor
     }
   }
 }
+
+// The double unit cell needs a bipartite cluster: its blocks are (K, K+Q).
+// Clusters that are not bipartite were accepted, and with an odd number of
+// sites indexed past the momenta (Betts2D-1A crashed in the charge-order
+// framework) (#451).
+TEST(DoubleCellFramework, RefusesClustersThatAreNotBipartite){
+  for (const char* framework : {"dca.AFM_SELFCONSISTENCY", "dca.CO_SELFCONSISTENCY"}) {
+    struct cluster { const char* name; int sites; bool bipartite; };
+    for (cluster c : {cluster{"Betts2D-4A", 4, true}, cluster{"Betts2D-8A", 8, true}, cluster{"Betts2D-16B", 16, true},
+                      cluster{"Betts2D-1A", 1, false}, cluster{"Betts2D-9A", 9, false}, cluster{"Betts2D-10A", 10, false},
+                      cluster{"Betts2D-13A", 13, false}}) {
+      SCOPED_TRACE(std::string(framework) + " " + c.name);
+      alps::params p;
+      define_dca_parameters(p);
+      p["dca.L"] = 4;
+      p["dca.LATTICE"] = c.name;
+      p["dca.SITES"] = c.sites;
+      p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
+      p["MU"] = 0.;
+      p["t"] = 1.;
+      p["U"] = 0.;
+      p["tprime"] = 0.;
+      p["BETA"] = 5.;
+      p["FLAVORS"] = 2;
+      p["NMATSUBARA"] = 8;
+      p["N"] = 10;
+      p[framework] = true;
+      p["dca.G0_OMEGA_INPUT"] = "none";
+      p["dca.G0_OMEGA_OUTPUT"] = "none";
+      if (c.bipartite) {
+        EXPECT_NO_THROW(DoubleCellClusterTransformer T(p));
+      } else {
+        try {
+          DoubleCellClusterTransformer T(p);
+          ADD_FAILURE() << "accepted";
+        } catch (std::invalid_argument const& e) {
+          const std::string what = e.what();
+          EXPECT_NE(what.find(std::string(framework) + " needs a bipartite cluster"), std::string::npos) << what;
+          EXPECT_NE(what.find("has " + std::to_string(c.sites) + " sites and is not bipartite"), std::string::npos) << what;
+        }
+      }
+    }
+  }
+}
