@@ -161,6 +161,12 @@ public:
     /** Add computed vector to the accumulator */
     var_acc &operator<<(const computed<T> &src) { add(src, 1, nullptr); return *this; }
 
+    /**
+     * Add one sample of `size()` components from contiguous memory. With a
+     * batch size of one, it goes to the sums directly, without a batch.
+     */
+    void add_sample(const T *value);
+
     /** Merge partial result into accumulator */
     var_acc &operator<<(const var_result<T,Strategy> &result);
 

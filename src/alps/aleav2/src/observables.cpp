@@ -308,7 +308,7 @@ void accumulator::add(const double *value, std::size_t size)
     self.set_size(size);
     const Eigen::Map<const Eigen::Matrix<double, Eigen::Dynamic, 1> > sample(value, size);
     if (self.simple) {
-        *self.simple << make_adapter(sample);
+        self.simple->add_sample(value);
     } else {
         *self.autocorr << make_adapter(sample);
         *self.batch << make_adapter(sample);

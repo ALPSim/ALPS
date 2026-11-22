@@ -232,3 +232,38 @@ TEST(Hdf5RoundTrip, AleaV2Resume)
     EXPECT_EQ(batch_result_.store().batch_size(), batch_resumed_result.store().batch_size());
     EXPECT_EQ(batch_result_.count(), total);
 }
+
+// Samples added directly, without a batch, give the same sums as samples added
+// through an adapter, and their state (an empty batch is not written) resumes.
+TEST(Hdf5RoundTrip, AleaDirectSamples)
+{
+    using namespace alps::alea;
+    alps::testing::TemporaryDirectory temporary;
+    const std::string filename = (temporary.path() / "alea_direct.h5").string();
+    var_acc<double> direct(2), adapted(2), resumed, batched_direct(2, 3), batched(2, 3);
+    statistics_test::ar1 source(11, 0.5);
+    for (std::size_t t = 0; t < total; ++t) {
+        if (t == first_part) {
+            {
+                alps::hdf5::archive archive(filename, "w");
+                hdf5_serializer serializer(archive, "/checkpoint");
+                direct.save_state(serializer, "var");
+            }
+            alps::hdf5::archive archive(filename, "r");
+            hdf5_serializer serializer(archive, "/checkpoint");
+            resumed.load_state(serializer, "var");
+        }
+        const double x = source();
+        const std::vector<double> pair = {x, -2 * x};
+        direct.add_sample(pair.data());
+        adapted << make_adapter(pair);
+        batched_direct.add_sample(pair.data());
+        batched << make_adapter(pair);
+        if (t >= first_part)
+            resumed.add_sample(pair.data());
+    }
+    EXPECT_TRUE(direct.result() == adapted.result());
+    EXPECT_TRUE(direct.result() == resumed.result());
+    EXPECT_TRUE(batched_direct.result() == batched.result());
+    EXPECT_EQ(direct.count(), total);
+}

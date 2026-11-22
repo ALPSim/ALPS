@@ -213,7 +213,10 @@ void cov_acc<T,Str>::save_state(serializer &s, const std::string &key) const
     s.enter("current");
     serialize(s, "target", current_.target());
     serialize(s, "count", current_.count());
-    serialize(s, "sum", current_.sum());
+    // An empty batch has a zero sum, which is not written. Earlier states
+    // wrote it; it is then zero and not read.
+    if (current_.count() != 0)
+        serialize(s, "sum", current_.sum());
     s.exit();
 }
 
@@ -232,7 +235,8 @@ void cov_acc<T,Str>::load_state(deserializer &s, const std::string &key)
     s.enter("current");
     current_ = bundle<T>(new_size, internal::read_uint(s, "target"));
     deserialize(s, "count", current_.count());
-    deserialize(s, "sum", current_.sum());
+    if (current_.count() != 0)
+        deserialize(s, "sum", current_.sum());
     s.exit();
 }
 

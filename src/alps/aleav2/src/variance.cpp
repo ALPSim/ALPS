@@ -135,6 +135,29 @@ void var_acc<T,Str>::add(const computed<T> &source, uint64_t count,
 }
 
 template <typename T, typename Str>
+void var_acc<T,Str>::add_sample(const T *value)
+{
+    internal::check_valid(*this);
+    if (std::is_same<T, double>::value && std::is_same<Str, circular_var>::value
+            && current_.target() == 1 && current_.count() == 0) {
+        // What add and add_bundle do for one sample, in one pass and without
+        // the batch: for a large observable the batch is a third of the memory.
+        const size_t n = size();
+        const double *x = reinterpret_cast<const double *>(value);
+        double *data = reinterpret_cast<double *>(store_->data().data());
+        double *data2 = reinterpret_cast<double *>(store_->data2().data());
+        for (size_t i = 0; i != n; ++i) {
+            data[i] += x[i];
+            data2[i] += x[i] * x[i];
+        }
+        store_->count() += 1;
+        store_->count2() += 1;
+        return;
+    }
+    add(make_adapter(Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1> >(value, size())), 1, nullptr);
+}
+
+template <typename T, typename Str>
 var_acc<T,Str> &var_acc<T,Str>::operator<<(const var_result<T,Str> &other)
 {
     internal::check_valid(*this);
@@ -258,7 +281,10 @@ void var_acc<T,Str>::save_state(serializer &s, const std::string &key) const
     s.enter("current");
     serialize(s, "target", current_.target());
     serialize(s, "count", current_.count());
-    serialize(s, "sum", current_.sum());
+    // An empty batch has a zero sum, which is not written. Earlier states
+    // wrote it; it is then zero and not read.
+    if (current_.count() != 0)
+        serialize(s, "sum", current_.sum());
     s.exit();
 }
 
@@ -277,7 +303,8 @@ void var_acc<T,Str>::load_state(deserializer &s, const std::string &key)
     s.enter("current");
     current_ = bundle<T>(new_size, internal::read_uint(s, "target"));
     deserialize(s, "count", current_.count());
-    deserialize(s, "sum", current_.sum());
+    if (current_.count() != 0)
+        deserialize(s, "sum", current_.sum());
     s.exit();
 }
 
