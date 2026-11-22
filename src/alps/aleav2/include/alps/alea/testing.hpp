@@ -58,21 +58,28 @@ public:
     double pvalue_lower() const { return has_plower() ? dist_.cdf(score_) : 1; }
 
     /** p-value in favour of the upper alternate Hypothesis */
-    double pvalue_upper() const { return dist_.ccdf(score_); }
+    double pvalue_upper() const { return tested() ? dist_.ccdf(score_) : 1; }
 
     /**
      * Two-sided p-value: twice the smaller tail, or the upper tail alone when
-     * the lower one cannot be tested. NaN if the test could not be done (too
-     * few observations), so that `pvalue() >= alpha` fails.
+     * the lower one cannot be tested (three or fewer components). 1 if
+     * nothing was left to test (all components exact and agreeing). NaN if
+     * the test could not be done (too few observations, NaN in the data), so
+     * that `pvalue() >= alpha` fails.
      */
     double pvalue() const
     {
         if (std::isnan(score_))
             return NAN;
+        if (!tested())
+            return 1;
         if (!has_plower())
             return pvalue_upper();
         return std::min(1.0, 2 * std::min(pvalue_lower(), pvalue_upper()));
     }
+
+    /** Whether any component was tested */
+    bool tested() const { return dist_.degrees_of_freedom1() != 0; }
 
     /** t2 statistic and argument to `dist()` */
     double score() const { return score_; }
@@ -91,10 +98,13 @@ private:
  * Takes the difference `diff` between the two results under test, which must
  * be independently Gaussian distributed with variances `var`, and the number
  * of uncorrelated observations `nmeas`, and performs Hotelling's T^2 test on
- * it. `pools` is the number of stochastic results (1 or 2) for a difference
- * of two results with pooled (equal) variance, and `atol` is an upper
- * tolerance for exact (zero variance) results. test_mean() removes the null
- * directions of a covariance before it calls this.
+ * it. `pools` is the number of means estimated from the data (1 for one
+ * sample, and for the Welch difference of two samples, which carries its
+ * degrees of freedom in `nmeas`; 2 for two samples with one pooled
+ * variance), and `atol` is an upper tolerance for exact (zero variance)
+ * results in the units of `diff` and `var`. If no component is left, the
+ * result has score 0 and pvalue() 1. test_mean() takes the rounding of the
+ * data into account and removes exact components before it calls this.
  *
  * @see test_mean()
  */
@@ -108,10 +118,13 @@ t2_result t2_test(const column<T> &diff,
  * Test mean of stochastic result `result` against known result `expected`.
  *
  * Components that are exact (zero variance) or, for a covariance, directions
- * at rounding level are left out if the difference along them is rounding.
- * `atol` additionally leaves out components whose variance and squared
- * difference are both below it; the default 0 keeps the test independent of
- * the units of the data.
+ * at rounding level are left out if the difference along them is rounding,
+ * judged per component relative to sqrt(var + mean^2) and the number of
+ * accumulated samples (see internal::whiten()). `atol` additionally leaves
+ * out components whose variance and squared difference are both below it,
+ * in the units of the data, for example an expected value of zero that is
+ * computed with rounding; the default 0 keeps the test independent of the
+ * units.
  */
 template <typename Result, typename Derived>
 t2_result test_mean(const Result &result,
@@ -122,8 +135,8 @@ t2_result test_mean(const Result &result,
     static_assert(traits<Result>::HAVE_VAR, "Result1 must have variance");
 
     using diff_scalar = internal::diff_scalar_type<Result, Derived>;
-    internal::diff_stats<diff_scalar> diff = internal::make_diff(result, expected);
-    return t2_test(diff.mean, diff.var, diff.nmeas, 1, atol);
+    internal::diff_stats<diff_scalar> diff = internal::make_diff(result, expected, atol);
+    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
 }
 
 /**
@@ -155,8 +168,8 @@ test_mean(const Result1 &result1, const Result2 &result2, double atol=0)
     // pool_var folds the two samples into one difference with Welch degrees
     // of freedom, so it is tested as one sample.
     using diff_scalar = internal::joined_value_type<Result1, Result2>;
-    internal::diff_stats<diff_scalar> diff = internal::pool_var(result1, result2);
-    return t2_test(diff.mean, diff.var, diff.nmeas, 1, atol);
+    internal::diff_stats<diff_scalar> diff = internal::pool_var(result1, result2, atol);
+    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
 }
 
 

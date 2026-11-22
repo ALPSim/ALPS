@@ -207,7 +207,7 @@ TEST(var1_test, same)
     // perform T2 test manually
     alps::alea::internal::diff_stats<double> diff = alps::alea::internal::pool_var(res1, res2);
     alps::alea::t2_result t2 = alps::alea::t2_test(diff.mean, diff.var,
-                                                   diff.nmeas, 1, 1e-10);
+                                                   diff.nmeas, 1, 0);
     print_t2(std::cerr, t2);
     ASSERT_GE(t2.pvalue(), 0.01);
 

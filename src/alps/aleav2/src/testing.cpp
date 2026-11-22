@@ -23,9 +23,8 @@ t2_result t2_test(const column<T> &diff,
         throw std::invalid_argument("Variances must be positive");
 
     // remove data points where both the variance and difference are zero
-    // within atol while propagating intrinsic NaNs. Null directions of a
-    // covariance are removed before, where their scale is known
-    // (internal::drop_null_directions()).
+    // within atol while propagating intrinsic NaNs. Rounding of the data is
+    // handled before, where its scale is known (internal::whiten()).
     double t2 = 0;
     size_t nsize = 0;
     for (int i = 0; i != diff.rows(); ++i) {
@@ -36,6 +35,10 @@ t2_result t2_test(const column<T> &diff,
         ++nsize;
     }
     t2 *= nmeas;
+
+    // nothing left to test: the results agree
+    if (nsize == 0)
+        return t2_result(0, 0, nmeas);
 
     // compute degrees of freedom.
     double dof = nmeas - nsize;

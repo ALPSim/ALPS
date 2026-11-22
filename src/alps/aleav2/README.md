@@ -89,14 +89,20 @@ and their false-alarm rate:
   test for one component). The imported pooled form assumed equal variances,
   divided only one of the two covariances by the degrees of freedom, and
   took N1 N2/(N1 + N2) observations.
-- `t2_result::pvalue()` is two-sided: twice the smaller tail. It returned the
-  smaller tail, which rejects twice as often as the level says, and 1 instead
-  of NaN when there were too few observations.
+- `t2_result::pvalue()` is two-sided for more than three components: twice
+  the smaller tail. It returned the smaller tail, which rejects twice as often
+  as the level says, and 1 instead of NaN when there were too few
+  observations. For three or fewer components it is the upper tail, as
+  before. It is 1 when nothing is left to test (exact results that agree).
 - Exactly correlated components (duplicates, sums, symmetric points) make
-  the covariance singular. Its null directions are dropped where the
-  rounding level is known, from the variances and means of the results,
-  instead of by an absolute tolerance, so the test does not depend on the
-  units of the data. `test_mean`'s `atol` defaults to 0.
+  the covariance singular, and constant components make it vanish. Both are
+  judged on the covariance scaled per component by sqrt(var + mean^2),
+  against the rounding of an accumulation over the number of samples
+  (2 count eps), instead of by an absolute tolerance, so the test does not
+  depend on the units of any component. A direction at rounding level is
+  dropped if the difference along it is rounding too, and otherwise tested
+  against the rounding level. `test_mean`'s `atol` defaults to 0 and is
+  applied per component in the units of the data.
 
 The shared `near.hpp` helper now enforces an absolute error bound for each matrix
 entry instead of a relative matrix norm. `compare_test.cpp` adds regression

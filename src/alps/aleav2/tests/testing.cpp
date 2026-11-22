@@ -211,3 +211,158 @@ TEST(t2_test, false_alarm_rate_two_sample_unequal_variance)
     EXPECT_GE(rejected, 51);
     EXPECT_LE(rejected, 149);
 }
+
+// The cut for null directions is taken per component, on the covariance
+// scaled by D = diag(sqrt(var + mean^2)). Independent components with very
+// different scales are all tested: here a component of mean 1000 and
+// standard deviation 1 next to one of mean 0 and standard deviation `small`.
+// 1000 tests at alpha = 0.05 reject 50 +- 6.9; [16, 84] is five standard
+// deviations. A cut taken from the largest component treated the small one
+// as null and rejected every test.
+TEST(t2_test, components_of_different_scale_are_tested)
+{
+    for (double small : {1e-2, 1e-5, 1e-8, 1e-12}) {
+        std::mt19937 engine(3);
+        Eigen::VectorXd mean(2);
+        mean << 1000.0, 0.0;
+        Eigen::MatrixXd l = Eigen::MatrixXd::Zero(2, 2);
+        l(0, 0) = 1.0;
+        l(1, 1) = small;
+        int rejected_one = 0, rejected_two = 0;
+        for (int rep = 0; rep != 1000; ++rep) {
+            cov_result<double> r1 = sample(engine, mean, l, 100);
+            cov_result<double> r2 = sample(engine, mean, l, 300);
+            alps::alea::t2_result one = alps::alea::test_mean(r1, mean);
+            alps::alea::t2_result two = alps::alea::test_mean(r1, r2);
+            ASSERT_EQ(one.dist().degrees_of_freedom1(), 2) << "std " << small;
+            ASSERT_EQ(two.dist().degrees_of_freedom1(), 2) << "std " << small;
+            rejected_one += one.pvalue() < 0.05;
+            rejected_two += two.pvalue() < 0.05;
+        }
+        EXPECT_GE(rejected_one, 16) << "std " << small;
+        EXPECT_LE(rejected_one, 84) << "std " << small;
+        EXPECT_GE(rejected_two, 16) << "std " << small;
+        EXPECT_LE(rejected_two, 84) << "std " << small;
+    }
+}
+
+// A constant component that is not exactly representable (0.1) is not
+// exact after accumulation: the error of its mean and variance grows like
+// count * eps (not sqrt(count) * eps, since every addition rounds the same
+// way). It must be dropped as exact, for a variance and for a covariance,
+// and the remaining component tested as usual: 25 tests at alpha = 0.05
+// reject 1.25 +- 1.1. The data cannot tell such a constant from one that
+// fluctuates below the precision of its variance (here 7e-6 relative), so
+// a constant is resolved to about 2e-8 relative: one off by 1e-6 must be
+// rejected.
+TEST(t2_test, constant_components_are_dropped_after_rounding)
+{
+    using alps::alea::var_acc;
+    std::mt19937 engine(5);
+    std::normal_distribution<double> normal;
+    Eigen::VectorXd expected(2), wrong(2);
+    expected << 0.1, 0.0;
+    wrong << 0.1 * (1 + 1e-6), 0.0;
+    int rejected_var = 0, rejected_cov = 0, rejected_two = 0;
+    for (int rep = 0; rep != 25; ++rep) {
+        var_acc<double> vacc(2), vacc2(2);
+        cov_acc<double> cacc(2);
+        for (int i = 0; i != 100000; ++i) {
+            Eigen::VectorXd x(2);
+            x << 0.1, normal(engine);
+            vacc << x;
+            cacc << x;
+            x[1] = normal(engine);
+            vacc2 << x;
+        }
+        alps::alea::var_result<double> vres = vacc.finalize(), vres2 = vacc2.finalize();
+        cov_result<double> cres = cacc.finalize();
+
+        alps::alea::t2_result tv = alps::alea::test_mean(vres, expected);
+        alps::alea::t2_result tc = alps::alea::test_mean(cres, expected);
+        alps::alea::t2_result t2 = alps::alea::test_mean(vres, vres2);
+        ASSERT_EQ(tv.dist().degrees_of_freedom1(), 1) << "rep " << rep;
+        ASSERT_EQ(tc.dist().degrees_of_freedom1(), 1) << "rep " << rep;
+        ASSERT_EQ(t2.dist().degrees_of_freedom1(), 1) << "rep " << rep;
+        rejected_var += tv.pvalue() < 0.05;
+        rejected_cov += tc.pvalue() < 0.05;
+        rejected_two += t2.pvalue() < 0.05;
+
+        if (rep == 0) {
+            EXPECT_LT(alps::alea::test_mean(vres, wrong).pvalue(), 1e-10);
+            EXPECT_LT(alps::alea::test_mean(cres, wrong).pvalue(), 1e-10);
+        }
+    }
+    EXPECT_LE(rejected_var, 8);
+    EXPECT_LE(rejected_cov, 8);
+    EXPECT_LE(rejected_two, 8);
+}
+
+// Results without any variance: nothing is left to test if they agree, so
+// the test passes (p = 1); if they differ, it rejects.
+TEST(t2_test, exact_results)
+{
+    Eigen::VectorXd x(2), y(2);
+    x << 1.0, 2.0;
+    y << 1.0, 2.5;
+    cov_acc<double> a(2), b(2), c(2);
+    alps::alea::var_acc<double> va(2);
+    for (int i = 0; i != 10; ++i) {
+        a << x;
+        b << x;
+        c << y;
+        va << x;
+    }
+    cov_result<double> ra = a.finalize(), rb = b.finalize(), rc = c.finalize();
+    alps::alea::var_result<double> rva = va.finalize();
+
+    EXPECT_EQ(alps::alea::test_mean(ra, x).pvalue(), 1.0);
+    EXPECT_EQ(alps::alea::test_mean(rva, x).pvalue(), 1.0);
+    EXPECT_EQ(alps::alea::test_mean(ra, rb).pvalue(), 1.0);
+    EXPECT_EQ(alps::alea::test_mean(ra, rva).pvalue(), 1.0);
+    EXPECT_LT(alps::alea::test_mean(ra, y).pvalue(), 1e-10);
+    EXPECT_LT(alps::alea::test_mean(rva, y).pvalue(), 1e-10);
+    EXPECT_LT(alps::alea::test_mean(ra, rc).pvalue(), 1e-10);
+}
+
+// A NaN in the data must give a NaN p-value (so that `pvalue() >= alpha`
+// fails), not be dropped. Empty results have nothing to test.
+TEST(t2_test, nan_propagates_and_empty_passes)
+{
+    std::mt19937 engine(9);
+    Eigen::VectorXd mean = Eigen::VectorXd::Zero(3);
+    cov_result<double> good = sample(engine, mean, mixing(3, 1.0), 50);
+
+    cov_acc<double> acc(3);
+    alps::alea::var_acc<double> vacc(3);
+    std::normal_distribution<double> normal;
+    for (int i = 0; i != 50; ++i) {
+        Eigen::VectorXd v(3);
+        v << normal(engine), normal(engine), i == 7 ? NAN : normal(engine);
+        acc << v;
+        vacc << v;
+    }
+    cov_result<double> bad = acc.finalize();
+    alps::alea::var_result<double> vbad = vacc.finalize();
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(bad, mean).pvalue()));
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(vbad, mean).pvalue()));
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(bad, good).pvalue()));
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(vbad, good).pvalue()));
+
+    Eigen::VectorXd nan_expected = mean;
+    nan_expected[1] = NAN;
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(good, nan_expected).pvalue()));
+
+    cov_acc<double> e1(0), e2(0);
+    alps::alea::var_acc<double> e3(0);
+    for (int i = 0; i != 5; ++i) {
+        e1 << Eigen::VectorXd(0);
+        e2 << Eigen::VectorXd(0);
+        e3 << Eigen::VectorXd(0);
+    }
+    cov_result<double> re1 = e1.finalize(), re2 = e2.finalize();
+    alps::alea::var_result<double> re3 = e3.finalize();
+    EXPECT_EQ(alps::alea::test_mean(re1, Eigen::VectorXd(0)).pvalue(), 1.0);
+    EXPECT_EQ(alps::alea::test_mean(re3, Eigen::VectorXd(0)).pvalue(), 1.0);
+    EXPECT_EQ(alps::alea::test_mean(re1, re2).pvalue(), 1.0);
+}
