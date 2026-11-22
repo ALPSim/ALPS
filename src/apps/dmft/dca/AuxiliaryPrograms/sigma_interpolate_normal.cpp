@@ -42,6 +42,11 @@ void run(int argc, char **argv){
   alps::params parms_new(p["pfile_new"].as<std::string>());
   define_parameters_pfile(parms_old);
   define_parameters_pfile(parms_new);
+  // the Green's functions here have 2 flavors (2x2 in Nambu space) (#471)
+  for (const alps::params* parms : {&parms_old, &parms_new})
+    if (int((*parms)["FLAVORS"]) != 2)
+      throw std::invalid_argument("FLAVORS = " + std::to_string(int((*parms)["FLAVORS"]))
+                                  + ": the self-energy interpolation works for FLAVORS = 2.");
   
   //general error check
   double beta_old=parms_old["BETA"];
@@ -69,7 +74,8 @@ void run(int argc, char **argv){
   cluster_matsubara_kspace_gf green_new(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_new,nfreq_new),CT_new.momentum_mesh(), alps::gf::index_mesh(2)));
   cluster_matsubara_kspace_gf green0_new(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_new,nfreq_new),CT_new.momentum_mesh(), alps::gf::index_mesh(2)));
   
-  //open and read in self-energy
+  //open and read in self-energy; load() takes the meshes from the file
+  const cluster_matsubara_kspace_gf expected_meshes(selfenergy_orig);
   {
     alps::hdf5::archive ar(p["sigma"].as<std::string>());
     selfenergy_orig.load(ar, p["path"].as<std::string>());
@@ -93,6 +99,11 @@ void run(int argc, char **argv){
   if(std::abs(selfenergy_orig.mesh1().beta()-beta_old)>1e-10*beta_old)
     throw std::invalid_argument("the self-energy is given at beta="+std::to_string(selfenergy_orig.mesh1().beta())
                                 +", but BETA of the old parameter file is "+std::to_string(beta_old));
+  // the momenta of the old cluster and 2 flavors (#471)
+  typedef cluster_matsubara_kspace_gf::gf_type sigma_gf_type;
+  if(!(static_cast<const sigma_gf_type&>(selfenergy_orig).meshes()==static_cast<const sigma_gf_type&>(expected_meshes).meshes()))
+    throw std::invalid_argument(p["sigma"].as<std::string>()+": the self-energy is not on the momenta of the old cluster"
+                                " (dca.LATTICE of the old parameter file) with 2 flavors.");
   std::vector<double> matsubara_freqs_old(nfreq_old);
   std::vector<double> matsubara_freqs_new(nfreq_new);
   for(int i=0;i<nfreq_old;++i) matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
@@ -105,14 +116,12 @@ void run(int argc, char **argv){
       for(alps::gf::matsubara_index i(0);i<nfreq_old;++i){
         sigma_real[i()]=selfenergy_kspace_interp(i,j,flavor).real();
         sigma_imag[i()]=selfenergy_kspace_interp(i,j,flavor).imag();
-        std::cout<<"setting from: "<<std::complex<double>(sigma_real[i()], sigma_imag[i()])<<std::endl;
       }
       std::cout<<"interpolating vector of size: "<<sigma_real.size()<<std::endl;
       std::vector<double> sigma_real_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_real, matsubara_freqs_new, false);
       std::vector<double> sigma_imag_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_imag, matsubara_freqs_new, true);
       for (alps::gf::matsubara_index i(0); i<nfreq_new; ++i){
         selfenergy_new(i,j,flavor) = std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()]);
-        std::cout<<"setting to: "<<std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()])<<std::endl;
       }
     }
   }
