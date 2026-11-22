@@ -58,9 +58,16 @@ void run(int argc, char **argv){
 
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
+  // the starting G0 of the new run has its initial fields, as dca's own
+  // starting G0 (compute_noninteracting_G0), in its data and its tail (#469)
   double h_new=parms_new["dca.H_INIT"];
   double eta1_new=parms_new["dca.ETA1_INIT"];
   double eta2_new=parms_new["dca.ETA2_INIT"];
+  // G0(tau) and its tails are real; dca refuses a complex pairing field
+  if(eta2_new!=0. || double(parms_new["dca.ETA2"])!=0.)
+    throw std::invalid_argument("sc.NAMBU: a complex pairing field dca.ETA1 + i dca.ETA2 differs from the real field |eta|"
+                                " only by a global phase, and G0(tau) is real; set dca.ETA2 and dca.ETA2_INIT to 0"
+                                " in the new parameter file.");
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["dca.SITES"];
   
@@ -156,6 +163,9 @@ void run(int argc, char **argv){
   std::cout<<"...running self-consistency..."<<std::endl;
   CT_new.matsubara_k_sum(green_new, selfenergy_new, eta1_new, eta2_new, h_new);
   CT_new.dyson_get_green0(green0_new, selfenergy_new, green_new);
+  // dyson_get_green0 attaches the tail with dca.H and dca.ETA*; the data are
+  // for the initial fields
+  CT_new.attach_bare_tail(green0_new, h_new, eta1_new, eta2_new);
 
   {
     std::string filename_new=p["g0"];

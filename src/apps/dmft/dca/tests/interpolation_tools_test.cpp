@@ -32,8 +32,9 @@ namespace fs = std::filesystem;
 const double beta = 5.;
 const int n_old = 64;
 
-void write_parameters(const fs::path& file, int n_matsubara) {
+void write_parameters(const fs::path& file, int n_matsubara, const std::string& extra = "") {
   std::ofstream f(file);
+  f << extra;
   f << "BETA = " << beta << "\nMU = 0.3\nU = 2\nt = 1\nN = 100\nNMATSUBARA = " << n_matsubara << "\n"
     << "dca.LATTICE = Betts2D-4A\ndca.SITES = 4\ndca.L = 8\n"
     << "dca.LATTICE_LIBRARY = " << DCA_CLUSTER_LIBRARY << "\n"
@@ -102,11 +103,12 @@ void write_nambu_sigma(alps::hdf5::archive& ar, double sigma_beta) {
 // The working directory is changed here rather than with "cd" in the command,
 // which would not change drives under cmd.exe.
 int run_tool(const std::string& tool, const fs::path& dir, int n_new, const std::string& extra,
-             double sigma_beta, const std::function<void(alps::hdf5::archive&, double)>& write_sigma) {
+             double sigma_beta, const std::function<void(alps::hdf5::archive&, double)>& write_sigma,
+             const std::string& new_parameters = "") {
   fs::remove_all(dir);
   fs::create_directories(dir);
   write_parameters(dir / "old.ini", n_old);
-  write_parameters(dir / "new.ini", n_new);
+  write_parameters(dir / "new.ini", n_new, new_parameters);
   {
     alps::hdf5::archive ar((dir / "sigma.h5").string(), "w");
     write_sigma(ar, sigma_beta);
@@ -190,3 +192,35 @@ TEST(InterpolationToolsBeta, NambuRefusesOtherBeta) {
 }
 
 }  // namespace
+
+// The starting G0 for a new Nambu run has the new run's initial fields in its
+// data (the k-sum) and in its tail: the tail was attached with dca.ETA1 and
+// dca.H instead (#469). With dca.ETA1_INIT = 0.4 and dca.ETA1 = 0, the
+// off-diagonal G0 at the highest frequency, (iw)^2 G0_12 = c2_12 + O(1/w),
+// has to match the tail's c2_12, the patch average of eta times the d-wave
+// form factor, which is not zero for every momentum.
+TEST(InterpolationTools, NambuTailHasTheInitialFields) {
+  const fs::path dir = fs::absolute("nambu_tail");
+  ASSERT_EQ(run_tool(DCA_INTERPOLATE_SC, dir, 1024, "", beta, write_nambu_sigma,
+                     "dca.ETA1_INIT = 0.4\ndca.ETA1 = 0\nsc.NAMBU = true\n"), 0)
+      << "see " << (dir / "tool.log");
+  cluster_nambu_matsubara_kspace_gf G0;
+  alps::hdf5::archive ar((dir / "out.h5").string(), "r");
+  G0.load(ar, "/G0");
+  const alps::gf::matsubara_index last(G0.mesh1().extent() - 1);
+  const std::complex<double> iw(0., G0.mesh1().points()[last()]);
+  double largest = 0.;
+  for (alps::gf::momentum_index k(0); k < G0.mesh2().extent(); ++k) {
+    const double c2 = G0.tail(2)(k, alps::gf::index(0), alps::gf::index(1));
+    largest = std::max(largest, std::abs(c2));
+    EXPECT_NEAR(std::real(iw * iw * G0(last, k, alps::gf::index(0), alps::gf::index(1))), c2, 1e-2) << "k=" << k();
+  }
+  EXPECT_GT(largest, 0.1);
+}
+
+TEST(InterpolationTools, NambuRefusesComplexPairingField) {
+  const fs::path dir = fs::absolute("nambu_eta2");
+  EXPECT_NE(run_tool(DCA_INTERPOLATE_SC, dir, 32, "", beta, write_nambu_sigma, "dca.ETA2_INIT = 0.1\n"), 0);
+  EXPECT_NE(read_file(dir / "tool.log").find("set dca.ETA2 and dca.ETA2_INIT to 0"), std::string::npos)
+      << read_file(dir / "tool.log");
+}
