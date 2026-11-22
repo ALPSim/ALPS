@@ -21,6 +21,7 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 #include "xml.h"
+#include "ctint_max_order.h"
 #include <filesystem>
 
 typedef alps::SignedObservable<alps::SimpleObservable<double,alps::DetailedBinning<double> > > signed_obs_t;
@@ -97,6 +98,11 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   std::cout<<std::endl;
   matrix_size<<std::endl;
   std::cout<<"average sign was: "<<sign_obseval.mean()<<"+-"<<sign_obseval.error()<<std::endl;
+  if(gathered_measurements.has("MaxOrderReached")){
+    alps::RealObsevaluator max_order_eval=gathered_measurements["MaxOrderReached"];
+    if(max_order_eval.count())
+      warn_if_max_order_reached(std::cerr, max_order_eval.mean(), static_cast<unsigned int>(p_.value_or_default("MAX_ORDER", 2048)));
+  }
   //single particle Green function measurements
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_flavors);
   std::vector<double> densities(n_flavors);

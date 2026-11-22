@@ -156,6 +156,14 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)
   alps_add_gtest(dmft_ctint_sz_results COMPONENT dmft LABELS regression)
 
+  add_executable(dmft_ctint_max_order dmft_ctint_max_order.C)
+  target_link_libraries(dmft_ctint_max_order PRIVATE ALPS::ctint)
+  if(NOT ALPS_ENABLE_MPI)
+    alps_add_gtest(dmft_ctint_max_order COMPONENT dmft LABELS regression)
+  else()
+    alps_add_mpi_gtest(dmft_ctint_max_order COMPONENT dmft RANKS 2 LABELS regression)
+  endif()
+
   # The serial solver stops after SWEEPS; under MPI it stops at the adapter's
   # scheduled checks, where a rank can still be thermalizing.
   if(NOT ALPS_ENABLE_MPI)

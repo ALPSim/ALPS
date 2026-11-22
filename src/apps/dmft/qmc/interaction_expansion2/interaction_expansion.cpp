@@ -68,7 +68,7 @@ green_matsubara(n_matsubara, n_site, n_flavors),
 bare_green_matsubara(n_matsubara,n_site, n_flavors), 
 bare_green_itime(n_tau+1, n_site, n_flavors),
 green_itime(n_tau+1, n_site, n_flavors),
-pert_hist(max_order)
+pert_hist(max_order+1)
 {
   //initialize measurement method
   if (input.histogram_measurement)
@@ -148,8 +148,13 @@ void InteractionExpansion::update()
   for(std::size_t i=0;i<measurement_period;++i){
     step++;
     interaction_expansion_step();                
-    if(vertices.size()<max_order)
+    if(vertices.size()<=max_order)
       pert_hist[vertices.size()]++;
+    if(step>therm_steps){
+      ++steps_since_measurement;
+      if(vertices.size()>=max_order)
+        ++steps_at_max_order;
+    }
     if(step % recalc_period ==0)
       reset_perturbation_series();
   }
@@ -157,8 +162,12 @@ void InteractionExpansion::update()
     thermalized=true;
 }
 void InteractionExpansion::measure(){
-  if(thermalized)
+  if(thermalized){
     measure_observables();
+    measurements["MaxOrderReached"] << (steps_since_measurement ? double(steps_at_max_order)/steps_since_measurement : 0.);
+  }
+  steps_at_max_order=0;
+  steps_since_measurement=0;
 }
 
 
@@ -186,6 +195,8 @@ void InteractionExpansion::initialize_simulation(const alps::params &parms)
     M.push_back(inverse_m_matrix());
   vertices.clear();
   pert_hist.clear();
+  steps_at_max_order=0;
+  steps_since_measurement=0;
   //initialize ALPS observables
   initialize_observables();
   green_matsubara=bare_green_matsubara;

@@ -57,7 +57,7 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
     bare_green_matsubara(n_matsubara,n_site, n_flavors), 
     bare_green_itime(n_tau+1, n_site, n_flavors),
     green_itime(n_tau+1, n_site, n_flavors),
-    pert_hist(max_order)
+    pert_hist(max_order+1)
 {
   //initialize measurement method
   if (parms.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
@@ -102,11 +102,16 @@ void InteractionExpansionRun::dostep()
       if(step> therm_steps)
         thermalized=true; 
       interaction_expansion_step();                
+      if(thermalized){
+        ++steps_since_measurement;
+        if(vertices.size()>=max_order)
+          ++steps_at_max_order;
+      }
       if(thermalized && step % measurement_period ==0)
         measure_observables();
       
       //increase perturbation order histogram
-      if(vertices.size()<max_order)
+      if(vertices.size()<=max_order)
         pert_hist[vertices.size()]++;
       ++step;
     }
@@ -137,6 +142,8 @@ void InteractionExpansionRun::initialize_simulation(const alps::Parameters& parm
     M.push_back(inverse_m_matrix());
   vertices.clear();
   pert_hist.clear();
+  steps_at_max_order=0;
+  steps_since_measurement=0;
   //initialize ALPS observables
   initialize_observables();
   green_matsubara=bare_green_matsubara;
