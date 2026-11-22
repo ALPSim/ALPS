@@ -5,8 +5,9 @@
 // sigma_interpolate_normal and sigma_interpolate_sc carry a self-energy over
 // to a run with other parameters. Here the old run has NMATSUBARA = 64 and
 // the new one 32 or 128 at the same BETA, so the new frequencies are old ones
-// or lie above them: the interpolated self-energy must equal the old one
-// where they coincide and its last value above the old range. A self-energy
+// or lie above them. The test self-energy is c + d/(i w): the tools continue
+// the real part with its last value and the imaginary part as 1/w above the
+// old range (#467), which reproduces it exactly at every new frequency. A self-energy
 // whose beta is not the old BETA must be refused.
 
 #include <complex>
@@ -127,8 +128,9 @@ std::string read_file(const fs::path& file) {
   return s.str();
 }
 
-// The value the interpolation must give at new frequency w.
-int source_frequency(int w) { return w < n_old ? w : n_old - 1; }
+// The value the interpolation must give at new frequency w: the self-energy
+// itself, also above the old range.
+int source_frequency(int w) { return w; }
 
 class InterpolationTools : public ::testing::TestWithParam<int> {};
 

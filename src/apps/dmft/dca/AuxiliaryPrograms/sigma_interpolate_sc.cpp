@@ -10,12 +10,10 @@
 #include<cmath>
 #include<cstdlib>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 
 #include "cluster.h"
+#include "sigma_interpolation.h"
 
-#include <Eigen/Dense>
 
 void define_parameters_commandline(alps::params &p){
   p.define<std::string>("pfile_old", "old parameter file");
@@ -32,44 +30,6 @@ void define_parameters_pfile(alps::params &p){
   define_dca_parameters(p);
 }
 
-std::vector<double> solve_parabola(const std::vector<double> &xvalues, const std::vector<double> &yvalues){
-  Eigen::Matrix3d M;
-  M << xvalues[0]*xvalues[0], xvalues[0], 1,
-       xvalues[1]*xvalues[1], xvalues[1], 1,
-       xvalues[2]*xvalues[2], xvalues[2], 1;
-  const Eigen::Vector3d Z(yvalues[0], yvalues[1], yvalues[2]);
-
-  const Eigen::FullPivLU<Eigen::Matrix3d> lu(M);
-  if(!lu.isInvertible()) throw std::runtime_error("solve_parabola: the three x values are not distinct.");
-  const Eigen::Vector3d coefficients = lu.solve(Z);
-  return std::vector<double>(coefficients.data(), coefficients.data()+3);
-}
-double evaluate_parabola(const std::vector<double> coefficients, double xvalue){
-  return coefficients[0]*xvalue*xvalue+coefficients[1]*xvalue+coefficients[2];
-}
-std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues){
-  std::vector<double> newyvalues(newxvalues.size());
-
-  gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-  gsl_spline *spline = gsl_spline_alloc (gsl_interp_cspline, oldxvalues.size());
-  gsl_spline_init (spline, &(oldxvalues[0]), &(oldyvalues[0]), oldxvalues.size());
-
-  std::vector<double> parabola_coefficients=solve_parabola(oldxvalues, oldyvalues);
-  for(int i=0;i<newxvalues.size();++i){
-    if(newxvalues[i]<oldxvalues[0]){ //need to do parabolic extrapolation
-      newyvalues[i]=evaluate_parabola(solve_parabola(oldxvalues, oldyvalues), newxvalues[i]);
-    }else if(newxvalues[i]> oldxvalues.back()){
-      newyvalues[i]=oldyvalues.back(); //we take the last value of the interpolated function, typically makes sense for AFM or SC with a real part
-    }else{
-      newyvalues[i]=gsl_spline_eval (spline, newxvalues[i], acc);
-    }
-  }
-
-  gsl_spline_free (spline);
-  gsl_interp_accel_free (acc);
-
-  return newyvalues;
-}
 
 void run(int argc, char **argv){
 
@@ -174,8 +134,8 @@ void run(int argc, char **argv){
         }
 
         std::cout<<"interpolating vector of size: "<<sigma_real.size()<<std::endl;
-        std::vector<double> sigma_real_interp=interpolate_vector(matsubara_freqs_old, sigma_real, matsubara_freqs_new);
-        std::vector<double> sigma_imag_interp=interpolate_vector(matsubara_freqs_old, sigma_imag, matsubara_freqs_new);
+        std::vector<double> sigma_real_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_real, matsubara_freqs_new, false);
+        std::vector<double> sigma_imag_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_imag, matsubara_freqs_new, true);
         for (alps::gf::matsubara_index i(0); i<nfreq_new; ++i){
           selfenergy_new(i,j,p,q) = std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()]);
           //std::cout<<"setting to: "<<std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()])<<std::endl;
