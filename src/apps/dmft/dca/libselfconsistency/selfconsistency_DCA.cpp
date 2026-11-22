@@ -137,15 +137,17 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
 }
 // Runs the loop in the framework of TRANSFORMER, which provides the Green's
 // function types of its framework and the starting G0.
-template<class TRANSFORMER> void run_dca(const std::string &param_file_name, const alps::params &parms){
+template<class TRANSFORMER> void run_dca(const std::string &param_file_name, const alps::params &parms,
+                                          const std::vector<std::string> &arguments){
   TRANSFORMER T(parms);
-  ImpuritySolver solver(parms["solver.SOLVER"].as<std::string>(), param_file_name, parms);
+  ImpuritySolver solver(parms["solver.SOLVER"].as<std::string>(), param_file_name, parms, arguments);
   typename TRANSFORMER::matsubara_gf G0_omega = T.make_matsubara_gf();
   typename TRANSFORMER::itime_gf G0_tau = T.make_itime_gf(parms["N"]);
   selfconsistency_loop_DCA(parms, solver, T, G0_omega, G0_tau);
 }
 
-void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms){
+void perform_cluster_loop(const std::string &param_file_name, const alps::params &parms,
+                          const std::vector<std::string> &arguments){
   const bool nambu=parms["sc.NAMBU"];
   const bool afm=parms["dca.AFM_SELFCONSISTENCY"];
   const bool charge_order=parms["dca.CO_SELFCONSISTENCY"];
@@ -172,12 +174,12 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
                                   " differs from the real field |eta| only by a global phase, and G0(tau) is real;"
                                   " set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|.");
     std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
-    run_dca<NambuClusterTransformer>(param_file_name, parms);
+    run_dca<NambuClusterTransformer>(param_file_name, parms, arguments);
   }else if(afm || charge_order){
     std::cout<<"running a DCA calculation in the double unit cell framework"<<std::endl;
-    run_dca<DoubleCellClusterTransformer>(param_file_name, parms);
+    run_dca<DoubleCellClusterTransformer>(param_file_name, parms, arguments);
   }else{
     std::cout<<"running a DCA calculation in the normal state"<<std::endl;
-    run_dca<NormalStateClusterTransformer>(param_file_name, parms);
+    run_dca<NormalStateClusterTransformer>(param_file_name, parms, arguments);
   }
 }

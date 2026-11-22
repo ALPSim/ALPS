@@ -35,7 +35,8 @@ template<class GFW, class GFT> void copy_g0(const std::string& infile, const std
 int main(int argc, char** argv) {
   try {
     if (argc < 2) throw std::invalid_argument("usage: free_solver <parameter file> [--MU=<mu>]");
-    alps::params p(argv[1]);
+    // the parameter file and the --NAME=value overrides dca passes on
+    alps::params p(argc, (const char**)argv);
     p.define<std::string>("solver.INFILE_H5GF", "alps_solver_in.h5gf", "input file");
     p.define<std::string>("solver.OUTFILE_H5GF", "alps_solver_out.h5gf", "output file");
     const std::string infile = p["solver.INFILE_H5GF"], outfile = p["solver.OUTFILE_H5GF"];

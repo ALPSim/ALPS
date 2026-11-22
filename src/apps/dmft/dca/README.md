@@ -60,12 +60,16 @@ G0(k, iωn) at `/G0` and G0(k, τ) at `/G0_tau` to the HDF5 file
 `solver.INFILE_H5GF` (default `alps_solver_in.h5gf`). It then runs
 
 ```sh
-<solver.SOLVER> <parameter file> --MU=<mu>
+<solver.SOLVER> <parameter file> [--NAME=value ...] --MU=<mu>
 ```
+
+where `--NAME=value ...` are the overrides given on `dca`'s own command line, so
+that the solver runs with the same parameters as `dca`, and `<mu>` is the
+loop's chemical potential (adjusted with `sc.ADJUST_MU`).
 
 and reads G(k, iωn) at `/G_omega` and G(k, τ) at `/G_tau` from
 `solver.OUTFILE_H5GF` (default `alps_solver_out.h5gf`). Both files are removed
-after each iteration. The solver reads the same parameter file as `dca`.
+after each iteration. The solver reads the same parameter file and overrides as `dca`.
 
 Each iteration also writes the Green's functions and self-energy as text
 (`G0_omega_<n>`, `G_omega_<n>`, `selfenergy_<n>`, ...) and to `Greens_<n>.h5`,

@@ -15,6 +15,8 @@
 /// @brief main program of the DCA program
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include <alps/cli.hpp>
 #include <alps/params.hpp>
@@ -64,7 +66,9 @@ int main(int argc, char** argv)
     alps::params parms=read_parameters_from_file(argc, (const char **)argv);
     std::string param_file_name(argv[1]);
 
-    perform_cluster_loop(param_file_name, parms);
+    // the --NAME=value overrides after the parameter file, for the solver
+    const std::vector<std::string> arguments(argv + 2, argv + argc);
+    perform_cluster_loop(param_file_name, parms, arguments);
   }
   catch (std::exception& exc) {
     std::cerr<<exc.what()<<std::endl;
