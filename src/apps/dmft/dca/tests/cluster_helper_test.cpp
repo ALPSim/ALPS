@@ -212,3 +212,36 @@ INSTANTIATE_TEST_SUITE_P(Clusters, ClusterIntegrationWeights, ::testing::Values(
       for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
       return name;
     });
+
+// The point group used to find the symmetries of a cluster is the full group
+// of the hypercubic lattice: 2 operations in 1D, 8 in 2D, 48 in 3D. The 3D
+// table listed the inversion twice and did not have the rotation by pi about
+// z, so a cluster with the full cubic symmetry got 47 symmetries. The classes
+// of site pairs, built as orbits of the group the listed operations
+// generate, were complete all the same.
+struct symmetry_case { const char* lattice; const char* library; int sites; int symmetries; };
+class ClusterSymmetries : public ::testing::TestWithParam<symmetry_case> {};
+TEST_P(ClusterSymmetries, FullPointGroupOfASymmetricCluster){
+  const symmetry_case& c = GetParam();
+  alps::params p;
+  p["dca.LATTICE"]=c.lattice;
+  p["dca.SITES"]=c.sites;
+  p["dca.L"]=2;
+  set_other_parameters(p);
+  p["dca.LATTICE_LIBRARY"]=std::string(DCA_CLUSTER_DIR) + "/" + c.library;
+  ClusterHelper CH(p);
+  EXPECT_EQ(CH.symmetry_table_k_space().rows(), c.symmetries);
+}
+INSTANTIATE_TEST_SUITE_P(Clusters, ClusterSymmetries, ::testing::Values(
+    symmetry_case{"Chain1D_4", "cluster1d.xml", 4, 2},
+    symmetry_case{"Betts2D-8A", "cluster.xml", 8, 8},
+    symmetry_case{"Betts2D-16B", "cluster.xml", 16, 8},
+    symmetry_case{"Betts2D-32A", "cluster.xml", 32, 8},
+    symmetry_case{"Betts3D-16A", "cluster3d.xml", 16, 48},
+    symmetry_case{"Betts3D-27A", "cluster3d.xml", 27, 48},
+    symmetry_case{"Betts3D-32A", "cluster3d.xml", 32, 48}),
+    [](const ::testing::TestParamInfo<symmetry_case>& info) {
+      std::string name = info.param.lattice;
+      for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
+      return name;
+    });
