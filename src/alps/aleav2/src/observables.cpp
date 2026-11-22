@@ -514,6 +514,25 @@ private:
 
 }
 
+namespace {
+
+// The result itself if nothing but `held` refers to it and `held` belongs to
+// one set only, else a copy. For an observable of a gigabyte, a copy costs a
+// gigabyte more on every rank.
+template <typename R>
+std::unique_ptr<R> take_or_copy(std::shared_ptr<const R> &held, bool sole)
+{
+    if (sole && held.use_count() == 1) {
+        // Results are created mutable and only held as const.
+        std::unique_ptr<R> out(new R(std::move(const_cast<R &>(*held))));
+        held.reset();
+        return out;
+    }
+    return std::unique_ptr<R>(new R(*held));
+}
+
+}
+
 void result_set::reduce(const reducer &outer)
 {
     // All observables first post their reductions, then one commit sends the
@@ -531,10 +550,32 @@ void result_set::reduce(const reducer &outer)
     std::map<std::string, std::shared_ptr<observable_result::impl> > parts;
     std::vector<pending> all;
     all.reserve(impl_->results.size());
+    // If a result of this set was changed for the reduction and the reduction
+    // fails, the set is left empty rather than with a part of its data.
+    bool changed = false;
+    struct empty_on_failure
+    {
+        result_set::impl &set;
+        const bool &changed;
+        bool done;
+        ~empty_on_failure() { if (!done && changed) set.results.clear(); }
+    } guard{*impl_, changed, false};
     for (const auto &named : impl_->results) {
-        const observable_result::impl &mine = *named.second.impl_;
+        // Results are created mutable and only held as const.
+        observable_result::impl &mine = const_cast<observable_result::impl &>(*named.second.impl_);
         if (mine.stored)
             throw std::invalid_argument(quoted(named.first) + " was read from a result file and cannot be reduced");
+        // A result no other set shares is replaced by its reduction below, so
+        // its data can be reduced in place. Its own references to bins go
+        // first, those of a signed observable to the bins of its sign too;
+        // data that anything else still refers to is copied.
+        const bool sole = named.second.impl_.use_count() == 1;
+        if (sole) {
+            changed = true;
+            mine.parts.clear();
+            mine.evaluated.reset();
+            mine.binning.reset();
+        }
         all.emplace_back();
         pending &p = all.back();
         p.reduced.reset(new observable_result::impl(mine.declaration));
@@ -553,15 +594,22 @@ void result_set::reduce(const reducer &outer)
         if (mine.size != 0 && mine.size != p.reduced->size)
             throw std::invalid_argument(quoted(named.first) + " differs in size between instances");
         if (mine.declaration.with_bins_) {
-            p.autocorr.reset(new autocorr_result<double>(mine.autocorr
-                ? *mine.autocorr : autocorr_acc<double>(p.reduced->size).finalize()));
-            p.batch.reset(new batch_result<double>(mine.batch
-                ? *mine.batch : batch_acc<double>(p.reduced->size, mine.declaration.num_bins_).finalize()));
+            if (mine.autocorr)
+                p.autocorr = take_or_copy(mine.autocorr, sole);
+            else
+                p.autocorr.reset(new autocorr_result<double>(autocorr_acc<double>(p.reduced->size).finalize()));
+            if (mine.batch)
+                p.batch = take_or_copy(mine.batch, sole);
+            else
+                p.batch.reset(new batch_result<double>(
+                    batch_acc<double>(p.reduced->size, mine.declaration.num_bins_).finalize()));
             p.autocorr->reduce(r, true, false);
             p.batch->reduce(r, true, false);
         } else {
-            p.simple.reset(new var_result<double>(mine.simple
-                ? *mine.simple : var_acc<double>(p.reduced->size).finalize()));
+            if (mine.simple)
+                p.simple = take_or_copy(mine.simple, sole);
+            else
+                p.simple.reset(new var_result<double>(var_acc<double>(p.reduced->size).finalize()));
             p.simple->reduce(r, true, false);
         }
     }
@@ -593,6 +641,7 @@ void result_set::reduce(const reducer &outer)
         impl_->link(parts);
     else
         impl_->results.clear();
+    guard.done = true;
 }
 
 }} /* namespace alps::alea */

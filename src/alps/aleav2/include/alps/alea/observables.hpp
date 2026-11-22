@@ -289,6 +289,8 @@ public:
      * Collect the results of all instances of a parallel run, as `merge` does
      * for one run after the other. All instances must have declared the same
      * observables. Instances without the result are left with an empty set.
+     * Results that no other set shares are reduced in place, without a copy;
+     * if the reduction fails, the set is then left empty.
      */
     void reduce(const reducer &r);
 

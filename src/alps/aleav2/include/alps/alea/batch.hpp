@@ -203,6 +203,11 @@ public:
 
     batch_result &operator=(const batch_result &other);
 
+    /** Takes the data of `other`, which is left without data */
+    batch_result(batch_result &&other) noexcept = default;
+
+    batch_result &operator=(batch_result &&other) noexcept = default;
+
     /** Returns `false` if `finalize()` has been called, `true` otherwise */
     bool valid() const { return (bool)store_; }
 

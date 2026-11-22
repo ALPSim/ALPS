@@ -234,6 +234,11 @@ public:
 
     var_result &operator=(const var_result &other);
 
+    /** Takes the data of `other`, which is left without data */
+    var_result(var_result &&other) noexcept = default;
+
+    var_result &operator=(var_result &&other) noexcept = default;
+
     /** Returns `false` if `finalize()` has been called, `true` otherwise */
     bool valid() const { return (bool)store_; }
 

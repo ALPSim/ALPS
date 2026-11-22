@@ -158,6 +158,13 @@ var_result<T,Str> var_acc<T,Str>::result() const
 {
     internal::check_valid(*this);
     var_result<T,Str> result;
+    if (current_.count() == 0) {
+        // What finalize_to does without a partial bundle, without copying
+        // the bundle: for a large observable it is a third of the memory.
+        result.store_.reset(new var_data<T,Str>(*store_));
+        result.store_->convert_to_mean();
+        return result;
+    }
     var_acc<T,Str>(*this).finalize_to(result, nullptr);
     return result;
 }

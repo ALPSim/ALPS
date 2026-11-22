@@ -208,3 +208,36 @@ TEST(MpiReduce, Accumulators)
     EXPECT_NEAR(expected["x"].error<double>(), results["x"].error<double>(), 1e-10 * expected["x"].error<double>());
     expect_calibrated(results["x"].error<double>(), s);
 }
+
+// A set's results are reduced in place unless something else holds them; then
+// they are copied and stay as they were. Both ways give the same numbers.
+TEST(MpiReduce, SharedResultsAreCopied)
+{
+    using namespace alps::alea;
+    const slices s;
+    observable_set set;
+    set << observable("x") << observable("plain").without_bins();
+    for (std::size_t t = 0; t < s.length; ++t) {
+        set["x"] << s.begin(s.comm.rank())[t];
+        set["plain"] << std::vector<double>({s.begin(s.comm.rank())[t], 1.0});
+    }
+    const result_set before = set.results();
+    result_set shared = before;
+    shared.reduce(mpi_reducer(s.comm, 0));
+    result_set alone = set.results();
+    alone.reduce(mpi_reducer(s.comm, 0));
+
+    const result_set fresh = set.results();
+    for (const char *name : {"x", "plain"}) {
+        EXPECT_EQ(before[name].count(), s.length);
+        EXPECT_EQ(before[name].mean_vector(), fresh[name].mean_vector());
+        EXPECT_EQ(before[name].error_vector(), fresh[name].error_vector());
+    }
+    if (s.comm.rank() != 0)
+        return;
+    for (const char *name : {"x", "plain"}) {
+        EXPECT_EQ(alone[name].count(), s.length * s.size);
+        EXPECT_EQ(alone[name].mean_vector(), shared[name].mean_vector());
+        EXPECT_EQ(alone[name].error_vector(), shared[name].error_vector());
+    }
+}
