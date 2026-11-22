@@ -123,3 +123,22 @@ TEST(AdjustMu, NeedsTheTailOfSigma) {
               std::string::npos) << e.what();
   }
 }
+
+// A constant self-energy shifts the band, so the MU that reaches a density
+// shifts by the same amount, here out of the window [-10, 10] the bisection
+// used to be limited to (#457). A density per site outside (0, FLAVORS),
+// which no MU reaches, is refused.
+TEST(AdjustMu, WidensTheWindow) {
+  const double shift = 15.;
+  EXPECT_NEAR(normal_mu(128, 0.8, shift, 0.), normal_mu(128, 0.8, 0., 0.) + shift, 1e-6);
+  const double s0[2][2] = {{-shift, 0}, {0, -shift}}, zero[2][2] = {{0, 0}, {0, 0}};
+  EXPECT_NEAR(double_cell_mu(128, 0.8, s0, zero), double_cell_mu(128, 0.8, zero, zero) - shift, 1e-6);
+  for (double target : {2.5, 2., 0., -0.1}) {
+    try {
+      normal_mu(64, target, 0., 0.);
+      ADD_FAILURE() << "a density of " << target << " per site was accepted";
+    } catch (std::invalid_argument const& e) {
+      EXPECT_NE(std::string(e.what()).find("must be between 0 and 2 (FLAVORS), per site."), std::string::npos) << e.what();
+    }
+  }
+}
