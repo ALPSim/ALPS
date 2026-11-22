@@ -167,4 +167,8 @@ TEST_F(ImpuritySolverTest, PassesMuExactlyAndTheParameterFileAsOneArgument) {
   EXPECT_EQ(args[0], "my par'ams.ini");
   ASSERT_EQ(args[1].substr(0, 5), "--MU=");
   EXPECT_EQ(std::stod(args[1].substr(5)), mu) << args[1];
+  // with the fewest digits that do
+  solver.adjust_mu(0.3);
+  solver.solve(g.G_omega, g.G_tau, out.G_omega, out.G_tau);
+  EXPECT_EQ(lines("args.txt").back(), "--MU=0.3");
 }

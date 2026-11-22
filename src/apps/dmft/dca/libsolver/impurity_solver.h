@@ -88,6 +88,19 @@ private:
     for(const typename GF::value_type *it=G.data().data(); it !=G.data().data()+G.data().num_elements(); it++)
       if(std::isnan(std::abs(*it)) || std::isinf(std::abs(*it))) throw std::runtime_error("encountered nan or inf in GF");
   }
+  /// x with the fewest digits that read back as x (0.3, not 0.29999999999999999)
+  static std::string exact(double x){
+    for (int digits = 1; digits < std::numeric_limits<double>::max_digits10; ++digits) {
+      std::ostringstream out;
+      out.precision(digits);
+      out << x;
+      if (std::stod(out.str()) == x) return out.str();
+    }
+    std::ostringstream out;
+    out.precision(std::numeric_limits<double>::max_digits10);
+    out << x;
+    return out.str();
+  }
   /// s as one word for the shell: in single quotes, with each ' as '\''
   static std::string shell_quote(const std::string &s){
     std::string quoted = "'";
@@ -100,8 +113,7 @@ private:
     // the parameter file is one argument, quoted for the shell, and MU has the
     // digits that read back as the same double (#460).
     std::stringstream  command;
-    command.precision(std::numeric_limits<double>::max_digits10);
-    command << launch_command_ << " " << shell_quote(param_file_name_) << " --MU=" << mu_;
+    command << launch_command_ << " " << shell_quote(param_file_name_) << " --MU=" << exact(mu_);
     std::cerr << "Calling external solver as: " <<  command.str()<<std::endl;
     int result = std::system(command.str().c_str());
     if (result)
