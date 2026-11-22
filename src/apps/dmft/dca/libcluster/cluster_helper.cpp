@@ -213,7 +213,6 @@ void ClusterHelper::find_integration_weights() {
   //find lattice integration weights (Simpson weights)
   lattice_momentum_set lattice_momenta(dimension(), epsilon_);
   for(int i=0;i<cell_momenta().size();++i){
-    //for (; itm != itm_end; ++itm) {
     std::vector<double> mom = cell_momenta()[i];
     std::vector<double> mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
     std::vector<std::vector<double> > moms;
@@ -508,6 +507,10 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         c = matrix_vector_mult(groups[g], c);
         c = map_back_into_cluster(c, basis_inv, basis);
         unsigned int i_mapped = identify_vertex(c, cluster_coordinates_);
+        if (i_mapped == n_cluster_sites()) {
+          bad = true;
+          break;
+        }
         if (!vertexmap.insert(std::pair<int,int>(i, i_mapped)).second) {
           if (vertexmap[i]!=i_mapped) {
             bad = true;
@@ -534,19 +537,12 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       bool bad = false;
       for(int off=0;off<cell_offsets().size();++off){
         std::vector<int> o = cell_offsets()[off];
-        //std::cout << c[0] << " "<< c[1] << " mu ";
-        //c = matrix_vector_mult(reciprocal_basis, c);
-        //std::cout << o[0] << " "<< o[1] << " cm ";
         std::vector<double> c(dimension());
         for (unsigned int d=0; d<dimension(); ++d)
           c[d] = 2*M_PI*o[d]+cluster_momentum(i,d);
-        //std::cout << c[0] << " "<< c[1] << " g ";
         c = matrix_vector_mult(groups[g], c);
-        //std::cout << c[0] << " " << c[1] << " ma ";
         c = map_back_into_brillouin_zone(c);
-        //std::cout << c[0] << " " << c[1] << " : ";
         unsigned int i_mapped = identify_vertex(c, cluster_momenta_);
-        //std::cout << i << ":" << i_mapped << "\n";
         if (i_mapped == n_cluster_sites()) {
           bad = true;
           break;
@@ -564,30 +560,9 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      /*if(alps::is_master())
-       std::cout  << g << " ";*/
       append_column_no_duplicates(symmetry_table_k_space_, vertexmap);
     }
   }
-  /*if(alps::is_master())
-   std::cout << "\n";*/
-  /*std::cout << "symmetry table k space:\n";
-   for (unsigned int i=0; i<symmetry_table_k_space_.rows(); ++i) {
-   for (unsigned int j=0; j<symmetry_table_k_space_.cols(); ++j) {
-   std::cout << symmetry_table_k_space_(i,j) << " ";
-   }
-   std::cout << std::endl;
-   }
-   std::cout << "symmetry table k space (with momenta):\n";
-   for (unsigned int i=0; i<symmetry_table_k_space_.rows(); ++i) {
-   for (unsigned int j=0; j<symmetry_table_k_space_.cols(); ++j) {
-   std::cout << " (";
-   for(std::size_t d=0;d<dimension();++d)
-   std::cout<<cluster_momentum(symmetry_table_k_space_(i,j),d) << " ";
-   std::cout<<")";
-   }
-   std::cout << std::endl;
-   }*/
   
   //setup equivalence classes of sites and site pairs
   std::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space_);
@@ -733,9 +708,6 @@ std::vector<double> ClusterHelper::map_back_into_brillouin_zone(std::vector<doub
     }
     v[d] *= M_PI;
   }
-  /*for (unsigned int d=0; d<v.size(); ++d) {
-   std::cout << v[d];
-   }std::cout<<std::endl;*/
   return v;
 }
 
@@ -831,7 +803,6 @@ unsigned int ClusterHelper::identify_vertex(const std::vector<double>& v, const 
     if (equal)
       return i;
   }
-  //std::cout << v[0] << " " << v[1] << "\n";
   return n_cluster_sites();
 }
 
@@ -878,27 +849,35 @@ std::vector<double> ClusterHelper::matrix_vector_mult(const Matrix<double>::Type
   return vn;
 }
 
+namespace {
+template <typename M>
+bool same_shape(const M &a, const M &b) { return a.rows() == b.rows() && a.cols() == b.cols(); }
+}
+
+// Two helpers are equal if they have the same flags and periodicity, the same
+// tables of the same size (within epsilon for the coordinates and momenta,
+// exactly for the symmetry tables) and the same equivalence classes.
 bool ClusterHelper::operator==(const ClusterHelper &CH) const{
-  //compare scalars
   if(epsilon_!=CH.epsilon_) return false;
   if(bipartite_!=CH.bipartite_) return false;
   if(paramagnet_!=CH.paramagnet_) return false;
-  
-  //compare double matrices
-  if(Matrix<double>::max_abs(cluster_coordinates_ - CH.cluster_coordinates_) > epsilon_) return false;
-  if(Matrix<double>::max_abs(lattice_momenta_ - CH.lattice_momenta_) > epsilon_) return false;
-  if(Matrix<double>::max_abs(reciprocal_basis_ - CH.reciprocal_basis_) > epsilon_) return false;
-  if(Matrix<double>::max_abs(reciprocal_basis_inv_ - CH.reciprocal_basis_inv_) > epsilon_) return false;
-  if(Matrix<double>::max_abs(rbzone_boundaries_ - CH.rbzone_boundaries_) > epsilon_) return false;
-  
-  //compare int matrices
-  if(Matrix<int>::max_abs(symmetry_table_k_space_ - CH.symmetry_table_k_space_) > epsilon_) return false;
-  if(Matrix<int>::max_abs(symmetry_table_real_space_ - CH.symmetry_table_real_space_) > epsilon_) return false;
-  
-  for(int i=0;i<periodicity_.size();++i){
-    if(periodicity_[i]!=CH.periodicity_[i]) return false;
+  if(periodicity_!=CH.periodicity_) return false;
+
+  for (auto pair : {std::make_pair(&cluster_coordinates_, &CH.cluster_coordinates_),
+                    std::make_pair(&cluster_momenta_, &CH.cluster_momenta_),
+                    std::make_pair(&lattice_momenta_, &CH.lattice_momenta_),
+                    std::make_pair(&basis_, &CH.basis_),
+                    std::make_pair(&basis_inv_, &CH.basis_inv_),
+                    std::make_pair(&reciprocal_basis_, &CH.reciprocal_basis_),
+                    std::make_pair(&reciprocal_basis_inv_, &CH.reciprocal_basis_inv_),
+                    std::make_pair(&rbzone_boundaries_, &CH.rbzone_boundaries_)}) {
+    if(!same_shape(*pair.first, *pair.second)) return false;
+    if(Matrix<double>::max_abs(*pair.first - *pair.second) > epsilon_) return false;
   }
-  
-  return true;
-  
+  if(symmetry_table_k_space_!=CH.symmetry_table_k_space_) return false;
+  if(symmetry_table_real_space_!=CH.symmetry_table_real_space_) return false;
+  return site_class_set_real_space_==CH.site_class_set_real_space_
+      && pair_class_set_real_space_==CH.pair_class_set_real_space_
+      && site_class_set_k_space_==CH.site_class_set_k_space_
+      && pair_class_set_k_space_==CH.pair_class_set_k_space_;
 }

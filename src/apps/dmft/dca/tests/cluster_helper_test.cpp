@@ -245,3 +245,31 @@ INSTANTIATE_TEST_SUITE_P(Clusters, ClusterSymmetries, ::testing::Values(
       for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
       return name;
     });
+
+// Comparing the tables of two different clusters, or of one cluster at two
+// values of dca.L, gives false. The comparisons subtracted Eigen matrices of
+// different sizes (an assertion in Debug, undefined in Release) and indexed
+// the other graph with this graph's sizes (#447).
+TEST(ClusterHelper, DifferentClustersCompareUnequal){
+  auto helper = [](const char* lattice, int sites, int L) {
+    alps::params p;
+    p["dca.LATTICE"]=lattice;
+    p["dca.SITES"]=sites;
+    p["dca.L"]=L;
+    set_other_parameters(p);
+    return ClusterHelper(p);
+  };
+  const ClusterHelper a = helper("Betts2D-4A", 4, 4), b = helper("Betts2D-8A", 8, 4), c = helper("Betts2D-4A", 4, 8);
+  EXPECT_TRUE(a == helper("Betts2D-4A", 4, 4));
+  EXPECT_FALSE(a == b);
+  EXPECT_FALSE(b == a);
+  EXPECT_FALSE(a == c);
+  EXPECT_FALSE(c == a);
+
+  const alps_graph g4("Betts2D-4A", DCA_CLUSTER_LIBRARY, 4), g8("Betts2D-4A", DCA_CLUSTER_LIBRARY, 8),
+                   g4b("Betts2D-8A", DCA_CLUSTER_LIBRARY, 4);
+  EXPECT_TRUE(g4 == alps_graph("Betts2D-4A", DCA_CLUSTER_LIBRARY, 4));
+  EXPECT_FALSE(g4 == g8);
+  EXPECT_FALSE(g8 == g4);
+  EXPECT_FALSE(g4 == g4b);
+}
