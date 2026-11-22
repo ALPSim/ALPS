@@ -7,6 +7,8 @@
 #include <alps/alea/core.hpp>
 #include <alps/utilities/mpi.hpp>     /* provides mpi.h */
 
+#include <algorithm>
+
 // TODO: merge into MPI
 namespace alps { namespace mpi {
 
@@ -86,11 +88,21 @@ protected:
         // Extract data type and get on with it
         MPI_Datatype dtype_tag = alps::mpi::get_mpi_datatype(T());
 
-        // In-place requires special value for sendbuf, but only on root
-        const void *sendbuf = am_root() ? MPI_IN_PLACE : data.data();
-        // To maintain MPI-2.0 compatibility `const` modifier should be removed
-        mpi::checked(MPI_Reduce(const_cast<void*>(sendbuf), data.data(), data.size(), dtype_tag,
-                                MPI_SUM, root_, comm_));
+        // In pieces of at most 4 MiB: MPI implementations may hold buffers of
+        // a whole message on the root, several of them at larger rank counts
+        // (Open MPI 4.1: up to three), which for an observable of a gigabyte
+        // is gigabytes more on the root. The pieces bound that, and keep each
+        // count within an int.
+        const size_t piece = std::max<size_t>(1, (size_t(1) << 22) / sizeof(T));
+        for (size_t start = 0; start < data.size(); start += piece) {
+            T *begin = data.data() + start;
+            const int count = (int) std::min(piece, data.size() - start);
+            // In-place requires special value for sendbuf, but only on root
+            const void *sendbuf = am_root() ? MPI_IN_PLACE : begin;
+            // To maintain MPI-2.0 compatibility `const` modifier should be removed
+            mpi::checked(MPI_Reduce(const_cast<void*>(sendbuf), begin, count, dtype_tag,
+                                    MPI_SUM, root_, comm_));
+        }
     }
 
 private:

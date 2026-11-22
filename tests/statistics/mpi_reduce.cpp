@@ -241,3 +241,28 @@ TEST(MpiReduce, SharedResultsAreCopied)
         EXPECT_EQ(alone[name].error_vector(), shared[name].error_vector());
     }
 }
+
+// The reducer sends a large observable in pieces of 4 MiB; every piece lands
+// in its place.
+TEST(MpiReduce, LargeObservableInPieces)
+{
+    using namespace alps::alea;
+    alps::mpi::communicator comm;
+    const std::size_t n = (std::size_t(1) << 19) + 5;   // just over one piece of doubles
+    observable_set set;
+    set << observable("big").without_bins();
+    std::vector<double> x(n);
+    for (int sample = 0; sample < 2; ++sample) {
+        for (std::size_t i = 0; i < n; ++i)
+            x[i] = comm.rank() + 1e-6 * i + sample;
+        set["big"] << x;
+    }
+    result_set results = set.results();
+    results.reduce(mpi_reducer(comm, 0));
+    if (comm.rank() != 0)
+        return;
+    const std::vector<double> mean = results["big"].mean_vector();
+    ASSERT_EQ(mean.size(), n);
+    for (std::size_t i : {std::size_t(0), (std::size_t(1) << 19) - 1, std::size_t(1) << 19, n - 1})
+        EXPECT_NEAR(mean[i], 0.5 * (comm.size() - 1) + 1e-6 * i + 0.5, 1e-12) << i;
+}
