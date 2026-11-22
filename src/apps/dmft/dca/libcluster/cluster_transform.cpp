@@ -1023,11 +1023,35 @@ void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_ks
 
 //create some instances for libcluster:
 
-void DoubleCellClusterTransformer::symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const{
-//  throw std::logic_error("Emanuel please implement the afm k-space symmetrization here");
-}
-void DoubleCellClusterTransformer::symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const{
-//  throw std::logic_error("Emanuel please implement the charge order k-space symmetrization here");
+// The point-group operations about a lattice site keep the sublattices of a
+// bipartite lattice apart, so they leave the AFM and charge-order patterns
+// invariant, and they map Q to Q (mod 2 pi), hence (K, K+Q) blocks to blocks:
+// G(gK, gK') = G(K, K'). The classes of momentum pairs (k1, k2) of
+// ClusterHelper are the orbits of these operations (with (k1,k2) ~ (k2,k1)
+// in the charge-order framework); averaging G over the classes of pairs in a
+// block symmetrizes it as symmetrize_k_space does in the normal state. The
+// block element (k1, k2) is G(w, k1, k2 % 2, spin), as K is at the even and
+// K+Q at the odd momentum of a block (#453).
+void DoubleCellClusterTransformer::symmetrize_k_space(double_cell_matsubara_kspace_gf &G) const{
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(std::tie(itc, itc_end)=pair_classes_k_space(); itc!=itc_end; ++itc) {
+    std::size_t in_block = 0;
+    for(const pair_type& pair : *itc)
+      if(pair.first/2 == pair.second/2) ++in_block;
+    if(in_block == 0) continue;
+    if(in_block != itc->size())
+      throw std::logic_error("double cell symmetrization: a symmetry maps an element of a (K, K+Q) block out of the blocks");
+    for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+      for (alps::gf::index spin(0); spin<G.mesh4().extent(); ++spin) {
+        std::complex<double> av = 0.;
+        for(const pair_type& pair : *itc)
+          av += G(w, alps::gf::momentum_index(pair.first), alps::gf::index(pair.second % 2), spin);
+        av /= double(itc->size());
+        for(const pair_type& pair : *itc)
+          G(w, alps::gf::momentum_index(pair.first), alps::gf::index(pair.second % 2), spin) = av;
+      }
+    }
+  }
 }
 void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_gf &G) const{
   const alps::gf::index K(0), KQ(1), up(0), dn(1);
