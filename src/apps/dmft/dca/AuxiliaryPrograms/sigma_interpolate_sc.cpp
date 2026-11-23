@@ -129,9 +129,11 @@ void run(int argc, char **argv){
   if(std::abs(selfenergy_orig.mesh1().beta()-beta_old)>1e-10*beta_old)
     throw std::invalid_argument("the self-energy is given at beta="+std::to_string(selfenergy_orig.mesh1().beta())
                                 +", but BETA of the old parameter file is "+std::to_string(beta_old));
-  // the momenta of the old cluster and 2 flavors (#471)
-  typedef double_cell_matsubara_kspace_gf::gf_type sigma_gf_type;
-  if(!(static_cast<const sigma_gf_type&>(selfenergy_orig).meshes()==static_cast<const sigma_gf_type&>(expected_meshes).meshes()))
+  if(selfenergy_orig.mesh1().statistics()!=alps::gf::statistics::FERMIONIC)
+    throw std::invalid_argument(p["sigma"].as<std::string>()+": the self-energy is not on fermionic Matsubara frequencies.");
+  // the momenta of the old cluster and 2 flavors (#471); beta and the
+  // frequencies are checked above, beta only to a relative 1e-10
+  if(!(selfenergy_orig.mesh2()==expected_meshes.mesh2() && selfenergy_orig.mesh3()==expected_meshes.mesh3() && selfenergy_orig.mesh4()==expected_meshes.mesh4()))
     throw std::invalid_argument(p["sigma"].as<std::string>()+": the self-energy is not on the momenta of the old cluster"
                                 " (dca.LATTICE of the old parameter file) with 2 flavors.");
   std::vector<double> matsubara_freqs_old(nfreq_old);
