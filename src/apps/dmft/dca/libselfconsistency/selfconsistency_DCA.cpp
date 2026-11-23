@@ -92,8 +92,6 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
   double change = 0.;
   for(int iteration_ctr=0;iteration_ctr < max_it; ++iteration_ctr) {
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-
-    std::cout<<"spin symmetrization is "<<spin_symmetrize<<std::endl;
     clustertrans.symmetrize_k_space(G0_omega);
     if(spin_symmetrize){ clustertrans.spin_symmetrize(G0_omega); }
 
@@ -118,13 +116,15 @@ template<class SOLV, class TRANS, class GFW, class GFT> void selfconsistency_loo
     if(write_iterations)
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, self_energy, G0_tau, G_tau, beta);
 
+    // the G0 to continue from, also after the last iteration (#465)
+    write_new_G0omega(G0_omega_new, g0_output_path);
+
     change = (G_omega-G_omega_old).norm();
     std::cout<<"iteration "<<iteration_ctr<<": change of G "<<change<<std::endl;
     if (change <= convergence_tolerance) { converged = true; break; }
 
     G_omega_old=G_omega;
     G0_omega=G0_omega_new;
-    write_new_G0omega(G0_omega_new, g0_output_path);
   }
   // Running a fixed number of iterations is the normal way to use dca;
   // convergence is judged afterwards from the iterations written.
