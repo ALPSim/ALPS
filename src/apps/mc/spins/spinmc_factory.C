@@ -163,7 +163,11 @@ alps::scheduler::Worker* SpinFactory::make_worker(
         return 0;
     }
   
-  else if (parms["MODEL"]=="Potts")
+  else if (parms["MODEL"]=="Potts") {
+    // the Potts field h favours color 0; with two numbers the first was silently ignored
+    if (parms.defined("h") && countElements(parms["h"]) != 1)
+      boost::throw_exception(std::runtime_error(
+        "The Potts model takes one value for h, the field on color 0; got h=\"" + std::string(parms["h"]) + "\"."));
     switch (int(parms["q"])) {
     case 3:
       return new SpinSim< PottsMoment<3>, MIdMatrix<double,2> >(where,parms,node);
@@ -175,6 +179,7 @@ alps::scheduler::Worker* SpinFactory::make_worker(
       boost::throw_exception(std::runtime_error(std::string(parms["q"]) 
             + "-state Potts model not implemented in file factory.C"));
     }
+  }
   else 
     boost::throw_exception(std::runtime_error(std::string(parms["MODEL"])
               + " model not implemented in file factory.C"));

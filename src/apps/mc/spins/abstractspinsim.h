@@ -23,6 +23,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include "matrices.h"
+#include <cmath>
 
 typedef alps::uint64_t uint64_t;
 
@@ -44,7 +45,10 @@ inline double coupling_sign(const MAT& J) { return J.det(); }
 template<class MAT>
 class AbstractSpinSim : public alps::scheduler::LatticeMCRun<> {
 public : 
-  AbstractSpinSim(const alps::ProcessList&,const alps::Parameters&,int);
+  // cluster_needs_ferromagnet: the cluster update of the moment type joins
+  // only ferromagnetic bonds (Potts), so other bonds rule it out
+  AbstractSpinSim(const alps::ProcessList&,const alps::Parameters&,int,
+                  bool cluster_needs_ferromagnet=false);
   ~AbstractSpinSim();  
  
   bool change_parameter(const std::string& name, const alps::StringValue& value);
@@ -92,7 +96,7 @@ protected:
 
 template<class MAT>
 AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w, 
-        const alps::Parameters& myparms,int n)
+        const alps::Parameters& myparms,int n,bool cluster_needs_ferromagnet)
   : alps::scheduler::LatticeMCRun<>(w,myparms,n),
   beta_(parms.defined("beta") ? double(parms["beta"]) : 1./double(parms.required_value("T"))),
   sweeps_(static_cast<uint64_t>(parms.required_value("SWEEPS"))),
@@ -119,6 +123,11 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   // moved from the inilializaton list to avoid 'internal compiler error' in gcc 4.3.x
   h_normalized = h_*(1./std::sqrt(h_.get_length2()));
   has_magnetic_field_ = h_normalized.get_length2()>1.e-10;
+
+  if (parms.defined("beta") && parms.defined("T"))
+    boost::throw_exception(std::runtime_error("Set either T or beta, not both."));
+  if (!(beta_ > 0.) || !std::isfinite(beta_))
+    boost::throw_exception(std::runtime_error("The temperature T must be positive and finite (beta > 0)."));
 
   if (inhomogeneous())
     boost::throw_exception(std::runtime_error("Disordered lattices not supported by the classical Monte Carlo program.\n"));
@@ -169,6 +178,11 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
       site_type_visited[type]=true;
       std::string diag="D"+boost::lexical_cast<std::string, int>(type);
       std::string diag_string;
+      // D' sets the second site type, like J' the second bond type
+      if (type==1 && parms.defined("D'") && parms.defined("D1"))
+        boost::throw_exception(std::runtime_error("Set either D' or D1, not both."));
+      if (!parms.defined(diag) && type==1 && parms.defined("D'"))
+        diag="D'";
       if (!parms.defined(diag)) {
         diag="D";
       }
@@ -187,6 +201,7 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
     }
   }
 
+  bool cluster_impossible = false;
   typedef boost::tuple<int,int,int> bond_tuple_type;
   std::map<bond_tuple_type,int> new_bond_type;
   int num_bond_types=0;
@@ -201,8 +216,13 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
       bond_type[*b] = found->second;
     else {
       new_bond_type[this_bond] = num_bond_types;
-      std::string J_name = parms.value_or_default("J"+
-               boost::lexical_cast<std::string,int>(bond_type[*b]),J_string);
+      std::string J_key = "J"+boost::lexical_cast<std::string,int>(bond_type[*b]);
+      // J' sets the second bond type, as in the model library's spin model
+      if (bond_type[*b]==1 && parms.defined("J'") && parms.defined("J1"))
+        boost::throw_exception(std::runtime_error("Set either J' or J1, not both."));
+      if (!parms.defined(J_key) && bond_type[*b]==1 && parms.defined("J'"))
+        J_key = "J'";
+      std::string J_name = parms.value_or_default(J_key,J_string);
       MAT this_J;
       this_J.setMatrix(J_name,parms);
       bond_type[*b] = num_bond_types;
@@ -210,6 +230,10 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
       couplings_[*b]=this_J;
       // this_J multiplies +S_i.S_j here, so a positive coupling is antiferromagnetic
       double sign = coupling_sign(this_J);
+      // the Potts cluster update adds a bond with probability 1-exp(-beta*J)
+      // (connect.h), which is not a probability for an antiferromagnetic J < 0
+      if (cluster_needs_ferromagnet && sign>0.)
+        cluster_impossible = true;
       // is_frustrated() takes a positive value as a ferromagnetic bond
       couplings_det[*b] = -sign;
       if (sign>0.)
@@ -220,6 +244,9 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
     }
   }
 
+  if (parms["UPDATE"]=="cluster" && cluster_impossible)
+    boost::throw_exception(std::runtime_error(
+      "Cluster updates are not possible for a Potts model with an antiferromagnetic coupling; use UPDATE=\"local\"."));
   if (parms["UPDATE"]=="cluster") {
     if (MAT::allow_cluster_update)
       cluster_updates_=true;
@@ -237,7 +264,7 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
     cluster_updates_=false;
   else if (parms["UPDATE"]=="")
     // the cluster update ignores the field, so it is only a default without one
-    cluster_updates_ = !has_magnetic_field_ && !alps::is_frustrated(graph(),couplings_det);
+    cluster_updates_ = !has_magnetic_field_ && !cluster_impossible && !alps::is_frustrated(graph(),couplings_det);
   else
     boost::throw_exception(std::runtime_error("Illegal update type " + std::string(parms["UPDATE"])));
 
