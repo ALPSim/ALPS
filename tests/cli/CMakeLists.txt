@@ -58,6 +58,22 @@ if(Python_Interpreter_FOUND)
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(spinmc_cluster_magnetization PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
   endif()
+  if(TARGET simplemc AND TARGET parameter2xml)
+    add_test(NAME simplemc_exact
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_simplemc_exact.py"
+        "$<TARGET_FILE:simplemc>" "$<TARGET_FILE:parameter2xml>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(simplemc_exact PROPERTIES TIMEOUT 120 LABELS "cli")
+  endif()
+  foreach(application loop dirloop_sse)
+    if(TARGET ${application} AND TARGET parameter2xml)
+      add_test(NAME qmc_exact_${application}
+        COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_qmc_exact.py" ${application}
+          "$<TARGET_FILE:${application}>" "$<TARGET_FILE:parameter2xml>" "${PROJECT_SOURCE_DIR}/src/alps/resources"
+          # Unoptimized builds are about ten times slower: shorter runs
+          "$<$<CONFIG:Debug>:--short>")
+      set_tests_properties(qmc_exact_${application} PROPERTIES TIMEOUT 120 LABELS "cli;qmc")
+    endif()
+  endforeach()
   if(TARGET qwl AND TARGET qwl_evaluate AND ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
     add_test(NAME scheduler_qwl_runs_mpi
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_qwl_runs.py"
