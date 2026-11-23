@@ -17,6 +17,7 @@
 #define GREEN_FUNCTION_H
 #include "types.h"
 #include <fstream>
+#include <limits>
 #include <iostream>
 #include <cassert>
 #include <cstring>
@@ -219,6 +220,9 @@ template<typename T> void green_function<T>::write(const char *filename) const{
   std::ofstream out_file(filename);
   assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
+  // These files are read back (G0OMEGA_INPUT, G0TAU_INPUT): write the digits
+  // that give the same double, not the default 6.
+  out_file.precision(std::numeric_limits<double>::max_digits10);
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
     for(unsigned int s0=0; s0<ns_; ++s0) {
