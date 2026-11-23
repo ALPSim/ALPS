@@ -1,0 +1,30 @@
+name: Website pages
+
+# Lists, in the job summary, the pages of the ALPS website that describe the
+# files a PR changes, from the map the website keeps
+# (.github/alps-source-map.json in ALPSim/alpsim.github.io), and warns about
+# map patterns that no longer match a file (.github/scripts/website_pages.py).
+# It never fails a PR.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: website-pages-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: List the website pages to check
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: python3 .github/scripts/website_pages.py --base "$BASE" --head HEAD

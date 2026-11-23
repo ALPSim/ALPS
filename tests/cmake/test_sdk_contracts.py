@@ -146,6 +146,14 @@ def test_sdk_exports_installed_applications(tmp_path):
     assert len(paths) == 26
     assert len(set(paths)) == 26
     assert all(Path(path).is_file() for path in paths)
+    # Every library the applications load is a runtime target, so that
+    # consumers bundling the programs (pyalps) install it with them.
+    runtime = (tmp_path / "runtime-Release.txt").read_text().splitlines()
+    assert runtime
+    assert all(Path(path).is_file() for path in runtime)
+    # dca and ct-hyb-segment load ALPS::gf, built when the SDK found Eigen.
+    if (Path(os.environ["ALPS_DIR"]) / "ALPSGfTargets.cmake").is_file():
+        assert any("alps_gf" in Path(path).name for path in runtime), runtime
 
 
 def test_sdk_exports_solver_libraries(tmp_path):

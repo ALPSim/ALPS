@@ -41,6 +41,23 @@ else()
     endforeach()
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/applications-$<CONFIG>.txt"
       CONTENT "${application_paths}")
+    # The runtime targets include the libraries the applications link, also
+    # those of components built with Eigen, which were not asked for here.
+    if(TARGET ALPS::dca)
+      if(NOT TARGET ALPS::gf)
+        message(FATAL_ERROR "dca links ALPS::gf, but the applications did not provide it")
+      endif()
+      get_target_property(gf_type ALPS::gf TYPE)
+      if(gf_type STREQUAL "SHARED_LIBRARY" AND NOT "ALPS::gf" IN_LIST ALPS_RUNTIME_TARGETS)
+        message(FATAL_ERROR "ALPS_RUNTIME_TARGETS lacks ALPS::gf, which dca loads: ${ALPS_RUNTIME_TARGETS}")
+      endif()
+    endif()
+    set(runtime_paths "")
+    foreach(runtime IN LISTS ALPS_RUNTIME_TARGETS)
+      string(APPEND runtime_paths "$<TARGET_FILE:${runtime}>\n")
+    endforeach()
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/runtime-$<CONFIG>.txt"
+      CONTENT "${runtime_paths}")
   else()
     find_package(ALPS CONFIG REQUIRED COMPONENTS utilities hdf5 params osiris xml cli accumulators mc numerics numeric_io numeric_xml)
   endif()

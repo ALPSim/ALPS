@@ -36,6 +36,9 @@ if(Python_Interpreter_FOUND)
     add_test(NAME dmft_parm_rewrite
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_parm_rewrite.py" "$<TARGET_FILE:dmft>")
     set_tests_properties(dmft_parm_rewrite PROPERTIES TIMEOUT 240 LABELS "cli")
+    add_test(NAME dmft_itime_loop_refusals
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_itime_loop.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_itime_loop_refusals PROPERTIES TIMEOUT 120 LABELS "cli")
   endif()
   if(TARGET spinmc)
     add_test(NAME scheduler_sweeps_spinmc
