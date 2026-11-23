@@ -110,6 +110,16 @@ TEST(ClusterLibrary, RefusesMalformedEntries) {
       "<LATTICE dimension = \"2\"\n   name = \"layout superlattice\">\n<BASIS><VECTOR> 2.0  2 </VECTOR>\n"
       "<VECTOR>2 -2</VECTOR></BASIS></LATTICE>\n"
       "<LATTICE name=\"left superlattice\" dimension=\"1\"><BASIS><VECTOR>-3</VECTOR></BASIS></LATTICE>\n"
+      // self-closing tag: the next lattice's basis must not be used
+      "<LATTICE name=\"selfclose superlattice\" dimension=\"2\"/>\n"
+      "<LATTICE name=\"afterself superlattice\" dimension=\"2\"><BASIS><VECTOR>3 0</VECTOR><VECTOR>0 3</VECTOR></BASIS></LATTICE>\n"
+      // commented-out entry: must not be found, and a commented duplicate must
+      // not count towards "defines it more than once"
+      "<LATTICE name=\"single superlattice\" dimension=\"1\"><BASIS><VECTOR>5</VECTOR></BASIS></LATTICE>\n"
+      "<!-- <LATTICE name=\"incomment superlattice\" dimension=\"1\"><BASIS><VECTOR>2</VECTOR></BASIS></LATTICE> -->\n"
+      "<!-- <LATTICE name=\"single superlattice\" dimension=\"1\"><BASIS><VECTOR>7</VECTOR></BASIS></LATTICE> -->\n"
+      // overflow: 1e300 rounds to itself but overflows int
+      "<LATTICE name=\"huge superlattice\" dimension=\"1\"><BASIS><VECTOR>1e300</VECTOR></BASIS></LATTICE>\n"
       "</LATTICES>\n";
   const std::string where = " in " + library + ": ";
   expect_contains(error_of("letter", library), "cluster letter" + where + "basis vector \"2 x\": \"x\" is not an integer.");
@@ -120,6 +130,11 @@ TEST(ClusterLibrary, RefusesMalformedEntries) {
   expect_contains(error_of("four", library), "dimension=\"4\"; clusters have dimension 1, 2 or 3.");
   expect_contains(error_of("twice", library), "the library defines it more than once.");
   expect_contains(error_of("nobasis", library), "has no <BASIS> ... </BASIS>.");
+  expect_contains(error_of("selfclose", library), "has no <BASIS> ... </BASIS>.");
+  expect_contains(error_of("incomment", library), "not found. dca.LATTICE has to be the name");
+  // a commented-out duplicate must not trigger "defines it more than once"
+  EXPECT_EQ(alps_graph("single", library, 1).unit_cell_volume(), 5);
+  expect_contains(error_of("huge", library), "is not an integer.");
 
   alps_graph layout("layout", library, 2);
   EXPECT_EQ(layout.unit_cell_volume(), 8);
