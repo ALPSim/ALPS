@@ -98,6 +98,7 @@ target_sources(alps_utilities PUBLIC
     include/alps/utilities/signal.hpp
     include/alps/utilities/size.hpp
     include/alps/utilities/stacktrace.hpp
+    include/alps/utilities/stream_seed.hpp
     include/alps/utilities/stringify.hpp
     include/alps/utilities/temporary_filename.hpp
     include/alps/utilities/type_wrapper.hpp

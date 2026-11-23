@@ -23,6 +23,7 @@
 
 #include <filesystem>
 #include <alps/utilities/fs/absolute.hpp>
+#include <alps/utilities/stream_seed.hpp>
 #include <fstream>
 #include <boost/throw_exception.hpp>
 #include <fstream>
@@ -101,6 +102,20 @@ void WorkerTask::handle_tag(std::istream& infile, const XMLTag& intag)
   }
 }
 
+namespace {
+// The parameters of run `run`: its SEED is the task's SEED for the first run
+// and a scrambled one for the others (alps::stream_seed). The runs used to get
+// SEED + run * cpus, so run 1 of the task with SEED=42 repeated run 0 of a
+// task with SEED=43.
+alps::Parameters run_parameters(alps::Parameters const& parms, unsigned int run, unsigned int cpus)
+{
+  alps::Parameters p(parms);
+  p["SEED"] = static_cast<int32_t>(alps::stream_seed(
+    static_cast<std::uint64_t>(static_cast<int32_t>(parms["SEED"])), std::uint64_t(run) * cpus));
+  return p;
+}
+}
+
 void WorkerTask::construct() // delayed until child class is fully constructed
 {
   Task::construct();
@@ -154,9 +169,8 @@ void WorkerTask::construct() // delayed until child class is fully constructed
     {
       std::copy(where.begin()+in,where.begin()+in+cpus(),here.begin());
       if(in==0&&here[0].local()) { // one on the local node
-        runs[0]=theScheduler->make_worker(here,parms);
+        runs[0]=theScheduler->make_worker(here,run_parameters(parms,0,cpus()));
         theWorker = runs[0];
-        parms["SEED"] = static_cast<int32_t>(parms["SEED"])+cpus();
         in +=cpus();
         workerstatus[0] = LocalRun;
 #ifdef ALPS_TRACE
@@ -164,8 +178,7 @@ void WorkerTask::construct() // delayed until child class is fully constructed
 #endif
       }
       else { // other runs on remote nodes
-        runs[i]=new RemoteWorker(here,parms);
-        parms["SEED"] = static_cast<int32_t>(parms["SEED"])+cpus();
+        runs[i]=new RemoteWorker(here,run_parameters(parms,i,cpus()));
         in +=cpus();
         workerstatus[i] = RemoteRun;
 #ifdef ALPS_TRACE
@@ -222,8 +235,7 @@ void WorkerTask::add_process(const Process& p)
 #ifdef ALPS_TRACE
     std::cerr  << "Creating additional run " << j+1 << " remote on Host: " << p << "\n";
 #endif
-    runs[j]=new RemoteWorker(here,parms);
-    parms["SEED"] = static_cast<int32_t>(parms["SEED"])+cpus();
+    runs[j]=new RemoteWorker(here,run_parameters(parms,j,cpus()));
     workerstatus[j] = RemoteRun;
     if(started())
       runs[j]->start_worker();

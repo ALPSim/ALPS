@@ -5,6 +5,7 @@
 
 #include <alps/utilities/signal.hpp>
 #include <alps/mc/mcbase.hpp>
+#include <alps/utilities/stream_seed.hpp>
 
 #include <stdexcept>
 
@@ -12,7 +13,7 @@ namespace alps {
 
     mcbase::mcbase(parameters_type const & parms, std::size_t seed_offset)
         : parameters(parms)
-        , random(std::size_t(parameters["SEED"]) + seed_offset)
+        , random(static_cast<int>(alps::stream_seed(std::size_t(parameters["SEED"]), seed_offset)))
     {
         alps::signal::listen();
     }
