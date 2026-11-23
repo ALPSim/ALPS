@@ -16,6 +16,7 @@
 
 #include <cctype>
 #include <cerrno>
+#include <cmath>
 #include <cstdlib>
 #include <limits>
 #include <type_traits>
@@ -107,8 +108,13 @@ namespace alps {
                 long long value = std::strtoll(begin, &end, 10);
                 if (end != begin && !only_space(end)) {
                     long double real = checked_real_string<long double>(text);
-                    if (!(real > (std::numeric_limits<long long>::min)() - 1.L
-                          && real < (std::numeric_limits<long long>::max)() + 1.L))
+                    // 2^63 is exact in every long double; min() - 1 and
+                    // max() + 1 are not where long double is a plain double.
+                    // trunc keeps accepting values in (-2^63 - 1, -2^63],
+                    // which only a long double wider than 64 bits can hold.
+                    long double const limit =
+                        std::ldexp(1.0L, std::numeric_limits<long long>::digits);
+                    if (!(std::trunc(real) >= -limit && real < limit))
                         throw std::out_of_range("integer parameter out of range: " + text);
                     value = static_cast<long long>(real);
                 } else if (end == begin)
@@ -124,7 +130,9 @@ namespace alps {
                 unsigned long long value = std::strtoull(begin, &end, 10);
                 if (end != begin && !only_space(end)) {
                     long double real = checked_real_string<long double>(text);
-                    if (!(real < (std::numeric_limits<unsigned long long>::max)() + 1.L))
+                    long double const limit =
+                        std::ldexp(1.0L, std::numeric_limits<unsigned long long>::digits);
+                    if (!(real < limit))
                         throw std::out_of_range("integer parameter out of range: " + text);
                     value = static_cast<unsigned long long>(real);
                 } else if (end == begin)
