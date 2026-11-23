@@ -17,6 +17,7 @@
 #include <alps/expression.h>
 #include <gtest/gtest.h>
 #include <sstream>
+#include <stdexcept>
 
 TEST(ExpressionSimplification, CombinesLikeTermsAndPreservesValues) {
   const char *input[] = {"3*(a*b)*2+5*(x*y)^2*x*3", "3*a*b+5*a-3*a*b+2.5*a",
@@ -57,5 +58,16 @@ TEST(ExpressionSimplification, KeepsDivisionBySymbols) {
     alps::Expression reparsed(rendered.str());
     EXPECT_DOUBLE_EQ(alps::evaluate<double>(reparsed, alps::ParameterEvaluator(params)), expected)
         << rendered.str();
+  }
+}
+
+// Evaluating a function no evaluator knows, such as the operator Sz(j) left in
+// a coefficient, used to recurse until the stack overflowed (issue #385).
+TEST(ExpressionEvaluation, RefusesUnknownFunction) {
+  for (const char *input : {"Sz(j)", "2*Sz(j)", "exchange(i,j)"}) {
+    SCOPED_TRACE(input);
+    alps::expression::Expression<double> expression(input);
+    EXPECT_FALSE(expression.can_evaluate());
+    EXPECT_THROW(expression.value(), std::runtime_error);
   }
 }
