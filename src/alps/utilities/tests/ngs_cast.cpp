@@ -42,6 +42,16 @@ TEST(NgsCastFromString, RejectsIntegersOutOfRange) {
     EXPECT_THROW(alps::cast<int>(std::string("1e10")), std::out_of_range);
     EXPECT_THROW(alps::cast<unsigned>(std::string("-1")), std::out_of_range);
     EXPECT_THROW(alps::cast<short>(std::string("40000")), std::out_of_range);
+    EXPECT_THROW(alps::cast<long long>(std::string("9223372036854775808.0")), std::out_of_range);
+    EXPECT_THROW(alps::cast<unsigned long long>(std::string("18446744073709551616.0")), std::out_of_range);
+}
+
+// The lower limit of long long is accepted as decimal text, also where long double is a plain double.
+TEST(NgsCastFromString, AcceptsLongLongMinimumAsDecimalText) {
+    EXPECT_EQ(alps::cast<long long>(std::string("-9223372036854775808.0")),
+              (std::numeric_limits<long long>::min)());
+    EXPECT_EQ(alps::cast<long long>(std::string("-9.223372036854775808e18")),
+              (std::numeric_limits<long long>::min)());
 }
 
 TEST(NgsCastFromString, ReadsBooleanWordsAndNumbers) {
