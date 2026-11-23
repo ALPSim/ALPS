@@ -15,10 +15,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
     <PARAMETER name="h#" default="h"/>
@@ -57,10 +57,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <PARAMETER name="K1" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
@@ -103,10 +103,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <PARAMETER name="K1" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
@@ -149,10 +149,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <PARAMETER name="K1" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
@@ -195,10 +195,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
     <PARAMETER name="h#" default="h"/>
@@ -237,10 +237,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
     <PARAMETER name="h#" default="h"/>
@@ -279,10 +279,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
     <PARAMETER name="h#" default="h"/>
@@ -321,10 +321,10 @@
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
   <PARAMETER name="K" default="0"/>
+  <PARAMETER name="K0" default="K"/>
   <PARAMETER name="h0" default="h"/>
   <PARAMETER name="Gamma0" default="Gamma"/>
   <PARAMETER name="D0" default="D"/>
-  <PARAMETER name="K0" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
     <PARAMETER name="h#" default="h"/>

@@ -469,6 +469,7 @@
     <PARAMETER name="Gamma" default="0"/>
     <PARAMETER name="D" default="0"/>
     <PARAMETER name="K" default="0"/>
+    <PARAMETER name="K0" default="K"/>
     <BASIS ref="spin"/>
     <SITETERM site="i">
       <PARAMETER name="h#" default="h"/>
