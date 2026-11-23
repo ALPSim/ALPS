@@ -20,6 +20,7 @@
 #include <boost/random.hpp>
 
 #include <string>
+#include <thread>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -75,4 +76,27 @@ TEST(Hdf5, Multiarchive) {
     }
     std::filesystem::remove(std::filesystem::path(filename));
 
+}
+
+// One thread reads a file while another opens it for writing. Opening it for
+// writing reopens the shared file; with a thread-safe HDF5 that used to abort
+// with "Not all resources closed".
+TEST(Hdf5, ReaderAndWriterInTwoThreads) {
+    alps::testing::TemporaryDirectory temporary;
+    std::string const filename = (temporary.path() / "mixed.h5").string();
+    { alps::hdf5::archive ar(filename, "w"); ar["/x"] << 1; }
+    std::vector<int> read(500, 0);
+    std::thread reader([&] {
+        for (int& x : read) { alps::hdf5::archive ar(filename, "r"); ar["/x"] >> x; }
+    });
+    std::thread writer([&] {
+        for (int i = 0; i < 500; ++i) { alps::hdf5::archive ar(filename, "a"); ar["/y" + std::to_string(i)] << i; }
+    });
+    reader.join();
+    writer.join();
+    EXPECT_EQ(std::count(read.begin(), read.end(), 1), 500);
+    alps::hdf5::archive ar(filename, "r");
+    int last = -1;
+    ar["/y499"] >> last;
+    EXPECT_EQ(last, 499);
 }

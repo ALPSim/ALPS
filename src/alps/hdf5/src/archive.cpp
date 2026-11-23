@@ -31,11 +31,12 @@
 
 #define ALPS_HDF5_LOCK_MUTEX std::lock_guard<std::recursive_mutex> guard(mutex_);
 
-#ifdef H5_HAVE_THREADSAFE
-    #define ALPS_HDF5_FAKE_THREADSAFETY
-#else
-    #define ALPS_HDF5_FAKE_THREADSAFETY ALPS_HDF5_LOCK_MUTEX
-#endif
+// Every access takes the lock, also with a thread-safe HDF5. Archives on one
+// file share a context, and opening it for writing while it is open read-only
+// closes and reopens the file: that needs every other access to that file to
+// have finished, or the check that all objects are closed fails and aborts.
+// HDF5's own global lock serialises the library calls anyway.
+#define ALPS_HDF5_FAKE_THREADSAFETY ALPS_HDF5_LOCK_MUTEX
 
 #define ALPS_NGS_HDF5_FOREACH_NATIVE_TYPE_INTEGRAL(CALLBACK, ARG)                                                                                                       \
     CALLBACK(char, ARG)                                                                                                                                                 \
