@@ -1,6 +1,6 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 # ALPSCore's mc tests, copied with publication pointers removed.
-foreach(name sum_single timer_in_sim timer check_schedule)
+foreach(name sum_single timer_in_sim timer check_schedule seed_streams)
   add_executable(mc_${name} ${name}.cpp)
   target_link_libraries(mc_${name} PRIVATE ALPS::mc)
   # The copies keep ALPSCore's TYPED_TEST_CASE, which GoogleTest 1.10 deprecated.
