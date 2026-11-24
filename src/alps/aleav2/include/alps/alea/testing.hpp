@@ -15,6 +15,7 @@
 #include <alps/alea/internal/pooling.hpp>
 
 #include <algorithm>
+#include <cmath>
 
 namespace alps { namespace alea {
     class t2_result;
@@ -57,10 +58,23 @@ public:
     double pvalue_lower() const { return has_plower() ? dist_.cdf(score_) : 1; }
 
     /** p-value in favour of the upper alternate Hypothesis */
-    double pvalue_upper() const { return dist_.ccdf(score_); }
+    double pvalue_upper() const { return tested() ? dist_.ccdf(score_) : 1; }
 
-    /** lowest p-value */
-    double pvalue() const { return std::min(pvalue_lower(), pvalue_upper()); }
+    /**
+     * Two-sided p-value, i.e., p-value in favour of all possible alternate hypotheses.
+     */
+    double pvalue() const
+    {
+        // std::min below would turn a NaN into 1
+        if (std::isnan(score_))
+            return NAN;
+        if (!has_plower())
+            return pvalue_upper();
+        return std::min(1.0, 2 * std::min(pvalue_lower(), pvalue_upper()));
+    }
+
+    /** Whether any component was tested */
+    bool tested() const { return dist_.degrees_of_freedom1() != 0; }
 
     /** t2 statistic and argument to `dist()` */
     double score() const { return score_; }
@@ -79,8 +93,13 @@ private:
  * Takes the difference `diff` between the two results under test, which must
  * be independently Gaussian distributed with variances `var`, and the number
  * of uncorrelated observations `nmeas`, and performs Hotelling's T^2 test on
- * it. `pools` is the number of stochastic results (1 or 2), and `atol` is
- * an upper tolerance for exact (zero variance) results.
+ * it. `pools` is the number of means estimated from the data (1 for one
+ * sample, and for the Welch difference of two samples, which carries its
+ * degrees of freedom in `nmeas`; 2 for two samples with one pooled
+ * variance), and `atol` is an upper tolerance for exact (zero variance)
+ * results, compared with `var` and the squared `diff`. If no component is
+ * left, the result has score 0 and pvalue() 1. test_mean() handles exact
+ * components itself (see its `rtol` and `atol`) and calls this with 0.
  *
  * @see test_mean()
  */
@@ -92,18 +111,30 @@ t2_result t2_test(const column<T> &diff,
 
 /**
  * Test mean of stochastic result `result` against known result `expected`.
+ *
+ * Exact components are those that the measurement computes exactly, such as
+ * constants and components related by a symmetry or a sum rule. They have
+ * no (or no independent) variance, so the test leaves them out where they
+ * agree with `expected`, and rejects where they do not. Exact means within
+ * `atol + rtol |x|`, in the units of the data, with |x| = sqrt(var + mean^2)
+ * of the component: `rtol` is the relative accuracy of the measurement routine
+ * (a few eps if it is careful, larger if, e.g., symmetric components are
+ * computed along different paths), and `atol` a floor for components that
+ * are zero, such as an expected value of zero computed with rounding. The
+ * rounding of the accumulation is added, and the variance is resolved only to
+ * its rounding.
  */
 template <typename Result, typename Derived>
 t2_result test_mean(const Result &result,
                     const Eigen::MatrixBase<Derived> &expected,
-                    double atol=1e-14)
+                    double rtol=internal::default_rtol, double atol=0)
 {
     static_assert(is_alea_result<Result>::value, "Result is not alea result");
     static_assert(traits<Result>::HAVE_VAR, "Result1 must have variance");
 
     using diff_scalar = internal::diff_scalar_type<Result, Derived>;
-    var_result<diff_scalar> diff = internal::make_diff(result, expected);
-    return t2_test(diff.mean(), diff.var(), diff.observations(), 1, atol);
+    internal::diff_stats<diff_scalar> diff = internal::make_diff(result, expected, rtol, atol);
+    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
 }
 
 /**
@@ -112,26 +143,33 @@ t2_result test_mean(const Result &result,
 template <typename Result, typename Derived>
 t2_result test_mean(const Eigen::MatrixBase<Derived> &expected,
                     const Result &result,
-                    double atol=1e-14)
+                    double rtol=internal::default_rtol, double atol=0)
 {
-    return test_mean(result, expected, atol);
+    return test_mean(result, expected, rtol, atol);
 }
 
 /**
- * Test mean of two stochastic results against each other.
+ * Test mean of two independent stochastic results against each other.
+ *
+ * The results may have different variances and numbers of observations
+ * (Welch test, see internal::pool_var()). `rtol` and `atol` apply to each
+ * result, as in test_mean() against a known result.
  */
 template <typename Result1, typename Result2>
 typename std::enable_if<
     is_alea_result<Result1>::value && is_alea_result<Result2>::value,
     t2_result>::type
-test_mean(const Result1 &result1, const Result2 &result2, double atol=1e-14)
+test_mean(const Result1 &result1, const Result2 &result2,
+          double rtol=internal::default_rtol, double atol=0)
 {
     static_assert(traits<Result1>::HAVE_VAR, "Result1 must have variance");
     static_assert(traits<Result2>::HAVE_VAR, "Result2 must have variance");
 
+    // pool_var folds the two samples into one difference with Welch degrees
+    // of freedom, so it is tested as one sample.
     using diff_scalar = internal::joined_value_type<Result1, Result2>;
-    var_result<diff_scalar> diff = internal::pool_var(result1, result2);
-    return t2_test(diff.mean(), diff.var(), diff.observations(), 2, atol);
+    internal::diff_stats<diff_scalar> diff = internal::pool_var(result1, result2, rtol, atol);
+    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
 }
 
 
