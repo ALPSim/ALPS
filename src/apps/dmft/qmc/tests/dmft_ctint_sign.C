@@ -80,7 +80,11 @@ alps::params parameters(double U, double alpha, bool histogram) {
   p.supply("HISTOGRAM_MEASUREMENT", histogram ? "1" : "0");
   p.supply("SWEEPS", "20000000");
   p.supply("THERMALIZATION", "1000");
-  p.supply("MAX_TIME", "120");
+  // The run ends after SWEEPS, not after a time: the error bars then do not
+  // depend on the speed of the machine (with MAX_TIME = 120, slow Debug and
+  // sanitizer builds stopped with errors above 0.01). MAX_TIME is required;
+  // the TIMEOUT in CMakeLists.txt catches a hang.
+  p.supply("MAX_TIME", "100000");
   p.supply("SEED", "5");
   return p;
 }
