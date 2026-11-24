@@ -128,7 +128,7 @@ bool Evaluator<T>::can_evaluate_function(const std::string& name, const std::vec
   bool can= can_evaluate_expressions(arg,true) &&
        ((arg.size()==0 && evaluate_random_ && (name == "random" || name=="gaussian_random" || name == "normal_random")) ||
         (arg.size()==1 && can_evaluate_function(name,arg[0],f)) || 
-        (arg.size()==2 && (evaluate_random_ && (name=="gaussian_random" || name=="atan2"))));
+        (arg.size()==2 && (name=="atan2" || (evaluate_random_ && (name=="gaussian_random" || name=="normal_random")))));
   return can;
 }
 

@@ -16,6 +16,7 @@
 
 #include <alps/expression.h>
 #include <gtest/gtest.h>
+#include <cmath>
 #include <sstream>
 #include <stdexcept>
 
@@ -70,4 +71,17 @@ TEST(ExpressionEvaluation, RefusesUnknownFunction) {
     EXPECT_FALSE(expression.can_evaluate());
     EXPECT_THROW(expression.value(), std::runtime_error);
   }
+}
+
+// The guard above must still accept every two-argument function the evaluator
+// computes: atan2 with random evaluation off, and normal_random(mean, sigma).
+TEST(ExpressionEvaluation, EvaluatesTwoArgumentFunctions) {
+  const alps::expression::Evaluator<double> no_random(false);
+  alps::expression::Expression<double> angle("atan2(1,1)");
+  EXPECT_TRUE(angle.can_evaluate(no_random));
+  EXPECT_DOUBLE_EQ(angle.value(no_random), std::atan2(1., 1.));
+
+  alps::expression::Expression<double> normal("normal_random(1,0)");
+  EXPECT_TRUE(normal.can_evaluate());
+  EXPECT_DOUBLE_EQ(normal.value(), 1.);
 }
