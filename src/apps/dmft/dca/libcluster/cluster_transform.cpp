@@ -68,6 +68,26 @@ ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelp
   compute_integration_weight_and_dispersion();
   compute_dispersion_weights();
 }
+// The double unit cell stores G in 2x2 blocks of (K, K+Q), Q = (pi, pi, ...),
+// with K at momentum 2m and K+Q at 2m+1, the order of
+// find_bipartite_cluster_momenta. Other clusters do not have Q among their
+// momenta: their "blocks" paired unrelated momenta, and with an odd number of
+// sites the last one indexed past the momenta (#451).
+void DoubleCellClusterTransformer::check_momentum_pairs() const{
+  const std::string framework = afm_symmetry_ ? "dca.AFM_SELFCONSISTENCY" : "dca.CO_SELFCONSISTENCY";
+  if(!bipartite() || n_cluster_sites()%2!=0)
+    throw std::invalid_argument(framework + " needs a bipartite cluster, which has the ordering vector Q among its momenta;"
+                                " dca.LATTICE has " + std::to_string(n_cluster_sites()) + " sites and is not bipartite.");
+  for(int m=0; m<n_cluster_sites(); m+=2){
+    for(unsigned int d=0; d<dimension(); ++d){
+      const double shift = (cluster_momentum(m+1,d) - cluster_momentum(m,d) - M_PI)/(2*M_PI);
+      if(std::abs(shift - std::round(shift)) > 1e-8)
+        throw std::logic_error(framework + ": cluster momentum " + std::to_string(m+1) + " is not momentum "
+                               + std::to_string(m) + " plus Q.");
+    }
+  }
+}
+
 NambuClusterTransformer::NambuClusterTransformer(const alps::params& params):ClusterTransformer(params),
     h_init_(params["dca.H_INIT"]), h_(params["dca.H"]),
     eta1_init_(params["dca.ETA1_INIT"]),
