@@ -13,6 +13,7 @@
 #include <alps/solvers.hpp>
 #include "interaction_expansion.hpp"
 #include "sz_results.hpp"
+#include "ctint_max_order.h"
 #include "fouriertransform.h"
 #include <alps/utilities/copyright.hpp>
 #include <alps/utilities/signal.hpp>
@@ -77,6 +78,8 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
     divide_sz_results_by_sign(results, ctint.sites);
+    if(results.has("MaxOrderReached") && results["MaxOrderReached"].count())
+      warn_if_max_order_reached(std::cerr, results["MaxOrderReached"].mean<double>(), ctint.max_order);
     save_results(results, parms, output_file, "/simulation/results");
     //compute the output Green's function and Fourier transform it, store in the right path
     compute_greens_functions(results, parms, output_file);

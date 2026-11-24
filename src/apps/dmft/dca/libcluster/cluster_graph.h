@@ -57,8 +57,6 @@ public:
   std::vector<std::vector<double> > compute_momenta(int L)const;
   ///comparison operator, mainly used for tests.
   bool operator==(const alps_graph &g) const;
-  ///if the reciprocal basis is correct, this test will validate that each vector is orthogonal to all other basis vectors
-  double validate_orthogonality() const;
 private:
   ///the cross product in 3d.
   std::vector<double> cross(const std::vector<double> &v1, const std::vector<double> &v2) const{

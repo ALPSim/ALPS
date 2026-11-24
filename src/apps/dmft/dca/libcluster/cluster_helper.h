@@ -82,8 +82,6 @@ public:
   int dimension() const { return alps_graph::dimension(); }
   int cluster_momentum_approximation(std::vector<double> k) const;
   
-  template<typename T>
-  T interpolate(std::vector<double> k, const std::vector<T>& values, const bool antiferromagnet) const;
   double site_distance(const unsigned int i, const unsigned int j) const;
   
   site_class_set_itpair_type site_classes_real_space() const
@@ -106,7 +104,6 @@ private:
   std::vector<Matrix<double>::Type > setup_point_groups() const;
   void symmetry_analysis(const Matrix<double>::Type& basis,
                          const Matrix<double>::Type& basis_inv);
-//  void ladder_symmetry_analysis();
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<int>::Type& symmetry_table) const;
   bool inside_cluster(std::vector<double> v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(std::vector<double> v) const;

@@ -238,10 +238,10 @@ TEST_F(DmftConvergence, restart_file_round_trip) {
     for (unsigned t = 0; t <= n_tau; ++t)
       G_tau(t, f) = -std::exp(-0.1 * t - f) / 3.;
   }
-  G.write("G0omega");
-  read.read("G0omega");
-  G_tau.write("G0tau");
-  read_tau.read("G0tau");
+  G.write("G0omega", 5.);
+  read.read("G0omega", 5.);
+  G_tau.write("G0tau", 5.);
+  read_tau.read("G0tau", 5.);
   for (unsigned f = 0; f < 2; ++f) {
     for (unsigned w = 0; w < n_matsubara; ++w)
       EXPECT_EQ(read(w, f), G(w, f)) << "frequency " << w << ", flavor " << f;

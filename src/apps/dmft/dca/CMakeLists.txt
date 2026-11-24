@@ -67,13 +67,21 @@ endif()
 
 if(ALPS_BUILD_TESTING)
   foreach(test IN ITEMS cluster_helper_test cluster_transform_test bare_tail_test
-                        double_cell_transform_test normal_state_transform_test)
+                        double_cell_transform_test normal_state_transform_test adjust_mu_test)
     add_executable(dca_${test} tests/${test}.cpp)
     target_link_libraries(dca_${test} PRIVATE alps_dca)
     target_compile_definitions(dca_${test} PRIVATE
-      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml")
+      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml"
+      DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
     alps_add_gtest(dca_${test} COMPONENT dmft)
   endforeach()
+
+  # Reads every cluster of the shipped libraries, and refuses malformed ones.
+  add_executable(dca_cluster_library_test tests/cluster_library_test.cpp)
+  target_link_libraries(dca_cluster_library_test PRIVATE alps_dca)
+  target_compile_definitions(dca_cluster_library_test PRIVATE
+    DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
+  alps_add_gtest(dca_cluster_library_test COMPONENT dmft)
 
   # End-to-end test: dca runs its loop at U=0 with a solver that returns G = G0.
   add_executable(dca_free_solver tests/free_solver.cpp)

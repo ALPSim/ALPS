@@ -6,7 +6,9 @@
 #include "cluster_helper.h"
 #include "alps/params.hpp"
 #include "alps/hdf5.hpp"
+#include <cmath>
 #include <cstdio>
+#include <string>
 
 #define TWODCLUSTERS1 "Betts2D-1A","Betts2D-4A","Betts2D-8A","Betts2D-8C","Betts2D-9A","Betts2D-9B","Betts2D-10A","Betts2D-10B","Betts2D-11A","Betts2D-12A","Betts2D-12B","Betts2D-12D","Betts2D-13A","Betts2D-14A","Betts2D-14B","Betts2D-15A","Betts2D-15B","Betts2D-16A","Betts2D-16B"
 //,"Betts2D-16C","Betts2D-16D","Betts2D-16E","Betts2D-17A","Betts2D-17B","Betts2D-18A","Betts2D-18B","Betts2D-18C","Betts2D-18D","Betts2D-19A"
@@ -148,3 +150,126 @@ INSTANTIATE_TEST_SUITE_P(Clusters, ClusterPeriodicity, ::testing::Values(
       for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
       return name;
     });
+
+// dca.L must be even and at least 2: the patch momenta are integrated with
+// Simpson's rule, and for odd L its weights did not add up to L^d, by which
+// the coarse-graining divides. Betts2D-4A at L = 9 gave sum(w)/L^2 = 1.075
+// and <eps^2> wrong by 0.14 (#441).
+TEST(ClusterHelper, RefusesOddOrNonpositiveL){
+  for (int L : {-4, 0, 1, 5, 9, 33}) {
+    alps::params p;
+    p["dca.LATTICE"]="Betts2D-4A";
+    p["dca.SITES"]=4;
+    p["dca.L"]=L;
+    set_other_parameters(p);
+    try {
+      ClusterHelper CH(p);
+      ADD_FAILURE() << "dca.L = " << L << " was accepted";
+    } catch (std::invalid_argument const & e) {
+      EXPECT_NE(std::string(e.what()).find("dca.L = " + std::to_string(L) + ": "), std::string::npos) << e.what();
+      EXPECT_NE(std::string(e.what()).find("must be even and at least 2"), std::string::npos) << e.what();
+    }
+  }
+}
+
+// With an even L the weights of each patch add up to L^d, and the patches
+// reproduce the Brillouin-zone average of eps(k) = -2 sum_d cos(k_d):
+// <eps> = 0 and <eps^2> = 2d.
+struct weight_case { const char* lattice; int sites; int L; };
+class ClusterIntegrationWeights : public ::testing::TestWithParam<weight_case> {};
+TEST_P(ClusterIntegrationWeights, NormalizedAndExactForTheDispersion){
+  const weight_case& c = GetParam();
+  alps::params p;
+  p["dca.LATTICE"]=c.lattice;
+  p["dca.SITES"]=c.sites;
+  p["dca.L"]=c.L;
+  set_other_parameters(p);
+  ClusterHelper CH(p);
+  const int d = CH.dimension();
+  double wsum = 0, e1 = 0, e2 = 0;
+  for (int kc = 0; kc < CH.n_cluster_sites(); ++kc)
+    for (int kl = 0; kl < CH.n_lattice_momenta(); ++kl) {
+      double e = 0;
+      for (int i = 0; i < d; ++i)
+        e -= 2 * std::cos(CH.lattice_momentum(kl, i) + CH.cluster_momentum(kc, i));
+      const double w = CH.lattice_momentum(kl, d);
+      if (kc == 0) wsum += w;
+      e1 += w * e;
+      e2 += w * e * e;
+    }
+  const double norm = double(CH.n_cluster_cells()) * CH.n_cluster_sites();
+  EXPECT_NEAR(wsum / CH.n_cluster_cells(), 1., 1e-12);
+  EXPECT_NEAR(e1 / norm, 0., 1e-12);
+  EXPECT_NEAR(e2 / norm, 2. * d, 1e-10);
+}
+INSTANTIATE_TEST_SUITE_P(Clusters, ClusterIntegrationWeights, ::testing::Values(
+    weight_case{"Betts2D-4A", 4, 8},
+    weight_case{"Betts2D-8A", 8, 16},
+    weight_case{"Betts2D-10A", 10, 2},
+    weight_case{"Betts3D-8A", 8, 4}),
+    [](const ::testing::TestParamInfo<weight_case>& info) {
+      std::string name = std::string(info.param.lattice) + "_L" + std::to_string(info.param.L);
+      for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
+      return name;
+    });
+
+// The point group used to find the symmetries of a cluster is the full group
+// of the hypercubic lattice: 2 operations in 1D, 8 in 2D, 48 in 3D. The 3D
+// table listed the inversion twice and did not have the rotation by pi about
+// z, so a cluster with the full cubic symmetry got 47 symmetries. The classes
+// of site pairs, built as orbits of the group the listed operations
+// generate, were complete all the same.
+struct symmetry_case { const char* lattice; const char* library; int sites; int symmetries; };
+class ClusterSymmetries : public ::testing::TestWithParam<symmetry_case> {};
+TEST_P(ClusterSymmetries, FullPointGroupOfASymmetricCluster){
+  const symmetry_case& c = GetParam();
+  alps::params p;
+  p["dca.LATTICE"]=c.lattice;
+  p["dca.SITES"]=c.sites;
+  p["dca.L"]=2;
+  set_other_parameters(p);
+  p["dca.LATTICE_LIBRARY"]=std::string(DCA_CLUSTER_DIR) + "/" + c.library;
+  ClusterHelper CH(p);
+  EXPECT_EQ(CH.symmetry_table_k_space().rows(), c.symmetries);
+}
+INSTANTIATE_TEST_SUITE_P(Clusters, ClusterSymmetries, ::testing::Values(
+    symmetry_case{"Chain1D_4", "cluster1d.xml", 4, 2},
+    symmetry_case{"Betts2D-8A", "cluster.xml", 8, 8},
+    symmetry_case{"Betts2D-16B", "cluster.xml", 16, 8},
+    symmetry_case{"Betts2D-32A", "cluster.xml", 32, 8},
+    symmetry_case{"Betts3D-16A", "cluster3d.xml", 16, 48},
+    symmetry_case{"Betts3D-27A", "cluster3d.xml", 27, 48},
+    symmetry_case{"Betts3D-32A", "cluster3d.xml", 32, 48}),
+    [](const ::testing::TestParamInfo<symmetry_case>& info) {
+      std::string name = info.param.lattice;
+      for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
+      return name;
+    });
+
+// Comparing the tables of two different clusters, or of one cluster at two
+// values of dca.L, gives false. The comparisons subtracted Eigen matrices of
+// different sizes (an assertion in Debug, undefined in Release) and indexed
+// the other graph with this graph's sizes (#447).
+TEST(ClusterHelper, DifferentClustersCompareUnequal){
+  auto helper = [](const char* lattice, int sites, int L) {
+    alps::params p;
+    p["dca.LATTICE"]=lattice;
+    p["dca.SITES"]=sites;
+    p["dca.L"]=L;
+    set_other_parameters(p);
+    return ClusterHelper(p);
+  };
+  const ClusterHelper a = helper("Betts2D-4A", 4, 4), b = helper("Betts2D-8A", 8, 4), c = helper("Betts2D-4A", 4, 8);
+  EXPECT_TRUE(a == helper("Betts2D-4A", 4, 4));
+  EXPECT_FALSE(a == b);
+  EXPECT_FALSE(b == a);
+  EXPECT_FALSE(a == c);
+  EXPECT_FALSE(c == a);
+
+  const alps_graph g4("Betts2D-4A", DCA_CLUSTER_LIBRARY, 4), g8("Betts2D-4A", DCA_CLUSTER_LIBRARY, 8),
+                   g4b("Betts2D-8A", DCA_CLUSTER_LIBRARY, 4);
+  EXPECT_TRUE(g4 == alps_graph("Betts2D-4A", DCA_CLUSTER_LIBRARY, 4));
+  EXPECT_FALSE(g4 == g8);
+  EXPECT_FALSE(g8 == g4);
+  EXPECT_FALSE(g4 == g4b);
+}

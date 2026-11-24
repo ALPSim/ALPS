@@ -10,12 +10,10 @@
 #include<cmath>
 #include<cstdlib>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
 
 #include "cluster.h"
+#include "sigma_interpolation.h"
 
-#include <Eigen/Dense>
 
 void define_parameters_commandline(alps::params &p){
   p.define<std::string>("pfile_old", "old parameter file");
@@ -32,44 +30,6 @@ void define_parameters_pfile(alps::params &p){
   define_dca_parameters(p);
 }
 
-std::vector<double> solve_parabola(const std::vector<double> &xvalues, const std::vector<double> &yvalues){
-  Eigen::Matrix3d M;
-  M << xvalues[0]*xvalues[0], xvalues[0], 1,
-       xvalues[1]*xvalues[1], xvalues[1], 1,
-       xvalues[2]*xvalues[2], xvalues[2], 1;
-  const Eigen::Vector3d Z(yvalues[0], yvalues[1], yvalues[2]);
-
-  const Eigen::FullPivLU<Eigen::Matrix3d> lu(M);
-  if(!lu.isInvertible()) throw std::runtime_error("solve_parabola: the three x values are not distinct.");
-  const Eigen::Vector3d coefficients = lu.solve(Z);
-  return std::vector<double>(coefficients.data(), coefficients.data()+3);
-}
-double evaluate_parabola(const std::vector<double> coefficients, double xvalue){
-  return coefficients[0]*xvalue*xvalue+coefficients[1]*xvalue+coefficients[2];
-}
-std::vector<double> interpolate_vector(const std::vector<double> &oldxvalues, const std::vector<double> &oldyvalues, const std::vector<double> &newxvalues){
-  std::vector<double> newyvalues(newxvalues.size());
-
-  gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-  gsl_spline *spline = gsl_spline_alloc (gsl_interp_cspline, oldxvalues.size());
-  gsl_spline_init (spline, &(oldxvalues[0]), &(oldyvalues[0]), oldxvalues.size());
-
-  std::vector<double> parabola_coefficients=solve_parabola(oldxvalues, oldyvalues);
-  for(int i=0;i<newxvalues.size();++i){
-    if(newxvalues[i]<oldxvalues[0]){ //need to do parabolic extrapolation
-      newyvalues[i]=evaluate_parabola(solve_parabola(oldxvalues, oldyvalues), newxvalues[i]);
-    }else if(newxvalues[i]> oldxvalues.back()){
-      newyvalues[i]=oldyvalues.back(); //we take the last value of the interpolated function, typically makes sense for AFM or SC with a real part
-    }else{
-      newyvalues[i]=gsl_spline_eval (spline, newxvalues[i], acc);
-    }
-  }
-
-  gsl_spline_free (spline);
-  gsl_interp_accel_free (acc);
-
-  return newyvalues;
-}
 
 void run(int argc, char **argv){
 
@@ -84,23 +44,33 @@ void run(int argc, char **argv){
   alps::params parms_new(p["pfile_new"].as<std::string>());
   define_parameters_pfile(parms_old);
   define_parameters_pfile(parms_new);
+  // the Green's functions here have 2 flavors (2x2 in Nambu space) (#471)
+  for (const alps::params* parms : {&parms_old, &parms_new})
+    if (int((*parms)["FLAVORS"]) != 2)
+      throw std::invalid_argument("FLAVORS = " + std::to_string(int((*parms)["FLAVORS"]))
+                                  + ": the self-energy interpolation works for FLAVORS = 2.");
 
   const double mult_anomalous=p["mult_anomalous"];
 
   //general error check
   double beta_old=parms_old["BETA"];
   double mu_old=parms_old["MU"];
-  double h_old=parms_old["dca.H"];
   double eta1_old=parms_old["dca.ETA1"];
-  double eta2_old=parms_old["dca.ETA2"];
   double nsites_old=parms_old["dca.SITES"];
   int nfreq_old = parms_old["NMATSUBARA"];
 
   double beta_new=parms_new["BETA"];
   double mu_new=parms_new["MU"];
+  // the starting G0 of the new run has its initial fields, as dca's own
+  // starting G0 (compute_noninteracting_G0), in its data and its tail (#469)
   double h_new=parms_new["dca.H_INIT"];
   double eta1_new=parms_new["dca.ETA1_INIT"];
   double eta2_new=parms_new["dca.ETA2_INIT"];
+  // G0(tau) and its tails are real; dca refuses a complex pairing field
+  if(eta2_new!=0. || double(parms_new["dca.ETA2"])!=0.)
+    throw std::invalid_argument("sc.NAMBU: a complex pairing field dca.ETA1 + i dca.ETA2 differs from the real field |eta|"
+                                " only by a global phase, and G0(tau) is real; set dca.ETA2 and dca.ETA2_INIT to 0"
+                                " in the new parameter file.");
   int nfreq_new=parms_new["NMATSUBARA"];
   double nsites_new=parms_new["dca.SITES"];
   
@@ -134,7 +104,8 @@ void run(int argc, char **argv){
       alps::gf::matsubara_positive_mesh(beta_new,nfreq_new), CT_new.momentum_mesh(), alps::gf::index_mesh(2), alps::gf::index_mesh(2)));
   //cluster_nambu_itime_kspace_gf green0_itime(ntau, nsites_new, 2, diagonal);
 
-  //open and read in self-energy
+  //open and read in self-energy; load() takes the meshes from the file
+  const double_cell_matsubara_kspace_gf expected_meshes(selfenergy_orig);
   {
     alps::hdf5::archive ar(p["sigma"].as<std::string>());
     selfenergy_orig.load(ar, p["path"].as<std::string>());
@@ -158,6 +129,13 @@ void run(int argc, char **argv){
   if(std::abs(selfenergy_orig.mesh1().beta()-beta_old)>1e-10*beta_old)
     throw std::invalid_argument("the self-energy is given at beta="+std::to_string(selfenergy_orig.mesh1().beta())
                                 +", but BETA of the old parameter file is "+std::to_string(beta_old));
+  if(selfenergy_orig.mesh1().statistics()!=alps::gf::statistics::FERMIONIC)
+    throw std::invalid_argument(p["sigma"].as<std::string>()+": the self-energy is not on fermionic Matsubara frequencies.");
+  // the momenta of the old cluster and 2 flavors (#471); beta and the
+  // frequencies are checked above, beta only to a relative 1e-10
+  if(!(selfenergy_orig.mesh2()==expected_meshes.mesh2() && selfenergy_orig.mesh3()==expected_meshes.mesh3() && selfenergy_orig.mesh4()==expected_meshes.mesh4()))
+    throw std::invalid_argument(p["sigma"].as<std::string>()+": the self-energy is not on the momenta of the old cluster"
+                                " (dca.LATTICE of the old parameter file) with 2 flavors.");
   std::vector<double> matsubara_freqs_old(nfreq_old);
   std::vector<double> matsubara_freqs_new(nfreq_new);
   for(int i=0;i<nfreq_old;++i) matsubara_freqs_old[i]=(2.*i+1)*M_PI/beta_old;
@@ -174,11 +152,10 @@ void run(int argc, char **argv){
         }
 
         std::cout<<"interpolating vector of size: "<<sigma_real.size()<<std::endl;
-        std::vector<double> sigma_real_interp=interpolate_vector(matsubara_freqs_old, sigma_real, matsubara_freqs_new);
-        std::vector<double> sigma_imag_interp=interpolate_vector(matsubara_freqs_old, sigma_imag, matsubara_freqs_new);
+        std::vector<double> sigma_real_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_real, matsubara_freqs_new, false);
+        std::vector<double> sigma_imag_interp=sigma_interpolation::interpolate(matsubara_freqs_old, sigma_imag, matsubara_freqs_new, true);
         for (alps::gf::matsubara_index i(0); i<nfreq_new; ++i){
           selfenergy_new(i,j,p,q) = std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()]);
-          //std::cout<<"setting to: "<<std::complex<double>(sigma_real_interp[i()], sigma_imag_interp[i()])<<std::endl;
         }
 
         if(p() != q() && mult_anomalous!=1){
@@ -196,6 +173,9 @@ void run(int argc, char **argv){
   std::cout<<"...running self-consistency..."<<std::endl;
   CT_new.matsubara_k_sum(green_new, selfenergy_new, eta1_new, eta2_new, h_new);
   CT_new.dyson_get_green0(green0_new, selfenergy_new, green_new);
+  // dyson_get_green0 attaches the tail with dca.H and dca.ETA*; the data are
+  // for the initial fields
+  CT_new.attach_bare_tail(green0_new, h_new, eta1_new, eta2_new);
 
   {
     std::string filename_new=p["g0"];

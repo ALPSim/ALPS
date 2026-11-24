@@ -39,6 +39,9 @@ if(Python_Interpreter_FOUND)
     add_test(NAME dmft_itime_loop_refusals
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_itime_loop.py" "$<TARGET_FILE:dmft>")
     set_tests_properties(dmft_itime_loop_refusals PROPERTIES TIMEOUT 120 LABELS "cli")
+    add_test(NAME dmft_ctint_max_order
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_ctint_max_order.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_ctint_max_order PROPERTIES TIMEOUT 240 LABELS "cli")
   endif()
   if(TARGET spinmc)
     add_test(NAME scheduler_sweeps_spinmc
@@ -60,6 +63,12 @@ if(Python_Interpreter_FOUND)
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_spinmc_cluster.py"
         "$<TARGET_FILE:spinmc>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
     set_tests_properties(spinmc_cluster_magnetization PROPERTIES TIMEOUT 120 LABELS "cli;compatibility")
+  endif()
+  if(TARGET dirloop_sse)
+    add_test(NAME dirloop_sse_cutoff_growth
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dirloop_sse_cutoff.py"
+        "$<TARGET_FILE:dirloop_sse>" "${PROJECT_SOURCE_DIR}/src/alps/resources")
+    set_tests_properties(dirloop_sse_cutoff_growth PROPERTIES TIMEOUT 120 LABELS "cli")
   endif()
   if(TARGET qwl AND TARGET qwl_evaluate AND ALPS_ENABLE_MPI AND MPIEXEC_EXECUTABLE)
     add_test(NAME scheduler_qwl_runs_mpi

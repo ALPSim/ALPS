@@ -86,6 +86,8 @@ void InteractionExpansionRun::initialize_observables(void)
     measurements<<signed_obs_t(sz0_szj_name.str().c_str());
   }
   //acceptance probabilities
+  // fraction of the updates at order MAX_ORDER, unsigned like the acceptances
+  measurements<<alps::RealObservable("MaxOrderReached");
   measurements<<alps::RealObservable("VertexInsertion");
   measurements<<alps::RealObservable("VertexRemoval");
   measurements.reset(true);
@@ -101,6 +103,9 @@ void InteractionExpansionRun::measure_observables()
 {
   //measure the fermionic sign
   measurements["Sign"]<<sign;
+  measurements["MaxOrderReached"]<<(steps_since_measurement ? double(steps_at_max_order)/steps_since_measurement : 0.);
+  steps_at_max_order=0;
+  steps_since_measurement=0;
   //measure the expansion order (perturbation order)
   std::valarray<double> pert_order(n_flavors);
   for(unsigned int i=0;i<n_flavors;++i) { 

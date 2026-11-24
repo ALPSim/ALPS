@@ -122,9 +122,21 @@ if(ALPS_BUILD_TESTING)
   target_link_libraries(dmft_hilberttransformer_insulating PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_hilberttransformer_insulating COMPONENT dmft LABELS regression)
 
+  add_executable(dmft_input_files dmft_input_files.C)
+  target_link_libraries(dmft_input_files PRIVATE ALPS::cthyb)
+  target_include_directories(dmft_input_files PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  alps_add_gtest(dmft_input_files COMPONENT dmft LABELS regression)
+
   add_executable(dmft_selfconsistency_convergence dmft_selfconsistency_convergence.C selfconsistency.C)
   target_link_libraries(dmft_selfconsistency_convergence PRIVATE dmft_qmc_impl)
   alps_add_gtest(dmft_selfconsistency_convergence COMPONENT dmft LABELS regression)
+  add_executable(dmft_retarded_interaction dmft_retarded_interaction.C)
+  target_link_libraries(dmft_retarded_interaction PRIVATE ALPS::cthyb)
+  target_include_directories(dmft_retarded_interaction PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  alps_add_gtest(dmft_retarded_interaction COMPONENT dmft LABELS regression)
+  add_executable(dmft_u_matrix dmft_u_matrix.C)
+  target_link_libraries(dmft_u_matrix PRIVATE dmft_qmc_impl)
+  alps_add_gtest(dmft_u_matrix COMPONENT dmft LABELS regression)
 
   add_executable(dmft_hilberttransformer_uniform_field dmft_hilberttransformer_uniform_field.C)
   target_link_libraries(dmft_hilberttransformer_uniform_field PRIVATE dmft_qmc_impl)
@@ -148,6 +160,14 @@ if(ALPS_BUILD_TESTING)
   add_executable(dmft_ctint_sz_results dmft_ctint_sz_results.C)
   target_link_libraries(dmft_ctint_sz_results PRIVATE ALPS::ctint)
   alps_add_gtest(dmft_ctint_sz_results COMPONENT dmft LABELS regression)
+
+  add_executable(dmft_ctint_max_order dmft_ctint_max_order.C)
+  target_link_libraries(dmft_ctint_max_order PRIVATE ALPS::ctint)
+  if(NOT ALPS_ENABLE_MPI)
+    alps_add_gtest(dmft_ctint_max_order COMPONENT dmft LABELS regression)
+  else()
+    alps_add_mpi_gtest(dmft_ctint_max_order COMPONENT dmft RANKS 2 LABELS regression)
+  endif()
 
   # The serial solver stops after SWEEPS; under MPI it stops at the adapter's
   # scheduled checks, where a rank can still be thermalizing.

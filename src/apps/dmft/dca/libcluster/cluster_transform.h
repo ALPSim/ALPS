@@ -12,6 +12,7 @@
 
 #include <Eigen/Dense>
 #include <fstream>
+#include <sstream>
 #include "alps/gf/fourier.hpp"
 #include "cluster_graph.h"
 #include "cluster_helper.h"
@@ -96,6 +97,48 @@ protected:
       m2 += w*H*H;
     }
   }
+  /// The tail of the coarse-grained G = <(iw - H(kl) - Sigma)^-1> over the
+  /// patch, for a self-energy with tail Sigma = s0 + s1/(iw): G = 1/iw +
+  /// c2/(iw)^2 + c3/(iw)^3 with c2 = m1 + s0 and c3 = m2 + m1 s0 + s0 m1 +
+  /// s0^2 + s1, where m1 = <H>, m2 = <H^2> (bare_moments). It holds for any
+  /// interaction, unlike a Hartree guess (#449).
+  template<class M> static void ksum_tail(const M &m1, const M &m2, const M &s0, const M &s1, M &c2, M &c3){
+    c2 = m1 + s0;
+    c3 = m2 + m1*s0 + s0*m1 + s0*s0 + s1;
+  }
+  /// Whether G has the tail orders lo to hi.
+  template<class GF> static bool has_tail(const GF &G, int lo, int hi){
+    return G.min_tail_order()!=alps::gf::TAIL_NOT_SET && G.min_tail_order()<=lo && G.max_tail_order()>=hi;
+  }
+  /// The MU at which density(MU), which grows with MU, reaches target (to
+  /// 1e-7, density per site, between 0 and n_flavors), for sc.ADJUST_MU. The window starts at [-10, 10] and is widened
+  /// until it brackets the target, up to |MU| = 1e4 (#457).
+  template<class F> static double find_mu(F density, double target, int n_flavors){
+    // A density per site outside (0, n_flavors) is reached by no MU; far out,
+    // where |MU| exceeds the Matsubara frequencies, the tail expansion of the
+    // density breaks down and could seem to reach it.
+    if(!(target>0 && target<n_flavors)){
+      std::ostringstream msg;
+      msg<<"sc.ADJUST_MU: sc.TARGET_DENSITY = "<<target<<" must be between 0 and "<<n_flavors<<" (FLAVORS), per site.";
+      throw std::invalid_argument(msg.str());
+    }
+    double lo=-10, hi=10;
+    double density_lo=density(lo), density_hi=density(hi);
+    while(density_lo>target && lo>-1e4){ hi=lo; density_hi=density_lo; lo*=2; density_lo=density(lo); }
+    while(density_hi<target && hi<1e4){ lo=hi; density_lo=density_hi; hi*=2; density_hi=density(hi); }
+    std::cout<<"sc.ADJUST_MU: density "<<density_lo<<" at MU = "<<lo<<", "<<density_hi<<" at MU = "<<hi<<std::endl;
+    if(density_lo>target || density_hi<target){
+      std::ostringstream msg;
+      msg<<"sc.ADJUST_MU: sc.TARGET_DENSITY = "<<target<<" is not reached for |MU| <= "<<std::max(-lo, hi)
+         <<": the density per site is "<<density_lo<<" at MU = "<<lo<<" and "<<density_hi<<" at MU = "<<hi<<".";
+      throw std::runtime_error(msg.str());
+    }
+    while(hi-lo>1.e-7){
+      const double mu=(lo+hi)/2.;
+      (density(mu)>target ? hi : lo)=mu;
+    }
+    return (lo+hi)/2.;
+  }
 
 
   /// The starting G0 of the loop, and its Fourier transform: read from
@@ -131,7 +174,6 @@ protected:
 
   ///chemical potential
   double mu_;
-  double half_filling_;
   ///t is the basic energy unit of the hopping. t2 is the tprime.
   double t_, t2_;
   double beta_;
@@ -195,8 +237,8 @@ public:
 
   ///attach the DCA cluster high frequency behavior for the non-interacting GF
   void attach_bare_tail(cluster_matsubara_kspace_gf &G0, bool isolated_cluster=false) const;
-  ///attach the DCA cluster high frequency behavior for the interacting GF
-  void attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
+  ///attach the tail of the k-sum G for a self-energy with the tail orders 0 and 1
+  void attach_ksum_tail(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const;
 
   //Real space and k-space transformers for the Green's functions
   cluster_matsubara_realspace_gf transform_into_real_space(const cluster_matsubara_kspace_gf& G) const;
@@ -213,8 +255,8 @@ private:
   template<class GF, class TAIL> void symmetrize_helper_real_space(alps::gf::four_index_gf_with_tail<GF,TAIL> &G,
                                                         const std::pair<std::set<pair_class_type>::const_iterator,
                                                         std::set<pair_class_type>::const_iterator> pair_classes) const;
-  ///given a chemical potential, compute the density (assuming a tail for the target density)
-  double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site);
+  ///given a chemical potential, compute the density per site of the k-sum G
+  double density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma);
 
   /**
     *  optimized Fourier transformation from reciprocal space to real space
@@ -301,6 +343,7 @@ public:
     mu_stag_init_(params["dca.MU_STAG_INIT"]), mu_stag_(params["dca.MU_STAG"]), afm_symmetry_(params["dca.AFM_SELFCONSISTENCY"]), charge_order_symmetry_(params["dca.CO_SELFCONSISTENCY"]){
     if(afm_symmetry_ && mu_stag_!=0) throw std::invalid_argument("do not use staggered mu in AFM Self-consistency");
     if(charge_order_symmetry_ && h_!=0) throw std::invalid_argument("do not use magnetic field in CO Self-consistency");
+    check_momentum_pairs();
   }
   ///virtual destructor
   virtual ~DoubleCellClusterTransformer() {}
@@ -338,23 +381,22 @@ public:
 
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(double_cell_matsubara_kspace_gf& G) const;
-  ///perform k-space symmetrization
-  void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const{if (afm_symmetry_) symmetrize_afm_kspace(G); else if(charge_order_symmetry_) symmetrize_co_kspace(G); else throw std::logic_error("neither AFM nor CO: how to symmetrize?");}
-
-  ///take a cluster Green's function and transform it from k-space into real space
-  cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const;
+  ///average G over the classes of (K, K+Q) block elements that the cluster's point group relates
+  void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const;
 
 private:
+  ///the blocks of G are (K, K+Q): check that momentum 2m+1 is momentum 2m plus Q
+  void check_momentum_pairs() const;
   ///attach a tail to the noninteracting GF
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
-  ///attach a tail to the interacting GF
-  void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
+  ///attach the tail of the k-sum G for a self-energy with the tail orders 0 and 1
+  void attach_ksum_tail(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const;
   ///perform the AFM symmetrization
   void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
   ///perform the CO symmetrization
   void symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const;
-  ///given a chemical potential, compute the density (assuming a tail for the target density)
-  double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site);
+  ///given a chemical potential, compute the density per site of the k-sum G
+  double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag);
 
   ///initial magnetic field value
   const double h_init_;
