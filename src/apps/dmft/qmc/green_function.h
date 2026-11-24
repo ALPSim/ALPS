@@ -16,7 +16,13 @@
 #ifndef GREEN_FUNCTION_H
 #define GREEN_FUNCTION_H
 #include "types.h"
+#include "text_table.h"
+#include <algorithm>
+#include <cmath>
 #include <fstream>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 #include <limits>
 #include <iostream>
 #include <cassert>
@@ -106,8 +112,14 @@ public:
   ///return # of matsubara frequencies. Exactly equivalent to ntime().
   ///In the case of a Matsubara GF 'ntime' sounds odd -> define 'nfreq' instead.
   unsigned int nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
-  void read(const char *filename);
-  void write(const char *filename) const;
+  /// Reads a file that write() wrote, for a run with inverse temperature
+  /// beta: a table of ntime rows of a label and nsite*nsite*nflavor values.
+  /// A header line "# BETA = ... NTIME = ... NSITE = ... NFLAVOR = ..." has
+  /// to match the run; files without one are only checked for their size.
+  void read(const char *filename, double beta);
+  /// Writes the header line and the table, with the digits that read back
+  /// as the same doubles.
+  void write(const char *filename, double beta) const;
 /*  void write_hdf5(alps::hdf5::archive & ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
@@ -199,30 +211,59 @@ std::istream &operator>>(std::istream &is, green_function<std::complex<double> >
 ///compute kinetic energy
 double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t);
 
-template<typename T> void green_function<T>::read(const char *filename){
+template<typename T> void green_function<T>::read(const char *filename, double beta){
   std::ifstream in_file(filename);
-  assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
-  if(!in_file.is_open()){ throw(std::invalid_argument("input file could not be opened!")); }
-  double ignored=0;
-  for(unsigned int i=0;i<nt_;++i){
-    in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    for(unsigned int s0=0; s0<ns_; ++s0) {
-      for(unsigned int s1=0; s1<ns_; ++s1){
-        for(unsigned int f=0; f<nf_; ++f) {
-          in_file>>operator()(i, s0, s1, f)>>std::ws; //read the actual value
-        }
-      }
+  if(!in_file.is_open())
+    throw std::invalid_argument(std::string("Green's function file ") + filename + ": cannot open the file.");
+  // the header line that write() puts first
+  in_file >> std::ws;
+  if (in_file.peek() == '#') {
+    std::string line;
+    std::getline(in_file, line);
+    std::istringstream header(line.substr(1));
+    std::string key, equals;
+    double file_beta = beta;
+    unsigned long nt = nt_, ns = ns_, nf = nf_;
+    while (header >> key >> equals) {
+      if (key == "BETA") header >> file_beta;
+      else if (key == "NTIME") header >> nt;
+      else if (key == "NSITE") header >> ns;
+      else if (key == "NFLAVOR") header >> nf;
+      else { std::string ignored; header >> ignored; }
+    }
+    if (std::abs(file_beta - beta) > 1e-12 * std::max(1., std::abs(beta))) {
+      std::ostringstream msg;
+      msg.precision(15);
+      msg << "Green's function file " << filename << ": was written for BETA = " << file_beta
+          << ", this run has BETA = " << beta << ".";
+      throw std::invalid_argument(msg.str());
+    }
+    if (nt != nt_ || ns != ns_ || nf != nf_) {
+      std::ostringstream msg;
+      msg << "Green's function file " << filename << ": has NTIME = " << nt << ", NSITE = " << ns
+          << ", NFLAVOR = " << nf << "; this run needs NTIME = " << nt_ << " (N+1 time points, or NMATSUBARA"
+          << " frequencies), NSITE = " << ns_ << ", NFLAVOR = " << nf_ << ".";
+      throw std::invalid_argument(msg.str());
     }
   }
+  const std::vector<T> values =
+      text_table::read_table<T>(in_file, nt_, std::size_t(ns_) * ns_ * nf_, "Green's function file", filename);
+  std::size_t k = 0;
+  for(unsigned int i=0;i<nt_;++i)
+    for(unsigned int s0=0; s0<ns_; ++s0)
+      for(unsigned int s1=0; s1<ns_; ++s1)
+        for(unsigned int f=0; f<nf_; ++f)
+          operator()(i, s0, s1, f) = values[k++];
 }
 
-template<typename T> void green_function<T>::write(const char *filename) const{
+template<typename T> void green_function<T>::write(const char *filename, double beta) const{
   std::ofstream out_file(filename);
-  assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
-  if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
+  if(!out_file.is_open())
+    throw std::runtime_error(std::string("Green's function file ") + filename + ": cannot open the file for writing.");
   // These files are read back (G0OMEGA_INPUT, G0TAU_INPUT): write the digits
   // that give the same double, not the default 6.
   out_file.precision(std::numeric_limits<double>::max_digits10);
+  out_file << "# BETA = " << beta << " NTIME = " << nt_ << " NSITE = " << ns_ << " NFLAVOR = " << nf_ << std::endl;
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
     for(unsigned int s0=0; s0<ns_; ++s0) {
