@@ -94,15 +94,17 @@ and their false-alarm rate:
   as the level says, and 1 instead of NaN when there were too few
   observations. For three or fewer components it is the upper tail, as
   before. It is 1 when nothing is left to test (exact results that agree).
-- Exactly correlated components (duplicates, sums, symmetric points) make
-  the covariance singular, and constant components make it vanish. Both are
-  judged on the covariance scaled per component by sqrt(var + mean^2),
-  against the rounding of an accumulation over the number of samples
-  (2 count eps), instead of by an absolute tolerance, so the test does not
-  depend on the units of any component. A direction at rounding level is
-  dropped if the difference along it is rounding too, and otherwise tested
-  against the rounding level. `test_mean`'s `atol` defaults to 0 and is
-  applied per component in the units of the data.
+- Exact components (constants, and components related by a symmetry or sum
+  rule, which make the covariance singular) are those the measurement
+  computes to within `atol + rtol |x|`, in the units of the data, with
+  |x| = sqrt(var + mean^2) per component; `test_mean` takes `rtol` (default
+  64 eps) and `atol` (default 0), and adds the rounding of the accumulation
+  (2 count eps). The covariance is scaled per component by |x| before the
+  exact directions are found as its numerical null space for these
+  tolerances, so the test does not depend on the units of any component.
+  An exact direction is dropped if the difference along it is within the
+  tolerance, and otherwise tested with the largest variance the data cannot
+  tell from zero.
 
 The shared `near.hpp` helper now enforces an absolute error bound for each matrix
 entry instead of a relative matrix norm. `compare_test.cpp` adds regression

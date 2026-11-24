@@ -23,8 +23,8 @@ t2_result t2_test(const column<T> &diff,
         throw std::invalid_argument("Variances must be positive");
 
     // remove data points where both the variance and difference are zero
-    // within atol while propagating intrinsic NaNs. Rounding of the data is
-    // handled before, where its scale is known (internal::whiten()).
+    // within atol while propagating intrinsic NaNs. Exact components are
+    // handled before, where their scale is known (internal::whiten()).
     double t2 = 0;
     size_t nsize = 0;
     for (int i = 0; i != diff.rows(); ++i) {

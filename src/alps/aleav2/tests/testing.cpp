@@ -366,3 +366,57 @@ TEST(t2_test, nan_propagates_and_empty_passes)
     EXPECT_EQ(alps::alea::test_mean(re3, Eigen::VectorXd(0)).pvalue(), 1.0);
     EXPECT_EQ(alps::alea::test_mean(re1, re2).pvalue(), 1.0);
 }
+
+// std::min(1.0, x) is 1 for x = NaN: pvalue() must return NaN itself when the
+// two-sided p-value is taken (more than three components).
+TEST(t2_result, nan_score_gives_nan_pvalue_for_many_components)
+{
+    EXPECT_TRUE(std::isnan(alps::alea::t2_result(NAN, 5, 20).pvalue()));
+    EXPECT_TRUE(std::isnan(alps::alea::t2_result(NAN, 2, 20).pvalue()));
+}
+
+// rtol is the relative accuracy of exact components. Here the second
+// component equals the first by symmetry, but the measurement computes it
+// only to about 1e-6 relative (a bias of 1e-6 and noise of 1e-7). With the
+// default rtol (64 eps) the broken symmetry is resolved and the test rejects;
+// with rtol = 1e-5 the components are exact to the stated accuracy, the
+// direction is dropped, and the remaining one is tested as usual.
+TEST(t2_test, rtol_is_the_accuracy_of_exact_components)
+{
+    std::mt19937 engine(17);
+    std::normal_distribution<double> normal;
+    cov_acc<double> acc(2);
+    for (int i = 0; i != 10000; ++i) {
+        const double x = 3 + normal(engine);
+        Eigen::VectorXd v(2);
+        v << x, x * (1 + 1e-6) + 1e-7 * normal(engine);
+        acc << v;
+    }
+    cov_result<double> res = acc.finalize();
+    Eigen::VectorXd expected(2);
+    expected << 3.0, 3.0;
+    EXPECT_LT(alps::alea::test_mean(res, expected).pvalue(), 1e-6);
+    alps::alea::t2_result loose = alps::alea::test_mean(res, expected, 1e-5);
+    EXPECT_EQ(loose.dist().degrees_of_freedom1(), 1);
+    EXPECT_GE(loose.pvalue(), 0.01);
+}
+
+// atol is in the units of the data (not squared): a component that should be
+// zero and is computed as 1e-12 is exact for atol = 1e-11 and not for 1e-13.
+TEST(t2_test, atol_is_in_units_of_the_data)
+{
+    std::mt19937 engine(19);
+    std::normal_distribution<double> normal;
+    alps::alea::var_acc<double> acc(2);
+    for (int i = 0; i != 1000; ++i) {
+        Eigen::VectorXd v(2);
+        v << normal(engine), 1e-12;
+        acc << v;
+    }
+    alps::alea::var_result<double> res = acc.finalize();
+    const Eigen::VectorXd zero = Eigen::VectorXd::Zero(2);
+    alps::alea::t2_result loose = alps::alea::test_mean(res, zero, 0, 1e-11);
+    EXPECT_EQ(loose.dist().degrees_of_freedom1(), 1);
+    EXPECT_GE(loose.pvalue(), 1e-4);
+    EXPECT_LT(alps::alea::test_mean(res, zero, 0, 1e-13).pvalue(), 1e-6);
+}

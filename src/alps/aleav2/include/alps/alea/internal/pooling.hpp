@@ -13,6 +13,7 @@
 
 #include <alps/alea/internal/joined.hpp>
 
+#include <cmath>
 #include <limits>
 #include <vector>
 
@@ -48,6 +49,13 @@ using diff_scalar_type = add_scalar_type<
                             typename Eigen::internal::traits<Derived>::Scalar>;
 
 /**
+ * Default relative accuracy to which exact components (symmetries, sum
+ * rules, constants) are assumed to be computed by the measurement, see
+ * test_mean().
+ */
+constexpr double default_rtol = 64 * std::numeric_limits<double>::epsilon();
+
+/**
  * Difference of a result from a reference, in coordinates where its
  * components are uncorrelated: `mean` and `var` are the difference and the
  * per-observation variance along each principal axis of the covariance
@@ -65,13 +73,15 @@ struct diff_stats
 
 /**
  * Bound on the relative rounding error of a mean, variance or covariance
- * accumulated over `count` samples. The sums are accumulated one sample (or
- * batch) after the other, so the error of a mean is bounded by
- * count * eps/2 * mean(|x|) and that of a (co)variance by about
- * 3 count * eps/2 (var + mean^2), in units of s = sqrt(var + mean^2) per
- * component. The bound is reached in practice: a constant such as 0.1 is
- * rounded the same way at every addition, and its mean and variance are off
- * by about 0.1 count eps. This returns 2 count eps.
+ * accumulated over `count` samples, relative to s = sqrt(var + mean^2) of
+ * each component. The sums are accumulated one sample (or batch) after the
+ * other, so the error of a mean is bounded by count * eps/2 * mean(|x|) and
+ * that of a (co)variance by about 3 count * eps/2 * s^2. The bound is reached
+ * in practice: a constant such as 0.1 is rounded the same way at every
+ * addition, and its mean and variance are off by about 0.1 count eps. This
+ * returns 2 (count + 4) eps; the 4 covers the few roundings of finalize()
+ * (division by the count, subtraction of the squared mean), which do not grow
+ * with the count.
  */
 inline double accumulation_error(double count)
 {
@@ -81,34 +91,38 @@ inline double accumulation_error(double count)
 /**
  * Covariance and difference in principal axes, scaled per component.
  *
- * Exactly correlated components (duplicates, sums, symmetries) make a
- * covariance singular, and components that are constant (or fluctuate below
- * the precision of the accumulation) make its diagonal vanish. The computed
- * null eigenvalues are then not zero but rounding, of either sign, and a
- * difference along them is rounding as well. To tell rounding from data, the
- * covariance is first scaled to R = D^-1 C D^-1 with D = diag(scale), where
- * scale is sqrt(var + mean^2) of each component. The rounding of each entry
- * of R is then below `rel_error` whatever the units of the components,
- * and that of an eigenvalue below n rel_error. T^2 does not change, since
+ * Components can be exact: constant, or related by a symmetry or sum rule
+ * (duplicates, sums), which makes the covariance singular. How exact they are
+ * is set by the measurement, not by the sampling, so the caller gives the
+ * tolerances per component, in the units of the data: `tol_var` for the
+ * fluctuation (the square root of a diagonal entry of `cov`) and `tol_diff`
+ * for the difference. The covariance is first scaled to R = D^-1 C D^-1 with
+ * D = diag(scale), so that tolerances and rounding are relative and do not
+ * depend on the units of each component: a cut relative to the largest
+ * eigenvalue of C would take a component with a small but real variance next
+ * to a large one for exact. T^2 does not change, since
  * d^T C^-1 d = (D^-1 d)^T R^-1 (D^-1 d).
  *
- * Along each principal axis, with eigenvalue lambda and difference delta:
- *  - lambda at rounding level (below its bound) and delta within the bound
- *    of its rounding (`diff_error`, scaled and rotated): no information,
+ * R is then diagonalized. Its eigenvalues below the cut, the squared
+ * tolerance rotated to that axis plus the rounding of an eigenvalue
+ * (`var_floor` relative to scale^2, plus that of the eigensolver), are the
+ * exact directions; their number is the numerical rank deficiency of R for
+ * that tolerance (Golub and Van Loan, Matrix Computations, Sec. 5.4). Along
+ * each principal axis k, with eigenvalue lambda_k and difference delta_k:
+ *  - exact, and delta_k within the tolerance: the reference agrees there,
  *    the axis is dropped (var and diff set to zero, which t2_test() skips);
- *  - otherwise the axis is tested with the variance lambda plus the bound of
- *    its rounding. Rounding can thus not make a variance too small, and a
- *    difference beyond rounding along a null axis is tested against the
- *    rounding level instead of zero: it rejects if it is larger than the
- *    data can resolve, and does not if it is noise of a variance below the
- *    resolution.
- * NaN in the data is kept and makes the test NaN. `keep` receives the axes
- * whose variance is above rounding.
+ *  - exact, and delta_k beyond the tolerance: tested with the cut as its
+ *    variance, the largest variance the data cannot tell from zero. A
+ *    violated symmetry thus rejects, and noise below the resolution of the
+ *    variance does not;
+ *  - otherwise: tested with the variance lambda_k, and listed in `keep`.
+ * NaN in the data is kept and makes the test NaN.
  */
 template <typename T, typename Real>
 void whiten(const typename eigen<T>::matrix &cov, bool diagonal,
-            column<T> &diff, column<Real> &var, column<Real> diff_error,
-            column<Real> scale, double rel_error,
+            column<T> &diff, column<Real> &var,
+            const column<Real> &tol_var, const column<Real> &tol_diff,
+            column<Real> scale, double var_floor,
             typename eigen<T>::matrix &vecs, std::vector<int> &keep)
 {
     const int n = diff.rows();
@@ -119,78 +133,59 @@ void whiten(const typename eigen<T>::matrix &cov, bool diagonal,
         vecs.resize(0, 0);
         return;
     }
-    for (int i = 0; i != n; ++i) {
+    for (int i = 0; i != n; ++i)
         if (scale[i] == 0)
             scale[i] = 1;       // component identically zero
-        diff[i] /= scale[i];
-        diff_error[i] /= scale[i];
-    }
+    const column<T> scaled = diff.cwiseQuotient(scale.template cast<T>());
     const typename eigen<T>::matrix r =
         scale.cwiseInverse().asDiagonal() * cov * scale.cwiseInverse().asDiagonal();
 
-    double var_error;
     if (diagonal) {
         vecs = eigen<T>::matrix::Identity(n, n);
         var = r.diagonal().real();
-        var_error = rel_error;
     } else {
         Eigen::SelfAdjointEigenSolver<typename eigen<T>::matrix> es(r);
         vecs = es.eigenvectors();
         var = es.eigenvalues();
-        // rounding of the entries plus that of the eigensolver
-        var_error = n * (rel_error + 8 * n * eps);
+        var_floor = n * (var_floor + 8 * n * eps);
     }
 
-    // Rounding of the difference along each axis: that of the components,
-    // and of the rotation itself.
-    const column<T> scaled = diff;
     diff = vecs.adjoint() * scaled;
     for (int k = 0; k != n; ++k) {
-        double bound = 0;
-        for (int i = 0; i != n; ++i)
-            bound += std::abs(vecs(i, k)) * (diff_error[i] + n * eps * std::abs(scaled[i]));
+        // tolerances along the axis; that of the difference includes the
+        // rounding of the rotation
+        double bound_var = 0, bound_diff = 0;
+        for (int i = 0; i != n; ++i) {
+            const double v = std::abs(vecs(i, k));
+            bound_var += v * tol_var[i] / scale[i];
+            bound_diff += v * (tol_diff[i] / scale[i] + n * eps * std::abs(scaled[i]));
+        }
+        const double cut = bound_var * bound_var + var_floor;
 
-        if (var[k] <= var_error && std::abs(diff[k]) <= bound) {
+        if (!(var[k] <= cut)) {
+            keep.push_back(k);  // tested with its variance (also NaN)
+        } else if (std::abs(diff[k]) <= bound_diff) {
             var[k] = 0;
             diff[k] = 0;
-            continue;
-        }
-        if (!(var[k] <= var_error))
-            keep.push_back(k);      // also NaN, so that it propagates
-        if (var[k] < 0)
-            var[k] = 0;
-        var[k] += var_error;
-    }
-}
-
-/**
- * Components with variance and squared difference both below `atol` (in the
- * units of the data) are taken as exact and agreeing: their difference and
- * covariance are set to zero, so that whiten() drops them.
- */
-template <typename T, typename Real>
-void apply_atol(typename eigen<T>::matrix &cov, column<T> &diff,
-                const column<Real> &var, double atol)
-{
-    if (!(atol > 0))
-        return;
-    for (int i = 0; i != diff.rows(); ++i) {
-        if (std::abs(var[i]) <= atol && std::norm(diff[i]) <= atol) {
-            diff[i] = 0;
-            cov.row(i).setZero();
-            cov.col(i).setZero();
+        } else {
+            var[k] = cut;
         }
     }
 }
 
 /**
- * Get difference of `result` from the exact `expected`
+ * Get difference of `result` from the exact `expected`.
+ *
+ * Tolerances (see whiten()): a component fluctuates within atol + rtol s, and
+ * its mean agrees within atol + max(rtol, accumulation_error()) s, with
+ * s = sqrt(var + mean^2), in the units of the data; the variance is also
+ * resolved only to its rounding, accumulation_error() s^2.
  */
 template <typename Result, typename Derived,
           typename T=diff_scalar_type<Result, Derived>>
 diff_stats<T> make_diff(const Result &result,
                         const Eigen::MatrixBase<Derived> &expected,
-                        double atol=0)
+                        double rtol=default_rtol, double atol=0)
 {
     if ((int)result.size() != expected.size())
         throw size_mismatch();
@@ -202,29 +197,33 @@ diff_stats<T> make_diff(const Result &result,
     diff_stats<T> diff;
     // observations() is the count consistent with var() (for autocorr_result
     // the number of bins at the binning level used), not count().
-    diff.nmeas = result.observations();
+    const double nmeas = result.observations();
+    diff.nmeas = nmeas;
     diff.mean = result.mean() - expected;
 
     // Scale per component; a component that is identically zero is scaled
     // by the expected value, so that a nonzero one rejects.
     const column<real> var = result.var();
-    const column<real> mean_abs = result.mean().cwiseAbs();
     const column<real> exp_abs = expected.cwiseAbs().template cast<real>();
-    column<real> scale = (var + mean_abs.cwiseAbs2()).cwiseSqrt();
+    column<real> scale = (var + result.mean().cwiseAbs2()).cwiseSqrt();
     for (int i = 0; i != scale.rows(); ++i)
         if (scale[i] == 0)
             scale[i] = exp_abs[i];
 
-    // Rounding of the mean, of the expected value and of the subtraction
-    const double rel_error = accumulation_error(result.count());
-    const column<real> diff_error = rel_error * scale + 8 * eps * exp_abs;
+    // Tolerances of the measurement, and the rounding of the accumulation,
+    // of the expected value and of the subtraction.
+    const double rounding = accumulation_error(result.count());
+    const column<real> tol_var = (atol + rtol * scale.array()).matrix();
+    const column<real> tol_diff = (atol + std::max(rtol, rounding) * scale.array()
+                                   + 8 * eps * exp_abs.array()).matrix();
 
-    matrix cov = get_cov(result);
-    apply_atol(cov, diff.mean, var, atol);
+    const matrix cov = get_cov(result);
+    const bool diagonal = !traits<Result>::HAVE_COV;
+
     matrix vecs;
     std::vector<int> keep;
-    whiten<T>(cov, !traits<Result>::HAVE_COV, diff.mean, diff.var,
-              diff_error, scale, rel_error, vecs, keep);
+    whiten<T>(cov, diagonal, diff.mean, diff.var, tol_var, tol_diff, scale,
+              rounding, vecs, keep);
     return diff;
 }
 
@@ -240,14 +239,16 @@ diff_stats<T> make_diff(const Result &result,
  *     nu = (r + r^2) / sum_k [tr(W_k^2) + tr(W_k)^2] / (N_k - 1),
  *     W_k = S^{-1/2} (C_k / N_k) S^{-1/2},
  *
- * with r the number of directions of S above rounding (see whiten(), here
- * with the scale sqrt((var_1 + mean_1^2)/N_1 + (var_2 + mean_2^2)/N_2)). The
- * result is returned as a one-sample difference with nu + 1 observations, so
- * that Hotelling's T^2 is referred to F(r, nu + 1 - r).
+ * with r the number of directions of S tested with their variance (see
+ * whiten(), here with the scale sqrt((var_1 + mean_1^2)/N_1 + (var_2 +
+ * mean_2^2)/N_2)). The result is returned as a one-sample difference with
+ * nu + 1 observations, so that Hotelling's T^2 is referred to F(r, nu + 1 - r).
+ * Each result has the tolerances of make_diff().
  */
 template <typename Result1, typename Result2,
           typename T=joined_value_type<Result1, Result2>>
-diff_stats<T> pool_var(const Result1 &r1, const Result2 &r2, double atol=0)
+diff_stats<T> pool_var(const Result1 &r1, const Result2 &r2,
+                       double rtol=default_rtol, double atol=0)
 {
     if (r1.size() != r2.size())
         throw size_mismatch();
@@ -262,33 +263,34 @@ diff_stats<T> pool_var(const Result1 &r1, const Result2 &r2, double atol=0)
     const column<real> s2 = (var2 + r2.mean().cwiseAbs2()).cwiseSqrt();
     const column<real> scale = (s1.cwiseAbs2() / obs1 + s2.cwiseAbs2() / obs2).cwiseSqrt();
 
-    // Rounding of each mean, and of the entries of C_k/N_k relative to
-    // scale_i scale_j (Cauchy-Schwarz bounds the sum by the larger one).
+    // Tolerances as in make_diff(), combined for the difference of the means
+    // and for the entries of S (Cauchy-Schwarz bounds the rounding of the sum
+    // by the larger one).
     const double err1 = accumulation_error(r1.count());
     const double err2 = accumulation_error(r2.count());
-    const column<real> diff_error = err1 * s1 + err2 * s2;
+    const column<real> t1 = (atol + rtol * s1.array()).matrix();
+    const column<real> t2 = (atol + rtol * s2.array()).matrix();
+    const column<real> tol_var = (t1.cwiseAbs2() / obs1 + t2.cwiseAbs2() / obs2).cwiseSqrt();
+    const column<real> tol_diff = (2 * atol + std::max(rtol, err1) * s1.array()
+                                   + std::max(rtol, err2) * s2.array()).matrix();
+    const double rounding = std::max(err1, err2);
 
-    matrix c1 = get_cov(r1) / obs1;
-    matrix c2 = get_cov(r2) / obs2;
+    const matrix c1 = get_cov(r1) / obs1;
+    const matrix c2 = get_cov(r2) / obs2;
+    const matrix s = c1 + c2;
     diff_stats<T> diff;
     diff.mean = r1.mean() - r2.mean();
-    {
-        // atol in the units of the data: both results exact there
-        column<real> var_max = var1.cwiseAbs().cwiseMax(var2.cwiseAbs());
-        column<T> mean = diff.mean;
-        apply_atol(c1, mean, var_max, atol);
-        apply_atol(c2, diff.mean, var_max, atol);
-    }
+    const bool diagonal = !traits<Result1>::HAVE_COV && !traits<Result2>::HAVE_COV;
 
     matrix v;
     std::vector<int> keep;
-    const bool diagonal = !traits<Result1>::HAVE_COV && !traits<Result2>::HAVE_COV;
-    whiten<T>(matrix(c1 + c2), diagonal, diff.mean, diff.var, diff_error,
-              scale, std::max(err1, err2), v, keep);
+    whiten<T>(s, diagonal, diff.mean, diff.var, tol_var, tol_diff, scale,
+              rounding, v, keep);
 
-    // Whitened covariances of the two means along the axes above rounding
+    // Whitened covariances of the two means along the axes tested with their
+    // variance
     const column<real> sinv = scale.unaryExpr(
-                    [](real s) { return s == 0 ? real(1) : 1 / s; });
+                    [](real x) { return x == 0 ? real(1) : 1 / x; });
     double denom = 0;
     for (int k = 0; k != 2; ++k) {
         const matrix &ck = k == 0 ? c1 : c2;
@@ -304,10 +306,10 @@ diff_stats<T> pool_var(const Result1 &r1, const Result2 &r2, double atol=0)
     }
     const double r = keep.size();
     // Both results exact: no variance to estimate, the difference is
-    // compared with the rounding level only.
-    const double nu = keep.empty() ? obs1 + obs2 - 2 : (r + r * r) / denom;
+    // compared with the tolerance only.
+    const double nu_ky = keep.empty() ? obs1 + obs2 - 2 : (r + r * r) / denom;
 
-    diff.nmeas = nu + 1;
+    diff.nmeas = nu_ky + 1;
     // t2_test expects per-observation variances, stderror^2 * nmeas
     diff.var *= diff.nmeas;
     return diff;
