@@ -97,7 +97,7 @@ template<class GF = cluster_matsubara_kspace_gf> GF load(const fs::path& file, c
 // Run dca in the directory dir_name and return that directory.
 fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it = 10,
                  bool write_iterations = true, const std::string& extra_parameters = "",
-                 bool expect_success = true) {
+                 bool expect_success = true, const std::string& command_line = "") {
   const fs::path dir = fs::absolute(dir_name);
   fs::remove_all(dir);
   fs::create_directories(dir);
@@ -126,7 +126,7 @@ fs::path run_dca(const cluster_case& c, const std::string& dir_name, int max_it 
         << extra_parameters;
   parms.close();
   const std::string command =
-      "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini > dca.log 2>&1";
+      "cd \"" + dir.string() + "\" && \"" DCA_EXECUTABLE "\" params.ini " + command_line + " > dca.log 2>&1";
   const int status = std::system(command.c_str());
   if (expect_success)
     EXPECT_EQ(status, 0) << "dca failed, see " << (dir / "dca.log");
@@ -305,6 +305,17 @@ TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
     EXPECT_NE(read_file(dir / "dca.log").find("needs sc.SPIN_SYMMETRIZATION = false"), std::string::npos)
         << field;
   }
+}
+
+// Parameters given on dca's command line reach the solver too: with other
+// solver file names, dca and the solver have to use the same files (#463).
+TEST(LoopOptions, PassesCommandLineOverridesToTheSolver) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "CommandLineOverrides", 2, false, "", true,
+                               "--solver.INFILE_H5GF=mine_in.h5 --solver.OUTFILE_H5GF=mine_out.h5");
+  const std::string log = read_file(dir / "dca.log");
+  EXPECT_NE(log.find("'params.ini' '--solver.INFILE_H5GF=mine_in.h5' '--solver.OUTFILE_H5GF=mine_out.h5' --MU="),
+            std::string::npos) << log;
 }
 
 // ---------------------------------------------------------------------------

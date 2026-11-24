@@ -172,3 +172,15 @@ TEST_F(ImpuritySolverTest, PassesMuExactlyAndTheParameterFileAsOneArgument) {
   solver.solve(g.G_omega, g.G_tau, out.G_omega, out.G_tau);
   EXPECT_EQ(lines("args.txt").back(), "--MU=0.3");
 }
+
+// dca's command-line overrides after the parameter file reach the solver
+// unchanged, in their order, and the loop's --MU replaces one among them
+// (#463).
+TEST_F(ImpuritySolverTest, PassesTheCommandLineOverrides) {
+  green_functions g = noninteracting(16);
+  write_output("ready.h5", g);
+  ImpuritySolver solver(recording_solver, "params.ini", parameters(16), {"--BETA=5", "--U=2 x", "--MU=7", "--t=1"});
+  green_functions out = g;
+  solver.solve(g.G_omega, g.G_tau, out.G_omega, out.G_tau);
+  EXPECT_EQ(lines("args.txt"), (std::vector<std::string>{"params.ini", "--BETA=5", "--U=2 x", "--t=1", "--MU=0.3"}));
+}

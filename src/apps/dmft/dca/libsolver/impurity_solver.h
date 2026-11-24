@@ -17,6 +17,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 #include "alps/hdf5.hpp"
 #include "alps/utilities/temporary_filename.hpp"
 #include "alps/params.hpp"
@@ -26,9 +27,13 @@
 class ImpuritySolver
 {
 public:
-  ImpuritySolver(const std::string & launch_command, const std::string &param_file_name, const alps::params &p) :
+  /// arguments: dca's command-line arguments after the parameter file
+  /// (--NAME=value overrides), which the solver gets too (#463)
+  ImpuritySolver(const std::string & launch_command, const std::string &param_file_name, const alps::params &p,
+                 const std::vector<std::string> &arguments = std::vector<std::string>()) :
     launch_command_(launch_command),
     param_file_name_(param_file_name),
+    arguments_(arguments),
     infile_str_(p["solver.INFILE_H5GF"].as<std::string>()),
     outfile_str_(p["solver.OUTFILE_H5GF"].as<std::string>()),
     params_(p),
@@ -113,7 +118,12 @@ private:
     // the parameter file is one argument, quoted for the shell, and MU has the
     // digits that read back as the same double (#460).
     std::stringstream  command;
-    command << launch_command_ << " " << shell_quote(param_file_name_) << " --MU=" << exact(mu_);
+    // dca's command-line overrides reach the solver too; the loop's MU comes
+    // last and replaces a --MU among them (#463).
+    command << launch_command_ << " " << shell_quote(param_file_name_);
+    for (const std::string &argument : arguments_)
+      if (argument.compare(0, 5, "--MU=") != 0) command << " " << shell_quote(argument);
+    command << " --MU=" << exact(mu_);
     std::cerr << "Calling external solver as: " <<  command.str()<<std::endl;
     int result = std::system(command.str().c_str());
     if (result)
@@ -128,6 +138,7 @@ private:
   ///command to launch the solver executable
   const std::string launch_command_;
   const std::string param_file_name_;
+  const std::vector<std::string> arguments_;
   const std::string infile_str_;
   const std::string outfile_str_;
   alps::params params_;
