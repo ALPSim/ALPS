@@ -43,6 +43,11 @@ public:
   }
   template<typename MGF, typename IGF> void solve(const MGF& G0_omega, const IGF &G0_tau, MGF &G_omega, IGF &G_tau){
     std::cout<<"entering solve() command."<<std::endl;
+    // Only a file the solver writes now can be read as its result: an output
+    // file left from before would be taken for it if the solver exits
+    // normally without writing one (#459). It is removed before the input is
+    // written, which may be the same file.
+    std::remove(outfile_str_.c_str());
     {
       alps::hdf5::archive solver_input(infile_str_, "w");
       solver_input<<alps::make_pvp("/parameters", params_);
@@ -55,6 +60,9 @@ public:
       alps::hdf5::archive ar(outfile_str_, "r");
       G_omega.load(ar, "/G_omega");
       G_tau  .load(ar, "/G_tau");
+      // load() takes the meshes from the file. G_tau is only printed, on
+      // whatever tau grid the solver used.
+      check_meshes(G_omega, G0_omega);
       validate_nan_inf(G_omega);
       validate_nan_inf(G_tau);
     }
@@ -69,6 +77,15 @@ public:
   }
 
 private:
+  /// The solver's G_omega has to be on the meshes of the G0 it was given:
+  /// another BETA, NMATSUBARA, cluster or number of flavors would be combined
+  /// with G0 on the loop's meshes (#459).
+  template<typename GF> void check_meshes(const GF &G, const GF &G0) const{
+    typedef typename GF::gf_type gf_type;
+    if (!(static_cast<const gf_type&>(G).meshes() == static_cast<const gf_type&>(G0).meshes()))
+      throw std::runtime_error(outfile_str_ + ": the solver's G_omega is not on the meshes of G0"
+                               " (BETA, NMATSUBARA, cluster, FLAVORS) that dca gave it.");
+  }
   template<typename GF> void validate_nan_inf(const GF &G){
     //this is a safety check for impurity solvers.
     for(const typename GF::value_type *it=G.data().data(); it !=G.data().data()+G.data().num_elements(); it++)
