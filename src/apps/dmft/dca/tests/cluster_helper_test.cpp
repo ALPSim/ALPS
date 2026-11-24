@@ -6,7 +6,9 @@
 #include "cluster_helper.h"
 #include "alps/params.hpp"
 #include "alps/hdf5.hpp"
+#include <cmath>
 #include <cstdio>
+#include <string>
 
 #define TWODCLUSTERS1 "Betts2D-1A","Betts2D-4A","Betts2D-8A","Betts2D-8C","Betts2D-9A","Betts2D-9B","Betts2D-10A","Betts2D-10B","Betts2D-11A","Betts2D-12A","Betts2D-12B","Betts2D-12D","Betts2D-13A","Betts2D-14A","Betts2D-14B","Betts2D-15A","Betts2D-15B","Betts2D-16A","Betts2D-16B"
 //,"Betts2D-16C","Betts2D-16D","Betts2D-16E","Betts2D-17A","Betts2D-17B","Betts2D-18A","Betts2D-18B","Betts2D-18C","Betts2D-18D","Betts2D-19A"
@@ -145,6 +147,68 @@ INSTANTIATE_TEST_SUITE_P(Clusters, ClusterPeriodicity, ::testing::Values(
     periodicity_case{"Fuchs3D-50B", 50, {50, 10, 50}}),
     [](const ::testing::TestParamInfo<periodicity_case>& info) {
       std::string name = info.param.lattice;
+      for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
+      return name;
+    });
+
+// dca.L must be even and at least 2: the patch momenta are integrated with
+// Simpson's rule, and for odd L its weights did not add up to L^d, by which
+// the coarse-graining divides. Betts2D-4A at L = 9 gave sum(w)/L^2 = 1.075
+// and <eps^2> wrong by 0.14 (#441).
+TEST(ClusterHelper, RefusesOddOrNonpositiveL){
+  for (int L : {-4, 0, 1, 5, 9, 33}) {
+    alps::params p;
+    p["dca.LATTICE"]="Betts2D-4A";
+    p["dca.SITES"]=4;
+    p["dca.L"]=L;
+    set_other_parameters(p);
+    try {
+      ClusterHelper CH(p);
+      ADD_FAILURE() << "dca.L = " << L << " was accepted";
+    } catch (std::invalid_argument const & e) {
+      EXPECT_NE(std::string(e.what()).find("dca.L = " + std::to_string(L) + ": "), std::string::npos) << e.what();
+      EXPECT_NE(std::string(e.what()).find("must be even and at least 2"), std::string::npos) << e.what();
+    }
+  }
+}
+
+// With an even L the weights of each patch add up to L^d, and the patches
+// reproduce the Brillouin-zone average of eps(k) = -2 sum_d cos(k_d):
+// <eps> = 0 and <eps^2> = 2d.
+struct weight_case { const char* lattice; int sites; int L; };
+class ClusterIntegrationWeights : public ::testing::TestWithParam<weight_case> {};
+TEST_P(ClusterIntegrationWeights, NormalizedAndExactForTheDispersion){
+  const weight_case& c = GetParam();
+  alps::params p;
+  p["dca.LATTICE"]=c.lattice;
+  p["dca.SITES"]=c.sites;
+  p["dca.L"]=c.L;
+  set_other_parameters(p);
+  ClusterHelper CH(p);
+  const int d = CH.dimension();
+  double wsum = 0, e1 = 0, e2 = 0;
+  for (int kc = 0; kc < CH.n_cluster_sites(); ++kc)
+    for (int kl = 0; kl < CH.n_lattice_momenta(); ++kl) {
+      double e = 0;
+      for (int i = 0; i < d; ++i)
+        e -= 2 * std::cos(CH.lattice_momentum(kl, i) + CH.cluster_momentum(kc, i));
+      const double w = CH.lattice_momentum(kl, d);
+      if (kc == 0) wsum += w;
+      e1 += w * e;
+      e2 += w * e * e;
+    }
+  const double norm = double(CH.n_cluster_cells()) * CH.n_cluster_sites();
+  EXPECT_NEAR(wsum / CH.n_cluster_cells(), 1., 1e-12);
+  EXPECT_NEAR(e1 / norm, 0., 1e-12);
+  EXPECT_NEAR(e2 / norm, 2. * d, 1e-10);
+}
+INSTANTIATE_TEST_SUITE_P(Clusters, ClusterIntegrationWeights, ::testing::Values(
+    weight_case{"Betts2D-4A", 4, 8},
+    weight_case{"Betts2D-8A", 8, 16},
+    weight_case{"Betts2D-10A", 10, 2},
+    weight_case{"Betts3D-8A", 8, 4}),
+    [](const ::testing::TestParamInfo<weight_case>& info) {
+      std::string name = std::string(info.param.lattice) + "_L" + std::to_string(info.param.L);
       for (char& ch : name) if (!std::isalnum(static_cast<unsigned char>(ch))) ch = '_';
       return name;
     });

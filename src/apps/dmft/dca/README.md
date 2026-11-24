@@ -45,7 +45,7 @@ dca parameters.ini
 | `BETA`, `MU`, `U`, `t`, `tprime` | Inverse temperature, chemical potential, interaction, hoppings |
 | `N`, `NMATSUBARA`, `FLAVORS` | Imaginary-time points, Matsubara frequencies, flavors (default 2) |
 | `dca.LATTICE`, `dca.LATTICE_LIBRARY`, `dca.SITES` | Cluster name, cluster definition file, number of cluster sites |
-| `dca.L` | Linear number of lattice momenta per cluster momentum in the coarse-graining |
+| `dca.L` | Linear number of lattice momenta per cluster momentum in the coarse-graining; even, for Simpson's rule |
 | `dca.AFM_SELFCONSISTENCY`, `dca.CO_SELFCONSISTENCY`, `sc.NAMBU` | Double unit cell (AFM or charge order) or Nambu frameworks |
 | `dca.G0_OMEGA_INPUT`, `dca.G0_OMEGA_OUTPUT` | Starting G0, and G0 written after each iteration to restart from |
 | `sc.MAX_IT`, `sc.SELFCONSISTENCY_CONVERGENCE` | Number of iterations, and the change of G at which to stop earlier |

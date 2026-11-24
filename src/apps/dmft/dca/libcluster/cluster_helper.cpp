@@ -27,10 +27,24 @@ void ClusterHelper::define_parameters(alps::params &p){
   p.define<bool>("dca.AFM_SELFCONSISTENCY", false, "Use the AFM double unit cell framework");
   p.define<bool>("dca.CO_SELFCONSISTENCY", false, "Use the charge order double unit cell framework.");
   p.define<int>("dca.SITES",  "number of cluster sites");
-  p.define<int>("dca.L", "linear discretization of cluster k-point integration");
+  p.define<int>("dca.L", "linear discretization of cluster k-point integration (even, Simpson's rule)");
 }
+namespace {
+// The patch momenta are integrated with Simpson's rule, which needs an even
+// number of intervals in each direction: for odd L the momenta lie halfway
+// between its nodes, and the weights neither are Simpson's nor add up to L^d,
+// by which the coarse-graining divides (#441).
+int checked_L(const alps::params& params) {
+  const int L = params["dca.L"];
+  if (L < 2 || L % 2 != 0)
+    throw std::invalid_argument("dca.L = " + std::to_string(L) + ": the number of lattice momenta per cluster"
+                                " momentum and direction must be even and at least 2, for Simpson's rule.");
+  return L;
+}
+}
+
 ClusterHelper::ClusterHelper(const alps::params& params) :
-alps_graph(params["dca.LATTICE"],params["dca.LATTICE_LIBRARY"],params["dca.L"]),
+alps_graph(params["dca.LATTICE"],params["dca.LATTICE_LIBRARY"],checked_L(params)),
 paramagnet_(!params["dca.AFM_SELFCONSISTENCY"]),
 epsilon_(1e-9),
 cluster_name_(params["dca.LATTICE"].as<std::string>())
