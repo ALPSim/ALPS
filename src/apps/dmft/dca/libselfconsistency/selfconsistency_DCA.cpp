@@ -171,6 +171,10 @@ void perform_cluster_loop(const std::string &param_file_name, const alps::params
       throw std::invalid_argument("sc.NAMBU: a complex pairing field dca.ETA1 + i dca.ETA2 with the d-wave form factor"
                                   " differs from the real field |eta| only by a global phase, and G0(tau) is real;"
                                   " set dca.ETA2 (and dca.ETA2_INIT) to 0 and dca.ETA1 to |eta|.");
+    // The k-sum that adjusts MU is not implemented in Nambu space; refuse it
+    // here rather than fail after the first solver run (#455).
+    if(parms["sc.ADJUST_MU"].as<bool>())
+      throw std::invalid_argument("sc.NAMBU: MU cannot be adjusted in Nambu space; set sc.ADJUST_MU = false and give MU.");
     std::cout<<"running a DCA calculation allowing for superconducting order"<<std::endl;
     run_dca<NambuClusterTransformer>(param_file_name, parms);
   }else if(afm || charge_order){

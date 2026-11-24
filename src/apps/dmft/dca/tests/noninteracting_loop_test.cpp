@@ -307,6 +307,18 @@ TEST(LoopOptions, RefusesNambuFieldWithSpinSymmetrization) {
   }
 }
 
+// MU cannot be adjusted in Nambu space. dca refuses sc.ADJUST_MU with
+// sc.NAMBU before it runs the solver; it failed after the first solver run
+// (#455).
+TEST(LoopOptions, RefusesNambuWithAdjustMu) {
+  const cluster_case c{"Betts2D-4A", "cluster.xml", 4, 2, 32, -0.15};
+  const fs::path dir = run_dca(c, "NambuAdjustMu", 10, true,
+                               "sc.NAMBU = true\nsc.ADJUST_MU = true\nsc.TARGET_DENSITY = 0.9\n", false);
+  const std::string log = read_file(dir / "dca.log");
+  EXPECT_NE(log.find("sc.NAMBU: MU cannot be adjusted in Nambu space"), std::string::npos) << log;
+  EXPECT_EQ(log.find("Calling external solver"), std::string::npos) << log;
+}
+
 // ---------------------------------------------------------------------------
 // Double unit cell and Nambu frameworks. Their G carries a 2x2 index: for the
 // double unit cell, G(K, j, spin) is the block (K, K+Q) of the cluster

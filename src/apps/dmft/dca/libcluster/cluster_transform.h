@@ -418,8 +418,6 @@ public:
   void attach_bare_tail(cluster_nambu_matsubara_kspace_gf &G0, double h, double eta1, double eta2, bool isolated_cluster=false) const;
   ///the d-wave form factor cos kx - cos ky at cluster momentum kc plus lattice momentum kl; kl<0 means at the cluster momentum itself
   double dwave_prefactor(int kc, int kl) const;
-  // TODO: h should also enter interacting tail
-  void attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const;
   void symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const;
   void symmetrize_k_space(cluster_nambu_matsubara_kspace_gf &G) const{return symmetrize_dwave_kspace(G);}
 

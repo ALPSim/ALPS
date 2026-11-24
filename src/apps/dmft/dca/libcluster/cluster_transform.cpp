@@ -843,7 +843,8 @@ void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf 
   }
 }
 double NambuClusterTransformer::matsubara_k_sum_adjust_mu(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma,double eta1,double eta2, double target_density) {
-  throw std::logic_error("not yet implemented. Bug Emanuel.");
+  // perform_cluster_loop refuses sc.ADJUST_MU with sc.NAMBU (#455)
+  throw std::logic_error("NambuClusterTransformer: MU cannot be adjusted in Nambu space (sc.ADJUST_MU with sc.NAMBU).");
 }
 
 void ClusterTransformer::compute_integration_weight_and_dispersion(){
@@ -948,28 +949,6 @@ void NambuClusterTransformer::attach_bare_tail(cluster_nambu_matsubara_kspace_gf
   G0.set_tail(2,c2);
   G0.set_tail(3,c3);
 }
-///merge this with normal state one?
-// TODO: h should also enter interacting tail
-void NambuClusterTransformer::attach_interacting_tail(cluster_nambu_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
-  alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
-  alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
-  alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
-  double density=(densities[0]+densities[1])/2.;
-
-  for(alps::gf::index f1(0); f1<n_flavors_; f1++) {
-    for(alps::gf::index f2(0); f2<n_flavors_; f2++) {
-      for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
-        c1(k,f1,f2) = f1()==f2()?1.:0.;
-        c2(k,f1,f2) = (f1()==0 && f2()==0)? epsav_[k()] - mu_ + U*density: (f1()==1 && f2()==1)? -(epsav_[k()] - mu_ + U*density):0.;
-        c3(k,f1,f2) = 0.;
-      }
-    }
-  }
-  G.set_tail(1,c1);
-  G.set_tail(2,c2);
-  G.set_tail(3,c3);
-}
-
 void NambuClusterTransformer::symmetrize_dwave_kspace(cluster_nambu_matsubara_kspace_gf &G) const
 {
   //symmetrize the diagonal elements of G
