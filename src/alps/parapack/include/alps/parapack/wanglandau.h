@@ -252,25 +252,16 @@ public:
   }
 
   static std::filesystem::path observable_dumpfile(Parameters const& params) {
-      std::filesystem::path basedir = absolute(std::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
-    std::filesystem::path dumpfile;
-    if (params.defined("OBSERVABLE_DUMP_FILE"))
-      dumpfile = alps::fs::absolute(std::filesystem::path(static_cast<std::string>(params["OBSERVABLE_DUMP_FILE"])), basedir);
-    else
-      dumpfile = alps::fs::absolute(std::filesystem::path(static_cast<std::string>(params["BASE_NAME"]) + ".observable"), basedir);
-    return dumpfile;
+    input::wanglandau_observable_dump const dump = input::read_wanglandau_observable_dump(params);
+    std::filesystem::path basedir = absolute(std::filesystem::path(dump.dir_name));
+    return alps::fs::absolute(std::filesystem::path(dump.file), basedir);
   }
 
   static std::vector<std::filesystem::path> weight_dumpfiles(Parameters const& params) {
-    std::filesystem::path basedir = absolute(std::filesystem::path(static_cast<std::string>(params["DIR_NAME"])));
-    std::vector<std::string> files;
-    if (params.defined("WEIGHT_DUMP_FILE")) {
-      read_vector_resize(params["WEIGHT_DUMP_FILE"], files);
-    } else {
-      files.push_back(params["BASE_NAME"] + ".weight");
-    }
+    input::wanglandau_weight_dump const dump = input::read_wanglandau_weight_dump(params);
+    std::filesystem::path basedir = absolute(std::filesystem::path(dump.dir_name));
     std::vector<std::filesystem::path> dumpfiles;
-    BOOST_FOREACH(std::string const& f, files) {
+    BOOST_FOREACH(std::string const& f, dump.files) {
       dumpfiles.push_back(alps::fs::absolute(std::filesystem::path(f), basedir));
     }
     return dumpfiles;
@@ -319,15 +310,10 @@ public:
 
   wanglandau_steps() {}
   wanglandau_steps(Parameters const& p)
-    : mcs_(p), stage_(0), interval_(16384), factor_(std::exp(1.0)), final_(1.00000001), flatness_(0.95) {
-    if (p.defined("CHECK_INTERVAL"))
-      interval_ = numeric::double2int(evaluate("CHECK_INTERVAL", p));
-    if (p.defined("INITIAL_UPDATE_FACTOR"))
-      factor_ = evaluate("INITIAL_UPDATE_FACTOR", p);
-    if (p.defined("FINAL_UPDATE_FACTOR"))
-      final_ = evaluate("FINAL_UPDATE_FACTOR", p);
-    if (p.defined("FLATNESS_THRESHOLD"))
-      flatness_ = evaluate("FLATNESS_THRESHOLD", p);
+    : wanglandau_steps(input::read_mc_steps_parameters(p), input::read_wanglandau_parameters(p)) {}
+  wanglandau_steps(input::mc_steps_parameters const& steps, input::wanglandau_parameters const& p)
+    : mcs_(steps), stage_(0), interval_(p.check_interval), factor_(p.initial_update_factor),
+      final_(p.final_update_factor), flatness_(p.flatness_threshold) {
     mcs_.set_thermalization(0);
     mcs_.set_sweeps(interval_);
   }

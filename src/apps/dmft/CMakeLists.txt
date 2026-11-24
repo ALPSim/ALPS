@@ -18,3 +18,4 @@
 #   DEALINGS IN THE SOFTWARE.
 
 add_subdirectory(qmc)
+add_subdirectory(dca)

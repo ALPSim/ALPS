@@ -32,6 +32,17 @@ if(Python_Interpreter_FOUND)
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_p2h5.py" "$<TARGET_FILE:p2h5>")
     set_tests_properties(p2h5_cli PROPERTIES TIMEOUT 60 LABELS "cli")
   endif()
+  if(TARGET dmft)
+    add_test(NAME dmft_parm_rewrite
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_parm_rewrite.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_parm_rewrite PROPERTIES TIMEOUT 240 LABELS "cli")
+    add_test(NAME dmft_itime_loop_refusals
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_itime_loop.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_itime_loop_refusals PROPERTIES TIMEOUT 120 LABELS "cli")
+    add_test(NAME dmft_ctint_max_order
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_ctint_max_order.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_ctint_max_order PROPERTIES TIMEOUT 240 LABELS "cli")
+  endif()
   if(TARGET spinmc)
     add_test(NAME scheduler_sweeps_spinmc
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_scheduler_sweeps.py"

@@ -90,6 +90,8 @@ void InteractionExpansion::initialize_observables(void)
     measurements << FullBinningAccumulator<double>(sz0_szj_name.str().c_str());
   }
   //acceptance probabilities
+  // fraction of the updates at order MAX_ORDER, unsigned like the acceptances
+  measurements << FullBinningAccumulator<double>("MaxOrderReached");
   measurements << FullBinningAccumulator<double>("VertexInsertion");
   measurements << FullBinningAccumulator<double>("VertexRemoval");
   measurements << FullBinningAccumulator<double>("MeasurementTime");

@@ -12,9 +12,22 @@
 *****************************************************************************/
 #include <alps/parapack/worker_factory.h>
 #include <alps/parapack/version.h>
+#include <alps/input/parapack.hpp>
 
 namespace alps {
 namespace parapack {
+
+namespace {
+
+// ALGORITHM, or the obsolete WORKER; empty if neither is set
+std::string algorithm_name(Parameters const& params) {
+  input::parapack_algorithm_parameters const p = input::read_parapack_algorithm_parameters(params);
+  if (p.obsolete_worker_key)
+    std::cout << "Warning: parameter WORKER is obsolete.  Please use ALGORITHM instead.\n";
+  return p.algorithm;
+}
+
+}
 
 //
 // abstract_worker
@@ -166,13 +179,7 @@ worker_factory::creator_pointer_type worker_factory::make_creator(Parameters con
     std::cerr << "Error: no algorithm registered\n";
     boost::throw_exception(std::runtime_error("worker_factory::make_creator()"));
   }
-  std::string algoname = "";
-  if (params.defined("ALGORITHM")) {
-    algoname = params["ALGORITHM"];
-  } else if (params.defined("WORKER")) {
-    algoname = params["WORKER"];
-    std::cout << "Warning: parameter WORKER is obsolete.  Please use ALGORITHM instead.\n";
-  }
+  std::string algoname = algorithm_name(params);
   if (worker_creators_.size() == 1) {
     if (algoname != "" && worker_creators_.begin()->first != algoname) {
       std::cout << "Warning: unknown algorithm: \"" << algoname
@@ -229,17 +236,9 @@ evaluator_factory* evaluator_factory::instance() {
 
 evaluator_factory::creator_pointer_type
 evaluator_factory::make_creator(Parameters const& params) const {
-  std::string evalname = "";
-  if (params.defined("EVALUATOR")) evalname = params["EVALUATOR"];
+  std::string evalname = input::read_parapack_algorithm_parameters(params).evaluator;
   std::string algoname = "";
-  if (evalname == "") {
-    if (params.defined("ALGORITHM")) {
-      algoname = params["ALGORITHM"];
-    } else if (params.defined("WORKER")) {
-      algoname = params["WORKER"];
-      std::cout << "Warning: parameter WORKER is obsolete.  Please use ALGORITHM instead.\n";
-    }
-  }
+  if (evalname == "") algoname = algorithm_name(params);
   if (evalname == "default") {
     // return default evaluator
   } else if (evaluator_creators_.size() == 0) {
@@ -326,13 +325,7 @@ parallel_worker_factory::make_creator(Parameters const& params) const {
     std::cerr << "Error: no algorithm registered\n";
     boost::throw_exception(std::runtime_error("parallel_worker_factory::make_creator()"));
   }
-  std::string algoname = "";
-  if (params.defined("ALGORITHM")) {
-    algoname = params["ALGORITHM"];
-  } else if (params.defined("WORKER")) {
-    algoname = params["WORKER"];
-    std::cout << "Warning: parameter WORKER is obsolete.  Please use ALGORITHM instead.\n";
-  }
+  std::string algoname = algorithm_name(params);
   if (worker_creators_.size() == 1) {
     if (algoname != "" && worker_creators_.begin()->first != algoname) {
       std::cout << "Warning: unknown algorithm: \"" << algoname

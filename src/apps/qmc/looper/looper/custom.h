@@ -13,6 +13,7 @@
 #define LOOPER_CUSTOM_H
 
 #include "measurement.h"
+#include <alps/input/looper.hpp>
 #include <alps/scheduler/measurement_operators.h>
 #include <boost/foreach.hpp>
 #include <boost/optional.hpp>
@@ -81,8 +82,8 @@ struct custom_measurement {
         local.resize(site_label.size());
       }
       if (correlation_elements.size()) {
-        if (params.defined("INITIAL_SITE"))
-          origin = static_cast<int>(params["INITIAL_SITE"]);
+        if (std::optional<int> const site = alps::input::read_looper_initial_site(params))
+          origin = *site;
         distance_label = distance_labels(lat, origin);
         if (!origin) {
           std::vector<unsigned int> m = distance_multiplicities(lat);

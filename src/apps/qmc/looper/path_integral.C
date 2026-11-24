@@ -107,7 +107,8 @@ loop_worker::loop_worker(alps::Parameters const& p)
 
   model.check_parameter(support_longitudinal_field, support_negative_sign);
 
-  use_improved_estimator = (!model.has_field()) && (!p.defined("DISABLE_IMPROVED_ESTIMATOR"));
+  use_improved_estimator = (!model.has_field()) &&
+    (!alps::input::read_looper_worker_parameters(p).disable_improved_estimator);
   if (!use_improved_estimator) std::cout << "WARNING: improved estimator is disabled\n";
 
   // configuration

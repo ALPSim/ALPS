@@ -1,0 +1,4113 @@
+<LATTICES>
+
+  <UNITCELL name="simple3d" dimension="3" vertices="1">
+    <VERTEX/>
+  </UNITCELL>
+
+  <LATTICE name="Betts3D-1A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 0</VECTOR>
+      <VECTOR>0 1 0</VECTOR>
+      <VECTOR>0 0 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi 0 0</VECTOR>
+      <VECTOR>0 2*pi 0</VECTOR>
+      <VECTOR>0 0 2*pi</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-1A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-1A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-8A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 0 0</VECTOR>
+      <VECTOR>0 2 0</VECTOR>
+      <VECTOR>0 0 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/8 0*pi/8 0*pi/8</VECTOR>
+      <VECTOR>0*pi/8 8*pi/8 0*pi/8</VECTOR>
+      <VECTOR>0*pi/8 0*pi/8 8*pi/8</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-8A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-8A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-8B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 0</VECTOR>
+      <VECTOR>0 1 2</VECTOR>
+      <VECTOR>1 -1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/8 4*pi/8 -2*pi/8</VECTOR>
+      <VECTOR>-2*pi/8 4*pi/8 6*pi/8</VECTOR>
+      <VECTOR>4*pi/8 -8*pi/8 4*pi/8</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-8B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-8B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-10A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+      <VECTOR>1 -2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-10 -2*pi/-10 -8*pi/-10</VECTOR>
+      <VECTOR>-8*pi/-10 -4*pi/-10 4*pi/-10</VECTOR>
+      <VECTOR>-8*pi/-10 6*pi/-10 4*pi/-10</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-10A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-10A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-12A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 1</VECTOR>
+      <VECTOR>1 -2 0</VECTOR>
+      <VECTOR>1 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/12 4*pi/12 4*pi/12</VECTOR>
+      <VECTOR>4*pi/12 -10*pi/12 2*pi/12</VECTOR>
+      <VECTOR>4*pi/12 2*pi/12 -10*pi/12</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-12A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-12A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-12B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>0 2 0</VECTOR>
+      <VECTOR>0 0 3</VECTOR>
+      <VECTOR>2 0 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/12 12*pi/12 0*pi/12</VECTOR>
+      <VECTOR>-4*pi/12 0*pi/12 8*pi/12</VECTOR>
+      <VECTOR>12*pi/12 0*pi/12 0*pi/12</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-12B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-12B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-14A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>2 -1 1</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/14 6*pi/14 10*pi/14</VECTOR>
+      <VECTOR>12*pi/14 -8*pi/14 -4*pi/14</VECTOR>
+      <VECTOR>8*pi/14 4*pi/14 -12*pi/14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-14A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-14A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-14B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>0 -1 2</VECTOR>
+      <VECTOR>2 -1 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/14 8*pi/14 4*pi/14</VECTOR>
+      <VECTOR>-2*pi/14 -4*pi/14 12*pi/14</VECTOR>
+      <VECTOR>10*pi/14 -8*pi/14 -4*pi/14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-14B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-14B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-14C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 0</VECTOR>
+      <VECTOR>-1 2 1</VECTOR>
+      <VECTOR>1 0 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/14 6*pi/14 -4*pi/14</VECTOR>
+      <VECTOR>-8*pi/14 8*pi/14 4*pi/14</VECTOR>
+      <VECTOR>4*pi/14 -4*pi/14 12*pi/14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-14C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-14C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-16A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 0</VECTOR>
+      <VECTOR>2 0 2</VECTOR>
+      <VECTOR>0 2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-16 -8*pi/-16 8*pi/-16</VECTOR>
+      <VECTOR>-8*pi/-16 8*pi/-16 -8*pi/-16</VECTOR>
+      <VECTOR>8*pi/-16 -8*pi/-16 -8*pi/-16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-16A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-16A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-16C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 2 0</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+      <VECTOR>-1 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/16 0*pi/16 8*pi/16</VECTOR>
+      <VECTOR>-4*pi/16 8*pi/16 -20*pi/16</VECTOR>
+      <VECTOR>-4*pi/16 8*pi/16 12*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-16C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-16C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-16D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 -2 0</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+      <VECTOR>1 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/16 -4*pi/16 -4*pi/16</VECTOR>
+      <VECTOR>4*pi/16 4*pi/16 -12*pi/16</VECTOR>
+      <VECTOR>8*pi/16 8*pi/16 8*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-16D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-16D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-16E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 0</VECTOR>
+      <VECTOR>2 -2 0</VECTOR>
+      <VECTOR>1 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/16 8*pi/16 4*pi/16</VECTOR>
+      <VECTOR>8*pi/16 -8*pi/16 4*pi/16</VECTOR>
+      <VECTOR>0*pi/16 0*pi/16 -16*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-16E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-16E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-16F superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 0</VECTOR>
+      <VECTOR>-3 1 -1</VECTOR>
+      <VECTOR>0 2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/16 12*pi/16 -12*pi/16</VECTOR>
+      <VECTOR>-8*pi/16 4*pi/16 -4*pi/16</VECTOR>
+      <VECTOR>-4*pi/16 2*pi/16 14*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-16F">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-16F superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/18 6*pi/18 6*pi/18</VECTOR>
+      <VECTOR>12*pi/18 -12*pi/18 0*pi/18</VECTOR>
+      <VECTOR>0*pi/18 12*pi/18 -12*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/18 6*pi/18 6*pi/18</VECTOR>
+      <VECTOR>10*pi/18 -14*pi/18 -2*pi/18</VECTOR>
+      <VECTOR>-2*pi/18 10*pi/18 -14*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>2 1 -1</VECTOR>
+      <VECTOR>-1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/18 6*pi/18 10*pi/18</VECTOR>
+      <VECTOR>12*pi/18 0*pi/18 -12*pi/18</VECTOR>
+      <VECTOR>-8*pi/18 12*pi/18 -4*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>0 0 3</VECTOR>
+      <VECTOR>2 -2 -1</VECTOR>
+      <VECTOR>2 1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/18 0*pi/18 12*pi/18</VECTOR>
+      <VECTOR>6*pi/18 -12*pi/18 0*pi/18</VECTOR>
+      <VECTOR>12*pi/18 12*pi/18 0*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 3 0</VECTOR>
+      <VECTOR>2 0 2</VECTOR>
+      <VECTOR>2 0 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/18 12*pi/18 0*pi/18</VECTOR>
+      <VECTOR>6*pi/18 -6*pi/18 12*pi/18</VECTOR>
+      <VECTOR>12*pi/18 -12*pi/18 -12*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-18F superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+      <VECTOR>0 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/18 0*pi/18 0*pi/18</VECTOR>
+      <VECTOR>0*pi/18 6*pi/18 -12*pi/18</VECTOR>
+      <VECTOR>-12*pi/18 12*pi/18 12*pi/18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-18F">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-18F superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+      <VECTOR>-1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/20 10*pi/20 2*pi/20</VECTOR>
+      <VECTOR>10*pi/20 -10*pi/20 -10*pi/20</VECTOR>
+      <VECTOR>-2*pi/20 10*pi/20 -14*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 1 1</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+      <VECTOR>1 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/20 -4*pi/20 -4*pi/20</VECTOR>
+      <VECTOR>2*pi/20 6*pi/20 -14*pi/20</VECTOR>
+      <VECTOR>-8*pi/20 16*pi/20 16*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>2 0 -2</VECTOR>
+      <VECTOR>-1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/20 12*pi/20 4*pi/20</VECTOR>
+      <VECTOR>12*pi/20 -4*pi/20 -8*pi/20</VECTOR>
+      <VECTOR>-8*pi/20 16*pi/20 -8*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 0</VECTOR>
+      <VECTOR>0 2 2</VECTOR>
+      <VECTOR>1 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/20 4*pi/20 -4*pi/20</VECTOR>
+      <VECTOR>-2*pi/20 6*pi/20 14*pi/20</VECTOR>
+      <VECTOR>4*pi/20 -12*pi/20 12*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 1 1</VECTOR>
+      <VECTOR>2 -2 0</VECTOR>
+      <VECTOR>1 -1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/20 8*pi/20 0*pi/20</VECTOR>
+      <VECTOR>2*pi/20 -18*pi/20 10*pi/20</VECTOR>
+      <VECTOR>4*pi/20 4*pi/20 -20*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20F superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+      <VECTOR>1 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/20 10*pi/20 4*pi/20</VECTOR>
+      <VECTOR>8*pi/20 -10*pi/20 4*pi/20</VECTOR>
+      <VECTOR>8*pi/20 0*pi/20 -16*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20F">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20F superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-20G superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>2 -2 0</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/20 8*pi/20 8*pi/20</VECTOR>
+      <VECTOR>10*pi/20 -10*pi/20 0*pi/20</VECTOR>
+      <VECTOR>4*pi/20 4*pi/20 -16*pi/20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-20G">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-20G superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-22A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 2 0</VECTOR>
+      <VECTOR>0 3 -1</VECTOR>
+      <VECTOR>-1 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/22 2*pi/22 6*pi/22</VECTOR>
+      <VECTOR>-4*pi/22 8*pi/22 -20*pi/22</VECTOR>
+      <VECTOR>-4*pi/22 8*pi/22 24*pi/22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-22A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-22A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-22B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>3 0 -1</VECTOR>
+      <VECTOR>-1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/22 14*pi/22 6*pi/22</VECTOR>
+      <VECTOR>12*pi/22 -4*pi/22 -8*pi/22</VECTOR>
+      <VECTOR>-4*pi/22 16*pi/22 -12*pi/22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-22B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-22B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-22C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 0</VECTOR>
+      <VECTOR>0 2 2</VECTOR>
+      <VECTOR>1 -1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/22 4*pi/22 -4*pi/22</VECTOR>
+      <VECTOR>-8*pi/22 12*pi/22 10*pi/22</VECTOR>
+      <VECTOR>8*pi/22 -12*pi/22 12*pi/22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-22C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-22C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-22E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 1 1</VECTOR>
+      <VECTOR>2 2 -3</VECTOR>
+      <VECTOR>0 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/22 4*pi/22 8*pi/22</VECTOR>
+      <VECTOR>6*pi/22 -8*pi/22 -16*pi/22</VECTOR>
+      <VECTOR>-10*pi/22 28*pi/22 12*pi/22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-22E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-22E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-24A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 0</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+      <VECTOR>0 2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>16*pi/24 0*pi/24 0*pi/24</VECTOR>
+      <VECTOR>-4*pi/24 12*pi/24 -12*pi/24</VECTOR>
+      <VECTOR>-4*pi/24 12*pi/24 12*pi/24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-24A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-24A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-24B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+      <VECTOR>2 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-24 -8*pi/-24 -8*pi/-24</VECTOR>
+      <VECTOR>8*pi/-24 -16*pi/-24 8*pi/-24</VECTOR>
+      <VECTOR>-16*pi/-24 8*pi/-24 8*pi/-24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-24B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-24B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-24C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>3 0 -1</VECTOR>
+      <VECTOR>-1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/24 8*pi/24 12*pi/24</VECTOR>
+      <VECTOR>12*pi/24 0*pi/24 -12*pi/24</VECTOR>
+      <VECTOR>-4*pi/24 16*pi/24 -12*pi/24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-24C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-24C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-24D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>0 0 3</VECTOR>
+      <VECTOR>1 3 0</VECTOR>
+      <VECTOR>-2 2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/24 0*pi/24 16*pi/24</VECTOR>
+      <VECTOR>12*pi/24 12*pi/24 0*pi/24</VECTOR>
+      <VECTOR>-18*pi/24 6*pi/24 0*pi/24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-24D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-24D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-24E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 0</VECTOR>
+      <VECTOR>3 -2 0</VECTOR>
+      <VECTOR>1 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/24 12*pi/24 4*pi/24</VECTOR>
+      <VECTOR>8*pi/24 -12*pi/24 4*pi/24</VECTOR>
+      <VECTOR>0*pi/24 0*pi/24 -24*pi/24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-24E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-24E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-26A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 -2 -2</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/26 4*pi/26 8*pi/26</VECTOR>
+      <VECTOR>10*pi/26 -14*pi/26 -2*pi/26</VECTOR>
+      <VECTOR>-4*pi/26 16*pi/26 -20*pi/26</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-26A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-26A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-26B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 2</VECTOR>
+      <VECTOR>3 -2 1</VECTOR>
+      <VECTOR>3 1 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/26 6*pi/26 18*pi/26</VECTOR>
+      <VECTOR>4*pi/26 -12*pi/26 16*pi/26</VECTOR>
+      <VECTOR>14*pi/26 10*pi/26 -22*pi/26</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-26B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-26B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-26C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 3</VECTOR>
+      <VECTOR>2 -1 -2</VECTOR>
+      <VECTOR>2 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/26 -4*pi/26 12*pi/26</VECTOR>
+      <VECTOR>14*pi/26 -16*pi/26 -4*pi/26</VECTOR>
+      <VECTOR>2*pi/26 20*pi/26 -8*pi/26</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-26C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-26C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-7A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 -1</VECTOR>
+      <VECTOR>2 0 1</VECTOR>
+      <VECTOR>0 1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/-7 -8*pi/-7 4*pi/-7</VECTOR>
+      <VECTOR>-6*pi/-7 4*pi/-7 -2*pi/-7</VECTOR>
+      <VECTOR>2*pi/-7 -6*pi/-7 -4*pi/-7</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-7A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-7A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-9A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 1</VECTOR>
+      <VECTOR>1 -2 1</VECTOR>
+      <VECTOR>1 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/9 4*pi/9 2*pi/9</VECTOR>
+      <VECTOR>0*pi/9 -6*pi/9 6*pi/9</VECTOR>
+      <VECTOR>6*pi/9 -2*pi/9 -10*pi/9</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-9A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-9A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-9B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>-1 1 1</VECTOR>
+      <VECTOR>2 1 1</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-6*pi/9 6*pi/9 6*pi/9</VECTOR>
+      <VECTOR>6*pi/9 0*pi/9 6*pi/9</VECTOR>
+      <VECTOR>0*pi/9 6*pi/9 -6*pi/9</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-9B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-9B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-9C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>2 1 0</VECTOR>
+      <VECTOR>0 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/9 -4*pi/9 8*pi/9</VECTOR>
+      <VECTOR>8*pi/9 2*pi/9 -4*pi/9</VECTOR>
+      <VECTOR>-4*pi/9 8*pi/9 2*pi/9</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-9C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-9C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-9D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 -1</VECTOR>
+      <VECTOR>2 -1 -2</VECTOR>
+      <VECTOR>2 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/-9 -12*pi/-9 12*pi/-9</VECTOR>
+      <VECTOR>-6*pi/-9 6*pi/-9 0*pi/-9</VECTOR>
+      <VECTOR>-6*pi/-9 0*pi/-9 -6*pi/-9</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-9D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-9D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-11A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 2</VECTOR>
+      <VECTOR>1 1 -3</VECTOR>
+      <VECTOR>1 2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/11 -6*pi/11 2*pi/11</VECTOR>
+      <VECTOR>8*pi/11 -4*pi/11 -6*pi/11</VECTOR>
+      <VECTOR>-10*pi/11 16*pi/11 2*pi/11</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-11A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-11A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-13A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 1 1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+      <VECTOR>-1 2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/13 4*pi/13 6*pi/13</VECTOR>
+      <VECTOR>4*pi/13 2*pi/13 -10*pi/13</VECTOR>
+      <VECTOR>-6*pi/13 10*pi/13 2*pi/13</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-13A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-13A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-13B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 -1 -1</VECTOR>
+      <VECTOR>2 -1 2</VECTOR>
+      <VECTOR>3 1 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-13 12*pi/-13 10*pi/-13</VECTOR>
+      <VECTOR>-2*pi/-13 6*pi/-13 -8*pi/-13</VECTOR>
+      <VECTOR>-6*pi/-13 -8*pi/-13 2*pi/-13</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-13B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-13B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-13C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 0 -1</VECTOR>
+      <VECTOR>0 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/13 8*pi/13 4*pi/13</VECTOR>
+      <VECTOR>10*pi/13 -12*pi/13 -6*pi/13</VECTOR>
+      <VECTOR>-4*pi/13 10*pi/13 -8*pi/13</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-13C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-13C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+      <VECTOR>-1 2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/15 4*pi/15 6*pi/15</VECTOR>
+      <VECTOR>4*pi/15 2*pi/15 -12*pi/15</VECTOR>
+      <VECTOR>-10*pi/15 10*pi/15 0*pi/15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>2 -1 1</VECTOR>
+      <VECTOR>1 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/15 10*pi/15 2*pi/15</VECTOR>
+      <VECTOR>8*pi/15 -10*pi/15 4*pi/15</VECTOR>
+      <VECTOR>6*pi/15 0*pi/15 -12*pi/15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 -1 2</VECTOR>
+      <VECTOR>0 0 -3</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/15 -6*pi/15 0*pi/15</VECTOR>
+      <VECTOR>6*pi/15 -8*pi/15 -10*pi/15</VECTOR>
+      <VECTOR>6*pi/15 12*pi/15 0*pi/15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-6*pi/-15 -6*pi/-15 -6*pi/-15</VECTOR>
+      <VECTOR>2*pi/-15 -8*pi/-15 12*pi/-15</VECTOR>
+      <VECTOR>-10*pi/-15 10*pi/-15 0*pi/-15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>-1 2 -2</VECTOR>
+      <VECTOR>-1 1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/15 6*pi/15 2*pi/15</VECTOR>
+      <VECTOR>-2*pi/15 6*pi/15 -8*pi/15</VECTOR>
+      <VECTOR>-12*pi/15 6*pi/15 12*pi/15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-15G superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 3 -1</VECTOR>
+      <VECTOR>-1 1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/15 -2*pi/15 10*pi/15</VECTOR>
+      <VECTOR>-2*pi/15 8*pi/15 -10*pi/15</VECTOR>
+      <VECTOR>-10*pi/15 10*pi/15 10*pi/15</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-15G">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-15G superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-17A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 1 1</VECTOR>
+      <VECTOR>1 -3 -1</VECTOR>
+      <VECTOR>2 0 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/17 -2*pi/17 12*pi/17</VECTOR>
+      <VECTOR>2*pi/17 -12*pi/17 4*pi/17</VECTOR>
+      <VECTOR>4*pi/17 10*pi/17 -26*pi/17</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-17A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-17A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-17B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>1 -1 2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/17 10*pi/17 2*pi/17</VECTOR>
+      <VECTOR>2*pi/17 -8*pi/17 12*pi/17</VECTOR>
+      <VECTOR>10*pi/17 -6*pi/17 -8*pi/17</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-17B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-17B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-17C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 2 1</VECTOR>
+      <VECTOR>2 -1 2</VECTOR>
+      <VECTOR>1 -2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/17 4*pi/17 -6*pi/17</VECTOR>
+      <VECTOR>-4*pi/17 -2*pi/17 20*pi/17</VECTOR>
+      <VECTOR>10*pi/17 -12*pi/17 -16*pi/17</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-17C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-17C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-19A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 1</VECTOR>
+      <VECTOR>1 -2 1</VECTOR>
+      <VECTOR>1 -1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/19 6*pi/19 2*pi/19</VECTOR>
+      <VECTOR>2*pi/19 -14*pi/19 8*pi/19</VECTOR>
+      <VECTOR>6*pi/19 -4*pi/19 -14*pi/19</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-19A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-19A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-19B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 1</VECTOR>
+      <VECTOR>-1 3 0</VECTOR>
+      <VECTOR>0 1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/19 4*pi/19 -2*pi/19</VECTOR>
+      <VECTOR>-2*pi/19 12*pi/19 -6*pi/19</VECTOR>
+      <VECTOR>-6*pi/19 -2*pi/19 20*pi/19</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-19B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-19B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-19C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 -3 0</VECTOR>
+      <VECTOR>2 0 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/19 4*pi/19 12*pi/19</VECTOR>
+      <VECTOR>4*pi/19 -10*pi/19 8*pi/19</VECTOR>
+      <VECTOR>6*pi/19 4*pi/19 -26*pi/19</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-19C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-19C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-19D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>0 2 3</VECTOR>
+      <VECTOR>1 -1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/19 6*pi/19 -4*pi/19</VECTOR>
+      <VECTOR>-6*pi/19 4*pi/19 10*pi/19</VECTOR>
+      <VECTOR>8*pi/19 -18*pi/19 12*pi/19</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-19D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-19D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-21A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>2 1 -2</VECTOR>
+      <VECTOR>-1 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/21 12*pi/21 10*pi/21</VECTOR>
+      <VECTOR>12*pi/21 -6*pi/21 -12*pi/21</VECTOR>
+      <VECTOR>-10*pi/21 12*pi/21 -4*pi/21</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-21A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-21A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-21B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 0</VECTOR>
+      <VECTOR>1 0 3</VECTOR>
+      <VECTOR>2 -1 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/21 12*pi/21 -2*pi/21</VECTOR>
+      <VECTOR>0*pi/21 0*pi/21 14*pi/21</VECTOR>
+      <VECTOR>12*pi/21 -18*pi/21 -4*pi/21</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-21B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-21B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-21C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 2</VECTOR>
+      <VECTOR>0 3 -1</VECTOR>
+      <VECTOR>0 1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>14*pi/21 0*pi/21 0*pi/21</VECTOR>
+      <VECTOR>-4*pi/21 12*pi/21 -6*pi/21</VECTOR>
+      <VECTOR>-16*pi/21 6*pi/21 18*pi/21</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-21C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-21C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-21D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 1</VECTOR>
+      <VECTOR>1 -2 2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/21 10*pi/21 6*pi/21</VECTOR>
+      <VECTOR>2*pi/21 -8*pi/21 12*pi/21</VECTOR>
+      <VECTOR>12*pi/21 -6*pi/21 -12*pi/21</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-21D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-21D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-21E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/21 6*pi/21 6*pi/21</VECTOR>
+      <VECTOR>12*pi/21 -16*pi/21 -2*pi/21</VECTOR>
+      <VECTOR>0*pi/21 14*pi/21 -14*pi/21</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-21E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-21E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>4 2 1</VECTOR>
+      <VECTOR>-2 3 2</VECTOR>
+      <VECTOR>1 1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/23 12*pi/23 -10*pi/23</VECTOR>
+      <VECTOR>-6*pi/23 14*pi/23 -4*pi/23</VECTOR>
+      <VECTOR>2*pi/23 -20*pi/23 32*pi/23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 1</VECTOR>
+      <VECTOR>1 2 -2</VECTOR>
+      <VECTOR>-1 2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/23 2*pi/23 8*pi/23</VECTOR>
+      <VECTOR>2*pi/23 8*pi/23 -14*pi/23</VECTOR>
+      <VECTOR>-8*pi/23 14*pi/23 10*pi/23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 0 2</VECTOR>
+      <VECTOR>1 3 1</VECTOR>
+      <VECTOR>-1 1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/23 -6*pi/23 8*pi/23</VECTOR>
+      <VECTOR>4*pi/23 16*pi/23 -6*pi/23</VECTOR>
+      <VECTOR>-12*pi/23 -2*pi/23 18*pi/23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 1</VECTOR>
+      <VECTOR>-3 0 1</VECTOR>
+      <VECTOR>0 1 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/23 18*pi/23 -6*pi/23</VECTOR>
+      <VECTOR>-16*pi/23 6*pi/23 -2*pi/23</VECTOR>
+      <VECTOR>6*pi/23 -8*pi/23 18*pi/23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23D">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23E superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 2</VECTOR>
+      <VECTOR>1 -1 3</VECTOR>
+      <VECTOR>2 -1 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/23 12*pi/23 2*pi/23</VECTOR>
+      <VECTOR>-4*pi/23 -8*pi/23 14*pi/23</VECTOR>
+      <VECTOR>22*pi/23 -2*pi/23 -8*pi/23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23E">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23E superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-23F superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 2</VECTOR>
+      <VECTOR>3 1 1</VECTOR>
+      <VECTOR>1 0 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/-23 -16*pi/-23 -2*pi/-23</VECTOR>
+      <VECTOR>-18*pi/-23 2*pi/-23 6*pi/-23</VECTOR>
+      <VECTOR>2*pi/-23 10*pi/-23 -16*pi/-23</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-23F">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-23F superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-25A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 2</VECTOR>
+      <VECTOR>-1 0 3</VECTOR>
+      <VECTOR>2 -1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/25 14*pi/25 2*pi/25</VECTOR>
+      <VECTOR>-8*pi/25 -2*pi/25 14*pi/25</VECTOR>
+      <VECTOR>12*pi/25 -22*pi/25 4*pi/25</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-25A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-25A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-25B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>0 2 3</VECTOR>
+      <VECTOR>3 -1 -1</VECTOR>
+      <VECTOR>1 2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/25 4*pi/25 14*pi/25</VECTOR>
+      <VECTOR>16*pi/25 -6*pi/25 4*pi/25</VECTOR>
+      <VECTOR>2*pi/25 18*pi/25 -12*pi/25</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-25B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-25B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-25C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 1 1</VECTOR>
+      <VECTOR>0 1 3</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>14*pi/25 12*pi/25 -4*pi/25</VECTOR>
+      <VECTOR>-6*pi/25 2*pi/25 16*pi/25</VECTOR>
+      <VECTOR>4*pi/25 -18*pi/25 6*pi/25</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-25C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-25C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-27A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 0 0</VECTOR>
+      <VECTOR>0 3 0</VECTOR>
+      <VECTOR>0 0 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>18*pi/27 0*pi/27 0*pi/27</VECTOR>
+      <VECTOR>0*pi/27 18*pi/27 0*pi/27</VECTOR>
+      <VECTOR>0*pi/27 0*pi/27 18*pi/27</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-27A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-27A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-28A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 2</VECTOR>
+      <VECTOR>3 0 -1</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/28 12*pi/28 12*pi/28</VECTOR>
+      <VECTOR>16*pi/28 -8*pi/28 -8*pi/28</VECTOR>
+      <VECTOR>-4*pi/28 16*pi/28 -12*pi/28</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-28A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-28A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-28B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>3 -2 1</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/28 14*pi/28 10*pi/28</VECTOR>
+      <VECTOR>10*pi/28 -14*pi/28 -2*pi/28</VECTOR>
+      <VECTOR>8*pi/28 0*pi/28 -24*pi/28</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-28B">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-28B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-28C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 2</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>0 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/-28 -12*pi/-28 -12*pi/-28</VECTOR>
+      <VECTOR>-20*pi/-28 4*pi/-28 4*pi/-28</VECTOR>
+      <VECTOR>-14*pi/-28 14*pi/-28 -14*pi/-28</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-28C">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-28C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-30A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 0 1</VECTOR>
+      <VECTOR>2 3 -1</VECTOR>
+      <VECTOR>-1 0 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>18*pi/30 -10*pi/30 6*pi/30</VECTOR>
+      <VECTOR>0*pi/30 20*pi/30 0*pi/30</VECTOR>
+      <VECTOR>-6*pi/30 10*pi/30 18*pi/30</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-30A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-30A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-32A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>-2 2 2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/32 16*pi/32 16*pi/32</VECTOR>
+      <VECTOR>16*pi/32 0*pi/32 16*pi/32</VECTOR>
+      <VECTOR>16*pi/32 16*pi/32 0*pi/32</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-32A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-32A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-34A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 4 1</VECTOR>
+      <VECTOR>-3 1 2</VECTOR>
+      <VECTOR>0 1 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/34 18*pi/34 -6*pi/34</VECTOR>
+      <VECTOR>-22*pi/34 6*pi/34 -2*pi/34</VECTOR>
+      <VECTOR>14*pi/34 -10*pi/34 26*pi/34</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-34A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-34A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Betts3D-36A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>3 -2 -1</VECTOR>
+      <VECTOR>0 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/36 12*pi/36 12*pi/36</VECTOR>
+      <VECTOR>12*pi/36 -12*pi/36 -12*pi/36</VECTOR>
+      <VECTOR>0*pi/36 12*pi/36 -24*pi/36</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Betts3D-36A">
+    <FINITELATTICE>
+      <LATTICE ref="Betts3D-36A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+
+  <UNITCELL name="simple3d" dimension="3" vertices="1">
+    <VERTEX/>
+  </UNITCELL>
+
+  <LATTICE name="Kent3D-8A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>1 2 0</VECTOR>
+      <VECTOR>1 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-8 2*pi/-8 -6*pi/-8</VECTOR>
+      <VECTOR>-4*pi/-8 -6*pi/-8 2*pi/-8</VECTOR>
+      <VECTOR>-8*pi/-8 4*pi/-8 4*pi/-8</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-8A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-8A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-8B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>0 0 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/8 12*pi/8 0*pi/8</VECTOR>
+      <VECTOR>8*pi/8 -4*pi/8 0*pi/8</VECTOR>
+      <VECTOR>-16*pi/8 20*pi/8 -8*pi/8</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-8B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-8B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-8C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 0 0</VECTOR>
+      <VECTOR>0 2 0</VECTOR>
+      <VECTOR>0 0 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/8 0*pi/8 0*pi/8</VECTOR>
+      <VECTOR>0*pi/8 8*pi/8 0*pi/8</VECTOR>
+      <VECTOR>0*pi/8 0*pi/8 8*pi/8</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-8C">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-8C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-10A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 1</VECTOR>
+      <VECTOR>3 1 -1</VECTOR>
+      <VECTOR>2 -1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-10 -10*pi/-10 -10*pi/-10</VECTOR>
+      <VECTOR>-4*pi/-10 -2*pi/-10 6*pi/-10</VECTOR>
+      <VECTOR>-4*pi/-10 8*pi/-10 -4*pi/-10</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-10A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-10A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-10B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 1 -2</VECTOR>
+      <VECTOR>0 0 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/-10 -12*pi/-10 0*pi/-10</VECTOR>
+      <VECTOR>-8*pi/-10 4*pi/-10 0*pi/-10</VECTOR>
+      <VECTOR>-14*pi/-10 22*pi/-10 -10*pi/-10</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-10B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-10B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-12A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>2 1 -1</VECTOR>
+      <VECTOR>1 -2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-12 -2*pi/-12 -10*pi/-12</VECTOR>
+      <VECTOR>-8*pi/-12 -4*pi/-12 4*pi/-12</VECTOR>
+      <VECTOR>-4*pi/-12 10*pi/-12 2*pi/-12</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-12A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-12A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-12B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 0 -3</VECTOR>
+      <VECTOR>-3 -3 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-18*pi/-12 30*pi/-12 -18*pi/-12</VECTOR>
+      <VECTOR>-8*pi/-12 8*pi/-12 0*pi/-12</VECTOR>
+      <VECTOR>-6*pi/-12 18*pi/-12 -6*pi/-12</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-12B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-12B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-14A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>3 1 0</VECTOR>
+      <VECTOR>1 -2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-14 0*pi/-14 -14*pi/-14</VECTOR>
+      <VECTOR>-8*pi/-14 -4*pi/-14 4*pi/-14</VECTOR>
+      <VECTOR>-4*pi/-14 12*pi/-14 2*pi/-14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-14A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-14A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-14B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>2 1 -1</VECTOR>
+      <VECTOR>1 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/-14 -6*pi/-14 -10*pi/-14</VECTOR>
+      <VECTOR>-10*pi/-14 -2*pi/-14 6*pi/-14</VECTOR>
+      <VECTOR>-6*pi/-14 10*pi/-14 -2*pi/-14</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-14B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-14B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-16C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>1 -2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-16 8*pi/-16 -16*pi/-16</VECTOR>
+      <VECTOR>-8*pi/-16 -6*pi/-16 4*pi/-16</VECTOR>
+      <VECTOR>-8*pi/-16 10*pi/-16 4*pi/-16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-16C">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-16C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-16D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>2 -2 0</VECTOR>
+      <VECTOR>1 1 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/16 8*pi/16 8*pi/16</VECTOR>
+      <VECTOR>8*pi/16 -8*pi/16 0*pi/16</VECTOR>
+      <VECTOR>8*pi/16 8*pi/16 -8*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-16D">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-16D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-16Z superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 0 0</VECTOR>
+      <VECTOR>0 2 0</VECTOR>
+      <VECTOR>0 0 4</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>16*pi/16 0*pi/16 0*pi/16</VECTOR>
+      <VECTOR>0*pi/16 16*pi/16 0*pi/16</VECTOR>
+      <VECTOR>0*pi/16 0*pi/16 8*pi/16</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-16Z">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-16Z superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+
+  <LATTICE name="Kent3D-18A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>2 2 -1</VECTOR>
+      <VECTOR>1 -2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-18 6*pi/-18 -12*pi/-18</VECTOR>
+      <VECTOR>-8*pi/-18 -8*pi/-18 4*pi/-18</VECTOR>
+      <VECTOR>-8*pi/-18 10*pi/-18 4*pi/-18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-18A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-18A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-18B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+      <VECTOR>2 -1 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-18 -4*pi/-18 -12*pi/-18</VECTOR>
+      <VECTOR>-2*pi/-18 -10*pi/-18 6*pi/-18</VECTOR>
+      <VECTOR>-12*pi/-18 12*pi/-18 0*pi/-18</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-18B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-18B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-20A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 2</VECTOR>
+      <VECTOR>3 2 1</VECTOR>
+      <VECTOR>2 -2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-20 10*pi/-20 -20*pi/-20</VECTOR>
+      <VECTOR>-8*pi/-20 -10*pi/-20 4*pi/-20</VECTOR>
+      <VECTOR>-8*pi/-20 10*pi/-20 4*pi/-20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-20A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-20A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-20B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 3 2</VECTOR>
+      <VECTOR>3 -2 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/-20 18*pi/-20 -30*pi/-20</VECTOR>
+      <VECTOR>-6*pi/-20 -14*pi/-20 10*pi/-20</VECTOR>
+      <VECTOR>-8*pi/-20 8*pi/-20 0*pi/-20</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-20B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-20B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-22A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 1 -1</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/-22 -10*pi/-22 -16*pi/-22</VECTOR>
+      <VECTOR>-10*pi/-22 -6*pi/-22 8*pi/-22</VECTOR>
+      <VECTOR>-6*pi/-22 14*pi/-22 -4*pi/-22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-22A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-22A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-22B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>2 -1 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/-22 -18*pi/-22 -14*pi/-22</VECTOR>
+      <VECTOR>-6*pi/-22 -10*pi/-22 2*pi/-22</VECTOR>
+      <VECTOR>-12*pi/-22 24*pi/-22 4*pi/-22</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-22B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-22B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-24C superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 0 0</VECTOR>
+      <VECTOR>1 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/24 12*pi/24 12*pi/24</VECTOR>
+      <VECTOR>16*pi/24 -10*pi/24 -2*pi/24</VECTOR>
+      <VECTOR>0*pi/24 18*pi/24 -6*pi/24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-24C">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-24C superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-24D superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 3 0</VECTOR>
+      <VECTOR>2 -2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-24 12*pi/-24 -24*pi/-24</VECTOR>
+      <VECTOR>-4*pi/-24 -12*pi/-24 8*pi/-24</VECTOR>
+      <VECTOR>-12*pi/-24 12*pi/-24 0*pi/-24</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-24D">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-24D superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-26A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>2 2 -1</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/-26 -12*pi/-26 -16*pi/-26</VECTOR>
+      <VECTOR>-16*pi/-26 -4*pi/-26 12*pi/-26</VECTOR>
+      <VECTOR>-12*pi/-26 10*pi/-26 -4*pi/-26</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-26A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-26A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-26B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/-26 -16*pi/-26 -20*pi/-26</VECTOR>
+      <VECTOR>-12*pi/-26 -4*pi/-26 8*pi/-26</VECTOR>
+      <VECTOR>-10*pi/-26 14*pi/-26 -2*pi/-26</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-26B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-26B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-28A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 -1 1</VECTOR>
+      <VECTOR>1 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/28 14*pi/28 14*pi/28</VECTOR>
+      <VECTOR>16*pi/28 -10*pi/28 -2*pi/28</VECTOR>
+      <VECTOR>8*pi/28 16*pi/28 -8*pi/28</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-28A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-28A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-28B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>1 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/-28 -14*pi/-28 -22*pi/-28</VECTOR>
+      <VECTOR>-16*pi/-28 0*pi/-28 8*pi/-28</VECTOR>
+      <VECTOR>-10*pi/-28 14*pi/-28 -2*pi/-28</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-28B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-28B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-30A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-30 -12*pi/-30 -16*pi/-30</VECTOR>
+      <VECTOR>-12*pi/-30 -6*pi/-30 12*pi/-30</VECTOR>
+      <VECTOR>-16*pi/-30 12*pi/-30 -4*pi/-30</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-30A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-30A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-30B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 2</VECTOR>
+      <VECTOR>3 1 -2</VECTOR>
+      <VECTOR>3 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-6*pi/-30 -18*pi/-30 -18*pi/-30</VECTOR>
+      <VECTOR>-10*pi/-30 -10*pi/-30 10*pi/-30</VECTOR>
+      <VECTOR>-8*pi/-30 16*pi/-30 -4*pi/-30</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-30B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-30B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-32A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-32 -12*pi/-32 -16*pi/-32</VECTOR>
+      <VECTOR>-14*pi/-32 -10*pi/-32 8*pi/-32</VECTOR>
+      <VECTOR>-16*pi/-32 16*pi/-32 0*pi/-32</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-32A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-32A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-32B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>2 0 -2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-32 -16*pi/-32 -8*pi/-32</VECTOR>
+      <VECTOR>-20*pi/-32 -8*pi/-32 12*pi/-32</VECTOR>
+      <VECTOR>-8*pi/-32 16*pi/-32 -8*pi/-32</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-32B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-32B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-34A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 -2 0</VECTOR>
+      <VECTOR>1 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/34 12*pi/34 16*pi/34</VECTOR>
+      <VECTOR>16*pi/34 -10*pi/34 -2*pi/34</VECTOR>
+      <VECTOR>12*pi/34 18*pi/34 -10*pi/34</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-34A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-34A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-34B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 3</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+      <VECTOR>1 -3 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-20*pi/-34 4*pi/-34 -16*pi/-34</VECTOR>
+      <VECTOR>-18*pi/-34 -10*pi/-34 6*pi/-34</VECTOR>
+      <VECTOR>-12*pi/-34 16*pi/-34 4*pi/-34</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-34B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-34B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-36A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>3 0 -2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-36 -20*pi/-36 -12*pi/-36</VECTOR>
+      <VECTOR>-16*pi/-36 -4*pi/-36 12*pi/-36</VECTOR>
+      <VECTOR>-8*pi/-36 16*pi/-36 -12*pi/-36</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-36A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-36A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-36B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 0 3</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>2 -2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-36 8*pi/-36 -20*pi/-36</VECTOR>
+      <VECTOR>-12*pi/-36 -16*pi/-36 4*pi/-36</VECTOR>
+      <VECTOR>-12*pi/-36 20*pi/-36 4*pi/-36</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-36B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-36B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-38A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 1 -3</VECTOR>
+      <VECTOR>2 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-10*pi/-38 -18*pi/-38 -16*pi/-38</VECTOR>
+      <VECTOR>-14*pi/-38 -10*pi/-38 8*pi/-38</VECTOR>
+      <VECTOR>-12*pi/-38 24*pi/-38 -4*pi/-38</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-38A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-38A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-38B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -1 -2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-38 -20*pi/-38 -8*pi/-38</VECTOR>
+      <VECTOR>-20*pi/-38 -8*pi/-38 12*pi/-38</VECTOR>
+      <VECTOR>-2*pi/-38 22*pi/-38 -14*pi/-38</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-38B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-38B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-40A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>3 1 -2</VECTOR>
+      <VECTOR>1 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-40 -16*pi/-40 -20*pi/-40</VECTOR>
+      <VECTOR>-20*pi/-40 0*pi/-40 10*pi/-40</VECTOR>
+      <VECTOR>-12*pi/-40 16*pi/-40 -10*pi/-40</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-40A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-40A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-40B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-40 -16*pi/-40 -16*pi/-40</VECTOR>
+      <VECTOR>-20*pi/-40 -8*pi/-40 12*pi/-40</VECTOR>
+      <VECTOR>-20*pi/-40 16*pi/-40 -4*pi/-40</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-40B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-40B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-42A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>3 0 -2</VECTOR>
+      <VECTOR>0 3 -3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/42 18*pi/42 18*pi/42</VECTOR>
+      <VECTOR>24*pi/42 -6*pi/42 -6*pi/42</VECTOR>
+      <VECTOR>-8*pi/42 16*pi/42 -12*pi/42</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-42A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-42A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-42B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -1 2</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/42 20*pi/42 16*pi/42</VECTOR>
+      <VECTOR>20*pi/42 -16*pi/42 4*pi/42</VECTOR>
+      <VECTOR>14*pi/42 14*pi/42 -14*pi/42</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-42B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-42B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-44A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 2</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -2 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-44 -18*pi/-44 -24*pi/-44</VECTOR>
+      <VECTOR>-12*pi/-44 -10*pi/-44 16*pi/-44</VECTOR>
+      <VECTOR>-16*pi/-44 16*pi/-44 -8*pi/-44</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-44A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-44A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-44B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/-44 -16*pi/-44 -20*pi/-44</VECTOR>
+      <VECTOR>-20*pi/-44 -8*pi/-44 12*pi/-44</VECTOR>
+      <VECTOR>-16*pi/-44 20*pi/-44 -8*pi/-44</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-44B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-44B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-46A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -2 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-46 -12*pi/-46 -24*pi/-46</VECTOR>
+      <VECTOR>-12*pi/-46 -18*pi/-46 10*pi/-46</VECTOR>
+      <VECTOR>-16*pi/-46 22*pi/-46 -2*pi/-46</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-46A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-46A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-46B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 1 -2</VECTOR>
+      <VECTOR>2 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-4*pi/-46 -20*pi/-46 -16*pi/-46</VECTOR>
+      <VECTOR>-20*pi/-46 -8*pi/-46 12*pi/-46</VECTOR>
+      <VECTOR>-14*pi/-46 22*pi/-46 -10*pi/-46</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-46B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-46B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-48A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>2 -3 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-16*pi/-48 -2*pi/-48 -26*pi/-48</VECTOR>
+      <VECTOR>-16*pi/-48 -14*pi/-48 10*pi/-48</VECTOR>
+      <VECTOR>-16*pi/-48 22*pi/-48 -2*pi/-48</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-48A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-48A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-48B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -2 1</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/48 16*pi/48 20*pi/48</VECTOR>
+      <VECTOR>20*pi/48 -16*pi/48 4*pi/48</VECTOR>
+      <VECTOR>16*pi/48 16*pi/48 -16*pi/48</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-48B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-48B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-50A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>2 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-50 -14*pi/-50 -26*pi/-50</VECTOR>
+      <VECTOR>-20*pi/-50 -10*pi/-50 10*pi/-50</VECTOR>
+      <VECTOR>-16*pi/-50 22*pi/-50 -2*pi/-50</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-50A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-50A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-50B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>2 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-2*pi/-50 -10*pi/-50 -26*pi/-50</VECTOR>
+      <VECTOR>-22*pi/-50 -10*pi/-50 14*pi/-50</VECTOR>
+      <VECTOR>-16*pi/-50 20*pi/-50 -8*pi/-50</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-50B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-50B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-52A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 2 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-16*pi/-52 0*pi/-52 -24*pi/-52</VECTOR>
+      <VECTOR>-4*pi/-52 -26*pi/-52 20*pi/-52</VECTOR>
+      <VECTOR>-20*pi/-52 26*pi/-52 -4*pi/-52</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-52A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-52A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-52B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 1 -2</VECTOR>
+      <VECTOR>2 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-10*pi/-52 -14*pi/-52 -22*pi/-52</VECTOR>
+      <VECTOR>-22*pi/-52 -10*pi/-52 14*pi/-52</VECTOR>
+      <VECTOR>-14*pi/-52 22*pi/-52 -10*pi/-52</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-52B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-52B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-54A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 0 -3</VECTOR>
+      <VECTOR>3 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-54 -30*pi/-54 -12*pi/-54</VECTOR>
+      <VECTOR>-20*pi/-54 -14*pi/-54 16*pi/-54</VECTOR>
+      <VECTOR>-12*pi/-54 24*pi/-54 -12*pi/-54</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-54A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-54A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-54B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -3 0</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>12*pi/54 12*pi/54 24*pi/54</VECTOR>
+      <VECTOR>20*pi/54 -16*pi/54 4*pi/54</VECTOR>
+      <VECTOR>18*pi/54 18*pi/54 -18*pi/54</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-54B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-54B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-56A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -3 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-16*pi/-56 -6*pi/-56 -30*pi/-56</VECTOR>
+      <VECTOR>-16*pi/-56 -20*pi/-56 12*pi/-56</VECTOR>
+      <VECTOR>-16*pi/-56 22*pi/-56 -2*pi/-56</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-56A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-56A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-56B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>3 -1 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/-56 -30*pi/-56 -18*pi/-56</VECTOR>
+      <VECTOR>-14*pi/-56 -14*pi/-56 14*pi/-56</VECTOR>
+      <VECTOR>-24*pi/-56 24*pi/-56 -8*pi/-56</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-56B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-56B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-58A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 1 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-58 -18*pi/-58 -30*pi/-58</VECTOR>
+      <VECTOR>-20*pi/-58 -16*pi/-58 12*pi/-58</VECTOR>
+      <VECTOR>-16*pi/-58 22*pi/-58 -2*pi/-58</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-58A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-58A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-58B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+      <VECTOR>2 2 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>4*pi/58 20*pi/58 24*pi/58</VECTOR>
+      <VECTOR>20*pi/58 -16*pi/58 4*pi/58</VECTOR>
+      <VECTOR>26*pi/58 14*pi/58 -18*pi/58</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-58B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-58B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-60A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 0 3</VECTOR>
+      <VECTOR>2 3 -2</VECTOR>
+      <VECTOR>2 -3 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-24*pi/-60 0*pi/-60 -24*pi/-60</VECTOR>
+      <VECTOR>-18*pi/-60 -20*pi/-60 12*pi/-60</VECTOR>
+      <VECTOR>-18*pi/-60 20*pi/-60 12*pi/-60</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-60A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-60A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-60B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+      <VECTOR>2 1 -3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>14*pi/60 26*pi/60 18*pi/60</VECTOR>
+      <VECTOR>18*pi/60 -18*pi/60 6*pi/60</VECTOR>
+      <VECTOR>26*pi/60 14*pi/60 -18*pi/60</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-60B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-60B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-62A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -3 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-16*pi/-62 -6*pi/-62 -30*pi/-62</VECTOR>
+      <VECTOR>-12*pi/-62 -20*pi/-62 24*pi/-62</VECTOR>
+      <VECTOR>-24*pi/-62 22*pi/-62 -14*pi/-62</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-62A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-62A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-62B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -1</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>2*pi/-62 -18*pi/-62 -30*pi/-62</VECTOR>
+      <VECTOR>-26*pi/-62 -14*pi/-62 18*pi/-62</VECTOR>
+      <VECTOR>-16*pi/-62 20*pi/-62 -8*pi/-62</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-62B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-62B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-64A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 1 -3</VECTOR>
+      <VECTOR>2 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-14*pi/-64 -24*pi/-64 -22*pi/-64</VECTOR>
+      <VECTOR>-26*pi/-64 -8*pi/-64 14*pi/-64</VECTOR>
+      <VECTOR>-18*pi/-64 24*pi/-64 -10*pi/-64</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-64A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-64A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-64B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>2 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-14*pi/-64 -18*pi/-64 -26*pi/-64</VECTOR>
+      <VECTOR>-22*pi/-64 -10*pi/-64 14*pi/-64</VECTOR>
+      <VECTOR>-24*pi/-64 24*pi/-64 -8*pi/-64</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-64B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-64B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-66A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -1</VECTOR>
+      <VECTOR>2 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/-66 -16*pi/-66 -30*pi/-66</VECTOR>
+      <VECTOR>-30*pi/-66 -8*pi/-66 18*pi/-66</VECTOR>
+      <VECTOR>-24*pi/-66 20*pi/-66 -12*pi/-66</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-66A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-66A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-66B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 0 -3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-18*pi/-66 -30*pi/-66 -18*pi/-66</VECTOR>
+      <VECTOR>-26*pi/-66 -14*pi/-66 18*pi/-66</VECTOR>
+      <VECTOR>-12*pi/-66 24*pi/-66 -12*pi/-66</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-66B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-66B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-68A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -1</VECTOR>
+      <VECTOR>3 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>8*pi/-68 -18*pi/-68 -30*pi/-68</VECTOR>
+      <VECTOR>-24*pi/-68 -14*pi/-68 22*pi/-68</VECTOR>
+      <VECTOR>-24*pi/-68 20*pi/-68 -12*pi/-68</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-68A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-68A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-68B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>2 -3 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/-68 -26*pi/-68 -30*pi/-68</VECTOR>
+      <VECTOR>-30*pi/-68 -6*pi/-68 14*pi/-68</VECTOR>
+      <VECTOR>-26*pi/-68 22*pi/-68 -6*pi/-68</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-68B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-68B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-70A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>-2 2 -3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-10*pi/70 26*pi/70 24*pi/70</VECTOR>
+      <VECTOR>30*pi/70 6*pi/70 -16*pi/70</VECTOR>
+      <VECTOR>-30*pi/70 22*pi/70 -12*pi/70</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-70A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-70A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-70B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>3 -2 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>10*pi/-70 -30*pi/-70 -30*pi/-70</VECTOR>
+      <VECTOR>-24*pi/-70 -12*pi/-70 16*pi/-70</VECTOR>
+      <VECTOR>-26*pi/-70 22*pi/-70 -6*pi/-70</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-70B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-70B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-72A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -2 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-72 -24*pi/-72 -24*pi/-72</VECTOR>
+      <VECTOR>-24*pi/-72 -14*pi/-72 22*pi/-72</VECTOR>
+      <VECTOR>-24*pi/-72 22*pi/-72 -14*pi/-72</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-72A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-72A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-72B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>2 3 -3</VECTOR>
+      <VECTOR>2 -3 3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-72 -24*pi/-72 -24*pi/-72</VECTOR>
+      <VECTOR>-36*pi/-72 0*pi/-72 24*pi/-72</VECTOR>
+      <VECTOR>-36*pi/-72 24*pi/-72 0*pi/-72</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-72B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-72B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-74A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 -1 -3</VECTOR>
+      <VECTOR>-3 3 -2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>22*pi/74 30*pi/74 12*pi/74</VECTOR>
+      <VECTOR>30*pi/74 14*pi/74 -24*pi/74</VECTOR>
+      <VECTOR>-12*pi/74 24*pi/74 -20*pi/74</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-74A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-74A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-74B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 2 3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+      <VECTOR>2 3 -3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>6*pi/74 26*pi/74 30*pi/74</VECTOR>
+      <VECTOR>30*pi/74 -18*pi/74 2*pi/74</VECTOR>
+      <VECTOR>26*pi/74 14*pi/74 -18*pi/74</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-74B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-74B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-76A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 2 -2</VECTOR>
+      <VECTOR>3 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-8*pi/-76 -18*pi/-76 -30*pi/-76</VECTOR>
+      <VECTOR>-24*pi/-76 -16*pi/-76 24*pi/-76</VECTOR>
+      <VECTOR>-24*pi/-76 22*pi/-76 -14*pi/-76</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-76A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-76A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-80A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 1 -3</VECTOR>
+      <VECTOR>3 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-16*pi/-80 -24*pi/-80 -24*pi/-80</VECTOR>
+      <VECTOR>-24*pi/-80 -16*pi/-80 24*pi/-80</VECTOR>
+      <VECTOR>-24*pi/-80 24*pi/-80 -16*pi/-80</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-80A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-80A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-80B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>-3 2 -3</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-10*pi/80 30*pi/80 30*pi/80</VECTOR>
+      <VECTOR>30*pi/80 6*pi/80 -26*pi/80</VECTOR>
+      <VECTOR>-30*pi/80 26*pi/80 -6*pi/80</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-80B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-80B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-84A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>3 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-6*pi/-84 -18*pi/-84 -36*pi/-84</VECTOR>
+      <VECTOR>-24*pi/-84 -16*pi/-84 24*pi/-84</VECTOR>
+      <VECTOR>-30*pi/-84 22*pi/-84 -12*pi/-84</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-84A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-84A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-84B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>3 -3 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-84 -12*pi/-84 -36*pi/-84</VECTOR>
+      <VECTOR>-18*pi/-84 -18*pi/-84 30*pi/-84</VECTOR>
+      <VECTOR>-30*pi/-84 26*pi/-84 -6*pi/-84</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-84B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-84B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-88A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>-3 3 -1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>14*pi/88 24*pi/88 30*pi/88</VECTOR>
+      <VECTOR>24*pi/88 16*pi/88 -24*pi/88</VECTOR>
+      <VECTOR>-30*pi/88 24*pi/88 -14*pi/88</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-88A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-88A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-90A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>3 3 -2</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>0*pi/-90 -24*pi/-90 -36*pi/-90</VECTOR>
+      <VECTOR>-30*pi/-90 -10*pi/-90 30*pi/-90</VECTOR>
+      <VECTOR>-30*pi/-90 26*pi/-90 -6*pi/-90</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-90A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-90A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-90B superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>3 -3 0</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-18*pi/-90 -18*pi/-90 -30*pi/-90</VECTOR>
+      <VECTOR>-18*pi/-90 -18*pi/-90 30*pi/-90</VECTOR>
+      <VECTOR>-30*pi/-90 30*pi/-90 -10*pi/-90</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-90B">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-90B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-96A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -3</VECTOR>
+      <VECTOR>3 -3 1</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-12*pi/-96 -24*pi/-96 -36*pi/-96</VECTOR>
+      <VECTOR>-24*pi/-96 -16*pi/-96 24*pi/-96</VECTOR>
+      <VECTOR>-36*pi/-96 24*pi/-96 -12*pi/-96</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-96A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-96A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-100A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>2 3 3</VECTOR>
+      <VECTOR>3 2 -3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-10*pi/-100 -30*pi/-100 -30*pi/-100</VECTOR>
+      <VECTOR>-30*pi/-100 -10*pi/-100 30*pi/-100</VECTOR>
+      <VECTOR>-30*pi/-100 30*pi/-100 -10*pi/-100</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-100A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-100A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+  <LATTICE name="Kent3D-102A superlattice" dimension="3">
+    <BASIS>
+      <VECTOR>1 3 3</VECTOR>
+      <VECTOR>3 3 -3</VECTOR>
+      <VECTOR>3 -3 2</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR>-6*pi/-102 -30*pi/-102 -36*pi/-102</VECTOR>
+      <VECTOR>-30*pi/-102 -14*pi/-102 24*pi/-102</VECTOR>
+      <VECTOR>-36*pi/-102 24*pi/-102 -12*pi/-102</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Kent3D-102A">
+    <FINITELATTICE>
+      <LATTICE ref="Kent3D-102A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <EXTENT dimension="3" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple3d"/>
+  </LATTICEGRAPH>
+
+</LATTICES>

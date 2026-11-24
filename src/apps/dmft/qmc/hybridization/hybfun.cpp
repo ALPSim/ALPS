@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 #include"hybfun.hpp"
+#include "../text_table.h"
 //construct a hybridization function. ntime: number of time slices.
 //noffidag_orbitals: number of offdiagonal orbitals. ndiag_orbitals: number
 //of diagonal orbitals. 
@@ -56,33 +57,24 @@ void hybfun::read_hybridization_function(const alps::input::hybridization_parame
       for(std::size_t j=0; j<nflavor(); j++){
         std::stringstream path; path<<"/Delta_"<<j;
         ar>>alps::make_pvp(path.str(),tmp);
+        if(tmp.size()!=ntime())
+          throw std::invalid_argument("hybridization file "+fname+": "+path.str()+" has "+std::to_string(tmp.size())
+                                      +" points, expected N_TAU+1 = "+std::to_string(ntime()));
         for(std::size_t i=0; i<ntime(); i++)
           operator()(i,j)=tmp[i];
       }
       tmp.clear();
     }
   }
-  else{//read from text file
+  else{//read from text file: N+1 rows of a label and one value per flavor
     std::ifstream infile(fname.c_str());
     if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open hybridization file (text format) ") + input.delta + " for Delta function"));
+      throw(std::invalid_argument(std::string("could not open hybridization file (text format) ") + fname + " for Delta function"));
     }
-    for (std::size_t i=0; i<ntime(); i++) {
-      if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + input.delta + ". probably wrong number of lines"));
-      }
-      double dummy;
-      infile >> dummy;
-      //std::cout<<i<<" "<<ntime()<<" "<<"dummy: "<<dummy<<std::endl;
-      for (std::size_t j=0; j<nflavor(); j++){
-        if(!infile.good()){
-          throw(std::invalid_argument(std::string("could not read hybridization file (text format) ") + input.delta + ". probably wrong number of columns"));
-        }
-        double delta;
-        infile >> delta;
-        operator()(i,j)=delta;
-      }
-    }
+    const std::vector<double> values = text_table::read_table<double>(infile, ntime(), nflavor(), "hybridization file", fname);
+    for (std::size_t i=0; i<ntime(); i++)
+      for (std::size_t j=0; j<nflavor(); j++)
+        operator()(i,j)=values[i*nflavor()+j];
   }
 }
 

@@ -686,3 +686,65 @@ references:
   - type: other
     value: levy2017maxent
     description: ALPS reference key
+- type: article
+  title: Quantum cluster theories
+  authors:
+  - family-names: Maier
+    given-names: T.
+  - family-names: Jarrell
+    given-names: M.
+  - family-names: Pruschke
+    given-names: T.
+  - family-names: Hettler
+    given-names: M. H.
+  year: 2005
+  journal: Reviews of Modern Physics
+  volume: '77'
+  issue: '3'
+  doi: 10.1103/RevModPhys.77.1027
+  start: '1027'
+  end: '1080'
+  identifiers:
+  - type: other
+    value: maier2005
+    description: ALPS reference key
+- type: article
+  title: Momentum-sector-selective metal-insulator transition in the eight-site dynamical mean-field approximation to the Hubbard model in two dimensions
+  authors:
+  - family-names: Gull
+    given-names: E.
+  - family-names: Parcollet
+    given-names: O.
+  - family-names: Werner
+    given-names: P.
+  - family-names: Millis
+    given-names: A. J.
+  year: 2009
+  journal: Physical Review B
+  volume: '80'
+  issue: '24'
+  doi: 10.1103/PhysRevB.80.245102
+  start: '245102'
+  identifiers:
+  - type: other
+    value: gull2009dca
+    description: ALPS reference key
+- type: article
+  title: Superconductivity and the pseudogap in the two-dimensional Hubbard model
+  authors:
+  - family-names: Gull
+    given-names: E.
+  - family-names: Parcollet
+    given-names: O.
+  - family-names: Millis
+    given-names: A. J.
+  year: 2013
+  journal: Physical Review Letters
+  volume: '110'
+  issue: '21'
+  doi: 10.1103/PhysRevLett.110.216405
+  start: '216405'
+  identifiers:
+  - type: other
+    value: gull2013dca
+    description: ALPS reference key

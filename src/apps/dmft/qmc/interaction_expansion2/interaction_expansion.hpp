@@ -323,7 +323,11 @@ protected:
   simple_hist **vertex_histograms;
   unsigned int vertex_histogram_size;
   
-  unsigned long step;        
+  unsigned long step;
+  // updates after thermalization at order MAX_ORDER, and all of them, since
+  // the last measurement: the series is cut at MAX_ORDER (#389)
+  unsigned long steps_at_max_order;
+  unsigned long steps_since_measurement;        
   time_t start_time;
   clock_t update_time;
   clock_t measurement_time;
