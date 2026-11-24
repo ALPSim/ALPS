@@ -105,6 +105,17 @@ and their false-alarm rate:
   An exact direction is dropped if the difference along it is within the
   tolerance, and otherwise tested with the largest variance the data cannot
   tell from zero.
+- With too few observations for Hotelling's T^2 (no more than the tested
+  directions plus one, or, for two samples, fewer than 1.5 per direction in
+  the smaller one), `test_mean` uses the test of Srivastava and Du, J.
+  Multivariate Anal. 99, 386 (2008), which needs only the diagonal of the
+  covariance, with per-component Welch degrees of freedom for two samples.
+  It needs 14 degrees of freedom per component (NaN with fewer) and is
+  approximate: 3% to 8% of correct results are rejected at a level of 5% in
+  simulations. T^2 returned NaN for one sample, and for two samples with the
+  larger variance in a sample with fewer observations than components it
+  rejected far more often than the level (47% at 5% for 40 components, 20
+  and 30 observations, variances 9 and 1).
 
 The shared `near.hpp` helper now enforces an absolute error bound for each matrix
 entry instead of a relative matrix norm. `compare_test.cpp` adds regression

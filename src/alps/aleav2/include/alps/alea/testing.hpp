@@ -33,6 +33,10 @@ namespace alps { namespace alea {
 /**
  * Result of Hotelling's T^2 test
  *
+ * The score is referred to an F distribution. With too few observations for
+ * T^2, test_mean() uses the test of Srivastava and Du instead, whose score is
+ * referred to the standard normal distribution (normal() is true).
+ *
  * @see test_mean(), t2_test()
  */
 class t2_result
@@ -43,8 +47,19 @@ public:
 public:
     /** Initializes t2 test */
     t2_result(double score, double f_size, double f_dof)
-        : score_(score), dist_(f_size, f_dof)
+        : score_(score), dist_(f_size, f_dof), normal_(false)
     { }
+
+    /** Result with a standard normal score of `size` components */
+    static t2_result normal(double z, double size)
+    {
+        t2_result r(z, size, INFINITY);
+        r.normal_ = true;
+        return r;
+    }
+
+    /** Whether the score is referred to the standard normal distribution */
+    bool normal() const { return normal_; }
 
     /** Returns whether the lower alternate hypothesis can be tested.
      *
@@ -52,13 +67,18 @@ public:
      * because there is no way to distinguish the lower alternate hypothesis
      * (too large error bars) from an accidental "hit".
      */
-    bool has_plower() const { return dist_.degrees_of_freedom1() > 3; }
+    bool has_plower() const { return !normal_ && dist_.degrees_of_freedom1() > 3; }
 
     /** p-value in favour of the lower alternate Hypothesis */
     double pvalue_lower() const { return has_plower() ? dist_.cdf(score_) : 1; }
 
     /** p-value in favour of the upper alternate Hypothesis */
-    double pvalue_upper() const { return tested() ? dist_.ccdf(score_) : 1; }
+    double pvalue_upper() const
+    {
+        if (!tested())
+            return 1;
+        return normal_ ? 0.5 * std::erfc(score_ / std::sqrt(2.0)) : dist_.ccdf(score_);
+    }
 
     /**
      * Two-sided p-value, i.e., p-value in favour of all possible alternate hypotheses.
@@ -85,6 +105,7 @@ public:
 private:
     double score_;
     dist_type dist_;
+    bool normal_;
 };
 
 /**
@@ -109,6 +130,50 @@ t2_result t2_test(const column<T> &diff,
                   double nmeas, size_t pools=1, double atol=1e-14
                   );
 
+namespace internal {
+
+/**
+ * Test of Srivastava and Du for the mean of a difference with fewer
+ * observations than components, where Hotelling's T^2 does not exist.
+ *
+ * The statistic is the sum of the squared differences in units of their
+ * standard errors (the covariance enters only through its diagonal), minus
+ * its mean under the null hypothesis, sum nu_i/(nu_i - 2), divided by its
+ * standard deviation: with a correlation matrix R, that of Srivastava and Du,
+ * J. Multivariate Anal. 99, 386 (2008), Eq. 2.10,
+ * 2 (tr R^2 - p^2/nu) (1 + tr R^2 / p^(3/2)), with nu the harmonic mean of the
+ * nu_i; for independent components (no covariance), the exact variance of a
+ * sum of squared t variables. For two samples nu_i are the Welch degrees of
+ * freedom of each component, an extension of the one-sample test that keeps
+ * its false-alarm rate within 0.03 to 0.08 at 0.05 in simulations with
+ * 10 to 100 components. The score is referred to the standard normal
+ * distribution, one-sided (upper). It needs at least `min_dof` degrees of
+ * freedom in every component; with fewer, or for complex data, the result
+ * is NaN.
+ */
+t2_result srivastava_du_test(const component_stats &c);
+
+/** Degrees of freedom srivastava_du_test() needs in every component */
+constexpr double srivastava_du_min_dof = 14;
+
+/**
+ * Hotelling's T^2 for the difference, or srivastava_du_test() for its
+ * components if there are too few observations for T^2 (in either sample).
+ */
+template <typename T>
+t2_result test_diff(const diff_stats<T> &diff)
+{
+    size_t nsize = 0;
+    for (int i = 0; i != diff.mean.rows(); ++i)
+        if (!(diff.var[i] == 0 && diff.mean[i] == T(0)))
+            ++nsize;
+    if (nsize != 0 && (diff.nmeas - nsize <= 1 || diff.min_obs < 1.5 * nsize))
+        return srivastava_du_test(diff.components);
+    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
+}
+
+} // namespace internal
+
 /**
  * Test mean of stochastic result `result` against known result `expected`.
  *
@@ -123,6 +188,10 @@ t2_result t2_test(const column<T> &diff,
  * are zero, such as an expected value of zero computed with rounding. The
  * rounding of the accumulation is added, and the variance is resolved only to
  * its rounding.
+ *
+ * With fewer observations than tested components, Hotelling's T^2 does not
+ * exist; the test of Srivastava and Du is used then (see
+ * internal::srivastava_du_test()).
  */
 template <typename Result, typename Derived>
 t2_result test_mean(const Result &result,
@@ -132,9 +201,7 @@ t2_result test_mean(const Result &result,
     static_assert(is_alea_result<Result>::value, "Result is not alea result");
     static_assert(traits<Result>::HAVE_VAR, "Result1 must have variance");
 
-    using diff_scalar = internal::diff_scalar_type<Result, Derived>;
-    internal::diff_stats<diff_scalar> diff = internal::make_diff(result, expected, rtol, atol);
-    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
+    return internal::test_diff(internal::make_diff(result, expected, rtol, atol));
 }
 
 /**
@@ -167,9 +234,7 @@ test_mean(const Result1 &result1, const Result2 &result2,
 
     // pool_var folds the two samples into one difference with Welch degrees
     // of freedom, so it is tested as one sample.
-    using diff_scalar = internal::joined_value_type<Result1, Result2>;
-    internal::diff_stats<diff_scalar> diff = internal::pool_var(result1, result2, rtol, atol);
-    return t2_test(diff.mean, diff.var, diff.nmeas, 1, 0);
+    return internal::test_diff(internal::pool_var(result1, result2, rtol, atol));
 }
 
 

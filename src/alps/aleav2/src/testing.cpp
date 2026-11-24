@@ -51,6 +51,44 @@ t2_result t2_test(const column<T> &diff,
     return t2_result(score, nsize, dof);
 }
 
+namespace internal {
+
+t2_result srivastava_du_test(const component_stats &c)
+{
+    const int p = c.z2.rows();
+    if (p == 0)
+        return t2_result(0, 0, 1);              // nothing to test
+    if (c.complex_data)
+        return t2_result::normal(NAN, p);
+
+    double t = 0, mean0 = 0, var_indep = 0, inv_nu = 0;
+    for (int i = 0; i != p; ++i) {
+        const double nu = c.nu[i];
+        if (!(nu >= srivastava_du_min_dof))
+            return t2_result::normal(NAN, p);
+        t += c.z2[i];
+        if (std::isinf(nu)) {                   // known variance: chi^2_1
+            mean0 += 1;
+            var_indep += 2;
+        } else {                                // t^2 with nu dof: F(1, nu)
+            mean0 += nu / (nu - 2);
+            var_indep += 2 * nu * nu * (nu - 1) / ((nu - 2) * (nu - 2) * (nu - 4));
+            inv_nu += 1 / nu;
+        }
+    }
+    double var0 = var_indep;
+    if (c.corr.size() != 0) {
+        const double tr2 = c.corr.squaredNorm();
+        // p^2 / nu with nu the harmonic mean of the nu_i
+        var0 = 2 * (tr2 - p * inv_nu) * (1 + tr2 / std::pow(p, 1.5));
+    }
+    if (!(var0 > 0))
+        return t2_result::normal(NAN, p);
+    return t2_result::normal((t - mean0) / std::sqrt(var0), p);
+}
+
+} // namespace internal
+
 template t2_result t2_test(const column<double> &diff, const column<double> &var,
                            double nmeas, size_t pools, double atol);
 template t2_result t2_test(const column<std::complex<double>> &diff,

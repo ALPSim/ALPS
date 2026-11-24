@@ -15,6 +15,7 @@
 
 #include <cmath>
 #include <limits>
+#include <type_traits>
 #include <vector>
 
 namespace alps { namespace alea { namespace internal {
@@ -56,12 +57,32 @@ using diff_scalar_type = add_scalar_type<
 constexpr double default_rtol = 64 * std::numeric_limits<double>::epsilon();
 
 /**
+ * Components of a difference for the test of Srivastava and Du (2008), used
+ * when there are too few observations for Hotelling's T^2 (see
+ * srivastava_du_test()): the squared differences in units of their standard
+ * errors, the degrees of freedom of each standard error (infinite for a
+ * variance that is known, not estimated), and the correlation matrix of the
+ * components, empty if they are taken as independent (no covariance).
+ */
+struct component_stats
+{
+    Eigen::VectorXd z2;
+    Eigen::VectorXd nu;
+    Eigen::MatrixXd corr;
+    bool complex_data;
+};
+
+/**
  * Difference of a result from a reference, in coordinates where its
  * components are uncorrelated: `mean` and `var` are the difference and the
  * per-observation variance along each principal axis of the covariance
  * scaled per component (see whiten()), `nmeas` the number of observations
  * that enter the F distribution of Hotelling's T^2 (one sample). T^2 does not
- * depend on the scaling.
+ * depend on the scaling. `components` is the same difference per component,
+ * for the test used when there are too few observations for T^2: when
+ * `nmeas` is not more than the number of tested directions plus one, or for
+ * two samples, when the smaller one has fewer than 1.5 observations per
+ * tested direction (`min_obs`, infinite for one sample; see pool_var()).
  */
 template <typename T>
 struct diff_stats
@@ -69,6 +90,8 @@ struct diff_stats
     column<T> mean;
     column<make_real_type<T>> var;
     double nmeas;
+    double min_obs;
+    component_stats components;
 };
 
 /**
@@ -174,6 +197,52 @@ void whiten(const typename eigen<T>::matrix &cov, bool diagonal,
 }
 
 /**
+ * Per-component statistics for srivastava_du_test(), from the difference
+ * `diff`, the variance of each mean difference `var_mean` with `nu` degrees
+ * of freedom, and its covariance `cov` (null if the components are taken as
+ * independent). A component is exact if `var_mean` is within `var_cut`; it is
+ * then left out if the difference is within `tol_diff`, and otherwise tested
+ * with `var_cut` as a known variance, as in whiten().
+ */
+template <typename T, typename Real>
+component_stats exact_or_tested(const column<T> &diff, const column<Real> &var_mean,
+                                const column<Real> &nu, const column<Real> &var_cut,
+                                const column<Real> &tol_diff,
+                                const typename eigen<T>::matrix *cov)
+{
+    component_stats out;
+    out.complex_data = !std::is_same<T, make_real_type<T>>::value;
+    std::vector<int> idx;
+    std::vector<double> z2, dof;
+    for (int i = 0; i != diff.rows(); ++i) {
+        if (!(var_mean[i] <= var_cut[i])) {
+            idx.push_back(i);
+            z2.push_back(std::norm(diff[i]) / var_mean[i]);
+            dof.push_back(nu[i]);
+        } else if (!(std::abs(diff[i]) <= tol_diff[i])) {
+            z2.push_back(var_cut[i] > 0 ? std::norm(diff[i]) / var_cut[i] : INFINITY);
+            dof.push_back(INFINITY);
+        }
+    }
+    out.z2 = Eigen::Map<Eigen::VectorXd>(z2.data(), z2.size());
+    out.nu = Eigen::Map<Eigen::VectorXd>(dof.data(), dof.size());
+    if (cov) {
+        // Correlations of the components tested with their variance; the
+        // exact ones (after them) are uncorrelated.
+        const int p = z2.size();
+        out.corr = Eigen::MatrixXd::Identity(p, p);
+        for (int a = 0; a != (int)idx.size(); ++a)
+            for (int b = 0; b != (int)idx.size(); ++b)
+                if (a != b) {
+                    const int i = idx[a], j = idx[b];
+                    out.corr(a, b) = std::real((*cov)(i, j))
+                            / std::sqrt(std::real((*cov)(i, i)) * std::real((*cov)(j, j)));
+                }
+    }
+    return out;
+}
+
+/**
  * Get difference of `result` from the exact `expected`.
  *
  * Tolerances (see whiten()): a component fluctuates within atol + rtol s, and
@@ -199,6 +268,7 @@ diff_stats<T> make_diff(const Result &result,
     // the number of bins at the binning level used), not count().
     const double nmeas = result.observations();
     diff.nmeas = nmeas;
+    diff.min_obs = INFINITY;
     diff.mean = result.mean() - expected;
 
     // Scale per component; a component that is identically zero is scaled
@@ -219,6 +289,12 @@ diff_stats<T> make_diff(const Result &result,
 
     const matrix cov = get_cov(result);
     const bool diagonal = !traits<Result>::HAVE_COV;
+    const column<real> var_cut =
+            ((tol_var.cwiseAbs2() + rounding * scale.cwiseAbs2()) / nmeas).eval();
+    diff.components = exact_or_tested<T, real>(
+                diff.mean, column<real>(var / nmeas),
+                column<real>::Constant(var.rows(), nmeas - 1), var_cut, tol_diff,
+                diagonal ? nullptr : &cov);
 
     matrix vecs;
     std::vector<int> keep;
@@ -243,6 +319,14 @@ diff_stats<T> make_diff(const Result &result,
  * whiten(), here with the scale sqrt((var_1 + mean_1^2)/N_1 + (var_2 +
  * mean_2^2)/N_2)). The result is returned as a one-sample difference with
  * nu + 1 observations, so that Hotelling's T^2 is referred to F(r, nu + 1 - r).
+ * The approximation needs a well-determined covariance of each sample. If
+ * the sample with the larger variance has no more observations than
+ * directions, S is dominated by a singular C_k and T^2 rejects far more often
+ * than alpha (47% at alpha = 0.05 for 40 components, N = 20 and 30,
+ * variances 9 and 1), and just above it still too often (14% for N = 43 and
+ * 200; 6% for N = 60). test_mean() therefore uses the per-component test if
+ * the smaller sample has fewer than 1.5 observations per direction
+ * (`min_obs`).
  * Each result has the tolerances of make_diff().
  */
 template <typename Result1, typename Result2,
@@ -280,7 +364,18 @@ diff_stats<T> pool_var(const Result1 &r1, const Result2 &r2,
     const matrix s = c1 + c2;
     diff_stats<T> diff;
     diff.mean = r1.mean() - r2.mean();
+    diff.min_obs = std::min(obs1, obs2);
+
+    // Per component: Welch-Satterthwaite degrees of freedom
     const bool diagonal = !traits<Result1>::HAVE_COV && !traits<Result2>::HAVE_COV;
+    const column<real> a1 = c1.diagonal().real(), a2 = c2.diagonal().real();
+    column<real> nu(a1.rows());
+    for (int i = 0; i != nu.rows(); ++i)
+        nu[i] = (a1[i] + a2[i]) * (a1[i] + a2[i])
+              / (a1[i] * a1[i] / (obs1 - 1) + a2[i] * a2[i] / (obs2 - 1));
+    const column<real> var_cut = (tol_var.cwiseAbs2() + rounding * scale.cwiseAbs2()).eval();
+    diff.components = exact_or_tested<T, real>(diff.mean, column<real>(a1 + a2), nu,
+                                               var_cut, tol_diff, diagonal ? nullptr : &s);
 
     matrix v;
     std::vector<int> keep;
