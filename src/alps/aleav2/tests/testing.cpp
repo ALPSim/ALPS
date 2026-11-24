@@ -11,6 +11,7 @@
 
 #include <Eigen/Dense>
 #include <cmath>
+#include <functional>
 #include <random>
 
 namespace {
@@ -419,4 +420,96 @@ TEST(t2_test, atol_is_in_units_of_the_data)
     EXPECT_EQ(loose.dist().degrees_of_freedom1(), 1);
     EXPECT_GE(loose.pvalue(), 1e-4);
     EXPECT_LT(alps::alea::test_mean(res, zero, 0, 1e-13).pvalue(), 1e-6);
+}
+
+// Fewer observations than components: Hotelling's T^2 does not exist, and
+// the test of Srivastava and Du is used. Its false-alarm rate at alpha = 0.05
+// is approximate (0.03 to 0.08 in simulations with at least 15 observations),
+// so the band here is [20, 100] of 1000, 2% to 10%. Before, the result was NaN
+// for one sample. For two samples, the smaller one here has fewer
+// observations than components and the larger variance: Hotelling's T^2 with
+// the Krishnamoorthy-Yu degrees of freedom rejected 47% of these tests.
+namespace {
+
+int rejected_of_1000(const std::function<alps::alea::t2_result(std::mt19937 &)> &test)
+{
+    std::mt19937 engine(23);
+    int rejected = 0;
+    for (int rep = 0; rep != 1000; ++rep) {
+        alps::alea::t2_result r = test(engine);
+        EXPECT_TRUE(r.normal());
+        EXPECT_FALSE(std::isnan(r.pvalue()));
+        rejected += r.pvalue() < 0.05;
+    }
+    return rejected;
+}
+
+alps::alea::var_result<double> independent_sample(std::mt19937 &engine, int p, double sd, size_t count)
+{
+    std::normal_distribution<double> normal;
+    alps::alea::var_acc<double> acc(p);
+    for (size_t i = 0; i != count; ++i) {
+        Eigen::VectorXd v(p);
+        for (int k = 0; k != p; ++k)
+            v[k] = sd * normal(engine);
+        acc << v;
+    }
+    return acc.finalize();
+}
+
+} // namespace
+
+TEST(t2_test, fewer_observations_than_components_one_sample)
+{
+    const Eigen::VectorXd zero = Eigen::VectorXd::Zero(40);
+    const Eigen::MatrixXd l = mixing(40, 1.0);
+    const int rejected = rejected_of_1000([&](std::mt19937 &engine) {
+        return alps::alea::test_mean(sample(engine, zero, l, 20), zero);
+    });
+    EXPECT_GE(rejected, 20);
+    EXPECT_LE(rejected, 100);
+}
+
+TEST(t2_test, fewer_observations_than_components_two_sample)
+{
+    const Eigen::VectorXd zero = Eigen::VectorXd::Zero(40);
+    const Eigen::MatrixXd wide = mixing(40, 3.0), narrow = mixing(40, 1.0);
+    const int rejected = rejected_of_1000([&](std::mt19937 &engine) {
+        return alps::alea::test_mean(sample(engine, zero, wide, 20),
+                                     sample(engine, zero, narrow, 30));
+    });
+    EXPECT_GE(rejected, 20);
+    EXPECT_LE(rejected, 100);
+}
+
+TEST(t2_test, fewer_observations_than_components_independent)
+{
+    const Eigen::VectorXd zero = Eigen::VectorXd::Zero(50);
+    const int rejected = rejected_of_1000([&](std::mt19937 &engine) {
+        return alps::alea::test_mean(independent_sample(engine, 50, 1.0, 20), zero);
+    });
+    EXPECT_GE(rejected, 20);
+    EXPECT_LE(rejected, 100);
+}
+
+// The fallback detects a shift, keeps NaN for NaN data, and needs at least 15
+// observations (14 degrees of freedom): with fewer it is NaN, as before.
+TEST(t2_test, fewer_observations_than_components_limits)
+{
+    std::mt19937 engine(29);
+    const Eigen::VectorXd zero = Eigen::VectorXd::Zero(40);
+    const Eigen::MatrixXd l = mixing(40, 1.0);
+    Eigen::VectorXd shifted = zero;
+    shifted.head(10).array() += 1.5;   // 10 components shifted by ~1.5 sd
+    cov_result<double> res = sample(engine, shifted, l, 20);
+    alps::alea::t2_result r = alps::alea::test_mean(res, zero);
+    EXPECT_TRUE(r.normal());
+    EXPECT_LT(r.pvalue(), 1e-6);
+
+    alps::alea::t2_result few = alps::alea::test_mean(sample(engine, zero, l, 10), zero);
+    EXPECT_TRUE(std::isnan(few.pvalue()));
+
+    Eigen::VectorXd nan_expected = zero;
+    nan_expected[3] = NAN;
+    EXPECT_TRUE(std::isnan(alps::alea::test_mean(res, nan_expected).pvalue()));
 }
