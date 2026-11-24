@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pyalps
+import pyalps.hdf5
 
 
 def steady_state_z(ts):
@@ -21,12 +22,20 @@ def steady_state_z(ts):
     t = np.arange(1, N + 1)
     slope = np.polyfit(t, ts, 1)[0]
     error = np.std(ts, ddof=1) * np.sqrt(12. / (N * (N**2 - 1)))
+    if error == 0.:
+        return slope, error, 0.  # a constant series, as in pyalps.checkSteadyState
     return slope, error, abs(slope) / error
 
 
 def cutoff(c):
     """z0 such that a standard normal Z satisfies P(|Z| < z0) = c."""
     return norm.ppf((1. + c) / 2.)
+
+
+def binsize(outfile, observable):
+    """The number of measurements in one time-series bin, as stored by ALPS."""
+    ar = pyalps.hdf5.archive(outfile.replace('.out.xml', '.out.h5'), 'r')
+    return int(ar['/simulation/results/%s/timeseries/data/@binsize' % observable])
 
 
 # Part 1: a run that is still drifting
@@ -50,17 +59,20 @@ print('drift run: %d bins, z = %.2f, cutoff z0 = %.2f, passes: %s'
       % (len(ts), z, cutoff(0.6827), z < cutoff(0.6827)))
 
 data = pyalps.loadMeasurements(files, '|Magnetization|')
-for d in pyalps.checkSteadyState(data):
-    s = d.props['checkSteadyState']
-    print('pyalps.checkSteadyState: z = %.2f, z0 = %.2f, passes: %s'
-          % (s['statistics']['z'], s['statistics']['z0'], s['value']))
+try:
+    for d in pyalps.checkSteadyState(data):
+        s = d.props['checkSteadyState']
+        print('pyalps.checkSteadyState: z = %.2f, z0 = %.2f, passes: %s'
+              % (s['statistics']['z'], s['statistics']['z0'], s['value']))
+except AttributeError as error:
+    # pyalps 3.0.0 calls scipy.linspace, which current SciPy no longer has
+    print('pyalps.checkSteadyState failed with this pyalps and SciPy:', error)
 
 # each time-series entry is the sum of |M| per site over one bin
-M = data[0][0].y[0].mean
-binsize = 2 ** int(round(np.log2(ts.mean() / M)))
-sweeps = (np.arange(len(ts)) + 0.5) * binsize
+bins = binsize(files[0], '|Magnetization|')
+sweeps = (np.arange(len(ts)) + 0.5) * bins
 plt.figure()
-plt.plot(sweeps, ts / binsize, 'o-', markersize=3)
+plt.plot(sweeps, ts / bins, 'o-', markersize=3)
 plt.xlabel('Monte Carlo sweeps (no thermalization)')
 plt.ylabel('|Magnetization| per site')
 plt.title('L = 128, T = T_c, local updates: z = %.1f' % z)

@@ -8,6 +8,7 @@ samples pass at the nominal rate, autocorrelated samples less often.
 """
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.signal import lfilter
 from scipy.stats import norm
 
 
@@ -23,6 +24,8 @@ def steady_state_z(ts):
     t = np.arange(1, N + 1)
     slope = np.polyfit(t, ts, 1)[0]
     error = np.std(ts, ddof=1) * np.sqrt(12. / (N * (N**2 - 1)))
+    if error == 0.:
+        return slope, error, 0.  # a constant series, as in pyalps.checkSteadyState
     return slope, error, abs(slope) / error
 
 
@@ -71,13 +74,9 @@ z0 = cutoff(0.6827)
 print()
 print('    tau   fraction passing at c = 0.6827 (N = %d points)' % N)
 for a in [0., 0.5, 0.8, 0.95]:
-    z = np.empty(samples)
-    for k in range(samples):
-        noise = rng.normal(size=N)
-        series = np.empty(N)
-        series[0] = noise[0] / np.sqrt(1 - a**2)
-        for i in range(1, N):
-            series[i] = a * series[i - 1] + noise[i]
-        z[k] = steady_state_z(series)[2]
+    noise = rng.normal(size=(samples, N))
+    noise[:, 0] /= np.sqrt(1 - a**2)
+    series = lfilter([1.], [1., -a], noise, axis=1)
+    z = np.array([steady_state_z(s)[2] for s in series])
     tau = (1 + a) / (2 * (1 - a))
     print('%7.1f   %.3f' % (tau, np.mean(z < z0)))

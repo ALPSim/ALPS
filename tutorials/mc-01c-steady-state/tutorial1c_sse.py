@@ -3,14 +3,15 @@
 
 Part 1 starts the spin-1/2 Heisenberg antiferromagnet on a 32 x 32 square
 lattice at T = 0.25 without thermalization, several times. The energy relaxes
-within the first bin: a large but short transient, which the linear test
-barely notices. Part 2 repeats an equilibrated run many times and records how
+within the first bin: a large but short transient, which raises z only to
+about 2, far less than its size suggests. Part 2 repeats an equilibrated run many times and records how
 often the test passes.
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pyalps
+import pyalps.hdf5
 
 
 def steady_state_z(ts):
@@ -20,12 +21,20 @@ def steady_state_z(ts):
     t = np.arange(1, N + 1)
     slope = np.polyfit(t, ts, 1)[0]
     error = np.std(ts, ddof=1) * np.sqrt(12. / (N * (N**2 - 1)))
+    if error == 0.:
+        return slope, error, 0.  # a constant series, as in pyalps.checkSteadyState
     return slope, error, abs(slope) / error
 
 
 def cutoff(c):
     """z0 such that a standard normal Z satisfies P(|Z| < z0) = c."""
     return norm.ppf((1. + c) / 2.)
+
+
+def binsize(outfile, observable):
+    """The number of measurements in one time-series bin, as stored by ALPS."""
+    ar = pyalps.hdf5.archive(outfile.replace('.out.xml', '.out.h5'), 'r')
+    return int(ar['/simulation/results/%s/timeseries/data/@binsize' % observable])
 
 
 # Part 1: runs that start out of equilibrium. Without thermalization,
@@ -42,10 +51,10 @@ parms = [{
     'INITIAL_CUTOFF' : 40000,
     'SWEEPS'         : 2000,
 } for run in range(NSTART)]
-input_file = pyalps.writeInputFiles('parm1c_sse', parms)
-pyalps.runApplication('dirloop_sse', input_file, Tmin=1)
+input_file = pyalps.writeInputFiles('parm1c_start_sse', parms)
+pyalps.runApplication('dirloop_sse', input_file, Tmin=1, writexml=True)
 
-files = pyalps.getResultFiles(prefix='parm1c_sse')
+files = pyalps.getResultFiles(prefix='parm1c_start_sse')
 series = [np.array(pyalps.loadTimeSeries(f, 'Energy')) for f in files]
 z = np.array([steady_state_z(ts)[2] for ts in series])
 z_rest = np.array([steady_state_z(ts[1:])[2] for ts in series])
@@ -57,11 +66,10 @@ for c in [0.6827, 0.95]:
 
 # each time-series entry is the sum of the energy over one bin
 ts = series[0]
-E = pyalps.loadMeasurements(files[:1], 'Energy')[0][0].y[0].mean
-binsize = 2 ** int(round(np.log2(ts.mean() / E)))
-sweeps = (np.arange(len(ts)) + 0.5) * binsize
+bins = binsize(files[0], 'Energy')
+sweeps = (np.arange(len(ts)) + 0.5) * bins
 plt.figure()
-plt.plot(sweeps, ts / binsize, 'o-', markersize=3)
+plt.plot(sweeps, ts / bins, 'o-', markersize=3)
 plt.xlabel('Monte Carlo sweeps (no thermalization)')
 plt.ylabel('Energy')
 plt.title('32 x 32 Heisenberg antiferromagnet, T = 0.25: z = %.1f' % z[0])
@@ -80,11 +88,11 @@ parms = [{
     'THERMALIZATION' : 1000,
     'SWEEPS'         : 4000,
 } for run in range(NRUNS)]
-input_file = pyalps.writeInputFiles('parm1c_sse_equilibrated', parms)
-pyalps.runApplication('dirloop_sse', input_file, Tmin=1)
+input_file = pyalps.writeInputFiles('parm1c_equilibrated_sse', parms)
+pyalps.runApplication('dirloop_sse', input_file, Tmin=1, writexml=True)
 
 z = np.array([steady_state_z(pyalps.loadTimeSeries(f, 'Energy'))[2]
-              for f in pyalps.getResultFiles(prefix='parm1c_sse_equilibrated')])
+              for f in pyalps.getResultFiles(prefix='parm1c_equilibrated_sse')])
 print('%d equilibrated runs, fraction passing at c = %g: %.2f (expected %.2f)'
       % (len(z), c, np.mean(z < cutoff(c)), c))
 
