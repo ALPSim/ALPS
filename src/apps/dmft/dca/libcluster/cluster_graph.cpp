@@ -50,20 +50,6 @@ std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::
   }
   throw std::logic_error("cluster"+cluster_name+" not found in library: "+cluster_library);
 }
-double alps_graph::validate_orthogonality() const{
-  double deviation_from_orthogonality=0.;
-  for(int i=0;i< basis_vectors_.size();++i){
-    for(int j=0;j< reciprocal_basis_vectors_.size();++j){
-      double inner_product=0.;
-      for(int k=0;k<dimension();++k){
-        inner_product+= basis_vectors_[i][k]* reciprocal_basis_vectors_[j][k];
-      }
-      deviation_from_orthogonality+=inner_product-2.*M_PI*(i==j);
-    }
-  }
-  return deviation_from_orthogonality;
-}
-
 void alps_graph::compute_unit_cell_volume(){
   if(dimension_==1){ unit_cell_volume_= basis_vectors_[0][0]; }
   else if(dimension_==2){
@@ -108,33 +94,27 @@ std::vector<std::vector<double> > alps_graph::compute_reciprocal_from_basis(cons
   return reciprocal_basis;
 }
 
-bool alps_graph::operator==(const alps_graph &g) const{
-  if(volume_!= g.volume_) return false;
-  if(unit_cell_volume_!= g.unit_cell_volume_) return false;
-  if(dimension_!= g.dimension_) return false;
-  
-  for(int i=0;i< basis_vectors_.size();++i){
-    for(int j=0;j<dimension_;++j){
-      if(std::abs(basis_vectors_[i][j]-g.basis_vectors_[i][j])>1.e-8) return false;
-    }
-  }
-  
-  for(int i=0;i< reciprocal_basis_vectors_.size();++i){
-    for(int j=0;j<dimension_;++j){
-      if(std::abs(reciprocal_basis_vectors_[i][j]-g.reciprocal_basis_vectors_[i][j])>1.e-8) return false;
-    }
-  }
-  for(int i=0;i<cell_origins_.size();++i){
-    for(int j=0;j<dimension_;++j){
-      if(std::abs(cell_origins_[i][j]-g.cell_origins_[i][j])>1.e-8) return false;
-    }
-  }
-  for(int i=0;i<cell_offsets_.size();++i){
-    for(int j=0;j<dimension_;++j){
-      if(std::abs((double)cell_offsets_[i][j]-g.cell_offsets_[i][j])>1.e-8) return false;
-    }
+namespace {
+// Equal sizes, and entries within 1e-8.
+template <typename T>
+bool same_table(const std::vector<std::vector<T> > &a, const std::vector<std::vector<T> > &b) {
+  if (a.size() != b.size()) return false;
+  for (std::size_t i = 0; i < a.size(); ++i) {
+    if (a[i].size() != b[i].size()) return false;
+    for (std::size_t j = 0; j < a[i].size(); ++j)
+      if (std::abs(double(a[i][j]) - double(b[i][j])) > 1.e-8) return false;
   }
   return true;
+}
+}
+
+bool alps_graph::operator==(const alps_graph &g) const{
+  return volume_ == g.volume_ && unit_cell_volume_ == g.unit_cell_volume_ && dimension_ == g.dimension_
+      && same_table(basis_vectors_, g.basis_vectors_)
+      && same_table(reciprocal_basis_vectors_, g.reciprocal_basis_vectors_)
+      && same_table(cell_origins_, g.cell_origins_)
+      && same_table(cell_offsets_, g.cell_offsets_)
+      && same_table(momenta_, g.momenta_);
 }
 
 void alps_graph::build(const std::vector<std::vector<double> > basis, int L){
