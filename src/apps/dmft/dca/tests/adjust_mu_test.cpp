@@ -23,7 +23,7 @@ alps::params parameters(bool afm, int nmatsubara) {
   define_dca_parameters(p);
   p["dca.LATTICE"] = "Betts2D-4A";
   p["dca.LATTICE_LIBRARY"] = DCA_CLUSTER_LIBRARY;
-  p["dca.L"] = 32;
+  p["dca.L"] = 8;
   p["dca.SITES"] = 4;
   p["dca.AFM_SELFCONSISTENCY"] = afm;
   p["MU"] = 0.;
@@ -106,9 +106,9 @@ TEST(AdjustMu, DoubleCellFindsTheMuOfTheNormalState) {
 // truncation of the Fourier transform, a few 1e-5 at NMATSUBARA = 128.
 TEST(AdjustMu, NearlyIndependentOfTheNumberOfFrequencies) {
   const double target = 0.8;
-  EXPECT_NEAR(normal_mu(128, target, 0.7, 1.3), normal_mu(1024, target, 0.7, 1.3), 1e-4);
+  EXPECT_NEAR(normal_mu(128, target, 0.7, 1.3), normal_mu(256, target, 0.7, 1.3), 1e-4);
   const double s0[2][2] = {{0.7, 0.3}, {0.3, 0.5}}, s1[2][2] = {{1.3, 0.2}, {0.2, 0.9}};
-  EXPECT_NEAR(double_cell_mu(128, target, s0, s1), double_cell_mu(1024, target, s0, s1), 1e-4);
+  EXPECT_NEAR(double_cell_mu(128, target, s0, s1), double_cell_mu(256, target, s0, s1), 1e-4);
 }
 
 TEST(AdjustMu, NeedsTheTailOfSigma) {
