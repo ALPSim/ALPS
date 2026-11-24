@@ -130,10 +130,8 @@ std::string read_file(const fs::path& file) {
   return s.str();
 }
 
-// The value the interpolation must give at new frequency w: the self-energy
-// itself, also above the old range.
-int source_frequency(int w) { return w; }
-
+// At every new frequency w the interpolation must give the self-energy itself,
+// sigma_value(w, ...), also above the old range.
 class InterpolationTools : public ::testing::TestWithParam<int> {};
 
 TEST_P(InterpolationTools, NormalState) {
@@ -148,7 +146,7 @@ TEST_P(InterpolationTools, NormalState) {
   for (alps::gf::matsubara_index w(0); w < n_new; ++w)
     for (alps::gf::momentum_index k(0); k < 4; ++k)
       for (alps::gf::index f(0); f < 2; ++f)
-        ASSERT_LT(std::abs(result(w, k, f) - sigma_value(source_frequency(w()), k(), f(), 0)), 1e-12)
+        ASSERT_LT(std::abs(result(w, k, f) - sigma_value(w(), k(), f(), 0)), 1e-12)
             << "w=" << w() << " k=" << k() << " f=" << f();
 }
 
@@ -167,7 +165,7 @@ TEST_P(InterpolationTools, Nambu) {
       for (alps::gf::index a(0); a < 2; ++a)
         for (alps::gf::index b(0); b < 2; ++b) {
           const std::complex<double> expected =
-              (a() == b() ? 1. : factor) * sigma_value(source_frequency(w()), k(), a(), b());
+              (a() == b() ? 1. : factor) * sigma_value(w(), k(), a(), b());
           ASSERT_LT(std::abs(result(w, k, a, b) - expected), 1e-12)
               << "w=" << w() << " k=" << k() << " (" << a() << "," << b() << ")";
         }
