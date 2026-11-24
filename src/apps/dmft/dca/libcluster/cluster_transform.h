@@ -339,8 +339,8 @@ public:
 
   ///perform spin symmetrization of matsubara k-space Green's function
   void spin_symmetrize(double_cell_matsubara_kspace_gf& G) const;
-  ///perform k-space symmetrization
-  void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const{if (afm_symmetry_) symmetrize_afm_kspace(G); else if(charge_order_symmetry_) symmetrize_co_kspace(G); else throw std::logic_error("neither AFM nor CO: how to symmetrize?");}
+  ///average G over the classes of (K, K+Q) block elements that the cluster's point group relates
+  void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const;
 
   ///take a cluster Green's function and transform it from k-space into real space
   cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const;
@@ -352,10 +352,6 @@ private:
   void attach_bare_tail(double_cell_matsubara_kspace_gf &G0, double h, double mu_stag, bool isolated_cluster=false) const;
   ///attach a tail to the interacting GF
   void attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const;
-  ///perform the AFM symmetrization
-  void symmetrize_afm_kspace(double_cell_matsubara_kspace_gf &G) const;
-  ///perform the CO symmetrization
-  void symmetrize_co_kspace(double_cell_matsubara_kspace_gf &G) const;
   ///given a chemical potential, compute the density (assuming a tail for the target density)
   double density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site);
 
