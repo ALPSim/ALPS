@@ -32,8 +32,9 @@ parms = [{
 
 # and an otherwise identical set with cluster updates (parm1b) for comparison.
 # Note that with cluster updates SWEEPS counts single Wolff cluster flips (one
-# measurement each), not sweeps over the lattice; THERMALIZATION counts flipped
-# spins divided by the number of sites in both cases:
+# measurement each), not sweeps over the lattice; THERMALIZATION counts sweeps
+# for local updates and the summed cluster size divided by the number of sites
+# for cluster updates:
 parms_cluster = [dict(parms[0], UPDATE="cluster")]
 
 # Write into XML input files:
@@ -41,8 +42,9 @@ input_file = pyalps.writeInputFiles('parm1a',parms)
 input_file_cluster = pyalps.writeInputFiles('parm1b',parms_cluster)
 
 # and run the application spinmc. Tmin is the minimum time in seconds between
-# checks whether a simulation has finished; the simulation keeps measuring
-# until the next check, so a run can contain more than SWEEPS measurements:
+# checks whether a simulation has finished. A run stops after SWEEPS
+# measurements; in ALPS 3.0.0 and earlier it kept measuring until the next
+# check, so a run could contain more:
 pyalps.runApplication('spinmc', input_file, Tmin=10, writexml=True)
 pyalps.runApplication('spinmc', input_file_cluster, Tmin=10, writexml=True)
 
