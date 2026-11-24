@@ -191,6 +191,20 @@ TEST(InterpolationToolsBeta, NambuRefusesOtherBeta) {
       << read_file(dir / "tool.log");
 }
 
+// A beta within the relative 1e-10 the tools allow is the old BETA: the check
+// of the momenta and flavors (#471) must not compare it exactly.
+TEST(InterpolationToolsBeta, NormalStateAcceptsBetaWithinTolerance) {
+  const fs::path dir = fs::absolute("normal_close_beta");
+  EXPECT_EQ(run_tool(DCA_INTERPOLATE_NORMAL, dir, 32, "", beta * (1 + 1e-12), write_normal_sigma), 0)
+      << read_file(dir / "tool.log");
+}
+
+TEST(InterpolationToolsBeta, NambuAcceptsBetaWithinTolerance) {
+  const fs::path dir = fs::absolute("nambu_close_beta");
+  EXPECT_EQ(run_tool(DCA_INTERPOLATE_SC, dir, 32, "", beta * (1 + 1e-12), write_nambu_sigma), 0)
+      << read_file(dir / "tool.log");
+}
+
 }  // namespace
 
 // The starting G0 for a new Nambu run has the new run's initial fields in its
@@ -223,4 +237,39 @@ TEST(InterpolationTools, NambuRefusesComplexPairingField) {
   EXPECT_NE(run_tool(DCA_INTERPOLATE_SC, dir, 32, "", beta, write_nambu_sigma, "dca.ETA2_INIT = 0.1\n"), 0);
   EXPECT_NE(read_file(dir / "tool.log").find("set dca.ETA2 and dca.ETA2_INIT to 0"), std::string::npos)
       << read_file(dir / "tool.log");
+}
+
+// The self-energy has to be on the momenta of the old cluster with 2 flavors:
+// load() takes the meshes from the file, and a self-energy with fewer
+// momenta or flavors was read past its end (#471).
+namespace {
+void write_mismatched_sigma(alps::hdf5::archive& ar, const char* lattice, int sites, int flavors) {
+  alps::params p = transformer_parameters();
+  p["dca.LATTICE"] = lattice;
+  p["dca.SITES"] = sites;
+  NormalStateClusterTransformer T(p);
+  cluster_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma_gf(
+      alps::gf::matsubara_positive_mesh(beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(flavors)));
+  sigma.initialize();
+  sigma.save(ar, "/Sigma");
+}
+}
+
+TEST(InterpolationTools, RefusesSigmaOfAnotherClusterOrFlavors) {
+  struct mismatch { const char* name; const char* lattice; int sites; int flavors; };
+  for (mismatch m : {mismatch{"flavors", "Betts2D-4A", 4, 1}, mismatch{"cluster", "Betts2D-8A", 8, 2}}) {
+    const fs::path dir = fs::absolute(std::string("mismatch_") + m.name);
+    EXPECT_NE(run_tool(DCA_INTERPOLATE_NORMAL, dir, 32, "", beta,
+                       [&](alps::hdf5::archive& ar, double) { write_mismatched_sigma(ar, m.lattice, m.sites, m.flavors); }),
+              0) << m.name;
+    EXPECT_NE(read_file(dir / "tool.log").find("sigma.h5: the self-energy is not on the momenta of the old cluster"),
+              std::string::npos) << m.name << ": " << read_file(dir / "tool.log");
+  }
+}
+
+TEST(InterpolationTools, RefusesOtherFlavors) {
+  const fs::path dir = fs::absolute("flavors_4");
+  EXPECT_NE(run_tool(DCA_INTERPOLATE_NORMAL, dir, 32, "", beta, write_normal_sigma, "FLAVORS = 4\n"), 0);
+  EXPECT_NE(read_file(dir / "tool.log").find("FLAVORS = 4: the self-energy interpolation works for FLAVORS = 2."),
+            std::string::npos) << read_file(dir / "tool.log");
 }
