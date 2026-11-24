@@ -13,11 +13,8 @@
 #include "alps/params.hpp"
 
 #include <filesystem>
-#include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 namespace {
 struct working_directory {
@@ -55,9 +52,9 @@ struct green_functions {
   cluster_matsubara_kspace_gf G_omega;
   cluster_itime_kspace_gf G_tau;
 };
-green_functions noninteracting(int nmatsubara) {
+green_functions noninteracting(int nmatsubara, int ntau = 20) {
   NormalStateClusterTransformer T(parameters(nmatsubara));
-  green_functions g{T.make_matsubara_gf(), T.make_itime_gf(20)};
+  green_functions g{T.make_matsubara_gf(), T.make_itime_gf(ntau)};
   T.compute_noninteracting_G0(g.G_omega);
   alps::gf::fourier_frequency_to_time(g.G_omega, g.G_tau);
   return g;
@@ -79,22 +76,14 @@ std::string solve_error(ImpuritySolver& solver, green_functions& g) {
   return "";
 }
 
-std::vector<std::string> lines(const std::string& file) {
-  std::ifstream in(file);
-  std::vector<std::string> result;
-  for (std::string line; std::getline(in, line);) result.push_back(line);
-  return result;
-}
-
 class ImpuritySolverTest : public ::testing::Test {
 protected:
   alps::testing::TemporaryDirectory temporary;
   working_directory cd{temporary.path()};
 };
 
-// A "solver" that writes its arguments, one per line, to args.txt and then
-// copies ready.h5 to the output file.
-const std::string copy_solver = "sh -c 'printf \"%s\\n\" \"$@\" > args.txt; cp ready.h5 out.h5' sh";
+// A "solver" that copies ready.h5 to the output file.
+const std::string copy_solver = "cp ready.h5 out.h5 #";
 }
 
 TEST_F(ImpuritySolverTest, ReadsTheOutputAndRemovesTheFiles) {
@@ -127,4 +116,25 @@ TEST_F(ImpuritySolverTest, RefusesOutputOnOtherMeshes) {
   ImpuritySolver solver(copy_solver, "params.ini", parameters(16));
   const std::string error = solve_error(solver, g);
   EXPECT_NE(error.find("out.h5: the solver's G_omega is not on the meshes of G0"), std::string::npos) << error;
+}
+
+// The input and output file may be the same: the solver has to find its
+// input there, and dca reads its output from it.
+TEST_F(ImpuritySolverTest, InputAndOutputCanBeTheSameFile) {
+  green_functions g = noninteracting(16);
+  write_output("ready.h5", g);
+  alps::params p = parameters(16);
+  p["solver.INFILE_H5GF"] = "io.h5";
+  p["solver.OUTFILE_H5GF"] = "io.h5";
+  ImpuritySolver solver("test -f io.h5 && cp ready.h5 io.h5 #", "params.ini", p);
+  EXPECT_EQ(solve_error(solver, g), "");
+}
+
+// dca only prints the solver's G_tau, so it may be on another tau grid than
+// G0_tau.
+TEST_F(ImpuritySolverTest, AcceptsGTauOnAnotherTauGrid) {
+  write_output("ready.h5", noninteracting(16, 40));
+  green_functions g = noninteracting(16);
+  ImpuritySolver solver(copy_solver, "params.ini", parameters(16));
+  EXPECT_EQ(solve_error(solver, g), "");
 }
