@@ -12,46 +12,122 @@
 
 
 #include<sstream>
+#include<cctype>
 #include<cmath>
+#include<climits>
 #include "cluster_graph.h"
 #include <iostream>
 
-std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
-  std::vector<std::vector<double> > basis;
-  //for now we use the ALPS xml file and write a poor man's parser.
-  std::string line;
-  std::string superlattice_string=cluster_name+" superlattice";
-  std::ifstream xml_file(cluster_library.c_str());
-  int dimension;
-  if(!xml_file.good()) throw std::runtime_error("cluster library: "+cluster_library+" could not be opened.");
-  while(getline(xml_file, line)) {
-    if (line.find(superlattice_string, 0) != std::string::npos) {
-      //on the same line we expect 'dimension'
-      if     (line.find("dimension=\"1\"")!=std::string::npos) dimension=1;
-      else if(line.find("dimension=\"2\"")!=std::string::npos) dimension=2;
-      else if(line.find("dimension=\"3\"")!=std::string::npos) dimension=3;
-      else throw std::runtime_error("problem finding dimensionality.");
-      getline(xml_file, line); //this should be 'basis'
-      for(int i=0;i<dimension;++i){
-        getline(xml_file, line); //this should be the first vector
-        int svecpos=line.find("<VECTOR>"); if(svecpos==std::string::npos) throw std::runtime_error("could not find <VECTOR> entry in xml line: "+line);
-        int evecpos=line.find("</VECTOR>");if(evecpos==std::string::npos) throw std::runtime_error("could not find </VECTOR> entry in xml line: "+line);
-        std::stringstream sstr(line.substr(svecpos+8, evecpos-svecpos-8));
-        std::vector<double> basis_vector;
-        for(int j=0;j<dimension;++j){
-          int basis_element;
-          sstr>>basis_element;
-          basis_vector.push_back(basis_element);
-        }
-        basis.push_back(basis_vector);
+namespace {
+// The value of the attribute `name` in the start tag `tag`, e.g. name="..." or
+// name = "...", or "" if the tag has no such attribute.
+std::string attribute(const std::string &tag, const std::string &name) {
+  std::size_t pos = 0;
+  while ((pos = tag.find(name, pos)) != std::string::npos) {
+    const bool starts_word = pos > 0 && std::isspace(static_cast<unsigned char>(tag[pos - 1]));
+    std::size_t p = pos + name.size();
+    while (p < tag.size() && std::isspace(static_cast<unsigned char>(tag[p]))) ++p;
+    if (starts_word && p < tag.size() && tag[p] == '=') {
+      ++p;
+      while (p < tag.size() && std::isspace(static_cast<unsigned char>(tag[p]))) ++p;
+      if (p < tag.size() && (tag[p] == '"' || tag[p] == '\'')) {
+        const std::size_t end = tag.find(tag[p], p + 1);
+        if (end != std::string::npos) return tag.substr(p + 1, end - p - 1);
       }
-      return basis;
     }
+    pos += name.size();
   }
-  throw std::logic_error("cluster"+cluster_name+" not found in library: "+cluster_library);
+  return "";
+}
+}
+
+// Reads the basis of the superlattice "<cluster_name> superlattice" from a
+// cluster library in the ALPS lattice library format:
+//   <LATTICE name="Betts2D-8A superlattice" dimension="2">
+//     <BASIS> <VECTOR>2 2</VECTOR> <VECTOR>2 -2</VECTOR> </BASIS> ...
+// The name has to match exactly, and each basis vector needs `dimension`
+// integer entries (#443).
+std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::string &cluster_name, const std::string &cluster_library) const{
+  std::ifstream xml_file(cluster_library.c_str());
+  if(!xml_file.good()) throw std::runtime_error("cluster library: "+cluster_library+" could not be opened.");
+  std::stringstream contents;
+  contents << xml_file.rdbuf();
+  std::string xml = contents.str();
+  // Entries inside <!-- --> are not read: blank out the comments, keeping
+  // the positions of everything else. An unterminated comment runs to the end.
+  for (std::size_t begin = xml.find("<!--"); begin != std::string::npos; begin = xml.find("<!--", begin)) {
+    const std::size_t close = xml.find("-->", begin + 4);
+    const std::size_t end = close == std::string::npos ? xml.size() : close + 3;
+    xml.replace(begin, end - begin, end - begin, ' ');
+  }
+  const std::string where = "cluster " + cluster_name + " in " + cluster_library + ": ";
+  const std::string wanted = cluster_name + " superlattice";
+
+  std::size_t found = std::string::npos, found_end = std::string::npos;
+  for (std::size_t pos = xml.find("<LATTICE"); pos != std::string::npos; pos = xml.find("<LATTICE", pos + 1)) {
+    const std::size_t after = pos + 8;
+    if (after >= xml.size() || !(std::isspace(static_cast<unsigned char>(xml[after])) || xml[after] == '>'))
+      continue;  // <LATTICEGRAPH ...>
+    const std::size_t tag_end = xml.find('>', pos);
+    if (tag_end == std::string::npos) break;
+    if (attribute(xml.substr(pos, tag_end - pos), "name") != wanted) continue;
+    if (found != std::string::npos)
+      throw std::runtime_error(where + "the library defines it more than once.");
+    found = pos;
+    found_end = tag_end;
+  }
+  if (found != std::string::npos && xml[found_end - 1] == '/') {
+    // <LATTICE .../> has no basis; the next lattice's must not be taken for it
+    throw std::runtime_error(where + "has no <BASIS> ... </BASIS>.");
+  }
+  if (found == std::string::npos)
+    throw std::runtime_error(where + "not found. dca.LATTICE has to be the name of a LATTICE \""
+                             + wanted + "\" in the library, exactly.");
+
+  const std::string dim_string = attribute(xml.substr(found, found_end - found), "dimension");
+  if (dim_string != "1" && dim_string != "2" && dim_string != "3")
+    throw std::runtime_error(where + "dimension=\"" + dim_string + "\"; clusters have dimension 1, 2 or 3.");
+  const int dimension = dim_string[0] - '0';
+
+  const std::size_t lattice_end = xml.find("</LATTICE>", found_end);
+  const std::size_t basis_begin = xml.find("<BASIS>", found_end);
+  const std::size_t basis_end = xml.find("</BASIS>", found_end);
+  if (lattice_end == std::string::npos || basis_begin == std::string::npos || basis_end == std::string::npos
+      || basis_begin > lattice_end || basis_end > lattice_end || basis_end < basis_begin)
+    throw std::runtime_error(where + "has no <BASIS> ... </BASIS>.");
+
+  std::vector<std::vector<double> > basis;
+  for (std::size_t pos = xml.find("<VECTOR>", basis_begin); pos != std::string::npos && pos < basis_end;
+       pos = xml.find("<VECTOR>", pos + 1)) {
+    const std::size_t end = xml.find("</VECTOR>", pos);
+    if (end == std::string::npos || end > basis_end)
+      throw std::runtime_error(where + "a <VECTOR> of the basis has no </VECTOR>.");
+    const std::string text = xml.substr(pos + 8, end - pos - 8);
+    std::stringstream entries(text);
+    std::vector<double> vector;
+    std::string entry;
+    while (entries >> entry) {
+      std::size_t used = 0;
+      double value = 0;
+      try { value = std::stod(entry, &used); } catch (std::exception const &) { used = 0; }
+      if (used != entry.size() || !std::isfinite(value) || value != std::round(value) || std::abs(value) > INT_MAX)
+        throw std::runtime_error(where + "basis vector \"" + text + "\": \"" + entry + "\" is not an integer."
+                                 + " dca needs a numeric basis of integer lattice vectors"
+                                 + " (the 1D chains are Chain1D_<N> in cluster1d.xml).");
+      vector.push_back(value);
+    }
+    if (int(vector.size()) != dimension)
+      throw std::runtime_error(where + "basis vector \"" + text + "\" has " + std::to_string(vector.size())
+                               + " entries, dimension=\"" + dim_string + "\" needs " + dim_string + ".");
+    basis.push_back(vector);
+  }
+  if (int(basis.size()) != dimension)
+    throw std::runtime_error(where + "the basis has " + std::to_string(basis.size()) + " vectors, dimension=\""
+                             + dim_string + "\" needs " + dim_string + ".");
+  return basis;
 }
 void alps_graph::compute_unit_cell_volume(){
-  if(dimension_==1){ unit_cell_volume_= basis_vectors_[0][0]; }
+  if(dimension_==1){ unit_cell_volume_= std::abs(basis_vectors_[0][0]); }
   else if(dimension_==2){
     unit_cell_volume_=std::abs(basis_vectors_[0][0]* basis_vectors_[1][1]- basis_vectors_[0][1]* basis_vectors_[1][0]);
   }else if(dimension_==3){
@@ -122,6 +198,8 @@ void alps_graph::build(const std::vector<std::vector<double> > basis, int L){
   dimension_=basis.size(); if(dimension_>3 || dimension_<1) throw std::invalid_argument("clusters work for dimensions 1, 2, and 3.");
   volume_=dimension_==1?L:dimension_==2?L*L:L*L*L;
   compute_unit_cell_volume();
+  if(unit_cell_volume_==0)
+    throw std::invalid_argument("cluster: the basis vectors are linearly dependent, the cluster has no sites.");
   
   reciprocal_basis_vectors_ =compute_reciprocal_from_basis(basis);
   std::pair<std::vector<std::vector<double> >,std::vector<std::vector<int> > > origins_and_offsets=compute_cell_origins_and_offsets(L);

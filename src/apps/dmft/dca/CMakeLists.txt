@@ -76,6 +76,13 @@ if(ALPS_BUILD_TESTING)
     alps_add_gtest(dca_${test} COMPONENT dmft)
   endforeach()
 
+  # Reads every cluster of the shipped libraries, and refuses malformed ones.
+  add_executable(dca_cluster_library_test tests/cluster_library_test.cpp)
+  target_link_libraries(dca_cluster_library_test PRIVATE alps_dca)
+  target_compile_definitions(dca_cluster_library_test PRIVATE
+    DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
+  alps_add_gtest(dca_cluster_library_test COMPONENT dmft)
+
   # End-to-end test: dca runs its loop at U=0 with a solver that returns G = G0.
   add_executable(dca_free_solver tests/free_solver.cpp)
   target_link_libraries(dca_free_solver PRIVATE alps_dca)
