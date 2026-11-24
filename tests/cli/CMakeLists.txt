@@ -39,6 +39,9 @@ if(Python_Interpreter_FOUND)
     add_test(NAME dmft_itime_loop_refusals
       COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_itime_loop.py" "$<TARGET_FILE:dmft>")
     set_tests_properties(dmft_itime_loop_refusals PROPERTIES TIMEOUT 120 LABELS "cli")
+    add_test(NAME dmft_ctint_max_order
+      COMMAND "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_dmft_ctint_max_order.py" "$<TARGET_FILE:dmft>")
+    set_tests_properties(dmft_ctint_max_order PROPERTIES TIMEOUT 240 LABELS "cli")
   endif()
   if(TARGET spinmc)
     add_test(NAME scheduler_sweeps_spinmc
