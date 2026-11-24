@@ -12,6 +12,7 @@
 #ifndef __SSE_ALG_H__
 #define __SSE_ALG_H__
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 #include <limits>
@@ -56,6 +57,9 @@ public:
     {
         nworms = params.value_or_default("NUMBER_OF_WORMS_PER_SWEEP", 0);
         nops = params.value_or_default("INITIAL_CUTOFF", 10);
+        // WORM_ABORT: a worm longer than WORM_ABORT * nops is abandoned and
+        // the operator string restored to its state before the worm. The
+        // limit follows nops, which can grow between sweeps.
         abort_factor = params.value_or_default("WORM_ABORT", 0.0);
         
         if (abort_factor != 0.0)
@@ -126,6 +130,9 @@ public:
     
     void do_step()
     {
+        // Keep the cutoff above the expansion order in every sweep, also
+        // after thermalisation; a fixed cutoff would truncate the series.
+        adjust_opstring_len();
         diagonal_update();
         
         if (!worker.is_thermalized()) {
@@ -151,7 +158,6 @@ public:
                 }
 
                 opstring2state();
-                adjust_opstring_len();
             }
         } else {
             measure_green_function = worker.measure_green_function();
@@ -303,10 +309,13 @@ private:
             opstring[last_leg / S2].linked[last_leg % S2] = first_leg;
         }
 
+        // The cutoff grows before every sweep, so this needs the expansion
+        // order to jump by a third plus 20 within one sweep. Then the
+        // truncation is no longer negligible, so stop rather than measure.
         if (worker.is_thermalized() && nnonzero == nops)
-            throw std::runtime_error("nnonzero reached the maximum value. "
-                    "Please increase THERMALIZATION or set INITIAL_CUTOFF "
-                    "to some large enough value.");
+            throw std::runtime_error("the expansion order reached the "
+                    "cutoff within one sweep. Please set INITIAL_CUTOFF "
+                    "well above the typical expansion order.");
     }
     
     boost::uint64_t worm_update()
@@ -545,32 +554,45 @@ private:
     
     void adjust_opstring_len()
     {
-        if (nnonzero < unsigned(0.8 * nops))
+        // Keep a third of the expansion order plus a fixed margin free, so
+        // that one sweep cannot fill the string even for short strings.
+        unsigned const target = nnonzero + nnonzero / 3 + 20;
+        if (nops >= target)
             return;
-            
-        unsigned nops1 = unsigned(1.1 * nops);
-        if (nops1 == nops) ++nops1;
 
-        opstring.reserve(nops1);
+        unsigned nops1 = std::max(target, unsigned(1.1 * nops));
+
         opstring.resize(nops1);
-        op_indices.reserve(nops1);
         op_indices.resize(nops1);
 
+        // Move the operators to the front, keeping their order.
         unsigned j = 0;
         for (unsigned i = 0; i < nops; ++i)
-            if (opstring[i].vertex_index != IDENTITY) {
-                opstring[j] = opstring[i];
-                ++j;
-            }
+            if (opstring[i].vertex_index != IDENTITY)
+                opstring[j++] = opstring[i];
         for (unsigned i = nnonzero; i < nops1; ++i)
             opstring[i].vertex_index = IDENTITY;
 
-        j = nnonzero - 1;
-        for (unsigned i = nops1 - 1; j < i; --i)
-            if (j > 0 && nnonzero > (unsigned) worker.mrandom_int(nops1)) {
-                opstring[i] = opstring[j];
-                opstring[j].vertex_index = IDENTITY;
-                --j;
+        // Spread them over the longer string, every placement of the
+        // nnonzero operators among nops1 slots equally likely. The weight of
+        // an operator sequence does not depend on the cutoff, only its number
+        // of placements does, so this keeps the distribution of the sequence
+        // and makes the placement given the sequence the equilibrium one at
+        // the new cutoff. This must stay uniform: growth now also happens
+        // while measuring, and estimators that use the operator positions
+        // (and nops) would see any bias here.
+        //
+        // What is not exact is that growing depends on the current nnonzero.
+        // Each growth lengthens the string by at least 10%, so it happens a
+        // few times per run, and the residual effect is of order
+        // (number of growths) / SWEEPS, far below the truncation bias that a
+        // fixed cutoff would cause.
+        unsigned left = nnonzero;
+        for (unsigned i = nops1; left > 0 && left < i; --i)
+            if (worker.mrandom_real() * i < left) {
+                opstring[i - 1] = opstring[left - 1];
+                opstring[left - 1].vertex_index = IDENTITY;
+                --left;
             }
 
         nops = nops1;
