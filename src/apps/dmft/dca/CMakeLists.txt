@@ -71,7 +71,8 @@ if(ALPS_BUILD_TESTING)
     add_executable(dca_${test} tests/${test}.cpp)
     target_link_libraries(dca_${test} PRIVATE alps_dca)
     target_compile_definitions(dca_${test} PRIVATE
-      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml")
+      DCA_CLUSTER_LIBRARY="${CMAKE_CURRENT_SOURCE_DIR}/libcluster/cluster.xml"
+      DCA_CLUSTER_DIR="${CMAKE_CURRENT_SOURCE_DIR}/libcluster")
     alps_add_gtest(dca_${test} COMPONENT dmft)
   endforeach()
 
