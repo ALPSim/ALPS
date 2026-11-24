@@ -297,54 +297,62 @@ void DoubleCellClusterTransformer::attach_bare_tail(double_cell_matsubara_kspace
   G0.set_tail(3,c3);
 }
 
-void NormalStateClusterTransformer::attach_interacting_tail(cluster_matsubara_kspace_gf &G, double U, const std::vector<double> &densities) const{
+namespace {
+const char* const missing_sigma_tail =
+  "sc.ADJUST_MU computes the density of the k-sum G with the high-frequency tail of the self-energy, which "
+  "follows from the tails of G and G0; the impurity solver returned a G without the tail orders 1 to 3.";
+}
+
+void NormalStateClusterTransformer::attach_ksum_tail(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma) const{
+  if(!has_tail(sigma, 0, 1)) throw std::runtime_error(missing_sigma_tail);
   alps::gf::k_sigma_gf c1(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c2(G.mesh2(), G.mesh3());
   alps::gf::k_sigma_gf c3(G.mesh2(), G.mesh3());
-  c1.initialize(); c2.initialize(); c3.initialize();
-  double density=(densities[0]+densities[1])/2.;
-
-  for(alps::gf::index f(0); f<n_flavors_; f++) {
-    for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+  typedef Eigen::Matrix<double,1,1> M;
+  for(alps::gf::momentum_index k(0); k<n_cluster_sites(); ++k) {
+    M m1, m2;
+    bare_moments(k(), false, [&](int kl){ return M::Constant(dispersion(k(),kl)-mu_); }, m1, m2);
+    for(alps::gf::index f(0); f<G.mesh3().extent(); ++f) {
+      M t2, t3;
+      const M s0 = M::Constant(sigma.tail(0)(k,f)), s1 = M::Constant(sigma.tail(1)(k,f));
+      ksum_tail(m1, m2, s0, s1, t2, t3);
       c1(k,f) = 1.;
-      c2(k,f) =epsav_[k()] - (mu_+U/2.)+ U*density;
-      c3(k,f) = epssqav_[k()] - 2*mu_*epsav_[k()] + mu_*mu_+ 2.*U*density*(epsav_[k()]-mu_) + U*U*density;
+      c2(k,f) = t2(0,0);
+      c3(k,f) = t3(0,0);
     }
   }
   G.set_tail(1,c1);
   G.set_tail(2,c2);
   G.set_tail(3,c3);
 }
-void DoubleCellClusterTransformer::attach_interacting_tail(double_cell_matsubara_kspace_gf &G, double U, double V, const std::vector<double> &densities) const{
+void DoubleCellClusterTransformer::attach_ksum_tail(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag) const{
+  if(!has_tail(sigma, 0, 1)) throw std::runtime_error(missing_sigma_tail);
   alps::gf::k_sigma1_sigma2_gf c1(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c2(G.mesh2(), G.mesh3(), G.mesh4());
   alps::gf::k_sigma1_sigma2_gf c3(G.mesh2(), G.mesh3(), G.mesh4());
-  c1.initialize(); c2.initialize(); c3.initialize();
-  //careful here: in the AFM case it is the spin of the other flavor that enters the hifreq tail
-  double density=(densities[0]+densities[1])/2.;
-
-  for(alps::gf::index spin(0); spin<n_flavors_; spin++) {
+  for(alps::gf::index spin(0); spin<G.mesh4().extent(); ++spin) {
+    // the field that couples k and k+Q, as in matsubara_k_sum
+    const double field = (spin()==0 ? 1. : -1.)*h/2. + mu_stag;
     for(alps::gf::momentum_index k(0); k<n_cluster_sites(); k+=2) {
-      int spin_factor = spin()==0 ? 1 : -1;
-      c1(k  ,alps::gf::index(0), spin) = 1.;
-      c1(k+1,alps::gf::index(1), spin) = 1.;
-
-     ///TODO: c2 here needs a proper derivation that accounts for the Hartree term. it is NOT U*density
-     //c2(k  ,alps::gf::index(0), spin) = epsav_[k()]   - (mu_+U/2.+2*dimension()*V)+ U*density;
-     //c2(k+1,alps::gf::index(1), spin) = epsav_[k()+1] - (mu_+U/2.+2*dimension()*V)+ U*density;
-
-     c2(k  ,alps::gf::index(0), spin) = 0.; //epsav_[k()] - mu_+ U*density;
-     c2(k+1,alps::gf::index(1), spin) = 0.;//epsav_[k()+1] - mu_+ U*density;
-
-
-      //the off-diagonal elements
-      c1(k  ,alps::gf::index(1), spin) = 0;
-      c1(k+1,alps::gf::index(0), spin) = 0; 
-      c2(k,alps::gf::index(1), spin)=0.; 
-      c2(k+1,alps::gf::index(0), spin)=0.;
-      // off-diagonal are set to zero for now
-     //c2(k,alps::gf::index(1), spin)=mu_stag+spin_factor*h/2.;
-     //c2(k+1,alps::gf::index(0), spin)=mu_stag+spin_factor*h/2.;   
+      Eigen::Matrix2d m1, m2, s0, s1, t2, t3;
+      bare_moments(k(), false, [&](int kl){
+          Eigen::Matrix2d H;
+          H << dispersion(k(),kl)-mu_, -field,
+               -field,                 dispersion(k()+1,kl)-mu_;
+          return H;
+        }, m1, m2);
+      for(int i=0; i<2; ++i)
+        for(int j=0; j<2; ++j){
+          s0(i,j) = sigma.tail(0)(k+i, alps::gf::index(j), spin);
+          s1(i,j) = sigma.tail(1)(k+i, alps::gf::index(j), spin);
+        }
+      ksum_tail(m1, m2, s0, s1, t2, t3);
+      for(int i=0; i<2; ++i)
+        for(int j=0; j<2; ++j){
+          c1(k+i, alps::gf::index(j), spin) = i==j ? 1. : 0.;
+          c2(k+i, alps::gf::index(j), spin) = t2(i,j);
+          c3(k+i, alps::gf::index(j), spin) = t3(i,j);
+        }
     }
   }
   G.set_tail(1,c1);
@@ -579,11 +587,7 @@ void NormalStateClusterTransformer::dyson_get_self_energy(cluster_matsubara_kspa
 void DoubleCellClusterTransformer::dyson_get_self_energy(double_cell_matsubara_kspace_gf &sigma, const double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &G0) const{
   alps::gf::index Zero(0);
   alps::gf::index Q(1);
-  //std::ofstream G0_omegaBEFORE_file("G0_omegaBEFORE",std::ios_base::app);
-  //G0_omegaBEFORE_file<<std::setprecision(14)<<G0;  
-  //std::ofstream G_omegaBEFORE_file("G_omegaBEFORE",std::ios_base::app);
-  //G_omegaBEFORE_file<<std::setprecision(14)<<G;
-for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+  for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
     for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
       for (alps::gf::index spin(0); spin<G.mesh3().extent(); spin++) {
         std::complex<double> g0_block[4]={G0(w, k, Zero,spin),G0(w, k, Q,spin),G0(w, k+1, Zero,spin),G0(w, k+1, Q,spin)};
@@ -598,12 +602,32 @@ for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
       }
     }
   }
-
-//exit(0);
- // std::ofstream G0_omegaAFTER_file("G0_omegaAFTER",std::ios_base::app);
- // G0_omegaAFTER_file<<std::setprecision(14)<<G0;
- // std::ofstream G_omegaAFTER_file("G_omegaAFTER",std::ios_base::app);
- // G_omegaAFTER_file<<std::setprecision(14)<<G;
+  // The tail of Sigma = G0^-1 - G^-1, as in the normal state, with 2x2
+  // matrices: G = 1/iw + C2/(iw)^2 + C3/(iw)^3 gives G^-1 = iw - C2 + (C2^2 - C3)/iw,
+  // so Sigma = (C2 - C02) + (C3 - C03 + C02^2 - C2^2)/iw. sc.ADJUST_MU needs it (#449).
+  if (!has_tail(G, 1, 3) || !has_tail(G0, 1, 3)) return;
+  alps::gf::k_sigma1_sigma2_gf s0(G.mesh2(), G.mesh3(), G.mesh4());
+  alps::gf::k_sigma1_sigma2_gf s1(G.mesh2(), G.mesh3(), G.mesh4());
+  for (alps::gf::index spin(0); spin<G.mesh4().extent(); ++spin) {
+    for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
+      Eigen::Matrix2d C2, C3, C02, C03;
+      for (int i=0; i<2; ++i)
+        for (int j=0; j<2; ++j) {
+          C2(i,j)  = G.tail(2)(k+i, alps::gf::index(j), spin);
+          C3(i,j)  = G.tail(3)(k+i, alps::gf::index(j), spin);
+          C02(i,j) = G0.tail(2)(k+i, alps::gf::index(j), spin);
+          C03(i,j) = G0.tail(3)(k+i, alps::gf::index(j), spin);
+        }
+      const Eigen::Matrix2d S0 = C2 - C02, S1 = C3 - C03 + C02*C02 - C2*C2;
+      for (int i=0; i<2; ++i)
+        for (int j=0; j<2; ++j) {
+          s0(k+i, alps::gf::index(j), spin) = S0(i,j);
+          s1(k+i, alps::gf::index(j), spin) = S1(i,j);
+        }
+    }
+  }
+  sigma.set_tail(0,s0);
+  sigma.set_tail(1,s1);
 }
 
 ///Use Dyson to get the self-energy in Nambu space
@@ -696,13 +720,12 @@ void NormalStateClusterTransformer::matsubara_k_sum(cluster_matsubara_kspace_gf 
     }
   }
 }
-double NormalStateClusterTransformer::density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma, double target_density_per_site){
+double NormalStateClusterTransformer::density_for_mu(double mu, const cluster_matsubara_kspace_gf &sigma){
   double mu_old=mu_; mu_=mu;
-  std::vector<double> target_spin_densities(2,target_density_per_site/2.);
   double computed_total_density=0.;
   cluster_matsubara_kspace_gf G_omega(alps::gf::omega_k_sigma_gf(sigma.mesh1(), sigma.mesh2(), sigma.mesh3()));
   cluster_itime_kspace_gf G_tau(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,2),G_omega.mesh2(), G_omega.mesh3())); //G(tau) with only 0 and beta
-  matsubara_k_sum(G_omega,sigma); attach_interacting_tail(G_omega, U_, target_spin_densities); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
+  matsubara_k_sum(G_omega,sigma); attach_ksum_tail(G_omega, sigma); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
   for(alps::gf::momentum_index kc(0); kc<G_tau.mesh2().extent(); ++kc){
     for(alps::gf::index f(0); f<G_tau.mesh3().extent();++f){
       computed_total_density+=-G_tau(alps::gf::itime_index(1),kc,f);
@@ -716,8 +739,8 @@ double NormalStateClusterTransformer::matsubara_k_sum_adjust_mu(cluster_matsubar
   double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
   double mu_convergence_tolerance=1.e-7;
   double mu_old=mu_;
-  double density_min=density_for_mu(mu_min, sigma, target_density);
-  double density_max=density_for_mu(mu_max, sigma, target_density);
+  double density_min=density_for_mu(mu_min, sigma);
+  double density_max=density_for_mu(mu_max, sigma);
   std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
   std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
   if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is > minimum density");
@@ -725,7 +748,7 @@ double NormalStateClusterTransformer::matsubara_k_sum_adjust_mu(cluster_matsubar
   double density, mu_trial;
   do{
     mu_trial=(mu_max+mu_min)/2.;
-    density=density_for_mu(mu_trial, sigma, target_density);
+    density=density_for_mu(mu_trial, sigma);
     if(density>target_density)
       mu_max=mu_trial;
     else
@@ -764,15 +787,14 @@ void DoubleCellClusterTransformer::matsubara_k_sum(double_cell_matsubara_kspace_
     }
   }
 }
-double DoubleCellClusterTransformer::density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double target_density_per_site){
+double DoubleCellClusterTransformer::density_for_mu(double mu, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag){
   double mu_old=mu_; mu_=mu;
-  std::vector<double> target_spin_densities(2,target_density_per_site/2.);
   double computed_total_density=0.;
   double_cell_matsubara_kspace_gf G_omega(alps::gf::omega_k_sigma1_sigma2_gf(sigma.mesh1(), sigma.mesh2(), sigma.mesh3(), sigma.mesh4()));
   double_cell_itime_kspace_gf G_tau(alps::gf::itime_k_sigma1_sigma2_gf(alps::gf::itime_mesh(beta_,2),G_omega.mesh2(), G_omega.mesh3(), G_omega.mesh4())); //G(tau) with only 0 and beta
-  matsubara_k_sum(G_omega,sigma); attach_interacting_tail(G_omega, U_, V_, target_spin_densities); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
+  matsubara_k_sum(G_omega, sigma, h, mu_stag); attach_ksum_tail(G_omega, sigma, h, mu_stag); alps::gf::fourier_frequency_to_time(G_omega, G_tau);
   for(alps::gf::momentum_index kc(0); kc<G_tau.mesh2().extent(); kc+=2){
-    for(alps::gf::index f(0); f<G_tau.mesh3().extent();++f){
+    for(alps::gf::index f(0); f<G_tau.mesh4().extent();++f){
       computed_total_density+=-G_tau(alps::gf::itime_index(1),kc  ,alps::gf::index(0), f);
       computed_total_density+=-G_tau(alps::gf::itime_index(1),kc+1,alps::gf::index(1), f);
     }
@@ -787,8 +809,8 @@ double DoubleCellClusterTransformer::matsubara_k_sum_adjust_mu(double_cell_matsu
   double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
   double mu_convergence_tolerance=1.e-7;
   double mu_old=mu_;
-  double density_min=density_for_mu(mu_min, sigma, target_density);
-  double density_max=density_for_mu(mu_max, sigma, target_density);
+  double density_min=density_for_mu(mu_min, sigma, h, mu_stag);
+  double density_max=density_for_mu(mu_max, sigma, h, mu_stag);
   std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
   std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
   if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is < mu-minimum density");
@@ -796,7 +818,7 @@ double DoubleCellClusterTransformer::matsubara_k_sum_adjust_mu(double_cell_matsu
   double density, mu_trial;
   do{
     mu_trial=(mu_max+mu_min)/2.;
-    density=density_for_mu(mu_trial, sigma, target_density);
+    density=density_for_mu(mu_trial, sigma, h, mu_stag);
     std::cout<<"attempting mu: "<<mu_trial<<" density: "<<density<<std::endl;
     if(density>target_density)
       mu_max=mu_trial;
@@ -804,7 +826,7 @@ double DoubleCellClusterTransformer::matsubara_k_sum_adjust_mu(double_cell_matsu
       mu_min=mu_trial;
   }while(std::abs(mu_max - mu_min)>mu_convergence_tolerance);
   mu_=mu_trial;
-  matsubara_k_sum(G,sigma);
+  matsubara_k_sum(G, sigma, h, mu_stag);
 
   return mu_;
 
