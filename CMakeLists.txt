@@ -172,6 +172,17 @@ get_property(ALPS_SDK_COMPONENTS GLOBAL PROPERTY ALPS_SDK_COMPONENTS)
 get_property(ALPS_SDK_RUNTIME_TARGETS GLOBAL PROPERTY ALPS_SDK_RUNTIME_TARGETS)
 get_property(ALPS_EIGEN_COMPONENT_NAMES GLOBAL PROPERTY ALPS_EIGEN_COMPONENT_NAMES)
 get_property(ALPS_EIGEN_COMPONENTS GLOBAL PROPERTY ALPS_EIGEN_COMPONENTS)
+# The components built with Eigen that the applications link, in the order of
+# ALPS_EIGEN_COMPONENT_NAMES: a component's export is loaded after those of the
+# components it links (cthyb_segment after gf).
+get_property(_alps_linked GLOBAL PROPERTY ALPS_APPLICATION_EIGEN_COMPONENTS)
+set(ALPS_APPLICATION_EIGEN_COMPONENTS "")
+foreach(component IN LISTS ALPS_EIGEN_COMPONENT_NAMES)
+  if(component IN_LIST _alps_linked)
+    list(APPEND ALPS_APPLICATION_EIGEN_COMPONENTS ${component})
+  endif()
+endforeach()
+unset(_alps_linked)
 configure_package_config_file(
   cmake/ALPSConfig.cmake.in "${PROJECT_BINARY_DIR}/cmake/ALPSConfig.cmake"
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATADIR}/alps

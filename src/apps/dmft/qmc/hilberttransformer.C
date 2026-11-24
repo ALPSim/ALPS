@@ -84,7 +84,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
       throw std::runtime_error("SemicircleHilbertTransformer::initial_G0: could not open inital G0 file");
     }
     else
-      G0_tau.read(parms["G0TAU_INPUT"].c_str());
+      G0_tau.read(parms["G0TAU_INPUT"].c_str(), static_cast<double>(parms["BETA"]));
   }
   else {
     GeneralFSHilbertTransformer hilbert(parms,false/*ignored*/);
@@ -94,7 +94,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
   }
   
   if (parms.defined("G0TAU_input"))
-    G0_tau.write((parms["G0TAU_input"]).c_str());
+    G0_tau.write((parms["G0TAU_input"]).c_str(), static_cast<double>(parms["BETA"]));
   
   return G0_tau;
 }
@@ -148,7 +148,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
       throw std::runtime_error("GeneralFSHilbertTransformer::initial_G0: could not open inital G0 file");
     }
     else
-      G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+      G0_omega.read(parms["G0OMEGA_INPUT"].c_str(), beta);
   }
   else {
     std::cout<<"calculating non-interacting initial G0_omega"<<std::endl;
@@ -163,7 +163,7 @@ matsubara_green_function_t GeneralFSHilbertTransformer::initial_G0(const alps::P
   }
   
   if (parms.defined("G0OMEGA_input"))   // it is not needed to store it by default, as it will be stored in the 1st iteration as G0_omega_1, G0_omegareal_1
-    G0_omega.write((parms["G0OMEGA_input"]).c_str());
+    G0_omega.write((parms["G0OMEGA_input"]).c_str(), beta);
 
   return G0_omega;
 }

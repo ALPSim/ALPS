@@ -19,34 +19,51 @@
 #include "green_function.h"
 #include "U_matrix.h"
 #include <fstream>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 #include <math.h>
+
+namespace {
+/// Prints doubles with every significant digit (15 for IEEE doubles) and
+/// gives the stream its precision back afterwards. The printers used to set
+/// 20 digits and leave them set, also on std::cout.
+class print_precision {
+public:
+  explicit print_precision(std::ostream& os)
+    : os_(os), old_(os.precision(std::numeric_limits<double>::digits10)) {}
+  ~print_precision() { os_.precision(old_); }
+private:
+  std::ostream& os_;
+  std::streamsize old_;
+};
+}
 
 
 
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.first.size();++i)
     os<<i<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.first.size();++i)
     os<<i<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const double_vector &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.size();++i)
     os<<i<<"\t"<<v[i]<<std::endl;
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const complex_vector &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.size();++i)
     os<<i<<"\t"<<v[i].real()<<"\t"<<v[i].imag()<<std::endl;
   return os;
@@ -56,7 +73,7 @@ std::ostream &operator<<(std::ostream &os, const complex_vector &v){
 
 
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.first.size();++i)
     os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 }
@@ -66,7 +83,7 @@ void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_
 
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t";
     switch (shape) {
@@ -98,7 +115,7 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, 
                                 const matsubara_green_function_t g_dressed, const double beta, const shape_t shape)
 {
-  os<<std::setprecision(20);
+  print_precision precision(os);
   switch (shape) {
     case diagonal:
       for(unsigned int i=0;i<g_bare.nfreq();++i){
@@ -151,7 +168,7 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 
 
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.first.size();++i){
     os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
   }
@@ -161,7 +178,7 @@ void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_
 
 
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*boost::math::constants::pi<double>()/beta<<"\t";
     switch (shape) {
@@ -191,7 +208,7 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 
 
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.first.size();++i){
     os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
   }
@@ -201,7 +218,7 @@ void print_green_itime(std::ostream &os, const multiple_vector_type &v, const do
 
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<"\t";
     switch (shape) {
@@ -328,7 +345,7 @@ void print_dressed_tau_green_functions(std::string const &basename, const int it
 }
 
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
     for(unsigned int i=0;i<v.nsite();++i)
@@ -368,7 +385,7 @@ std::istream &operator>>(std::istream &is, green_function<double> &v){
  }*/
 
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
-  os<<std::setprecision(20);
+  print_precision precision(os);
   for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
     for(unsigned int i=0;i<v.nsite();++i)
