@@ -52,7 +52,6 @@ const alps::params& reject_removed_parameters(const alps::params& params){
 
 ClusterTransformer::ClusterTransformer(const alps::params& params) : ClusterHelper(reject_removed_parameters(params)),
     mu_(params["MU"]),
-    half_filling_(0.),
     t_(params["t"]),
     t2_(params["tprime"]),
     n_flavors_(params["FLAVORS"]),
@@ -417,9 +416,9 @@ void NambuClusterTransformer::spin_symmetrize(cluster_nambu_matsubara_kspace_gf&
   }
 }
 
-///perform spin symmetrization of imaginary time k-space cluster Green's function
+///perform spin symmetrization of imaginary time real-space cluster Green's function
 void NormalStateClusterTransformer::spin_symmetrize(cluster_itime_realspace_gf& gf) const{
-  if(gf.mesh3().extent()!=2) throw std::runtime_error("mesh should only have two flavors.");
+  if(gf.mesh4().extent()!=2) throw std::runtime_error("mesh should only have two flavors.");
   for (alps::gf::itime_index om=alps::gf::itime_index(0); om<gf.mesh1().extent(); ++om) {
     for (alps::gf::real_space_index ii=alps::gf::real_space_index(0); ii<gf.mesh2().extent(); ++ii) {
       for (alps::gf::real_space_index jj=alps::gf::real_space_index(0); jj<gf.mesh3().extent(); ++jj) {
@@ -430,9 +429,9 @@ void NormalStateClusterTransformer::spin_symmetrize(cluster_itime_realspace_gf& 
     }
   }
 }
-///perform spin symmetrization of matsubara k-space Green's function
+///perform spin symmetrization of matsubara real-space Green's function
 void NormalStateClusterTransformer::spin_symmetrize(cluster_matsubara_realspace_gf& gf) const{
-  if(gf.mesh3().extent()!=2) throw std::runtime_error("mesh should only have two flavors.");
+  if(gf.mesh4().extent()!=2) throw std::runtime_error("mesh should only have two flavors.");
   for (alps::gf::matsubara_index om=alps::gf::matsubara_index(0); om<gf.mesh1().extent(); ++om) {
     for (alps::gf::real_space_index ii=alps::gf::real_space_index(0); ii<gf.mesh2().extent(); ++ii) {
       for (alps::gf::real_space_index jj=alps::gf::real_space_index(0); jj<gf.mesh3().extent(); ++jj) {
@@ -736,27 +735,8 @@ double NormalStateClusterTransformer::density_for_mu(double mu, const cluster_ma
 }
 ///Compute the DMFT/DCA k-summation and adjust mu to get the right target density
 double NormalStateClusterTransformer::matsubara_k_sum_adjust_mu(cluster_matsubara_kspace_gf &G, const cluster_matsubara_kspace_gf &sigma, double target_density) {
-  double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
-  double mu_convergence_tolerance=1.e-7;
-  double mu_old=mu_;
-  double density_min=density_for_mu(mu_min, sigma);
-  double density_max=density_for_mu(mu_max, sigma);
-  std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
-  std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
-  if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is > minimum density");
-  if(density_max < target_density) throw std::runtime_error("in Regula Falsi: target density is < maximum density");
-  double density, mu_trial;
-  do{
-    mu_trial=(mu_max+mu_min)/2.;
-    density=density_for_mu(mu_trial, sigma);
-    if(density>target_density)
-      mu_max=mu_trial;
-    else
-      mu_min=mu_trial;
-  }while(std::abs(mu_max - mu_min)>mu_convergence_tolerance);
-  mu_=mu_trial;
+  mu_=find_mu([&](double mu){ return density_for_mu(mu, sigma); }, target_density, n_flavors_);
   matsubara_k_sum(G,sigma);
-  
   return mu_;
 }
 ///Compute the DMFT/DCA k-summation in the double unit cell case
@@ -800,36 +780,13 @@ double DoubleCellClusterTransformer::density_for_mu(double mu, const double_cell
     }
   }
   mu_=mu_old;
-  std::cout<<"added up to: "<<computed_total_density<<" dividing by cluster sites: "<<n_cluster_sites()<<std::endl;
   return computed_total_density/(n_cluster_sites());
 }
 ///Compute the DMFT/DCA k-summation and adjust mu to get the right target density
-//this is essentially a copy of the NormalState one above. All the difference is in density_for_mu. Merge the two?
 double DoubleCellClusterTransformer::matsubara_k_sum_adjust_mu(double_cell_matsubara_kspace_gf &G, const double_cell_matsubara_kspace_gf &sigma, double h, double mu_stag, double target_density) {
-  double mu_min=-10; double mu_max=10; //hard coded. optionally put into parameters
-  double mu_convergence_tolerance=1.e-7;
-  double mu_old=mu_;
-  double density_min=density_for_mu(mu_min, sigma, h, mu_stag);
-  double density_max=density_for_mu(mu_max, sigma, h, mu_stag);
-  std::cout<<"at mu_min: "<<mu_min<<" found density: "<<density_min<<std::endl;
-  std::cout<<"at mu_max: "<<mu_max<<" found density: "<<density_max<<std::endl;
-  if(density_min > target_density) throw std::runtime_error("in Regula Falsi: target density is < mu-minimum density");
-  if(density_max < target_density) throw std::runtime_error("in Regula Falsi: target density is > mu-maximum density");
-  double density, mu_trial;
-  do{
-    mu_trial=(mu_max+mu_min)/2.;
-    density=density_for_mu(mu_trial, sigma, h, mu_stag);
-    std::cout<<"attempting mu: "<<mu_trial<<" density: "<<density<<std::endl;
-    if(density>target_density)
-      mu_max=mu_trial;
-    else
-      mu_min=mu_trial;
-  }while(std::abs(mu_max - mu_min)>mu_convergence_tolerance);
-  mu_=mu_trial;
+  mu_=find_mu([&](double mu){ return density_for_mu(mu, sigma, h, mu_stag); }, target_density, n_flavors_);
   matsubara_k_sum(G, sigma, h, mu_stag);
-
   return mu_;
-
 }
 ///Compute the DMFT/DCA k-summation
 void NambuClusterTransformer::matsubara_k_sum(cluster_nambu_matsubara_kspace_gf &G, const cluster_nambu_matsubara_kspace_gf &sigma,double eta1,double eta2, double h) const{
@@ -917,7 +874,7 @@ double NambuClusterTransformer::dwave_prefactor(int kc, int kl) const{
 }
 double ClusterTransformer::epsilon(const std::vector<double> &k) const
 {
-  double eps = -half_filling_;
+  double eps = 0.;
   for (unsigned int i=0; i<dimension(); ++i)
     eps -= 2*t_*cos(k[i]);
   if (t2_!=0.) {
@@ -1095,30 +1052,5 @@ void DoubleCellClusterTransformer::spin_symmetrize(double_cell_matsubara_kspace_
     }
   }else throw std::logic_error("neither AFM nor CO: how to symmetrize?");
 }
-cluster_itime_realspace_gf DoubleCellClusterTransformer::transform_into_real_space(const double_cell_itime_kspace_gf& G) const{
-  cluster_itime_realspace_gf G_rs(alps::gf::itime_r1_r2_sigma_gf(G.mesh1(),real_space_mesh(), real_space_mesh(), G.mesh4()));
-  G_rs.initialize();
-  for (alps::gf::momentum_index k(0); k<G.mesh2().extent(); k+=2) {
-    for (int q1=0; q1<2; ++q1) {
-      for (int q2=0; q2<2; ++q2) {
-        for (alps::gf::real_space_index i(0); i<G_rs.mesh2().extent(); ++i) {
-          for (alps::gf::real_space_index j(0); j<G_rs.mesh3().extent(); ++j) {
-            double phase = 0.;
-            for (unsigned int d=0; d<dimension(); ++d){
-              phase += cluster_momentum(k()+q1,d)*cluster_coordinate(i(),d)-cluster_momentum(k()+q2,d)*cluster_coordinate(j(),d);
-            }
-            for (alps::gf::itime_index t(0); t<G.mesh1().extent(); ++t) {
-              for (alps::gf::index spin(0); spin<G.mesh4().extent(); ++spin) {
-                G_rs(t,i,j,spin)+=G(t, k+q1, alps::gf::index(q2), spin)*(cos(phase)/double(G_rs.mesh2().extent()));
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  return G_rs;
-}
-
 template bool ClusterTransformer::read_initial_G0(cluster_matsubara_kspace_gf &G0_omega) const;
 template bool ClusterTransformer::read_initial_G0(cluster_nambu_matsubara_kspace_gf &G0_omega) const;

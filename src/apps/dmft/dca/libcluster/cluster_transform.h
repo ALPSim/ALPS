@@ -12,6 +12,7 @@
 
 #include <Eigen/Dense>
 #include <fstream>
+#include <sstream>
 #include "alps/gf/fourier.hpp"
 #include "cluster_graph.h"
 #include "cluster_helper.h"
@@ -109,6 +110,35 @@ protected:
   template<class GF> static bool has_tail(const GF &G, int lo, int hi){
     return G.min_tail_order()!=alps::gf::TAIL_NOT_SET && G.min_tail_order()<=lo && G.max_tail_order()>=hi;
   }
+  /// The MU at which density(MU), which grows with MU, reaches target (to
+  /// 1e-7, density per site, between 0 and n_flavors), for sc.ADJUST_MU. The window starts at [-10, 10] and is widened
+  /// until it brackets the target, up to |MU| = 1e4 (#457).
+  template<class F> static double find_mu(F density, double target, int n_flavors){
+    // A density per site outside (0, n_flavors) is reached by no MU; far out,
+    // where |MU| exceeds the Matsubara frequencies, the tail expansion of the
+    // density breaks down and could seem to reach it.
+    if(!(target>0 && target<n_flavors)){
+      std::ostringstream msg;
+      msg<<"sc.ADJUST_MU: sc.TARGET_DENSITY = "<<target<<" must be between 0 and "<<n_flavors<<" (FLAVORS), per site.";
+      throw std::invalid_argument(msg.str());
+    }
+    double lo=-10, hi=10;
+    double density_lo=density(lo), density_hi=density(hi);
+    while(density_lo>target && lo>-1e4){ hi=lo; density_hi=density_lo; lo*=2; density_lo=density(lo); }
+    while(density_hi<target && hi<1e4){ lo=hi; density_lo=density_hi; hi*=2; density_hi=density(hi); }
+    std::cout<<"sc.ADJUST_MU: density "<<density_lo<<" at MU = "<<lo<<", "<<density_hi<<" at MU = "<<hi<<std::endl;
+    if(density_lo>target || density_hi<target){
+      std::ostringstream msg;
+      msg<<"sc.ADJUST_MU: sc.TARGET_DENSITY = "<<target<<" is not reached for |MU| <= "<<std::max(-lo, hi)
+         <<": the density per site is "<<density_lo<<" at MU = "<<lo<<" and "<<density_hi<<" at MU = "<<hi<<".";
+      throw std::runtime_error(msg.str());
+    }
+    while(hi-lo>1.e-7){
+      const double mu=(lo+hi)/2.;
+      (density(mu)>target ? hi : lo)=mu;
+    }
+    return (lo+hi)/2.;
+  }
 
 
   /// The starting G0 of the loop, and its Fourier transform: read from
@@ -144,7 +174,6 @@ protected:
 
   ///chemical potential
   double mu_;
-  double half_filling_;
   ///t is the basic energy unit of the hopping. t2 is the tprime.
   double t_, t2_;
   double beta_;
@@ -354,9 +383,6 @@ public:
   void spin_symmetrize(double_cell_matsubara_kspace_gf& G) const;
   ///average G over the classes of (K, K+Q) block elements that the cluster's point group relates
   void symmetrize_k_space(double_cell_matsubara_kspace_gf& G) const;
-
-  ///take a cluster Green's function and transform it from k-space into real space
-  cluster_itime_realspace_gf transform_into_real_space(const double_cell_itime_kspace_gf& G) const;
 
 private:
   ///the blocks of G are (K, K+Q): check that momentum 2m+1 is momentum 2m plus Q

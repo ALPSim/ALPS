@@ -209,3 +209,32 @@ TEST_F(ClusterTransformTest, FourSiteRealSpaceSymmetry){
     }
   }
 }
+
+// The real-space spin symmetrization averages the two flavors. It checked the
+// second site index for "two flavors" and threw for every cluster without
+// exactly two sites (#457).
+TEST_F(ClusterTransformTest, SpinSymmetrizeRealSpace){
+  cluster_matsubara_kspace_gf G_ks(alps::gf::omega_k_sigma_gf(alps::gf::matsubara_positive_mesh(beta_,n_freq_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  initialize_to_random(G_ks);
+  cluster_matsubara_realspace_gf G=CT_->transform_into_real_space(G_ks), G_orig=G;
+  cluster_itime_kspace_gf G_tks(alps::gf::itime_k_sigma_gf(alps::gf::itime_mesh(beta_,n_tau_), CT_->momentum_mesh(), alps::gf::index_mesh(n_flavors_)));
+  initialize_to_random(G_tks);
+  cluster_itime_realspace_gf T=CT_->transform_into_real_space(G_tks), T_orig=T;
+  ASSERT_EQ(G.mesh2().extent(), 4);
+  CT_->spin_symmetrize(G);
+  CT_->spin_symmetrize(T);
+  const alps::gf::index up(0), dn(1);
+  for (alps::gf::real_space_index i(0); i<G.mesh2().extent(); ++i)
+    for (alps::gf::real_space_index j(0); j<G.mesh3().extent(); ++j) {
+      for (alps::gf::matsubara_index w(0); w<G.mesh1().extent(); ++w) {
+        const std::complex<double> mean = (G_orig(w,i,j,up) + G_orig(w,i,j,dn))/2.;
+        EXPECT_NEAR(std::abs(G(w,i,j,up) - mean), 0., 1e-14);
+        EXPECT_NEAR(std::abs(G(w,i,j,dn) - mean), 0., 1e-14);
+      }
+      for (alps::gf::itime_index t(0); t<T.mesh1().extent(); ++t) {
+        const double mean = (T_orig(t,i,j,up) + T_orig(t,i,j,dn))/2.;
+        EXPECT_NEAR(T(t,i,j,up), mean, 1e-14);
+        EXPECT_NEAR(T(t,i,j,dn), mean, 1e-14);
+      }
+    }
+}
