@@ -1,6 +1,10 @@
 # Copyright (C) 2026 ALPS collaboration. SPDX-License-Identifier: MIT
 # Regression tests for the shared DMFT QMC infrastructure.
 
+# The tests include the headers of the solvers in the parent directory,
+# as "green_function.h" or "interaction_expansion2/sz_results.hpp".
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
+
 add_executable(dmft_fouriertransform_offdiag_numeric dmft_fouriertransform_offdiag_numeric.C)
 target_link_libraries(dmft_fouriertransform_offdiag_numeric PRIVATE dmft_qmc_impl)
 alps_add_gtest(dmft_fouriertransform_offdiag_numeric COMPONENT dmft LABELS regression)
