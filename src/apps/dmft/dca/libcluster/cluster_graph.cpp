@@ -14,6 +14,7 @@
 #include<sstream>
 #include<cctype>
 #include<cmath>
+#include<climits>
 #include "cluster_graph.h"
 #include <iostream>
 
@@ -51,7 +52,14 @@ std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::
   if(!xml_file.good()) throw std::runtime_error("cluster library: "+cluster_library+" could not be opened.");
   std::stringstream contents;
   contents << xml_file.rdbuf();
-  const std::string xml = contents.str();
+  std::string xml = contents.str();
+  // Entries inside <!-- --> are not read: blank out the comments, keeping
+  // the positions of everything else. An unterminated comment runs to the end.
+  for (std::size_t begin = xml.find("<!--"); begin != std::string::npos; begin = xml.find("<!--", begin)) {
+    const std::size_t close = xml.find("-->", begin + 4);
+    const std::size_t end = close == std::string::npos ? xml.size() : close + 3;
+    xml.replace(begin, end - begin, end - begin, ' ');
+  }
   const std::string where = "cluster " + cluster_name + " in " + cluster_library + ": ";
   const std::string wanted = cluster_name + " superlattice";
 
@@ -67,6 +75,10 @@ std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::
       throw std::runtime_error(where + "the library defines it more than once.");
     found = pos;
     found_end = tag_end;
+  }
+  if (found != std::string::npos && xml[found_end - 1] == '/') {
+    // <LATTICE .../> has no basis; the next lattice's must not be taken for it
+    throw std::runtime_error(where + "has no <BASIS> ... </BASIS>.");
   }
   if (found == std::string::npos)
     throw std::runtime_error(where + "not found. dca.LATTICE has to be the name of a LATTICE \""
@@ -98,7 +110,7 @@ std::vector<std::vector<double> > alps_graph::lookup_basis_from_name(const std::
       std::size_t used = 0;
       double value = 0;
       try { value = std::stod(entry, &used); } catch (std::exception const &) { used = 0; }
-      if (used != entry.size() || !std::isfinite(value) || value != std::round(value))
+      if (used != entry.size() || !std::isfinite(value) || value != std::round(value) || std::abs(value) > INT_MAX)
         throw std::runtime_error(where + "basis vector \"" + text + "\": \"" + entry + "\" is not an integer."
                                  + " dca needs a numeric basis of integer lattice vectors"
                                  + " (the 1D chains are Chain1D_<N> in cluster1d.xml).");
