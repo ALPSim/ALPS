@@ -257,9 +257,15 @@ void InteractionExpansion::compute_W_itime()
         if(n_flavors==2 && flavor==0){ //then we know how to compute Sz^2
           std::stringstream sz_name, sz2_name, sz0_szj_name;
           sz_name<<"Sz_"<<i; sz2_name<<"Sz2_"<<i; sz0_szj_name<<"Sz0_Sz"<<i;
+          // density[z][i] is G_z(i,i; 0+) = n_z(i) - 1 in this configuration.
+          // The flavors are independent in a configuration, so by Wick's
+          // theorem <n_z n_z'> = n_z n_z' for z != z', and n_z^2 = n_z:
+          // <(n_0 - n_1)^2> = n_0 + n_1 - 2 n_0 n_1, not (n_0 - n_1)^2.
+          const double n0 = 1+density[0][i], n1 = 1+density[1][i];
+          const double sz2 = n0 + n1 - 2*n0*n1;
           measurements[sz_name.str().c_str()]<<((density[0][i]-density[1][i])*sign);
-          measurements[sz2_name.str().c_str()]<<((density[0][i]-density[1][i])*(density[0][i]-density[1][i])*sign);
-          measurements[sz0_szj_name.str().c_str()]<<((density[0][0]-density[1][0])*(density[0][i]-density[1][i])*sign);
+          measurements[sz2_name.str().c_str()]<<(sz2*sign);
+          measurements[sz0_szj_name.str().c_str()]<<((i==0 ? sz2 : (density[0][0]-density[1][0])*(density[0][i]-density[1][i]))*sign);
         }
       }
     }

@@ -77,7 +77,7 @@ void alps::solvers::ctint(alps::params const& input, std::string const& output_f
   //on the master: collect MC results and store them in file, then postprocess
   if (rank==0){
     alps::results_type<HubbardInteractionExpansion>::type results = collect_results(s);
-    divide_sz_results_by_sign(results, ctint.sites);
+    divide_signed_results_by_sign(results, ctint.sites, ctint.flavors);
     if(results.has("MaxOrderReached") && results["MaxOrderReached"].count())
       warn_if_max_order_reached(std::cerr, results["MaxOrderReached"].mean<double>(), ctint.max_order);
     save_results(results, parms, output_file, "/simulation/results");

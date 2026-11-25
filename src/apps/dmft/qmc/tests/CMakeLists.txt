@@ -72,6 +72,17 @@ else()
   alps_add_mpi_gtest(dmft_ctint_max_order COMPONENT dmft RANKS 2 LABELS regression)
 endif()
 
+# Statistical: checks against the exact atom in units of the error bars, so
+# it does not need the serial solver's exact stop after SWEEPS. It runs for
+# SWEEPS, not MAX_TIME, so slow builds take longer instead of failing.
+add_executable(dmft_ctint_sign dmft_ctint_sign.C)
+target_link_libraries(dmft_ctint_sign PRIVATE ALPS::ctint)
+if(NOT ALPS_ENABLE_MPI)
+  alps_add_gtest(dmft_ctint_sign COMPONENT dmft LABELS regression TIMEOUT 900)
+else()
+  alps_add_mpi_gtest(dmft_ctint_sign COMPONENT dmft RANKS 2 LABELS regression TIMEOUT 900)
+endif()
+
 # The serial solver stops after SWEEPS; under MPI it stops at the adapter's
 # scheduled checks, where a rank can still be thermalizing.
 if(NOT ALPS_ENABLE_MPI)
