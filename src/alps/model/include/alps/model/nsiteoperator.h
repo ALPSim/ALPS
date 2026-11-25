@@ -559,6 +559,18 @@ nsite_matrix<T> NSiteOperator::matrix(const std::vector<SiteBasisDescriptor<I> >
   return mat;
 }
 
+// Names for a message: "Sz", "Nup and Ndown", "N, Nup and Ndown" (or "or").
+inline std::string join_names(const std::vector<std::string>& names, const std::string& conjunction)
+{
+  std::string joined;
+  for (std::size_t i = 0; i < names.size(); ++i) {
+    if (i > 0)
+      joined += (i + 1 == names.size() ? " " + conjunction + " " : ", ");
+    joined += names[i];
+  }
+  return joined;
+}
+
 // A term that changes a quantum number whose range is capped by a parameter
 // (e.g. a boson N with max="Nmax") gives results that depend on that cutoff:
 // matrix elements that would leave the range are dropped. Returns a warning

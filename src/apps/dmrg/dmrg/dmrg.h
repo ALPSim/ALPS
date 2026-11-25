@@ -1087,10 +1087,15 @@ DMRGTask<value_type>::split_nsite_operator(alps::NSiteOperator const& op, alps::
   for (std::size_t r = 0; r < p.sites.size(); ++r)
     bases.push_back(basis().site_basis(site_type(p.sites[r])));
   alps::nsite_matrix<value_type> mat = op.template matrix<value_type>(bases,parms);
-  if (!mat.nonconserved.empty())
+  if (!mat.nonconserved.empty()) {
+    std::vector<std::string> qns(mat.nonconserved.begin(), mat.nonconserved.end());
     throw std::runtime_error("<NSITETERM> on n-site groups of type "
-      + std::to_string(p.type) + " changes the total " + *mat.nonconserved.begin()
-      + ". dmrg supports only n-site terms that conserve every quantum number; use fulldiag or sparsediag.");
+      + std::to_string(p.type) + " changes the total " + alps::join_names(qns, "and")
+      + ". dmrg supports only n-site terms that conserve every quantum number. If the term should conserve "
+      + alps::join_names(qns, "and") + ", find the parts that change " + (qns.size() > 1 ? "them" : "it")
+      + "; otherwise use fulldiag or sparsediag on the full space, without fixing "
+      + alps::join_names(qns, "or") + ".");
+  }
   return op.template split<value_type>(bases,parms);
 }
 
