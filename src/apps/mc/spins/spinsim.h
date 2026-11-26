@@ -28,6 +28,11 @@
 
 #include <boost/property_map/vector_property_map.hpp>
 
+// The Potts cluster update (connect.h) joins only ferromagnetic bonds; the
+// Ising and O(n) reflection clusters handle bonds of either sign.
+template <class M> struct cluster_update_needs_ferromagnet { static const bool value = false; };
+template <unsigned int Q> struct cluster_update_needs_ferromagnet<PottsMoment<Q> > { static const bool value = true; };
+
 namespace boost {
 
 template <class T> struct property_traits<std::vector<T> > {
@@ -98,7 +103,7 @@ private:
 
 template <class M, class MAT>
 SpinSim<M, MAT>::SpinSim(const alps::ProcessList& w,const alps::Parameters& p,int n)
- : AbstractSpinSim<MAT>::AbstractSpinSim(w,p,n),
+ : AbstractSpinSim<MAT>::AbstractSpinSim(w,p,n,cluster_update_needs_ferromagnet<M>::value),
    spins_(this->num_sites())
 {
 }
@@ -106,7 +111,7 @@ SpinSim<M, MAT>::SpinSim(const alps::ProcessList& w,const alps::Parameters& p,in
 template <class M>
 SpinSim<M, MIdMatrix<double,M::dim> >::SpinSim(const alps::ProcessList& w,
                 const alps::Parameters& p,int n)
- : AbstractSpinSim<MIdMatrix<double,M::dim> >::AbstractSpinSim(w,p,n),
+ : AbstractSpinSim<MIdMatrix<double,M::dim> >::AbstractSpinSim(w,p,n,cluster_update_needs_ferromagnet<M>::value),
    spins_(this->num_sites())
 {
 }
