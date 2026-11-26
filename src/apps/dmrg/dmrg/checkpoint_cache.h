@@ -12,6 +12,7 @@
 #include <alps/parameter.h>
 #include <alps/params.hpp>
 #include <alps/scheduler/signal.hpp>
+#include <boost/throw_exception.hpp>
 #include <filesystem>
 #include <algorithm>
 #include <cerrno>
@@ -24,12 +25,15 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 #include <fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
+
+namespace dmtk { extern FileList tmp_files; } // defined in dmtk/system.h
 
 namespace dmrg_checkpoint {
 
@@ -163,6 +167,202 @@ inline bool read_meta(const fs::path& entry, std::string& fingerprint)
   return true;
 }
 
+// Flush a file (or directory) to disk; ofstream gives no access to its descriptor.
+inline bool sync_path(const fs::path& path)
+{
+  int fd = ::open(path.c_str(), O_RDONLY);
+  if (fd < 0) return false;
+  bool ok = ::fsync(fd) == 0;
+  ::close(fd);
+  return ok;
+}
+
+// Replace path by contents so that a crash leaves either the old or the new file.
+inline void write_atomically(const fs::path& path, const std::string& contents)
+{
+  fs::path tmp = path;
+  tmp += ".tmp";
+  {
+    std::ofstream out(tmp.string().c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
+    out << contents;
+    out.close();
+    if (!out || !sync_path(tmp))
+      boost::throw_exception(std::runtime_error("could not write " + tmp.string()));
+  }
+  fs::rename(tmp, path);
+  sync_path(path.parent_path()); // not supported on every filesystem
+}
+
+// The files of a checkpoint entry, attached to a dmtk::FileList. Files keep
+// their own names in the entry directory so that a rerun can find them.
+// Writes go to <name>.new.<generation> and replace the committed files only
+// in commit(), so a run killed at any point leaves the last committed state
+// intact.
+class Files : public dmtk::FileStore {
+public:
+  Files() {}
+  Files(const Files&) = delete;
+  Files& operator=(const Files&) = delete;
+  ~Files() { close(); }
+
+  // Use the entry dir and return the caller's part of its last progress
+  // record, empty if nothing was committed. Staged files of a commit whose
+  // record was written are promoted, all others discarded. Throws if a
+  // committed file is missing or has the wrong size: DMTK only prints an
+  // error for a file it cannot read and goes on with an empty block.
+  std::string open(const fs::path& dir)
+  {
+    close();
+    dir_ = fs::absolute(dir);
+    generation_ = 0;
+    committed_.clear();
+    std::string record;
+    const fs::path progress = dir_ / "progress";
+    if (fs::exists(progress)) {
+      std::ifstream in(progress.string().c_str(), std::ios::in | std::ios::binary);
+      std::string magic, word;
+      std::size_t count = 0;
+      std::getline(in, magic);
+      if (magic != progress_magic() || !(in >> word >> generation_) || word != "generation"
+          || !(in >> word >> count) || word != "staged")
+        boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+      for (std::size_t i = 0; i < count; ++i) {
+        std::string name;
+        in >> name;
+        fs::path staged = dir_ / (name + suffix(generation_));
+        if (fs::exists(staged))
+          fs::rename(staged, dir_ / name);
+      }
+      if (!in || !(in >> word >> count) || word != "files")
+        boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+      for (std::size_t i = 0; i < count; ++i) {
+        std::string name;
+        std::uintmax_t size;
+        if (!(in >> name >> size))
+          boost::throw_exception(std::runtime_error("unreadable progress record " + progress.string()));
+        std::error_code error;
+        std::uintmax_t actual = fs::file_size(dir_ / name, error);
+        if (error)
+          boost::throw_exception(std::runtime_error("checkpoint file " + name + " is missing"));
+        if (actual != size)
+          boost::throw_exception(std::runtime_error("checkpoint file " + name + " has "
+            + std::to_string(actual) + " bytes instead of " + std::to_string(size)));
+        committed_[name] = size;
+      }
+      in.ignore(1);
+      std::ostringstream rest;
+      rest << in.rdbuf();
+      record = rest.str();
+      ++generation_;
+    }
+    for (fs::directory_iterator it(dir_), end; it != end; ++it)
+      if (it->path().filename().string().find(".new.") != std::string::npos)
+        fs::remove(it->path());
+    return record;
+  }
+
+  // Until list.cleanup() or close().
+  void attach(dmtk::FileList& list)
+  {
+    list.attach(this);
+    list_ = &list;
+  }
+
+  // Reads see this run's uncommitted writes.
+  const char* get_read_filename(const char* input) override
+  {
+    auto staged = staged_.find(input);
+    if (staged != staged_.end()) return staged->second.c_str();
+    auto entry = paths_.emplace(input, (dir_ / input).string());
+    return entry.first->second.c_str();
+  }
+
+  const char* get_write_filename(const char* input) override
+  {
+    auto staged = staged_.find(input);
+    if (staged != staged_.end()) return staged->second.c_str();
+    auto entry = staged_.emplace(input, (dir_ / (input + suffix(generation_))).string());
+    return entry.first->second.c_str();
+  }
+
+  void write_failed(const char* input) override { failed_writes_.push_back(input); }
+
+  // Make all staged files and the caller's record the state a rerun resumes from.
+  void commit(const std::string& record)
+  {
+    if (!failed_writes_.empty())
+      boost::throw_exception(std::runtime_error("could not write checkpoint file " + failed_writes_.front()
+        + " in " + dir_.string() + " (disk full or over quota?)"));
+    std::ostringstream out;
+    out << progress_magic() << "\ngeneration " << generation_ << "\nstaged " << staged_.size() << "\n";
+    std::map<std::string, std::uintmax_t> committed = committed_;
+    for (const auto& entry : staged_) {
+      std::error_code error;
+      committed[entry.first] = fs::file_size(entry.second, error);
+      if (error || !sync_path(entry.second))
+        boost::throw_exception(std::runtime_error("could not write checkpoint file " + entry.second));
+      out << entry.first << "\n";
+    }
+    out << "files " << committed.size() << "\n";
+    for (const auto& entry : committed)
+      out << entry.first << " " << entry.second << "\n";
+    out << record;
+    write_atomically(dir_ / "progress", out.str());
+    for (const auto& entry : staged_)
+      fs::rename(entry.second, dir_ / entry.first);
+    staged_.clear();
+    committed_.swap(committed);
+    ++generation_;
+  }
+
+  // Generation of the last commit, or of the first one if there was none.
+  unsigned long last_generation() const { return generation_ == 0 ? 0 : generation_ - 1; }
+
+  // Names of the files of the last commit.
+  std::vector<std::string> committed_files() const
+  {
+    std::vector<std::string> names;
+    for (const auto& entry : committed_) names.push_back(entry.first);
+    return names;
+  }
+
+  // The entry outlives the run; only uncommitted writes go.
+  void cleanup() noexcept override
+  {
+    for (const auto& entry : staged_) {
+      std::error_code error;
+      fs::remove(entry.second, error);
+      if (error)
+        std::cerr << "ALPS DMRG could not remove temporary file " << entry.second
+                  << ": " << error.message() << std::endl;
+    }
+    paths_.clear();
+    staged_.clear();
+    failed_writes_.clear();
+    list_ = nullptr;
+  }
+
+  // Detach from the FileList, which then calls cleanup().
+  void close() noexcept
+  {
+    if (list_) list_->cleanup();
+    else cleanup();
+  }
+
+private:
+  static const char* progress_magic() { return "ALPS DMRG progress 1"; }
+  static std::string suffix(unsigned long generation) { return ".new." + std::to_string(generation); }
+
+  std::map<std::string, std::string> paths_;
+  std::map<std::string, std::string> staged_;
+  // name and size of every file the last commit left in the entry
+  std::map<std::string, std::uintmax_t> committed_;
+  std::vector<std::string> failed_writes_;
+  fs::path dir_;
+  unsigned long generation_ = 0;
+  dmtk::FileList* list_ = nullptr;
+};
+
 // The ALPS handlers of SIGUSR1 and SIGUSR2 are one-shot: a second signal
 // would kill the run. While checkpoints are kept, a handler that is not
 // one-shot passes each of them on to the ALPS one.
@@ -191,7 +391,7 @@ public:
   Cache() {}
   Cache(const Cache&) = delete;
   Cache& operator=(const Cache&) = delete;
-  ~Cache() { release(); }
+  ~Cache() { files_.close(); release(); }
 
   void configure(const alps::params& settings)
   {
@@ -206,11 +406,14 @@ public:
   const fs::path& directory() const { return entry_; }
   // Progress record of the last commit, empty if none.
   const std::string& record() const { return record_; }
+  // Names of the files of the last commit.
+  std::vector<std::string> committed_files() const { return files_.committed_files(); }
 
-  // Take the checkpoint of the task in task_file and point dmtk::tmp_files at
-  // it. False if the run has to go on without checkpoints. Throws Refusal if
-  // RESUME=1 and the checkpoint cannot be resumed, or if RESUME=0 and the
-  // task has a checkpoint: a checkpoint is only resumed or removed on request.
+  // Take the checkpoint of the task in task_file and attach its files to
+  // dmtk::tmp_files. False if the run has to go on without checkpoints. Throws
+  // Refusal if RESUME=1 and the checkpoint cannot be resumed, or if RESUME=0
+  // and the task has a checkpoint: a checkpoint is only resumed or removed on
+  // request.
   bool open(const std::string& fingerprint, const fs::path& task_file)
   {
     fingerprint_ = fingerprint;
@@ -255,7 +458,7 @@ public:
                         + " belongs to other parameters" + start_over);
         std::string problem;
         try {
-          record_ = dmtk::tmp_files.open_entry(entry_.c_str());
+          record_ = files_.open(entry_);
           if (record_.empty())
             problem = "it holds no completed iteration";
           else if (!count_attempt())
@@ -273,8 +476,9 @@ public:
         if (!readable || written_by != fingerprint_)
           clear_entry();
         write_meta();
-        record_ = dmtk::tmp_files.open_entry(entry_.c_str());
+        record_ = files_.open(entry_);
       }
+      files_.attach(dmtk::tmp_files);
     } catch (const Refusal& e) {
       std::cerr << "ALPS DMRG: " << e.what() << std::endl;
       dmtk::tmp_files.cleanup();
@@ -302,7 +506,7 @@ public:
   {
     ++commits_;
     simulate_failure(true);
-    dmtk::tmp_files.commit(record);
+    files_.commit(record);
     record_ = record;
     simulate_failure(false);
     simulate_signals();
@@ -438,7 +642,7 @@ private:
   bool count_attempt()
   {
     const fs::path file = entry_ / "attempts";
-    const unsigned long generation = dmtk::tmp_files.last_generation();
+    const unsigned long generation = files_.last_generation();
     unsigned long seen = 0;
     int count = 0;
     std::ifstream in(file.string().c_str());
@@ -447,7 +651,7 @@ private:
     in.close();
     if (count >= max_resume_attempts)
       return false;
-    dmtk::detail::write_atomically(file, std::to_string(generation) + " " + std::to_string(count + 1) + "\n");
+    write_atomically(file, std::to_string(generation) + " " + std::to_string(count + 1) + "\n");
     return true;
   }
 
@@ -464,7 +668,7 @@ private:
 
   void write_meta()
   {
-    dmtk::detail::write_atomically(entry_ / "meta", std::string(meta_magic) + "\nfingerprint\n" + fingerprint_);
+    write_atomically(entry_ / "meta", std::string(meta_magic) + "\nfingerprint\n" + fingerprint_);
   }
 
   void release()
@@ -532,6 +736,7 @@ private:
       std::raise(SIGKILL);
   }
 
+  Files files_;
   bool enabled_ = true;
   bool resume_ = false;
   bool progressed_ = false;
