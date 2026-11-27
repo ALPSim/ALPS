@@ -261,6 +261,7 @@ def main():
         for login in reviewers:
             if marker(pr["number"], login) in cards:
                 card = cards[marker(pr["number"], login)]
+                set_text(project, card, "issue", issue)
                 set_text(project, card, "reviews", lights[login])
                 set_text(project, card, "prstate", state)
                 if card["content"]["title"] != title:
