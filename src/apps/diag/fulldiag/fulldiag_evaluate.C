@@ -28,6 +28,7 @@ void print_usage(std::ostream& out, const char* pname)
       << pname << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--H_MIN ...] [--H_MAX ... ] [--DELTA_H ... ] [--versus h] [--DENSITIES ...] filenames\n"
       << "or:\n"
       << pname << " --couple mu [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--MU_MIN ...] [--MU_MAX ... ] [--DELTA_MU ...] [--versus mu] [--DENSITIES ...] filenames\n"
+      << "\nEach file is the .out.xml file of a task written by fulldiag.\n"
       << "\nOptions:\n"
       << "  -h, --help     produce help message\n"
       << "  -l, --license  print license conditions\n";
@@ -72,6 +73,17 @@ try {
   if(i >= argc) {
     print_usage(std::cerr, argv[0]);
     return 1;
+  }
+
+  const std::string suffix = ".out.xml";
+  for (int j = i; j < argc; ++j) {
+    std::string const name = argv[j];
+    if (name.size() <= suffix.size() ||
+        name.compare(name.size() - suffix.size(), suffix.size(), suffix) != 0) {
+      std::cerr << "Expected the .out.xml file of a task, got: " << name << "\n";
+      print_usage(std::cerr, argv[0]);
+      return 1;
+    }
   }
 
   alps::cli_mpi_guard mpi(argc, argv);

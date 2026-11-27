@@ -59,6 +59,29 @@ if(ALPS_BUILD_TESTING)
         -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/measure_energy_false.cmake")
     set_tests_properties(fulldiag_measure_energy_false PROPERTIES LABELS "fulldiag" TIMEOUT 120
       ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+    add_test(NAME fulldiag_evaluate_reach_issue_433
+      COMMAND ${CMAKE_COMMAND}
+        "-Dfulldiag=$<TARGET_FILE:fulldiag>"
+        "-Dfulldiag_evaluate=$<TARGET_FILE:fulldiag_evaluate>"
+        "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+        "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "-Dinput=${CMAKE_CURRENT_SOURCE_DIR}/tests/reach_issue_433/fd"
+        "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/reach-issue-433"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/reach_issue_433.cmake")
+    set_tests_properties(fulldiag_evaluate_reach_issue_433 PROPERTIES LABELS "fulldiag;cli" TIMEOUT 120
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
+  endif()
+  if(TARGET parameter2xml)
+    add_test(NAME fulldiag_evaluate_out_xml_only
+      COMMAND ${CMAKE_COMMAND}
+        "-Dfulldiag=$<TARGET_FILE:fulldiag>"
+        "-Dfulldiag_evaluate=$<TARGET_FILE:fulldiag_evaluate>"
+        "-Dparameter2xml=$<TARGET_FILE:parameter2xml>"
+        "-Dxml_dir=${PROJECT_SOURCE_DIR}/src/alps/resources"
+        "-Dtest_dir=${CMAKE_CURRENT_BINARY_DIR}/evaluate-out-xml-only"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/evaluate_out_xml_only.cmake")
+    set_tests_properties(fulldiag_evaluate_out_xml_only PROPERTIES LABELS "fulldiag;cli" TIMEOUT 120
+      ENVIRONMENT "OMP_NUM_THREADS=1;OPENBLAS_NUM_THREADS=1")
   endif()
 endif()
 
