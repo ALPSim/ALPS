@@ -253,6 +253,21 @@ void write_mismatched_sigma(alps::hdf5::archive& ar, const char* lattice, int si
   sigma.initialize();
   sigma.save(ar, "/Sigma");
 }
+
+// The Nambu self-energy of sigma_interpolate_sc, with flavors1 x flavors2
+// flavor and Nambu indices.
+void write_mismatched_nambu_sigma(alps::hdf5::archive& ar, const char* lattice, int sites, int flavors1,
+                                  int flavors2) {
+  alps::params p = transformer_parameters();
+  p["dca.LATTICE"] = lattice;
+  p["dca.SITES"] = sites;
+  NambuClusterTransformer T(p);
+  cluster_nambu_matsubara_kspace_gf sigma(alps::gf::omega_k_sigma1_sigma2_gf(
+      alps::gf::matsubara_positive_mesh(beta, n_old), T.momentum_mesh(), alps::gf::index_mesh(flavors1),
+      alps::gf::index_mesh(flavors2)));
+  sigma.initialize();
+  sigma.save(ar, "/Sigma");
+}
 }
 
 TEST(InterpolationTools, RefusesSigmaOfAnotherClusterOrFlavors) {
@@ -265,6 +280,19 @@ TEST(InterpolationTools, RefusesSigmaOfAnotherClusterOrFlavors) {
     EXPECT_NE(read_file(dir / "tool.log").find("sigma.h5: the self-energy is not on the momenta of the old cluster"),
               std::string::npos) << m.name << ": " << read_file(dir / "tool.log");
   }
+  struct nambu_mismatch { const char* name; const char* lattice; int sites; int flavors1; int flavors2; };
+  for (nambu_mismatch m : {nambu_mismatch{"flavors", "Betts2D-4A", 4, 1, 2},
+                           nambu_mismatch{"nambu", "Betts2D-4A", 4, 2, 1},
+                           nambu_mismatch{"cluster", "Betts2D-8A", 8, 2, 2}}) {
+    const fs::path dir = fs::absolute(std::string("nambu_mismatch_") + m.name);
+    EXPECT_NE(run_tool(DCA_INTERPOLATE_SC, dir, 32, "", beta,
+                       [&](alps::hdf5::archive& ar, double) {
+                         write_mismatched_nambu_sigma(ar, m.lattice, m.sites, m.flavors1, m.flavors2);
+                       }),
+              0) << m.name;
+    EXPECT_NE(read_file(dir / "tool.log").find("sigma.h5: the self-energy is not on the momenta of the old cluster"),
+              std::string::npos) << m.name << ": " << read_file(dir / "tool.log");
+  }
 }
 
 TEST(InterpolationTools, RefusesOtherFlavors) {
@@ -272,4 +300,8 @@ TEST(InterpolationTools, RefusesOtherFlavors) {
   EXPECT_NE(run_tool(DCA_INTERPOLATE_NORMAL, dir, 32, "", beta, write_normal_sigma, "FLAVORS = 4\n"), 0);
   EXPECT_NE(read_file(dir / "tool.log").find("FLAVORS = 4: the self-energy interpolation works for FLAVORS = 2."),
             std::string::npos) << read_file(dir / "tool.log");
+  const fs::path nambu_dir = fs::absolute("nambu_flavors_4");
+  EXPECT_NE(run_tool(DCA_INTERPOLATE_SC, nambu_dir, 32, "", beta, write_nambu_sigma, "FLAVORS = 4\n"), 0);
+  EXPECT_NE(read_file(nambu_dir / "tool.log").find("FLAVORS = 4: the self-energy interpolation works for FLAVORS = 2."),
+            std::string::npos) << read_file(nambu_dir / "tool.log");
 }
