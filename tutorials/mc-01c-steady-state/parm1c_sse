@@ -1,0 +1,9 @@
+LATTICE="square lattice"
+MODEL="spin"
+local_S=1/2
+T=0.25
+J=1
+THERMALIZATION=0
+INITIAL_CUTOFF=40000
+SWEEPS=2000
+{L=32;}
